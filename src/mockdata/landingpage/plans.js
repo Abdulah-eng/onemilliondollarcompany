@@ -1,0 +1,48 @@
+export const PLANS = [
+  {
+    name: 'Basic',
+    price: '$17.99',
+    period: 'One-Time',
+    description: 'Perfect for trying out our approach',
+    featured: false,
+    features: [
+      { text: 'One 1-month plan', included: true },
+      { text: 'Progress tools', included: false },
+      { text: 'Feedback', included: false },
+    ],
+    cta: 'Get Started',
+    badge: null,
+  },
+  {
+    name: 'Standard',
+    price: '$14.99',
+    period: '/month',
+    description: 'Most popular choice for consistent growth',
+    featured: false,
+    features: [
+      { text: 'One monthly plan (choose 1 pillar)', included: true },
+      { text: 'Knowledge Hub', included: true },
+      { text: 'Blog Access', included: true },
+      { text: 'Feedback / Progress Tracking', included: false },
+      { text: '14-day trial', included: true },
+    ],
+    cta: 'Start Free Trial',
+    badge: null,
+  },
+  {
+    name: 'Premium',
+    price: '$29.99',
+    period: '/month',
+    description: 'Complete transformation package',
+    featured: true,
+    features: [
+      { text: 'Fitness, Nutrition & Mind Plans', included: true },
+      { text: 'Full Knowledge Hub', included: true },
+      { text: 'Progress Tracking', included: true },
+      { text: 'Coach Feedback', included: true },
+      { text: 'Monthly Plan Updates', included: true },
+    ],
+    cta: 'Start Free Trial',
+    badge: '⭐',
+  },
+];
