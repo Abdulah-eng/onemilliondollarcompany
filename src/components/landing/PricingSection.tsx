@@ -24,22 +24,22 @@ export default function PricingSection() {
           </p>
         </div>
 
-        {/* Cards: snap scroll on <= lg, 3-col grid on desktop */}
+        {/* ≤ iPad: horizontal snap; ≥ lg: 3 fixed-width cards centered */}
         <div
           className="
             flex gap-4 md:gap-6 overflow-x-auto overflow-y-hidden
             snap-x snap-mandatory scroll-px-4
             [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
             lg:overflow-visible lg:scroll-px-0
-            lg:grid lg:grid-cols-3 lg:gap-8 lg:justify-between lg:max-w-6xl lg:mx-auto
+            lg:grid lg:grid-cols-3 lg:gap-8 lg:justify-items-center
+            lg:max-w-6xl lg:mx-auto
           "
           role="list"
           aria-label="Pricing plans"
         >
           {PLANS.map((plan, idx) => {
             const isPopular = Boolean((plan as any).popular);
-            const periodLabel =
-              plan.period === 'One-Time' ? plan.period : `/${plan.period}`;
+            const periodLabel = plan.period === 'One-Time' ? plan.period : `/${plan.period}`;
 
             return (
               <div
@@ -50,12 +50,12 @@ export default function PricingSection() {
                   border ${isPopular ? 'border-emerald-300 ring-1 ring-emerald-300' : 'border-gray-200'}
                   bg-white shadow-md transition-transform md:hover:scale-105
                   bg-gradient-to-br ${plan.gradient || 'from-white to-white'}
-                  /* width behaviour */
-                  min-w-[88%] sm:min-w-[70%] md:min-w-[58%]
-                  lg:min-w-0 lg:w-full lg:max-w-[360px] xl:max-w-[380px] lg:mx-auto
+                  /* width behavior */
+                  min-w-[88%] sm:min-w-[70%] md:min-w-[58%]      /* mobile/tablet: nice peeking */
+                  lg:min-w-0 lg:w-[340px] xl:w-[360px]           /* desktop: fixed width, no stretch */
                 `}
               >
-                {/* Corner ⭐ badge like your screenshot */}
+                {/* Corner ⭐ badge */}
                 {isPopular && (
                   <div className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-orange-500 text-white shadow-lg grid place-items-center">
                     <span className="text-lg leading-none">⭐</span>
@@ -66,17 +66,13 @@ export default function PricingSection() {
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-foreground mb-1">{plan.name}</h3>
                   <div className="mb-1">
-                    <span className="text-3xl font-extrabold text-emerald-600">
-                      {plan.price}
-                    </span>
+                    <span className="text-3xl font-extrabold text-emerald-600">{plan.price}</span>
                     <span className="text-muted-foreground ml-1">{periodLabel}</span>
                   </div>
-                  {plan.summary && (
-                    <p className="text-sm text-muted-foreground">{plan.summary}</p>
-                  )}
+                  {plan.summary && <p className="text-sm text-muted-foreground">{plan.summary}</p>}
                 </div>
 
-                {/* Features (lucide Check/X like old code) */}
+                {/* Features */}
                 <div className="space-y-3 mb-8">
                   {plan.features.map((f: any, i: number) => (
                     <div key={i} className="flex items-start space-x-3">
@@ -85,11 +81,7 @@ export default function PricingSection() {
                       ) : (
                         <X className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                       )}
-                      <span
-                        className={`text-sm ${
-                          f.included ? 'text-foreground' : 'text-muted-foreground line-through'
-                        }`}
-                      >
+                      <span className={`text-sm ${f.included ? 'text-foreground' : 'text-muted-foreground line-through'}`}>
                         {f.text}
                       </span>
                     </div>
