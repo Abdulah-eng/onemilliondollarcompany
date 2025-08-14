@@ -12,7 +12,7 @@ export default function TestimonialsSection() {
     const el = trackRef.current;
     if (!el) return;
 
-    // lock vertical overflow in the track only
+    // Horizontal-only inside the track
     el.style.overflowY = 'hidden';
 
     const reduceMotion =
@@ -24,12 +24,14 @@ export default function TestimonialsSection() {
     let timer: number | undefined;
 
     const stepOnce = () => {
-      if (!el) return;
       const firstCard = el.querySelector<HTMLElement>('[data-card]');
       if (!firstCard) return;
 
+      // Measure the current first card + the computed gap
       const cardWidth = firstCard.getBoundingClientRect().width;
-      const gap = parseInt(getComputedStyle(el).columnGap || getComputedStyle(el).gap || '16', 10) || 16;
+      const styles = getComputedStyle(el);
+      const gap =
+        parseInt(styles.columnGap || styles.gap || '16', 10) || 16;
 
       const { scrollLeft, scrollWidth, clientWidth } = el;
       const atEnd = scrollLeft + clientWidth >= scrollWidth - 2;
@@ -53,7 +55,6 @@ export default function TestimonialsSection() {
       timer = undefined;
     };
 
-    // pause on interactions
     const pause = () => (pauseRef.current = true);
     const resume = () => (pauseRef.current = false);
 
@@ -64,17 +65,14 @@ export default function TestimonialsSection() {
     el.addEventListener('focusin', pause);
     el.addEventListener('focusout', resume);
 
-    start();
-
-    // restart on resize to re-measure card width
+    // Restart timing on resize (card width changes with breakpoints)
     const onResize = () => {
       pause();
-      setTimeout(() => {
-        resume();
-      }, 200);
+      setTimeout(resume, 200);
     };
     window.addEventListener('resize', onResize, { passive: true });
 
+    start();
     return () => {
       stop();
       el.removeEventListener('mouseenter', pause);
@@ -91,12 +89,7 @@ export default function TestimonialsSection() {
     <section
       id="testimonials"
       aria-label="Client testimonials"
-      /* Responsive min-height so the tallest card fits on iPad & phones */
-      className="
-        bg-muted/30
-        py-12 sm:py-16
-        min-h-[480px] sm:min-h-[520px] md:min-h-[560px]
-      "
+      className="bg-muted/30 py-12 sm:py-16 overflow-hidden"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -109,17 +102,18 @@ export default function TestimonialsSection() {
           </p>
         </div>
 
-        {/* Always horizontal: snap carousel, no vertical scroll inside */}
+        {/* Horizontal-only track, no negative margins */}
         <div
           ref={trackRef}
+          role="list"
           className="
-            -mx-4 px-4
+            w-full
             flex items-stretch gap-4 md:gap-6
             overflow-x-auto overflow-y-hidden
             snap-x snap-mandatory scroll-px-4
             [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
+            px-4
           "
-          role="list"
         >
           {TESTIMONIALS.map((t, idx) => (
             <article
@@ -127,11 +121,9 @@ export default function TestimonialsSection() {
               key={`${t.name}-${idx}`}
               role="listitem"
               tabIndex={0}
-              /* Each card grows to the section's available height */
               className="
                 snap-center shrink-0
-                min-w-[92%] xs:min-w-[85%] sm:min-w-[72%] md:min-w-[58%] lg:min-w-[44%] xl:min-w-[36%]
-                h-full
+                min-w-full xs:min-w-[90%] sm:min-w-[75%] md:min-w-[60%] lg:min-w-[50%]
                 bg-background rounded-2xl shadow
                 p-6 sm:p-7 md:p-8
                 flex flex-col justify-between
