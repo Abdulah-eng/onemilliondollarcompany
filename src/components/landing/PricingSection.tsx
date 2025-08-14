@@ -80,22 +80,34 @@ const PricingSection = () => {
               {/* Features */}
               <div className="space-y-3 mb-8">
                 {plan.features.map(
-                  (feature: { text: string; included: boolean }, i: number) => (
+                  (
+                    feature: { text: string | string[]; included: boolean },
+                    i: number
+                  ) => (
                     <div key={i} className="flex items-start space-x-3">
                       {feature.included ? (
                         <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       ) : (
                         <X className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                       )}
-                      <span
+                      {/* UPDATED: Logic to handle multi-line text */}
+                      <div
                         className={`text-sm ${
                           feature.included
                             ? 'text-foreground'
                             : 'text-muted-foreground line-through'
                         }`}
                       >
-                        {feature.text}
-                      </span>
+                        {Array.isArray(feature.text) ? (
+                          feature.text.map((line, lineIndex) => (
+                            <span key={lineIndex} className="block">
+                              {line}
+                            </span>
+                          ))
+                        ) : (
+                          feature.text
+                        )}
+                      </div>
                     </div>
                   )
                 )}
