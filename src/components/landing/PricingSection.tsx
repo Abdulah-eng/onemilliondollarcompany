@@ -42,8 +42,8 @@ const PricingSection = () => {
         </div>
 
         {/* Pricing Cards */}
-        {/* This container has been updated to handle horizontal scrolling */}
-        <div className="flex gap-8 overflow-x-auto py-8 -mx-4 px-4 md:grid md:grid-cols-3 md:mx-auto md:px-0">
+        {/* This container now switches to a grid on `lg` screens to prevent tablet overlap */}
+        <div className="flex gap-8 overflow-x-auto py-8 -mx-4 px-4 lg:grid lg:grid-cols-3 lg:mx-auto lg:px-0">
           {plans.map((plan: any, index: number) => (
             <div
               key={plan.name}
