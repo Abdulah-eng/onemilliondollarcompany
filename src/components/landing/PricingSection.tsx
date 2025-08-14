@@ -1,61 +1,9 @@
 // File: src/components/landing/PricingSection.tsx
 import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PLANS } from '@/mockdata/landingpage/plans';
 
 const PricingSection = () => {
-  const plans = [
-    {
-      name: 'Basic',
-      price: '$17.99',
-      period: 'One-Time',
-      description: 'Perfect for trying out our approach',
-      featured: false,
-      features: [
-        { text: 'One 1-month plan', included: true },
-        { text: 'Progress tools', included: false },
-        { text: 'Feedback', included: false },
-      ],
-      cta: 'Get Started',
-      badge: null,
-    },
-    {
-      name: 'Standard',
-      price: '$14.99',
-      period: '/month',
-      description: 'Perfect for focused goals',
-      featured: false,
-      features: [
-        { text: 'One monthly plan (choose 1 pillar)', included: true },
-        { text: 'Knowledge Hub', included: true },
-        { text: 'Recipe/Exercise Library', included: true },
-        { text: 'Blog Access', included: true },
-        { text: 'Progress Tracking', included: false },
-        { text: 'Feedback', included: false },
-        { text: '14-Day Free Trial', included: true },
-      ],
-      cta: 'Try Standard – 14 Days Free',
-      badge: null,
-    },
-    {
-      name: 'Premium',
-      price: '$29.99',
-      period: '/month',
-      description: 'Everything you need to transform',
-      featured: true,
-      features: [
-        { text: 'Fitness, Nutrition & Mental Plans', included: true },
-        { text: 'Full Knowledge Hub', included: true },
-        { text: 'Recipe + Exercise Library', included: true },
-        { text: 'Blog Access', included: true },
-        { text: 'Progress Tracking', included: true },
-        { text: 'Coach Feedback', included: true },
-        { text: 'Monthly Plan Updates', included: true },
-      ],
-      cta: 'Choose Premium – $29.99/mo',
-      badge: '⭐',
-    },
-  ];
-
   return (
     <section id="pricing" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -71,7 +19,7 @@ const PricingSection = () => {
 
         {/* Pricing Cards */}
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {plans.map((plan, index) => (
+          {PLANS.map((plan, index) => (
             <div
               key={plan.name}
               className={`wellness-card p-8 relative ${
