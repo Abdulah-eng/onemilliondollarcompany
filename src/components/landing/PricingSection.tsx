@@ -1,4 +1,4 @@
-// File: src/components/landing/PricingSection.tsx
+
 import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PLANS } from '@/mockdata/landingpage/plans';
