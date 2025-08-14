@@ -29,7 +29,7 @@ export const PLANS = [
     popular: false,
     gradient: 'from-blue-100 to-blue-50',
     features: [
-      { text: '🎯 One monthly plan (choose fitness, nutrition or mental)', included: true },
+      { text: '🎯 One monthly plan <br> (choose fitness, nutrition or mental)' </br>, included: true },
       { text: '📚 Knowledge Hub', included: true },
       { text: '🍳 Recipe/Exercise Library', included: true },
       { text: '📖 Blog Access', included: true },
