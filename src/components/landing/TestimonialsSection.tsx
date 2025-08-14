@@ -12,30 +12,27 @@ export default function TestimonialsSection() {
     const el = trackRef.current;
     if (!el) return;
 
-    // Horizontal-only inside the track
+    // horizontal-only inside the track
     el.style.overflowY = 'hidden';
 
     const reduceMotion =
       typeof window !== 'undefined' &&
       window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-
     if (reduceMotion) return;
 
     let timer: number | undefined;
 
     const stepOnce = () => {
-      const firstCard = el.querySelector<HTMLElement>('[data-card]');
-      if (!firstCard) return;
+      const card = el.querySelector<HTMLElement>('[data-card]');
+      if (!card) return;
 
-      // Measure the current first card + the computed gap
-      const cardWidth = firstCard.getBoundingClientRect().width;
+      // measure current card width + the gap between cards
+      const cardWidth = card.getBoundingClientRect().width;
       const styles = getComputedStyle(el);
-      const gap =
-        parseInt(styles.columnGap || styles.gap || '16', 10) || 16;
+      const gap = parseInt(styles.columnGap || styles.gap || '16', 10) || 16;
 
       const { scrollLeft, scrollWidth, clientWidth } = el;
       const atEnd = scrollLeft + clientWidth >= scrollWidth - 2;
-
       if (atEnd) {
         el.scrollTo({ left: 0, behavior: 'smooth' });
       } else {
@@ -65,7 +62,7 @@ export default function TestimonialsSection() {
     el.addEventListener('focusin', pause);
     el.addEventListener('focusout', resume);
 
-    // Restart timing on resize (card width changes with breakpoints)
+    // re-measure on resize (breakpoints change card width)
     const onResize = () => {
       pause();
       setTimeout(resume, 200);
@@ -102,7 +99,7 @@ export default function TestimonialsSection() {
           </p>
         </div>
 
-        {/* Horizontal-only track, no negative margins */}
+        {/* Track: no horizontal padding; use scroll-px to keep safe edges */}
         <div
           ref={trackRef}
           role="list"
@@ -110,9 +107,9 @@ export default function TestimonialsSection() {
             w-full
             flex items-stretch gap-4 md:gap-6
             overflow-x-auto overflow-y-hidden
-            snap-x snap-mandatory scroll-px-4
+            snap-x snap-mandatory
+            scroll-px-4             /* safe scroll padding without adding real padding */
             [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
-            px-4
           "
         >
           {TESTIMONIALS.map((t, idx) => (
@@ -123,7 +120,8 @@ export default function TestimonialsSection() {
               tabIndex={0}
               className="
                 snap-center shrink-0
-                min-w-full xs:min-w-[90%] sm:min-w-[75%] md:min-w-[60%] lg:min-w-[50%]
+                /* width never exceeds track width on small screens */
+                min-w-full sm:min-w-[90%] md:min-w-[75%] lg:min-w-[60%] xl:min-w-[50%]
                 bg-background rounded-2xl shadow
                 p-6 sm:p-7 md:p-8
                 flex flex-col justify-between
@@ -138,19 +136,17 @@ export default function TestimonialsSection() {
                   <h3 className="font-semibold">
                     {t.name}, {t.age}
                   </h3>
-                  <div
-                    role="img"
-                    aria-label={`${t.rating} out of 5 stars`}
-                    className="text-sm"
-                  >
+                  <div role="img" aria-label={`${t.rating} out of 5 stars`} className="text-sm">
                     {'⭐'.repeat(t.rating || 5)}
                   </div>
                 </div>
               </header>
 
-              {/* Quote */}
+              {/* Quote — force wrapping */}
               <blockquote className="my-2 sm:my-3 italic text-muted-foreground leading-relaxed">
-                <p>“{t.text}”</p>
+                <p className="whitespace-normal break-words hyphens-auto">
+                  “{t.text}”
+                </p>
               </blockquote>
 
               {/* Bottom */}
