@@ -6,9 +6,9 @@ import { PLANS } from '@/mockdata/landingpage/plans';
 const PricingSection = () => {
   return (
     <section id="pricing" className="py-20 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-16 fade-in-up">
+        <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
             Choose Your Transformation Plan
           </h2>
@@ -17,22 +17,38 @@ const PricingSection = () => {
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {/* Mobile-first: horizontal snap scroll; desktop: 3-col grid */}
+        <div
+          className="
+            w-full
+            flex gap-4 md:gap-6 overflow-x-auto overflow-y-hidden
+            snap-x snap-mandatory scroll-px-4
+            [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
+            lg:overflow-visible lg:scroll-px-0
+            lg:grid lg:grid-cols-3 lg:gap-8 lg:justify-items-center lg:max-w-6xl lg:mx-auto
+          "
+          role="list"
+          aria-label="Pricing plans"
+        >
           {PLANS.map((plan, index) => (
             <div
               key={plan.name}
-              className={`wellness-card p-8 relative ${
-                plan.featured
-                  ? 'ring-2 ring-emerald-500 bg-emerald-50'
-                  : 'border border-gray-200'
-              } hover:scale-105 transition-all duration-300 rounded-3xl bg-white`}
+              role="listitem"
+              className={`
+                relative p-8 snap-start shrink-0 rounded-3xl bg-white shadow-md
+                ${plan.featured ? 'ring-2 ring-emerald-500 bg-emerald-50 border border-emerald-200' : 'border border-gray-200'}
+                transition-transform md:hover:scale-105
+                /* Horizontal card widths (never overflow) */
+                min-w-[88%] sm:min-w-[75%] md:min-w-[60%]
+                /* Desktop fixed widths so they don't look wide */
+                lg:min-w-0 lg:w-[340px] xl:w-[360px]
+              `}
               style={{ animationDelay: `${index * 0.2}s` }}
             >
-              {/* Badge */}
+              {/* Star badge (if provided in mock data) */}
               {plan.badge && (
-                <div className="absolute -top-3 -right-3 w-9 h-9 bg-orange-500 text-white rounded-full flex items-center justify-center text-lg shadow-md">
-                  {plan.badge}
+                <div className="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-orange-500 text-white shadow-md grid place-items-center">
+                  <span className="text-base leading-none">{plan.badge}</span>
                 </div>
               )}
 
@@ -42,29 +58,24 @@ const PricingSection = () => {
                   {plan.name}
                 </h3>
                 <div className="mb-2">
-                  <span
-                    className={`text-3xl font-bold ${
-                      plan.featured ? 'text-emerald-600' : 'text-emerald-500'
-                    }`}
-                  >
+                  <span className="text-3xl font-bold text-emerald-600">
                     {plan.price}
                   </span>
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground ml-1">
                     {plan.period}
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {plan.description}
-                </p>
+                {(plan as any).summary || plan.description ? (
+                  <p className="text-sm text-muted-foreground">
+                    {(plan as any).summary || plan.description}
+                  </p>
+                ) : null}
               </div>
 
               {/* Features */}
               <div className="space-y-3 mb-8">
                 {plan.features.map((feature, featureIndex) => (
-                  <div
-                    key={featureIndex}
-                    className="flex items-start space-x-3"
-                  >
+                  <div key={featureIndex} className="flex items-start space-x-3">
                     {feature.included ? (
                       <Check className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                     ) : (
@@ -83,15 +94,9 @@ const PricingSection = () => {
                 ))}
               </div>
 
-              {/* CTA Button */}
-              <Button
-                className={`w-full ${
-                  plan.featured
-                    ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                    : 'bg-gray-100 hover:bg-gray-200 text-emerald-600'
-                }`}
-              >
-                {plan.cta}
+              {/* CTA — green gradient (global class) */}
+              <Button className="w-full btn-wellness-primary">
+                {(plan as any).ctaText || plan.cta || 'Get Started'}
               </Button>
             </div>
           ))}
