@@ -42,11 +42,12 @@ const PricingSection = () => {
         </div>
 
         {/* Pricing Cards */}
-        <div className="flex flex-wrap md:grid md:grid-cols-3 gap-8 max-w-6xl mx-auto overflow-x-auto pb-4 md:pb-0">
+        {/* The container below is where the key changes were made. */}
+        <div className="flex gap-8 overflow-x-auto pb-4 md:grid md:grid-cols-3 md:gap-8 max-w-6xl mx-auto">
           {plans.map((plan: any, index: number) => (
             <div
               key={plan.name}
-              className={`wellness-card p-8 relative rounded-3xl shadow-xl min-w-[300px] flex-shrink-0 md:min-w-0 ${
+              className={`wellness-card p-8 relative rounded-3xl shadow-xl min-w-[300px] flex-shrink-0 md:min-w-0 md:flex-shrink ${
                 plan.featured ? 'ring-2 ring-primary bg-gradient-primary/5' : 'bg-card'
               } hover:scale-105 transition-all duration-300`}
               style={{ animationDelay: `${index * 0.2}s` }}
