@@ -1,21 +1,66 @@
 // File: src/components/landing/PricingSection.tsx
-import { useNavigate } from 'react-router-dom';
 import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PLANS } from '@/mockdata/landingpage/plans';
 
-export default function PricingSection() {
-  const navigate = useNavigate();
-
-  const handlePlanClick = (planKey: string) => {
-    navigate(`/get-started?plan=${encodeURIComponent(planKey)}`);
-  };
+const PricingSection = () => {
+  const plans = [
+    {
+      name: 'Basic',
+      price: '$17.99',
+      period: 'One-Time',
+      description: 'Perfect for trying out our approach',
+      featured: false,
+      features: [
+        { text: 'One 1-month plan', included: true },
+        { text: 'Progress tools', included: false },
+        { text: 'Feedback', included: false },
+      ],
+      cta: 'Get Started',
+      badge: null,
+    },
+    {
+      name: 'Standard',
+      price: '$14.99',
+      period: '/month',
+      description: 'Perfect for focused goals',
+      featured: false,
+      features: [
+        { text: 'One monthly plan (choose 1 pillar)', included: true },
+        { text: 'Knowledge Hub', included: true },
+        { text: 'Recipe/Exercise Library', included: true },
+        { text: 'Blog Access', included: true },
+        { text: 'Progress Tracking', included: false },
+        { text: 'Feedback', included: false },
+        { text: '14-Day Free Trial', included: true },
+      ],
+      cta: 'Try Standard – 14 Days Free',
+      badge: null,
+    },
+    {
+      name: 'Premium',
+      price: '$29.99',
+      period: '/month',
+      description: 'Everything you need to transform',
+      featured: true,
+      features: [
+        { text: 'Fitness, Nutrition & Mental Plans', included: true },
+        { text: 'Full Knowledge Hub', included: true },
+        { text: 'Recipe + Exercise Library', included: true },
+        { text: 'Blog Access', included: true },
+        { text: 'Progress Tracking', included: true },
+        { text: 'Coach Feedback', included: true },
+        { text: 'Monthly Plan Updates', included: true },
+      ],
+      cta: 'Choose Premium – $29.99/mo',
+      badge: '⭐',
+    },
+  ];
 
   return (
     <section id="pricing" className="py-20 bg-background">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 fade-in-up">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
             Choose Your Transformation Plan
           </h2>
@@ -24,80 +69,84 @@ export default function PricingSection() {
           </p>
         </div>
 
-        {/* ≤ iPad: horizontal snap; ≥ lg: 3 fixed-width cards centered */}
-        <div
-          className="
-            flex gap-4 md:gap-6 overflow-x-auto overflow-y-hidden
-            snap-x snap-mandatory scroll-px-4
-            [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
-            lg:overflow-visible lg:scroll-px-0
-            lg:grid lg:grid-cols-3 lg:gap-8 lg:justify-items-center
-            lg:max-w-6xl lg:mx-auto
-          "
-          role="list"
-          aria-label="Pricing plans"
-        >
-          {PLANS.map((plan, idx) => {
-            const isPopular = Boolean((plan as any).popular);
-            const periodLabel = plan.period === 'One-Time' ? plan.period : `/${plan.period}`;
-
-            return (
-              <div
-                key={`${plan.name}-${idx}`}
-                role="listitem"
-                className={`
-                  relative p-8 snap-start shrink-0 rounded-3xl
-                  border ${isPopular ? 'border-emerald-300 ring-1 ring-emerald-300' : 'border-gray-200'}
-                  bg-white shadow-md transition-transform md:hover:scale-105
-                  bg-gradient-to-br ${plan.gradient || 'from-white to-white'}
-                  /* width behavior */
-                  min-w-[88%] sm:min-w-[70%] md:min-w-[58%]      /* mobile/tablet: nice peeking */
-                  lg:min-w-0 lg:w-[340px] xl:w-[360px]           /* desktop: fixed width, no stretch */
-                `}
-              >
-                {/* Corner ⭐ badge */}
-                {isPopular && (
-                  <div className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-orange-500 text-white shadow-lg grid place-items-center">
-                    <span className="text-lg leading-none">⭐</span>
-                  </div>
-                )}
-
-                {/* Plan Header */}
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-foreground mb-1">{plan.name}</h3>
-                  <div className="mb-1">
-                    <span className="text-3xl font-extrabold text-emerald-600">{plan.price}</span>
-                    <span className="text-muted-foreground ml-1">{periodLabel}</span>
-                  </div>
-                  {plan.summary && <p className="text-sm text-muted-foreground">{plan.summary}</p>}
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {plans.map((plan, index) => (
+            <div
+              key={plan.name}
+              className={`wellness-card p-8 relative ${
+                plan.featured
+                  ? 'ring-2 ring-emerald-500 bg-emerald-50'
+                  : 'border border-gray-200'
+              } hover:scale-105 transition-all duration-300 rounded-3xl bg-white`}
+              style={{ animationDelay: `${index * 0.2}s` }}
+            >
+              {/* Badge */}
+              {plan.badge && (
+                <div className="absolute -top-3 -right-3 w-9 h-9 bg-orange-500 text-white rounded-full flex items-center justify-center text-lg shadow-md">
+                  {plan.badge}
                 </div>
+              )}
 
-                {/* Features */}
-                <div className="space-y-3 mb-8">
-                  {plan.features.map((f: any, i: number) => (
-                    <div key={i} className="flex items-start space-x-3">
-                      {f.included ? (
-                        <Check className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      ) : (
-                        <X className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                      )}
-                      <span className={`text-sm ${f.included ? 'text-foreground' : 'text-muted-foreground line-through'}`}>
-                        {f.text}
-                      </span>
-                    </div>
-                  ))}
+              {/* Plan Header */}
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-foreground mb-2">
+                  {plan.name}
+                </h3>
+                <div className="mb-2">
+                  <span
+                    className={`text-3xl font-bold ${
+                      plan.featured ? 'text-emerald-600' : 'text-emerald-500'
+                    }`}
+                  >
+                    {plan.price}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {plan.period}
+                  </span>
                 </div>
-
-                {/* CTA */}
-                <Button
-                  onClick={() => handlePlanClick(plan.planKey)}
-                  className={`w-full ${isPopular ? 'btn-wellness-primary' : 'btn-wellness-secondary'}`}
-                >
-                  {plan.ctaText}
-                </Button>
+                <p className="text-sm text-muted-foreground">
+                  {plan.description}
+                </p>
               </div>
-            );
-          })}
+
+              {/* Features */}
+              <div className="space-y-3 mb-8">
+                {plan.features.map((feature, featureIndex) => (
+                  <div
+                    key={featureIndex}
+                    className="flex items-start space-x-3"
+                  >
+                    {feature.included ? (
+                      <Check className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                    ) : (
+                      <X className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    )}
+                    <span
+                      className={`text-sm ${
+                        feature.included
+                          ? 'text-foreground'
+                          : 'text-muted-foreground line-through'
+                      }`}
+                    >
+                      {feature.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA Button */}
+              <Button
+                className={`w-full ${
+                  plan.featured
+                    ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                    : 'bg-gray-100 hover:bg-gray-200 text-emerald-600'
+                }`}
+              >
+                {plan.cta}
+              </Button>
+            </div>
+          ))}
         </div>
 
         {/* Footer Note */}
@@ -109,4 +158,6 @@ export default function PricingSection() {
       </div>
     </section>
   );
-}
+};
+
+export default PricingSection;
