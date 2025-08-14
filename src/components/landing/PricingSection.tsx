@@ -1,14 +1,12 @@
-'use client';
-
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { PLANS } from '@/mockdata/landingpage/plans';
 import { Button } from '@/components/ui/button';
 
 export default function PricingSection() {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handlePlanClick = (planKey: string) => {
-    router.push(`/get-started?plan=${encodeURIComponent(planKey)}`);
+    navigate(`/get-started?plan=${encodeURIComponent(planKey)}`);
   };
 
   return (

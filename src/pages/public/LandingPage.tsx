@@ -1,14 +1,14 @@
 
 import { useEffect } from 'react';
-import Navbar from './Navbar';
-import HeroSection from './HeroSection';
-import FeaturesSection from './FeaturesSection';
-import MoreThanPlanSection from './MoreThanPlanSection';
-import HowItWorksSection from './HowItWorksSection';
-import TestimonialsSection from './TestimonialsSection';
-import PricingSection from './PricingSection';
-import CTASection from './CTASection';
-import Footer from './Footer';
+import Navbar from '@/components/landing/Navbar';
+import HeroSection from '@/components/landing/HeroSection';
+import FeaturesSection from '@/components/landing/FeaturesSection';
+import MoreThanPlanSection from '@/components/landing/MoreThanPlanSection';
+import HowItWorksSection from '@/components/landing/HowItWorksSection';
+import TestimonialsSection from '@/components/landing/TestimonialsSection';
+import PricingSection from '@/components/landing/PricingSection';
+import CTASection from '@/components/landing/CTASection';
+import Footer from '@/components/landing/Footer';
 
 function useRevealOnScroll() {
   useEffect(() => {

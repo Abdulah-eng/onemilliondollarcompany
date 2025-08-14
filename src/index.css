@@ -18,10 +18,10 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 225 15% 20%;
 
-    /* Primary: Vibrant orange-pink gradient colors */
-    --primary: 15 100% 55%;
+    /* Primary: Emerald-teal gradient colors */
+    --primary: 158 64% 52%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 330 80% 60%;
+    --primary-glow: 173 58% 39%;
 
     /* Secondary: Soft mint green */
     --secondary: 160 30% 95%;
@@ -45,13 +45,13 @@ All colors MUST be HSL.
     --radius: 1rem;
 
     /* Wellness gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(15 100% 55% / 0.1), hsl(330 80% 60% / 0.1));
-    --gradient-primary: linear-gradient(135deg, hsl(15 100% 55%), hsl(330 80% 60%));
+    --gradient-hero: linear-gradient(135deg, hsl(158 64% 52% / 0.1), hsl(173 58% 39% / 0.1));
+    --gradient-primary: linear-gradient(135deg, hsl(158 64% 52%), hsl(173 58% 39%));
     --gradient-secondary: linear-gradient(135deg, hsl(160 60% 50%), hsl(180 60% 50%));
     --gradient-accent: linear-gradient(135deg, hsl(270 60% 60%), hsl(290 60% 60%));
 
     /* Wellness shadows */
-    --shadow-wellness: 0 10px 40px hsl(15 100% 55% / 0.15);
+    --shadow-wellness: 0 10px 40px hsl(158 64% 52% / 0.15);
     --shadow-card: 0 4px 20px hsl(225 15% 20% / 0.08);
 
     --sidebar-background: 0 0% 98%;
@@ -168,7 +168,7 @@ All colors MUST be HSL.
 
   .btn-wellness-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 15px 50px hsl(15 100% 55% / 0.25);
+    box-shadow: 0 15px 50px hsl(158 64% 52% / 0.25);
   }
 
   .btn-wellness-secondary {
