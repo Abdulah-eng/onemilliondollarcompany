@@ -12,33 +12,39 @@ export default function TestimonialsSection() {
     const el = trackRef.current;
     if (!el) return;
 
-    // Horizontal only
+    // lock vertical overflow in the track only
     el.style.overflowY = 'hidden';
 
     const reduceMotion =
       typeof window !== 'undefined' &&
-      window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
 
-    if (reduceMotion) return; // respect user preference
+    if (reduceMotion) return;
 
     let timer: number | undefined;
 
-    const start = () => {
-      if (timer) window.clearInterval(timer);
-      timer = window.setInterval(() => {
-        if (pauseRef.current) return;
+    const stepOnce = () => {
+      if (!el) return;
+      const firstCard = el.querySelector<HTMLElement>('[data-card]');
+      if (!firstCard) return;
 
-        const { scrollLeft, scrollWidth, clientWidth } = el;
-        const atEnd = scrollLeft + clientWidth >= scrollWidth - 2;
-        if (atEnd) {
-          // jump back to start smoothly
-          el.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          // advance roughly one card (80% of viewport width looks good)
-          const step = Math.max(clientWidth * 0.8, 280);
-          el.scrollBy({ left: step, behavior: 'smooth' });
-        }
+      const cardWidth = firstCard.getBoundingClientRect().width;
+      const gap = parseInt(getComputedStyle(el).columnGap || getComputedStyle(el).gap || '16', 10) || 16;
+
+      const { scrollLeft, scrollWidth, clientWidth } = el;
+      const atEnd = scrollLeft + clientWidth >= scrollWidth - 2;
+
+      if (atEnd) {
+        el.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        el.scrollBy({ left: cardWidth + gap, behavior: 'smooth' });
+      }
+    };
+
+    const start = () => {
+      stop();
+      timer = window.setInterval(() => {
+        if (!pauseRef.current) stepOnce();
       }, 3500);
     };
 
@@ -47,7 +53,7 @@ export default function TestimonialsSection() {
       timer = undefined;
     };
 
-    // pause on hover/touch/keyboard focus
+    // pause on interactions
     const pause = () => (pauseRef.current = true);
     const resume = () => (pauseRef.current = false);
 
@@ -59,6 +65,16 @@ export default function TestimonialsSection() {
     el.addEventListener('focusout', resume);
 
     start();
+
+    // restart on resize to re-measure card width
+    const onResize = () => {
+      pause();
+      setTimeout(() => {
+        resume();
+      }, 200);
+    };
+    window.addEventListener('resize', onResize, { passive: true });
+
     return () => {
       stop();
       el.removeEventListener('mouseenter', pause);
@@ -67,6 +83,7 @@ export default function TestimonialsSection() {
       el.removeEventListener('touchend', resume);
       el.removeEventListener('focusin', pause);
       el.removeEventListener('focusout', resume);
+      window.removeEventListener('resize', onResize);
     };
   }, []);
 
@@ -74,11 +91,16 @@ export default function TestimonialsSection() {
     <section
       id="testimonials"
       aria-label="Client testimonials"
-      className="py-20 bg-muted/30 overflow-hidden" // hard-stop any vertical overflow
+      /* Responsive min-height so the tallest card fits on iPad & phones */
+      className="
+        bg-muted/30
+        py-12 sm:py-16
+        min-h-[480px] sm:min-h-[520px] md:min-h-[560px]
+      "
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8 sm:mb-10">
           <h2 className="mb-3 text-3xl sm:text-4xl lg:text-5xl font-bold">
             What Clients Are Saying
           </h2>
@@ -87,33 +109,37 @@ export default function TestimonialsSection() {
           </p>
         </div>
 
-        {/* Always horizontal: snap carousel, no vertical scroll */}
+        {/* Always horizontal: snap carousel, no vertical scroll inside */}
         <div
           ref={trackRef}
           className="
             -mx-4 px-4
-            flex items-stretch gap-4 overflow-x-auto overflow-y-hidden
-            snap-x snap-mandatory scroll-p-4
-            md:gap-6
+            flex items-stretch gap-4 md:gap-6
+            overflow-x-auto overflow-y-hidden
+            snap-x snap-mandatory scroll-px-4
             [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
           "
           role="list"
         >
           {TESTIMONIALS.map((t, idx) => (
             <article
+              data-card
               key={`${t.name}-${idx}`}
               role="listitem"
               tabIndex={0}
+              /* Each card grows to the section's available height */
               className="
-                p-6 snap-center shrink-0
-                min-w-[90%] sm:min-w-[70%] md:min-w-[55%] lg:min-w-[40%] xl:min-w-[33%]
-                bg-background rounded-xl shadow
+                snap-center shrink-0
+                min-w-[92%] xs:min-w-[85%] sm:min-w-[72%] md:min-w-[58%] lg:min-w-[44%] xl:min-w-[36%]
+                h-full
+                bg-background rounded-2xl shadow
+                p-6 sm:p-7 md:p-8
                 flex flex-col justify-between
                 transition-transform duration-300 hover:scale-[1.02]
                 focus:outline-none focus:ring-2 focus:ring-primary
               "
             >
-              {/* Avatar + Info */}
+              {/* Top */}
               <header className="mb-4 flex items-center">
                 <div className="mr-3 text-3xl">{t.avatar}</div>
                 <div>
@@ -130,13 +156,13 @@ export default function TestimonialsSection() {
                 </div>
               </header>
 
-              {/* Text */}
-              <blockquote className="mb-4 italic text-muted-foreground">
+              {/* Quote */}
+              <blockquote className="my-2 sm:my-3 italic text-muted-foreground leading-relaxed">
                 <p>“{t.text}”</p>
               </blockquote>
 
-              {/* Result */}
-              <div className="flex items-center text-sm">
+              {/* Bottom */}
+              <div className="mt-4 flex items-center text-sm">
                 <span className="mr-2">✨</span>
                 <span className="font-medium text-primary">{t.result}</span>
               </div>
