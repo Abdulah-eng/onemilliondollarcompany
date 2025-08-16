@@ -1,6 +1,9 @@
+// src/hooks/useRedirectIfAuthenticated.ts
+
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/lib/AuthContext';
+// UPDATED: Import path now points to the /contexts folder
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useRedirectIfAuthenticated = () => {
   const { user, profile, loading } = useAuth();
