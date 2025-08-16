@@ -1,3 +1,5 @@
+// src/components/layouts/AuthLayout.tsx
+
 import React, { useState, useEffect } from 'react';
 
 const testimonials = [
@@ -12,17 +14,17 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % testimonials.length);
-    }, 4000); // Increased duration for a calmer feel
+    }, 4000);
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className="relative flex min-h-[100svh] w-full bg-background">
-      {/* Left side: The branded, motivational part */}
-      <div className="hidden lg:flex flex-col justify-center w-1/2 bg-gradient-to-br from-gray-50 to-orange-100 p-12">
+    <div className="flex min-h-[100svh] w-full bg-background antialiased">
+      {/* LEFT: Branding Panel - UPDATED with green gradient */}
+      <div className="hidden lg:flex flex-col justify-center w-1/2 bg-gradient-to-br from-emerald-50 to-teal-100 p-12">
         <div className="max-w-md">
           <h1 className="text-4xl font-bold leading-tight text-gray-800 mb-4">
-            Join a system that fits your life.
+            A wellness system that fits your life.
           </h1>
           <p className="text-lg text-muted-foreground mb-8">
             Training, meals, and mental tools—everything in one app, built for momentum.
@@ -34,8 +36,8 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </div>
       
-      {/* Right side: The form/action part */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-4">
+      {/* RIGHT: Form Panel */}
+      <div className="w-full lg:w-1-2 flex items-center justify-center p-4">
         {children}
       </div>
     </div>
