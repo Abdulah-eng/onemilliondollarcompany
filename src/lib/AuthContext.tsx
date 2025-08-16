@@ -1,14 +1,18 @@
+
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client'; // Assuming this path is correct
+import { supabase } from '@/integrations/supabase/client';
 
 // Define the Profile type clearly
 export interface Profile {
   id: string;
   role: 'customer' | 'coach';
   onboarding_complete: boolean;
-  // Add other optional fields from your DB
-  [key: string]: any; 
+  email?: string;
+  full_name?: string;
+  avatar_url?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface AuthContextType {
@@ -16,7 +20,6 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  // We can add other functions like signInWithPassword later if needed
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -85,5 +88,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-// We will create a separate file for auth actions to keep the context clean
