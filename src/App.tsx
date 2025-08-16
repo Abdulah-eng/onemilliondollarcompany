@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // 1. We import our AuthProvider and the new pages
 import { AuthProvider } from "./contexts/AuthContext";
-import LandingPage from "./pages/LandingPage"; // Make sure this path is correct
+import LandingPage from "./pages/public/LandingPage"; // Fixed path
 import GetStartedPage from "./pages/auth/GetStartedPage";
 import LoginPage from "./pages/auth/LoginPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
