@@ -1,5 +1,3 @@
-// src/components/layouts/AuthLayout.tsx
-
 import React, { useState, useEffect } from 'react';
 
 const testimonials = [
@@ -20,7 +18,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="flex min-h-[100svh] w-full bg-background antialiased">
-      {/* LEFT: Branding Panel - UPDATED with green gradient */}
+      {/* LEFT: Branding Panel */}
       <div className="hidden lg:flex flex-col justify-center w-1/2 bg-gradient-to-br from-emerald-50 to-teal-100 p-12">
         <div className="max-w-md">
           <h1 className="text-4xl font-bold leading-tight text-gray-800 mb-4">
@@ -36,10 +34,25 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </div>
       
-      {/* RIGHT: Form Panel */}
-      <div className="w-full lg:w-1-2 flex items-center justify-center p-4">
-        {children}
+      {/* RIGHT: Form Panel with Background Image */}
+      <div className="relative w-full lg:w-1/2 flex items-center justify-center p-4">
+        {/* Background Image Layer */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center z-0"
+          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=2120&auto=format&fit=crop')" }}
+          aria-hidden="true"
+        ></div>
+        
+        {/* Overlay Layer for better contrast */}
+        <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px] z-0" aria-hidden="true"></div>
+
+        {/* Form Content Layer */}
+        <div className="relative z-10 w-full">
+          {children}
+        </div>
       </div>
     </div>
   );
 };
+
+export default AuthLayout;
