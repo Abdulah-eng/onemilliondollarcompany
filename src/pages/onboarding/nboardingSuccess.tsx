@@ -1,24 +1,22 @@
+// src/pages/onboarding/OnboardingSuccess.tsx
+
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Sparkles, Loader2 } from 'lucide-react';
+import { CheckCircle, Sparkles } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 
 const OnboardingSuccess = () => {
-  const { completeOnboarding, loading, clearState } = useOnboarding();
+  const { clearState } = useOnboarding();
   const navigate = useNavigate();
 
+  // This effect cleans up the onboarding state when the user leaves this page.
   useEffect(() => {
-    const finalize = async () => {
-      await completeOnboarding();
-    };
-    finalize();
-    
     return () => {
       clearState();
     };
-  }, [completeOnboarding, clearState]);
+  }, [clearState]);
 
   const handleGoToDashboard = () => {
     navigate('/customer/dashboard');
@@ -54,10 +52,9 @@ const OnboardingSuccess = () => {
 
             <Button
               onClick={handleGoToDashboard}
-              disabled={loading}
               className="w-full !mt-8 text-lg py-6 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all"
             >
-              {loading ? <Loader2 className="animate-spin" /> : 'Go to My Dashboard'}
+              Go to My Dashboard
             </Button>
           </CardContent>
         </Card>
