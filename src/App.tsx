@@ -8,9 +8,10 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { OnboardingProvider } from "./contexts/OnboardingContext";
 
 // --- LAYOUTS & ROUTE PROTECTION ---
-import CustomerShell from "./components/layout/CustomerShell";
-import CoachShell from "./components/layout/CoachShell";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
+// CORRECTED PATHS: Using the '@/...' alias instead of './...'
+import CustomerShell from "@/components/layout/CustomerShell";
+import CoachShell from "@/components/layout/CoachShell";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 // --- PAGES ---
 import LandingPage from "./pages/public/LandingPage";
