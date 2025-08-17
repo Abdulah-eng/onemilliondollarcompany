@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import backgroundImage from '@/assets/backgroundImage.jpg'; // adjust path if different
 
 const testimonials = [
-  { text: '“Clear plans, zero guesswork. Love the guidance.”', author: 'Jonas' },
-  { text: '“I finally stayed consistent for 6 weeks straight.”', author: 'Mia' },
-  { text: '“Workouts, meals, and mindset—all in one place.”', author: 'Leo' },
+  { text: '"Clear plans, zero guesswork. Love the guidance."', author: 'Jonas' },
+  { text: '"I finally stayed consistent for 6 weeks straight."', author: 'Mia' },
+  { text: '"Workouts, meals, and mindset—all in one place."', author: 'Leo' },
 ];
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
@@ -40,7 +41,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         {/* Background Image Layer */}
         <div
           className="absolute inset-0 bg-cover bg-center z-0"
-          style={{ backgroundImage: `url(${backgroundImage.src || backgroundImage})` }}
+          style={{ backgroundImage: `url(${backgroundImage})` }}
           aria-hidden="true"
         ></div>
 

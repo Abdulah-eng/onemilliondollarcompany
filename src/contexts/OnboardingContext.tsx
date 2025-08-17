@@ -48,8 +48,11 @@ export const OnboardingProvider = ({ children }: { children: React.ReactNode }) 
 
   const clearState = useCallback(() => setState(initialOnboardingState), []);
 
-  const completeOnboarding = async () => {
-    if (!user) return toast.error("Authentication error.");
+  const completeOnboarding = async (): Promise<void> => {
+    if (!user) {
+      toast.error("Authentication error.");
+      return;
+    }
     setLoading(true);
 
     try {

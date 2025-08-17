@@ -1,5 +1,4 @@
 
-
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
@@ -12,6 +11,7 @@ export interface Profile {
   email?: string;
   full_name?: string;
   avatar_url?: string;
+  phone?: string;
   created_at: string;
   updated_at: string;
 }
