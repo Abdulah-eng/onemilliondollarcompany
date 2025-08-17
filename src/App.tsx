@@ -9,8 +9,8 @@ import { OnboardingProvider } from "./contexts/OnboardingContext";
 import { Loader2 } from "lucide-react";
 
 // --- LAYOUTS ---
-import CustomerShell from "@/components/layout/CustomerShell";
-import CoachShell from "@/components/layout/CoachShell";
+import CustomerShell from "@/components/layouts/CustomerShell";
+import CoachShell from "@/components/layouts/CoachShell";
 
 // --- PAGES ---
 import LandingPage from "./pages/public/LandingPage";
