@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'; // <-- SYNTAX FIX
-import wellnessBackgroundImage from '@/assets/backgroundImage.jpg'; // <-- IMPORT LOCAL IMAGE
+import React, { useState, useEffect } from 'react';
+import backgroundImage from '@/assets/backgroundImage.jpg'; // adjust path if different
 
 const testimonials = [
   { text: '“Clear plans, zero guesswork. Love the guidance.”', author: 'Jonas' },
@@ -7,7 +7,7 @@ const testimonials = [
   { text: '“Workouts, meals, and mindset—all in one place.”', author: 'Leo' },
 ];
 
-const AuthLayout = ({ children }: { children: React.ReactNode }) => {
+export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -34,16 +34,16 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
       </div>
-      
+
       {/* RIGHT: Form Panel with Background Image */}
       <div className="relative w-full lg:w-1/2 flex items-center justify-center p-4">
         {/* Background Image Layer */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center z-0"
-          style={{ backgroundImage: `url(${wellnessBackgroundImage})` }} // <-- USE IMPORTED IMAGE
+          style={{ backgroundImage: `url(${backgroundImage.src || backgroundImage})` }}
           aria-hidden="true"
         ></div>
-        
+
         {/* Overlay Layer for better contrast */}
         <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px] z-0" aria-hidden="true"></div>
 
