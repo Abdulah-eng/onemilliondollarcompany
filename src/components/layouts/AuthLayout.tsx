@@ -39,7 +39,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         {/* Background Image Layer */}
         <div 
           className="absolute inset-0 bg-cover bg-center z-0"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=2120&auto=format&fit=crop')" }}
+          style={{ backgroundImage: "url('https://www.freepik.com/free-ai-image/side-view-people-doing-yoga-together_94544221.htm')" }}
           aria-hidden="true"
         ></div>
         
