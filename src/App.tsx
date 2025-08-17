@@ -1,13 +1,16 @@
-
 // src/App.tsx
 
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
-import { useAuth, AuthProvider } from "./contexts/AuthContext";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
 import { OnboardingProvider } from "./contexts/OnboardingContext";
-import { Loader2 } from "lucide-react";
+
+// --- LAYOUTS & ROUTE PROTECTION ---
+import CustomerShell from "./components/layout/CustomerShell";
+import CoachShell from "./components/layout/CoachShell";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 // --- PAGES ---
 import LandingPage from "./pages/public/LandingPage";
@@ -21,48 +24,11 @@ import PreferencesStep from "./pages/onboarding/PreferencesStep";
 import ContactStep from "./pages/onboarding/ContactStep";
 import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess";
 
-// --- DASHBOARD & LOADING COMPONENTS ---
-const CustomerDashboard = () => <div className="p-8"><h1>Customer Dashboard</h1></div>;
-const CoachDashboard = () => <div className="p-8"><h1>Coach Dashboard</h1></div>;
-const LoadingScreen = () => <div className="flex h-screen w-full items-center justify-center bg-emerald-50"><Loader2 className="h-10 w-10 animate-spin text-emerald-500" /></div>;
+// --- DASHBOARD PLACEHOLDERS ---
+const CustomerDashboard = () => <div>Customer Dashboard Content</div>;
+const CoachDashboard = () => <div>Coach Dashboard Content</div>;
 
 const queryClient = new QueryClient();
-
-// --- ROUTING LOGIC ---
-
-const ProtectedRoutes = () => {
-  const { profile, loading } = useAuth();
-
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
-  if (!profile) {
-    return <Navigate to="/login" replace />;
-  }
-
-  // Role-based redirection
-  if (profile.role === 'coach') {
-    // Coaches are always sent to their dashboard
-    return <Navigate to="/coach/dashboard" replace />;
-  }
-
-  if (profile.role === 'customer') {
-    if (!profile.onboarding_complete) {
-      // Customers without completed onboarding are sent to the flow
-      return (
-        <OnboardingProvider>
-          <Outlet />
-        </OnboardingProvider>
-      );
-    }
-    // Onboarded customers can access their dashboard
-    return <Outlet />;
-  }
-
-  // Fallback for any other case
-  return <Navigate to="/login" replace />;
-};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -78,16 +44,28 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
             {/* Protected Routes */}
-            <Route element={<ProtectedRoutes />}>
-              <Route path="/customer/dashboard" element={<CustomerDashboard />} />
-              <Route path="/coach/dashboard" element={<CoachDashboard />} />
-              
-              {/* Onboarding Flow */}
-              <Route path="/onboarding/step-1" element={<GoalSelectionStep />} />
-              <Route path="/onboarding/step-2" element={<PersonalInfoStep />} />
-              <Route path="/onboarding/step-3" element={<PreferencesStep />} />
-              <Route path="/onboarding/step-4" element={<ContactStep />} />
-              <Route path="/onboarding/success" element={<OnboardingSuccess />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/customer/*" element={<CustomerShell />}>
+                <Route path="dashboard" element={<CustomerDashboard />} />
+                {/* Future customer pages go here */}
+              </Route>
+
+              <Route path="/coach/*" element={<CoachShell />}>
+                <Route path="dashboard" element={<CoachDashboard />} />
+                {/* Future coach pages go here */}
+              </Route>
+
+              <Route path="/onboarding/*" element={
+                <OnboardingProvider>
+                  <Routes>
+                    <Route path="step-1" element={<GoalSelectionStep />} />
+                    <Route path="step-2" element={<PersonalInfoStep />} />
+                    <Route path="step-3" element={<PreferencesStep />} />
+                    <Route path="step-4" element={<ContactStep />} />
+                    <Route path="success" element={<OnboardingSuccess />} />
+                  </Routes>
+                </OnboardingProvider>
+              }/>
             </Route>
             
             <Route path="*" element={<NotFound />} />
