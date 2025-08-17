@@ -5,64 +5,48 @@ import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
-// Define the shape of our onboarding data
+// Define the shape of the data we'll collect
 const initialOnboardingState = {
   goals: [],
-  personalInfo: { name: '', height: 0, weight: 0, age: 0, gender: '' },
-  preferences: { allergies: [], trainingLikes: '', trainingDislikes: '', meditationExperience: '' },
-  contactInfo: { avatarFile: null, avatarPreview: null },
+  personalInfo: { weight: 0, height: 0, gender: '', dob: '', country: '' },
+  preferences: { allergies: [], trainingLikes: [], trainingDislikes: [], injuries: [], meditationExperience: '' },
+  contactInfo: { avatarFile: null, avatarPreview: null, phone: '', password: '' },
 };
 
-// Create the context
 const OnboardingContext = createContext(undefined);
 
-// Create the provider component
 export const OnboardingProvider = ({ children }) => {
   const { user, profile, loading: authLoading } = useAuth();
   const [state, setState] = useState(initialOnboardingState);
   const [loading, setLoading] = useState(false);
-  const [initializing, setInitializing] = useState(true);
 
-  // Effect to pre-fill state with existing profile data
+  // Pre-fill state with existing profile data
   useEffect(() => {
-    setInitializing(true);
     if (profile) {
       setState(prevState => ({
         ...prevState,
-        personalInfo: {
-          ...prevState.personalInfo,
-          name: profile.full_name || '',
-        },
         contactInfo: {
           ...prevState.contactInfo,
           avatarPreview: profile.avatar_url || null,
         }
       }));
     }
-    setInitializing(false);
   }, [profile]);
 
   // State update functions
-  const updateGoals = useCallback((goals) => setState(s => ({ ...s, goals })), []);
-  const updatePersonalInfo = useCallback((info) => setState(s => ({ ...s, personalInfo: info })), []);
-  const updatePreferences = useCallback((prefs) => setState(s => ({ ...s, preferences: prefs })), []);
-  const updateContactInfo = useCallback((info) => setState(s => ({ ...s, contactInfo: info })), []);
+  const updateState = useCallback((step, data) => {
+    setState(prevState => ({ ...prevState, [step]: data }));
+  }, []);
+
   const clearState = useCallback(() => setState(initialOnboardingState), []);
 
-  // Placeholder for saving partial progress (can be expanded later)
-  const saveStep = async (step) => {
-    console.log(`Step ${step} data:`, state);
-    // In a real app, you might save this partial data to Supabase here
-  };
-
-  // The final function to complete the onboarding process
   const completeOnboarding = async () => {
-    if (!user) return toast.error("You must be logged in.");
+    if (!user) return toast.error("Authentication error.");
     setLoading(true);
 
     try {
       let avatar_url = profile?.avatar_url;
-      const { avatarFile } = state.contactInfo;
+      const { avatarFile, password } = state.contactInfo;
 
       // 1. Upload avatar if a new one exists
       if (avatarFile) {
@@ -74,42 +58,50 @@ export const OnboardingProvider = ({ children }) => {
         avatar_url = urlData.publicUrl;
       }
 
-      // 2. Prepare all data for the 'profiles' table update
-      const finalProfileData = {
+      // 2. Update user's password if they provided a new one
+      if (password) {
+        const { error: passwordError } = await supabase.auth.updateUser({ password });
+        if (passwordError) throw passwordError;
+      }
+
+      // 3. Prepare data for the 'profiles' table
+      const profileUpdate = {
         id: user.id,
-        full_name: state.personalInfo.name,
-        height: state.personalInfo.height,
-        weight: state.personalInfo.weight,
-        age: state.personalInfo.age,
-        gender: state.personalInfo.gender,
+        onboarding_complete: true,
         avatar_url,
-        onboarding_complete: true, // Mark onboarding as done!
+        phone: state.contactInfo.phone,
         updated_at: new Date().toISOString(),
       };
-      
-      // 3. Prepare detailed data for a new 'onboarding_details' table
-      const onboardingDetails = {
-          user_id: user.id,
-          goals: state.goals,
-          allergies: state.preferences.allergies,
-          training_likes: state.preferences.trainingLikes,
-          training_dislikes: state.preferences.trainingDislikes,
-          meditation_experience: state.preferences.meditationExperience,
+
+      // 4. Prepare data for the 'onboarding_details' table
+      const detailsUpdate = {
+        user_id: user.id,
+        weight: state.personalInfo.weight,
+        height: state.personalInfo.height,
+        gender: state.personalInfo.gender,
+        dob: state.personalInfo.dob,
+        country: state.personalInfo.country,
+        goals: state.goals,
+        allergies: state.preferences.allergies,
+        training_likes: state.preferences.trainingLikes,
+        training_dislikes: state.preferences.trainingDislikes,
+        injuries: state.preferences.injuries,
+        meditation_experience: state.preferences.meditationExperience,
       };
 
-      // 4. Execute database updates
-      const { error: profileError } = await supabase.from('profiles').upsert(finalProfileData);
+      // 5. Execute database transactions
+      const { error: profileError } = await supabase.from('profiles').upsert(profileUpdate);
       if (profileError) throw profileError;
 
-      const { error: detailsError } = await supabase.from('onboarding_details').upsert(onboardingDetails);
+      const { error: detailsError } = await supabase.from('onboarding_details').upsert(detailsUpdate);
       if (detailsError) throw detailsError;
-      
+
       toast.success("Welcome! Your profile is complete.");
 
     } catch (error) {
       console.error("Onboarding completion error:", error);
-      toast.error("Could not complete setup. Please try again.");
-      throw error; // Re-throw to be caught by the calling component
+      toast.error(error.message || "Could not complete setup. Please try again.");
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -117,14 +109,8 @@ export const OnboardingProvider = ({ children }) => {
 
   const value = {
     state,
-    user,
-    loading: loading || authLoading,
-    initializing,
-    updateGoals,
-    updatePersonalInfo,
-    updatePreferences,
-    updateContactInfo,
-    saveStep,
+    loading,
+    updateState,
     completeOnboarding,
     clearState,
   };
@@ -132,7 +118,6 @@ export const OnboardingProvider = ({ children }) => {
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
 };
 
-// Custom hook to use the context
 export const useOnboarding = () => {
   const context = useContext(OnboardingContext);
   if (context === undefined) {
