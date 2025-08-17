@@ -1,111 +1,77 @@
+// src/pages/onboarding/PreferencesStep.tsx
 import { useNavigate } from 'react-router-dom';
 import { OnboardingContainer } from '@/components/onboarding/OnboardingContainer';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { MultiSelectButton } from '@/components/onboarding/MultiSelectButton';
 import { Card, CardContent } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 
-const allergiesOptions = ['Dairy', 'Gluten', 'Nuts', 'Eggs', 'Soy', 'Fish', 'Shellfish'];
+const allergies = ['Dairy', 'Gluten', 'Nuts', 'Eggs', 'Soy', 'Fish', 'Shellfish', 'Lactose'];
+const trainingOptions = ['Strength', 'Cardio', 'Endurance', 'Weights', 'Calisthenics', 'HIIT', 'Outdoor', 'Running'];
+const injuries = ['Lower back', 'Neck', 'Knee', 'Shoulder', 'Wrist/Elbow'];
 const meditationOptions = [
   { value: 'never', label: 'Never tried it', emoji: '🤔' },
   { value: 'beginner', label: 'Just started', emoji: '🌱' },
   { value: 'sometimes', label: 'Practice sometimes', emoji: '🧘' },
   { value: 'regular', label: 'Regular practice', emoji: '🧠' },
+  { value: 'experienced', label: 'Very experienced', emoji: '🕉️' },
 ];
 
 const PreferencesStep = () => {
-  const { state, updatePreferences, saveStep, loading } = useOnboarding();
+  const { state, updateState, loading } = useOnboarding();
   const navigate = useNavigate();
+  const { preferences } = state;
 
-  const handleAllergyToggle = (allergy: string) => {
-    const newAllergies = state.preferences.allergies.includes(allergy)
-      ? state.preferences.allergies.filter(a => a !== allergy)
-      : [...state.preferences.allergies, allergy];
-    updatePreferences({ ...state.preferences, allergies: newAllergies });
-  };
-  
-  const handlePreferenceChange = (field, value) => {
-    updatePreferences({ ...state.preferences, [field]: value });
-  };
-
-  const handleNext = async () => {
-    await saveStep(3);
-    navigate('/onboarding/step-4');
+  const handleMultiSelect = (field, value) => {
+    const currentValues = preferences[field];
+    const newValues = currentValues.includes(value)
+      ? currentValues.filter(item => item !== value)
+      : [...currentValues, value];
+    updateState('preferences', { ...preferences, [field]: newValues });
   };
 
   return (
     <OnboardingContainer
-      title="Your preferences & history"
-      subtitle="This information helps us fine-tune your plan."
+      title="Customize Your Experience"
+      subtitle="Your preferences help us build a plan you'll love."
       currentStep={3}
-      totalSteps={4}
+      totalSteps={5}
       onBack={() => navigate('/onboarding/step-2')}
-      onNext={handleNext}
-      nextDisabled={loading}
+      onNext={() => navigate('/onboarding/step-4')}
       isLoading={loading}
     >
-      <div className="max-w-2xl mx-auto">
-        <Card className="bg-white/80 backdrop-blur-sm border-gray-200 shadow-lg">
-          <CardContent className="p-6 sm:p-8 space-y-8">
-            <div>
-              <Label className="text-lg font-bold text-gray-800">Food Allergies or Intolerances</Label>
-              <p className="text-sm text-gray-500 mb-4">Select any that apply.</p>
-              <div className="flex flex-wrap gap-3">
-                {allergiesOptions.map(allergy => (
-                  <MultiSelectButton
-                    key={allergy}
-                    selected={state.preferences.allergies.includes(allergy)}
-                    onClick={() => handleAllergyToggle(allergy)}
-                  >
-                    {allergy}
-                  </MultiSelectButton>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-lg font-bold text-gray-800">Meditation Experience</Label>
-              <p className="text-sm text-gray-500 mb-4">How familiar are you with mindfulness?</p>
-              <RadioGroup 
-                value={state.preferences.meditationExperience} 
-                onValueChange={(value) => handlePreferenceChange('meditationExperience', value)}
-                className="grid grid-cols-2 gap-4"
-              >
-                {meditationOptions.map(option => (
-                  <Label key={option.value} className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-all has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-400">
-                    <RadioGroupItem value={option.value} />
-                    <span className="text-lg">{option.emoji}</span>
-                    <span className="font-semibold">{option.label}</span>
-                  </Label>
-                ))}
-              </RadioGroup>
-            </div>
-            
-            <div>
-               <Label className="text-lg font-bold text-gray-800">Training Preferences</Label>
-               <p className="text-sm text-gray-500 mb-4">Tell us what you like and dislike in a workout.</p>
-               <div className="grid sm:grid-cols-2 gap-6">
-                 <Textarea
-                   placeholder="I enjoy things like..."
-                   value={state.preferences.trainingLikes}
-                   onChange={(e) => handlePreferenceChange('trainingLikes', e.target.value)}
-                   className="min-h-[120px]"
-                 />
-                 <Textarea
-                   placeholder="I'd like to avoid..."
-                   value={state.preferences.trainingDislikes}
-                   onChange={(e) => handlePreferenceChange('trainingDislikes', e.target.value)}
-                   className="min-h-[120px]"
-                 />
-               </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="max-w-2xl mx-auto space-y-8">
+        <PreferenceSection title="Food Allergies"><MultiSelectGrid items={allergies} selected={preferences.allergies} onSelect={(item) => handleMultiSelect('allergies', item)} /></PreferenceSection>
+        <PreferenceSection title="What do you like to train?"><MultiSelectGrid items={trainingOptions} selected={preferences.trainingLikes} onSelect={(item) => handleMultiSelect('trainingLikes', item)} /></PreferenceSection>
+        <PreferenceSection title="What do you dislike?"><MultiSelectGrid items={trainingOptions} selected={preferences.trainingDislikes} onSelect={(item) => handleMultiSelect('trainingDislikes', item)} /></PreferenceSection>
+        <PreferenceSection title="Past Injuries"><MultiSelectGrid items={injuries} selected={preferences.injuries} onSelect={(item) => handleMultiSelect('injuries', item)} /></PreferenceSection>
+        <PreferenceSection title="Meditation Experience">
+          <RadioGroup value={preferences.meditationExperience} onValueChange={(val) => updateState('preferences', {...preferences, meditationExperience: val})} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {meditationOptions.map(opt => (
+              <Label key={opt.value} className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-all has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-400">
+                <RadioGroupItem value={opt.value} />
+                <span className="text-lg">{opt.emoji}</span><span className="font-semibold">{opt.label}</span>
+              </Label>
+            ))}
+          </RadioGroup>
+        </PreferenceSection>
       </div>
     </OnboardingContainer>
   );
 };
+
+const PreferenceSection = ({ title, children }) => (
+  <Card className="bg-white/80 backdrop-blur-sm border-gray-200 shadow-lg"><CardContent className="p-6">
+    <Label className="text-lg font-bold text-gray-800">{title}</Label>
+    <div className="mt-4">{children}</div>
+  </CardContent></Card>
+);
+
+const MultiSelectGrid = ({ items, selected, onSelect }) => (
+  <div className="flex flex-wrap gap-3">
+    {items.map(item => <MultiSelectButton key={item} selected={selected.includes(item)} onClick={() => onSelect(item)}>{item}</MultiSelectButton>)}
+  </div>
+);
 
 export default PreferencesStep;
