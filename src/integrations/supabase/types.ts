@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      onboarding_details: {
+        Row: {
+          allergies: string[]
+          country: string | null
+          created_at: string
+          dob: string | null
+          gender: string | null
+          goals: string[]
+          height: number | null
+          id: string
+          injuries: string[]
+          meditation_experience: string | null
+          training_dislikes: string[]
+          training_likes: string[]
+          updated_at: string
+          user_id: string
+          weight: number | null
+        }
+        Insert: {
+          allergies?: string[]
+          country?: string | null
+          created_at?: string
+          dob?: string | null
+          gender?: string | null
+          goals?: string[]
+          height?: number | null
+          id?: string
+          injuries?: string[]
+          meditation_experience?: string | null
+          training_dislikes?: string[]
+          training_likes?: string[]
+          updated_at?: string
+          user_id: string
+          weight?: number | null
+        }
+        Update: {
+          allergies?: string[]
+          country?: string | null
+          created_at?: string
+          dob?: string | null
+          gender?: string | null
+          goals?: string[]
+          height?: number | null
+          id?: string
+          injuries?: string[]
+          meditation_experience?: string | null
+          training_dislikes?: string[]
+          training_likes?: string[]
+          updated_at?: string
+          user_id?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_details_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -22,6 +84,7 @@ export type Database = {
           full_name: string | null
           id: string
           onboarding_complete: boolean
+          phone: string | null
           role: string
           updated_at: string
         }
@@ -32,6 +95,7 @@ export type Database = {
           full_name?: string | null
           id: string
           onboarding_complete?: boolean
+          phone?: string | null
           role?: string
           updated_at?: string
         }
@@ -42,6 +106,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           onboarding_complete?: boolean
+          phone?: string | null
           role?: string
           updated_at?: string
         }
@@ -52,7 +117,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      current_user_is_coach: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

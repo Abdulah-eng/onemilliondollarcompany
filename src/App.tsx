@@ -1,3 +1,4 @@
+
 // src/App.tsx
 
 import { Toaster } from "@/components/ui/sonner";
@@ -17,7 +18,7 @@ import NotFound from "./pages/NotFound";
 import GoalSelectionStep from "./pages/onboarding/GoalSelectionStep";
 import PersonalInfoStep from "./pages/onboarding/PersonalInfoStep";
 import PreferencesStep from "./pages/onboarding/PreferencesStep";
-import ContactStep from "./pages/onboarding/ContactStep"; // Renamed for clarity
+import ContactStep from "./pages/onboarding/ContactStep";
 import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess";
 
 // --- DASHBOARD & LOADING COMPONENTS ---

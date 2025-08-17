@@ -1,4 +1,3 @@
-// src/contexts/OnboardingContext.tsx
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
@@ -13,9 +12,17 @@ const initialOnboardingState = {
   contactInfo: { avatarFile: null, avatarPreview: null, phone: '', password: '' },
 };
 
-const OnboardingContext = createContext(undefined);
+interface OnboardingContextType {
+  state: typeof initialOnboardingState;
+  loading: boolean;
+  updateState: (step: string, data: any) => void;
+  completeOnboarding: () => Promise<void>;
+  clearState: () => void;
+}
 
-export const OnboardingProvider = ({ children }) => {
+const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
+
+export const OnboardingProvider = ({ children }: { children: React.ReactNode }) => {
   const { user, profile, loading: authLoading } = useAuth();
   const [state, setState] = useState(initialOnboardingState);
   const [loading, setLoading] = useState(false);
@@ -28,13 +35,14 @@ export const OnboardingProvider = ({ children }) => {
         contactInfo: {
           ...prevState.contactInfo,
           avatarPreview: profile.avatar_url || null,
+          phone: profile.phone || '',
         }
       }));
     }
   }, [profile]);
 
   // State update functions
-  const updateState = useCallback((step, data) => {
+  const updateState = useCallback((step: string, data: any) => {
     setState(prevState => ({ ...prevState, [step]: data }));
   }, []);
 
@@ -46,7 +54,7 @@ export const OnboardingProvider = ({ children }) => {
 
     try {
       let avatar_url = profile?.avatar_url;
-      const { avatarFile, password } = state.contactInfo;
+      const { avatarFile, password, phone } = state.contactInfo;
 
       // 1. Upload avatar if a new one exists
       if (avatarFile) {
@@ -69,7 +77,7 @@ export const OnboardingProvider = ({ children }) => {
         id: user.id,
         onboarding_complete: true,
         avatar_url,
-        phone: state.contactInfo.phone,
+        phone,
         updated_at: new Date().toISOString(),
       };
 
@@ -100,7 +108,7 @@ export const OnboardingProvider = ({ children }) => {
 
     } catch (error) {
       console.error("Onboarding completion error:", error);
-      toast.error(error.message || "Could not complete setup. Please try again.");
+      toast.error((error as Error).message || "Could not complete setup. Please try again.");
       throw error;
     } finally {
       setLoading(false);
