@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // <-- SYNTAX FIX
+import wellnessBackgroundImage from '@/assets/backgroundImage.jpg'; // <-- IMPORT LOCAL IMAGE
 
 const testimonials = [
   { text: '“Clear plans, zero guesswork. Love the guidance.”', author: 'Jonas' },
@@ -6,7 +7,7 @@ const testimonials = [
   { text: '“Workouts, meals, and mindset—all in one place.”', author: 'Leo' },
 ];
 
-export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
+const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         {/* Background Image Layer */}
         <div 
           className="absolute inset-0 bg-cover bg-center z-0"
-          style={{ backgroundImage: "url('https://www.freepik.com/free-ai-image/side-view-people-doing-yoga-together_94544221.htm')" }}
+          style={{ backgroundImage: `url(${wellnessBackgroundImage})` }} // <-- USE IMPORTED IMAGE
           aria-hidden="true"
         ></div>
         
