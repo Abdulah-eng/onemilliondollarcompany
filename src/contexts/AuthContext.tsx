@@ -32,6 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Use useCallback to memoize the fetch function
   const fetchProfile = useCallback(async (user: User) => {
+    console.log('🔍 Fetching profile for user:', user.id);
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -39,22 +40,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .single();
 
     if (error) {
-      console.error('Error fetching profile:', error.message);
+      console.error('❌ Error fetching profile:', error.message);
       return null;
     }
+    console.log('✅ Profile fetched:', data);
     return data as Profile;
   }, []);
 
   useEffect(() => {
+    console.log('🚀 AuthContext: Setting up auth listener');
     setLoading(true);
-    // onAuthStateChange handles everything: initial load, sign in, sign out, token refresh.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔄 Auth state change:', { event, hasSession: !!session, hasUser: !!session?.user });
+      
+      // Synchronously update user and session state
       if (session?.user) {
         setUser(session.user);
-        const profileData = await fetchProfile(session.user);
-        setProfile(profileData);
       } else {
-        // Clear state on sign out
+        setUser(null);
+        setProfile(null);
+      }
+      
+      // Always set loading to false after auth state change
+      setLoading(false);
+    });
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('📋 Initial session check:', { hasSession: !!session, hasUser: !!session?.user });
+      if (session?.user) {
+        setUser(session.user);
+      } else {
         setUser(null);
         setProfile(null);
       }
@@ -63,9 +81,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Cleanup subscription on unmount
     return () => {
+      console.log('🧹 AuthContext: Cleaning up auth listener');
       subscription.unsubscribe();
     };
-  }, [fetchProfile]);
+  }, []);
+
+  // Separate effect for profile fetching
+  useEffect(() => {
+    if (user && !profile) {
+      console.log('👤 User detected, fetching profile...');
+      fetchProfile(user).then(profileData => {
+        console.log('🎯 Setting profile:', profileData);
+        setProfile(profileData);
+      });
+    } else if (!user) {
+      console.log('🚪 No user, clearing profile');
+      setProfile(null);
+    }
+  }, [user, profile, fetchProfile]);
 
   const signOut = async () => {
     await supabase.auth.signOut();

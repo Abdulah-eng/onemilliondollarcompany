@@ -36,30 +36,70 @@ const queryClient = new QueryClient();
 // Layout for Authentication pages (/login, /get-started)
 // If the user is already logged in, it redirects them to their correct dashboard.
 const AuthRedirectLayout = () => {
-  const { profile, loading } = useAuth();
-  if (loading) return <LoadingScreen />;
-  if (!profile) return <Outlet />; // User is not logged in, so show the login/signup page.
+  const { user, profile, loading } = useAuth();
+  
+  if (loading) {
+    console.log('🔄 AuthRedirectLayout: Loading...');
+    return <LoadingScreen />;
+  }
+  
+  if (!user) {
+    console.log('👤 AuthRedirectLayout: No user, showing auth page');
+    return <Outlet />; // User is not logged in, so show the login/signup page.
+  }
 
-  // User is logged in, redirect them.
-  if (profile.role === 'coach') return <Navigate to="/coach/dashboard" replace />;
-  return <Navigate to="/customer/dashboard" replace />;
+  // User is logged in, redirect them based on profile
+  if (profile?.role === 'coach') {
+    console.log('🧑‍🏫 AuthRedirectLayout: Redirecting coach to dashboard');
+    return <Navigate to="/coach/dashboard" replace />;
+  }
+  
+  if (profile?.role === 'customer') {
+    if (profile.onboarding_complete) {
+      console.log('✅ AuthRedirectLayout: Redirecting completed customer to dashboard');
+      return <Navigate to="/customer/dashboard" replace />;
+    } else {
+      console.log('📝 AuthRedirectLayout: Redirecting incomplete customer to onboarding');
+      return <Navigate to="/onboarding/step-1" replace />;
+    }
+  }
+  
+  // If we have a user but no profile yet, show loading
+  console.log('⏳ AuthRedirectLayout: User exists but profile loading...');
+  return <LoadingScreen />;
 };
 
 // Layout for all protected parts of the app.
 // It handles all role and onboarding checks.
 const ProtectedLayout = () => {
-  const { profile, loading } = useAuth();
-  if (loading) return <LoadingScreen />;
-  if (!profile) return <Navigate to="/login" replace />;
+  const { user, profile, loading } = useAuth();
+  
+  if (loading) {
+    console.log('🔄 ProtectedLayout: Loading...');
+    return <LoadingScreen />;
+  }
+  
+  if (!user) {
+    console.log('🚪 ProtectedLayout: No user, redirecting to login');
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (!profile) {
+    console.log('⏳ ProtectedLayout: User exists but no profile, showing loading');
+    return <LoadingScreen />;
+  }
 
   if (profile.role === 'coach') {
+    console.log('🧑‍🏫 ProtectedLayout: Coach accessing protected route');
     return <CoachShell />; // Coaches see the coach layout
   }
 
   if (profile.role === 'customer') {
     if (profile.onboarding_complete) {
+      console.log('✅ ProtectedLayout: Completed customer accessing protected route');
       return <CustomerShell />; // Onboarded customers see the customer layout
     } else {
+      console.log('📝 ProtectedLayout: Incomplete customer in onboarding flow');
       // Customers who need to onboard are shown the onboarding flow.
       // The OnboardingProvider wraps the <Outlet /> to manage state.
       return (
@@ -71,6 +111,7 @@ const ProtectedLayout = () => {
   }
 
   // Fallback if role is not recognized
+  console.log('❓ ProtectedLayout: Unknown role, redirecting to login');
   return <Navigate to="/login" replace />;
 };
 
