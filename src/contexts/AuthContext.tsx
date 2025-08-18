@@ -30,9 +30,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Use useCallback to memoize the fetch function
+  // Self-healing: create profile if missing
+  const createProfileIfMissing = useCallback(async (user: User) => {
+    console.log('🔧 Creating missing profile for user:', user.id);
+    
+    const profileData = {
+      id: user.id,
+      email: user.email,
+      role: 'customer' as const,
+      onboarding_complete: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert(profileData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('❌ Error creating profile:', error.message);
+      return null;
+    }
+    
+    console.log('✅ Profile created successfully:', data);
+    return data as Profile;
+  }, []);
+
+  // Fetch profile with self-healing capability
   const fetchProfile = useCallback(async (user: User) => {
     console.log('🔍 Fetching profile for user:', user.id);
+    
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -40,34 +69,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .single();
 
     if (error) {
+      if (error.code === 'PGRST116') {
+        // No profile found - create one (self-healing)
+        console.log('🔧 No profile found, creating one...');
+        return await createProfileIfMissing(user);
+      }
       console.error('❌ Error fetching profile:', error.message);
       return null;
     }
+    
     console.log('✅ Profile fetched:', data);
     return data as Profile;
-  }, []);
+  }, [createProfileIfMissing]);
 
   useEffect(() => {
     console.log('🚀 AuthContext: Setting up auth listener');
     setLoading(true);
     
-    // Set up auth state listener FIRST
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('🔄 Auth state change:', { event, hasSession: !!session, hasUser: !!session?.user });
       
-      // Synchronously update user and session state
+      // Synchronously update user state
       if (session?.user) {
         setUser(session.user);
       } else {
         setUser(null);
         setProfile(null);
+        setLoading(false); // No user = done loading
       }
-      
-      // Always set loading to false after auth state change
-      setLoading(false);
     });
 
-    // THEN check for existing session
+    // Check for existing session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('📋 Initial session check:', { hasSession: !!session, hasUser: !!session?.user });
       if (session?.user) {
@@ -75,24 +108,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         setUser(null);
         setProfile(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-    // Cleanup subscription on unmount
     return () => {
       console.log('🧹 AuthContext: Cleaning up auth listener');
       subscription.unsubscribe();
     };
   }, []);
 
-  // Separate effect for profile fetching
+  // Separate effect for profile fetching with self-healing
   useEffect(() => {
     if (user && !profile) {
-      console.log('👤 User detected, fetching profile...');
+      console.log('👤 User detected, fetching/creating profile...');
       fetchProfile(user).then(profileData => {
         console.log('🎯 Setting profile:', profileData);
         setProfile(profileData);
+        setLoading(false); // Profile loaded = done loading
+      }).catch(err => {
+        console.error('❌ Profile fetch/create failed:', err);
+        setLoading(false); // Even on error, stop loading
       });
     } else if (!user) {
       console.log('🚪 No user, clearing profile');
@@ -101,8 +137,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user, profile, fetchProfile]);
 
   const signOut = async () => {
+    console.log('🚪 Signing out...');
     await supabase.auth.signOut();
-    // No need to set state here, onAuthStateChange will handle it.
+    // onAuthStateChange will handle clearing the state
   };
 
   const value = { user, profile, loading, signOut };
@@ -114,7 +151,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-// Custom hook remains the same, but is now much more reliable.
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
