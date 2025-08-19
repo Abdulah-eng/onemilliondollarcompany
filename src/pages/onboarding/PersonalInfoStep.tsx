@@ -1,4 +1,5 @@
 // src/pages/onboarding/PersonalInfoStep.tsx
+
 import { useNavigate } from 'react-router-dom';
 import { OnboardingContainer } from '@/components/onboarding/OnboardingContainer';
 import { useOnboarding } from '@/contexts/OnboardingContext';
@@ -16,7 +17,8 @@ const PersonalInfoStep = () => {
     updateState('personalInfo', { ...personalInfo, [field]: value });
   };
 
-  const isFormValid = personalInfo.weight > 0 && personalInfo.height > 0 && personalInfo.gender && personalInfo.dob && personalInfo.country;
+  // FIX: Added 'name' to the validation check.
+  const isFormValid = personalInfo.name && personalInfo.weight > 0 && personalInfo.height > 0 && personalInfo.gender && personalInfo.dob && personalInfo.country;
 
   return (
     <OnboardingContainer
@@ -32,6 +34,11 @@ const PersonalInfoStep = () => {
       <div className="max-w-md mx-auto">
         <Card className="bg-white/80 backdrop-blur-sm border-gray-200 shadow-lg">
           <CardContent className="p-6 sm:p-8 space-y-6">
+            {/* ADDED: Full Name field, which was missing from the UI */}
+            <FormField label="Full Name" htmlFor="name">
+              <Input id="name" type="text" placeholder="e.g., Alex Doe" value={personalInfo.name || ''} onChange={(e) => handleInputChange('name', e.target.value)} />
+            </FormField>
+
             <div className="grid grid-cols-2 gap-4">
               <FormField label="Height (cm)" htmlFor="height">
                 <Input id="height" type="number" placeholder="175" value={personalInfo.height || ''} onChange={(e) => handleInputChange('height', e.target.value)} />
