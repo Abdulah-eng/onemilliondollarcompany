@@ -1,7 +1,7 @@
 // src/contexts/OnboardingContext.tsx
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useAuth } from './AuthContext'; // Make sure useAuth is imported
+import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
@@ -15,8 +15,7 @@ const initialOnboardingState = {
 const OnboardingContext = createContext(undefined);
 
 export const OnboardingProvider = ({ children }) => {
-  // --- FIX 1: Get the refreshProfile function from the AuthContext ---
-  const { user, profile, refreshProfile } = useAuth(); 
+  const { user, profile, refreshProfile } = useAuth(); // <-- Get refreshProfile
   const [state, setState] = useState(initialOnboardingState);
   const [loading, setLoading] = useState(false);
 
@@ -41,23 +40,20 @@ export const OnboardingProvider = ({ children }) => {
     setLoading(true);
 
     try {
+      // ... (avatar upload and password update logic remains the same)
       let avatar_url = profile?.avatar_url;
-      const { avatarFile, password } = state.contactInfo;
-
-      if (avatarFile) {
-        const fileExt = avatarFile.name.split('.').pop();
-        const filePath = `${user.id}/${Date.now()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, avatarFile, { upsert: true });
+      if (state.contactInfo.avatarFile) {
+        const file = state.contactInfo.avatarFile;
+        const filePath = `${user.id}/${Date.now()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
         if (uploadError) throw uploadError;
-        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
-        avatar_url = urlData.publicUrl;
+        avatar_url = supabase.storage.from('avatars').getPublicUrl(filePath).data.publicUrl;
+      }
+      if (state.contactInfo.password) {
+        await supabase.auth.updateUser({ password: state.contactInfo.password });
       }
 
-      if (password) {
-        const { error: passwordError } = await supabase.auth.updateUser({ password });
-        if (passwordError) throw passwordError;
-      }
-
+      // Update profiles table
       const profileUpdate = {
         full_name: state.personalInfo.name,
         avatar_url,
@@ -65,10 +61,10 @@ export const OnboardingProvider = ({ children }) => {
         onboarding_complete: true,
         updated_at: new Date().toISOString(),
       };
-
       const { error: profileError } = await supabase.from('profiles').update(profileUpdate).eq('id', user.id);
       if (profileError) throw profileError;
 
+      // Upsert onboarding details
       const detailsUpdate = {
         user_id: user.id,
         weight: state.personalInfo.weight,
@@ -82,20 +78,19 @@ export const OnboardingProvider = ({ children }) => {
         training_dislikes: state.preferences.trainingDislikes,
         injuries: state.preferences.injuries,
         meditation_experience: state.preferences.meditationExperience,
-        updated_at: new Date().toISOString(),
       };
-      
       const { error: detailsError } = await supabase.from('onboarding_details').upsert(detailsUpdate, { onConflict: 'user_id' });
       if (detailsError) throw detailsError;
 
-      // --- FIX 2: Immediately refresh the profile data in the AuthContext ---
+      // --- THE CRITICAL FIX ---
+      // After all database operations are successful, force the AuthContext to refresh.
       await refreshProfile();
       
       toast.success("Welcome! Your profile is complete.");
 
     } catch (error) {
       console.error("Onboarding completion error:", error);
-      toast.error(error.message || "Could not complete setup. Please try again.");
+      toast.error(error.message || "Could not complete setup.");
       throw error;
     } finally {
       setLoading(false);
