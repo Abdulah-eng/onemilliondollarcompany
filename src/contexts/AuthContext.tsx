@@ -53,11 +53,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchProfile = useCallback(async (user: User) => {
     console.log('🔍 Fetching profile for user:', user.id);
     const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-    if (error) {
-      if (error.code === 'PGRST116') {
-        console.log('🔧 No profile found, creating one...');
-        return await createProfileIfMissing(user);
-      }
+    if (error && error.code === 'PGRST116') {
+      console.log('🔧 No profile found, creating one...');
+      return await createProfileIfMissing(user);
+    } else if (error) {
       console.error('❌ Error fetching profile:', error.message);
       return null;
     }
@@ -67,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // --- 2. THE NEW REFRESH FUNCTION ---
   const refreshProfile = useCallback(async () => {
-    const currentUser = supabase.auth.getUser(); // Get the most current user session
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
     if (currentUser) {
       console.log('🔄 Manually refreshing profile...');
       const profileData = await fetchProfile(currentUser);
@@ -80,14 +79,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     console.log('🚀 AuthContext: Setting up auth listener');
     setLoading(true);
-    
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔄 Auth state change:', { event, hasSession: !!session, hasUser: !!session?.user });
+      console.log('🔄 Auth state change:', { event, hasSession: !!session });
       setUser(session?.user ?? null);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('📋 Initial session check:', { hasSession: !!session, hasUser: !!session?.user });
+      console.log('📋 Initial session check:', { hasSession: !!session });
       setUser(session?.user ?? null);
     });
 
@@ -104,9 +102,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       fetchProfile(user).then(profileData => {
         console.log('🎯 Setting profile:', profileData);
         setProfile(profileData);
-        setLoading(false);
-      }).catch(err => {
-        console.error('❌ Profile fetch/create failed:', err);
         setLoading(false);
       });
     } else {
