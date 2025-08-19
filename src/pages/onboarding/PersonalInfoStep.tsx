@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
-// --- Validation and Conversion Helpers ---
 const validateField = (name, value, allValues = {}) => {
   switch (name) {
     case 'name':
@@ -50,7 +49,6 @@ const PersonalInfoStep = () => {
   const [units, setUnits] = useState('metric');
   const [errors, setErrors] = useState({});
 
-  // --- BUG FIX: Clear irrelevant errors when switching units ---
   useEffect(() => {
     setErrors(prev => {
       const newErrors = { ...prev };
@@ -70,28 +68,27 @@ const PersonalInfoStep = () => {
     let newPersonalInfo = { ...personalInfo };
     let newErrors = { ...errors };
 
-    // Handle all field updates and validations in one place
     if (field === 'name' || field === 'country' || field === 'gender') {
         newPersonalInfo[field] = value;
         newErrors[field] = validateField(field, value);
     } else if (field === 'dob') {
         const { part, val } = value;
-        const dobParts = { year: personalInfo.year, month: personalInfo.month, day: personalInfo.day, [part]: val };
+        const dobParts = { year: personalInfo.year || '', month: personalInfo.month || '', day: personalInfo.day || '', [part]: val };
         newErrors.dob = validateField('dob', null, dobParts);
         const { year, month, day } = dobParts;
         const dobString = (year && month && day) ? `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}` : '';
         newPersonalInfo = { ...newPersonalInfo, ...dobParts, dob: dobString };
-    } else { // Measurement fields
+    } else {
         const numValue = Number(value) || 0;
         if (units === 'metric') {
             newErrors[field] = validateField(field, numValue);
             const fieldName = field.replace('_kg', '').replace('_cm', '');
             newPersonalInfo[fieldName] = numValue;
-        } else { // Imperial
+        } else {
             newErrors[field] = validateField(field, numValue);
             if (field === 'weight_lbs') {
                 newPersonalInfo.weight = Math.round(numValue * 0.453592);
-            } else { // height_ft or height_in
+            } else {
                 const feet = field === 'height_ft' ? numValue : (personalInfo.height_ft || 0);
                 const inches = field === 'height_in' ? numValue : (personalInfo.height_in || 0);
                 newPersonalInfo.height = Math.round((feet * 30.48) + (inches * 2.54));
@@ -123,7 +120,7 @@ const PersonalInfoStep = () => {
       <div className="max-w-md mx-auto">
         <Card className="bg-white/80 backdrop-blur-sm border-gray-200 shadow-lg">
           <CardContent className="p-6 sm:p-8 space-y-6">
-            <FormField label="Full Name" htmlFor="name" error={errors.name}>
+            <FormField label="Full Name" htmlFor="name" error={errors.name || ''}>
               <Input id="name" type="text" placeholder="e.g., Alex Doe" value={personalInfo.name || ''} onChange={(e) => handleInputChange('name', e.target.value)} />
             </FormField>
             
@@ -137,38 +134,38 @@ const PersonalInfoStep = () => {
               </div>
               {units === 'metric' ? (
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField label="Height (cm)" htmlFor="height_cm" error={errors.height_cm}>
-                    <Input id="height_cm" type="number" placeholder="175" value={personalInfo.height || ''} onChange={(e) => handleInputChange('height_cm', e.target.value)} />
+                  <FormField label="Height (cm)" htmlFor="height_cm" error={errors.height_cm || ''}>
+                    <Input id="height_cm" type="number" placeholder="175" value={personalInfo.height_cm || ''} onChange={(e) => handleInputChange('height_cm', e.target.value)} />
                   </FormField>
-                  <FormField label="Weight (kg)" htmlFor="weight_kg" error={errors.weight_kg}>
-                    <Input id="weight_kg" type="number" placeholder="70" value={personalInfo.weight || ''} onChange={(e) => handleInputChange('weight_kg', e.target.value)} />
+                  <FormField label="Weight (kg)" htmlFor="weight_kg" error={errors.weight_kg || ''}>
+                    <Input id="weight_kg" type="number" placeholder="70" value={personalInfo.weight_kg || ''} onChange={(e) => handleInputChange('weight_kg', e.target.value)} />
                   </FormField>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-4">
-                   <FormField label="Height (ft & in)" htmlFor="height_ft" error={errors.height_ft || errors.height_in}>
+                   <FormField label="Height (ft & in)" htmlFor="height_ft" error={errors.height_ft || errors.height_in || ''}>
                       <div className="flex gap-2">
                           <Input id="height_ft" type="number" placeholder="ft" value={personalInfo.height_ft || ''} onChange={(e) => handleInputChange('height_ft', e.target.value)} />
                           <Input id="height_in" type="number" placeholder="in" value={personalInfo.height_in || ''} onChange={(e) => handleInputChange('height_in', e.target.value)} />
                       </div>
                    </FormField>
-                  <FormField label="Weight (lbs)" htmlFor="weight_lbs" error={errors.weight_lbs}>
-                    <Input id="weight_lbs" type="number" placeholder="154" value={personalInfo.weight ? Math.round(personalInfo.weight / 0.453592) : ''} onChange={(e) => handleInputChange('weight_lbs', e.target.value)} />
+                  <FormField label="Weight (lbs)" htmlFor="weight_lbs" error={errors.weight_lbs || ''}>
+                    <Input id="weight_lbs" type="number" placeholder="154" value={personalInfo.weight_lbs || ''} onChange={(e) => handleInputChange('weight_lbs', e.target.value)} />
                   </FormField>
                 </div>
               )}
             </div>
             
-            <FormField label="Date of Birth" htmlFor="dob" error={errors.dob}>
+            <FormField label="Date of Birth" htmlFor="dob" error={errors.dob || ''}>
               <DateSelector
-                value={{ day: personalInfo.day, month: personalInfo.month, year: personalInfo.year }}
+                value={{ day: personalInfo.day || '', month: personalInfo.month || '', year: personalInfo.year || '' }}
                 onChange={(part, val) => handleInputChange('dob', { part, val })}
               />
             </FormField>
 
             <div className="grid grid-cols-2 gap-4">
-              <FormField label="Gender" htmlFor="gender">
-                 <Select value={personalInfo.gender} onValueChange={(value) => handleInputChange('gender', value)}>
+              <FormField label="Gender" htmlFor="gender" error="">
+                 <Select value={personalInfo.gender || ''} onValueChange={(value) => handleInputChange('gender', value)}>
                    <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
                    <SelectContent>
                      <SelectItem value="male">Male</SelectItem>
@@ -178,7 +175,7 @@ const PersonalInfoStep = () => {
                    </SelectContent>
                  </Select>
               </FormField>
-              <FormField label="Country" htmlFor="country" error={errors.country}>
+              <FormField label="Country" htmlFor="country" error={errors.country || ''}>
                 <Input id="country" type="text" placeholder="e.g. Norway" value={personalInfo.country || ''} onChange={(e) => handleInputChange('country', e.target.value)} />
               </FormField>
             </div>

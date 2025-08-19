@@ -9,8 +9,8 @@ import { OnboardingProvider } from "./contexts/OnboardingContext";
 import { Loader2 } from "lucide-react";
 
 // --- LAYOUTS ---
-import CustomerShell from "@/components/layout/CustomerShell";
-import CoachShell from "@/components/layout/CoachShell";
+import CustomerShell from "@/components/layouts/CustomerShell";
+import CoachShell from "@/components/layouts/CoachShell";
 
 // --- PAGES ---
 import LandingPage from "./pages/public/LandingPage";
@@ -23,10 +23,10 @@ import PersonalInfoStep from "./pages/onboarding/PersonalInfoStep";
 import PreferencesStep from "./pages/onboarding/PreferencesStep";
 import ContactStep from "./pages/onboarding/ContactStep";
 import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess";
+import CustomerDashboard from "./pages/customer/CustomerDashboard";
+import CoachDashboard from "./pages/coach/CoachDashboard";
 
-// --- DASHBOARD & LOADING COMPONENTS ---
-const CustomerDashboard = () => <div>Customer Dashboard Content</div>;
-const CoachDashboard = () => <div>Coach Dashboard Content</div>;
+// --- LOADING COMPONENTS ---
 const LoadingScreen = () => <div className="flex h-screen w-full items-center justify-center bg-emerald-50"><Loader2 className="h-10 w-10 animate-spin text-emerald-500" /></div>;
 
 const queryClient = new QueryClient();
@@ -79,8 +79,12 @@ const App = () => (
 
             {/* 3. Protected Routes (for logged-in users) */}
             <Route element={<ProtectedLayout />}>
-              <Route path="/customer/dashboard" element={<CustomerShell><CustomerDashboard /></CustomerShell>} />
-              <Route path="/coach/dashboard" element={<CoachShell><CoachDashboard /></CoachShell>} />
+              <Route path="/customer/*" element={<CustomerShell />}>
+                <Route path="dashboard" element={<CustomerDashboard />} />
+              </Route>
+              <Route path="/coach/*" element={<CoachShell />}>
+                <Route path="dashboard" element={<CoachDashboard />} />
+              </Route>
               
               {/* Onboarding Flow is now correctly wrapped */}
               <Route path="/onboarding/*" element={

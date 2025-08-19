@@ -7,9 +7,35 @@ import { toast } from 'sonner';
 
 const initialOnboardingState = {
   goals: [],
-  personalInfo: { name: '', weight: 0, height: 0, gender: '', dob: '', country: '' },
-  preferences: { allergies: [], trainingLikes: [], trainingDislikes: [], injuries: [], meditationExperience: '' },
-  contactInfo: { avatarFile: null, avatarPreview: null, phone: '', password: '' },
+  personalInfo: { 
+    name: '', 
+    weight: 0, 
+    height: 0, 
+    gender: '', 
+    dob: '', 
+    country: '',
+    year: '',
+    month: '',
+    day: '',
+    weight_lbs: '',
+    height_ft: '',
+    height_in: '',
+    weight_kg: '',
+    height_cm: ''
+  },
+  preferences: { 
+    allergies: [], 
+    trainingLikes: [], 
+    trainingDislikes: [], 
+    injuries: [], 
+    meditationExperience: '' 
+  },
+  contactInfo: { 
+    avatarFile: null, 
+    avatarPreview: null, 
+    phone: '', 
+    password: '' 
+  },
 };
 
 const OnboardingContext = createContext(undefined);
@@ -76,7 +102,7 @@ export const OnboardingProvider = ({ children }) => {
       };
       await supabase.from('onboarding_details').upsert(detailsUpdate, { onConflict: 'user_id' });
 
-      await refreshProfile(); // THIS IS THE KEY: REFRESH THE STATE
+      // Note: We do NOT call refreshProfile here as per the requirements
       toast.success("Welcome! Your profile is complete.");
     } catch (error) {
       toast.error(error.message || "Could not complete setup.");

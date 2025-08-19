@@ -73,20 +73,20 @@ const ContactStep = () => {
               />
             </div>
             
-            <FormField label="Phone (Optional)" htmlFor="phone" error={errors.phone}>
-              <Input id="phone" type="tel" placeholder="+1 555 123 4567" value={contactInfo.phone} onChange={(e) => handleInputChange('phone', e.target.value)} />
+            <FormField label="Phone (Optional)" htmlFor="phone" error={errors.phone || ''}>
+              <Input id="phone" type="tel" placeholder="+1 555 123 4567" value={contactInfo.phone || ''} onChange={(e) => handleInputChange('phone', e.target.value)} />
             </FormField>
 
-            <FormField label="New Password (min. 6 characters)" htmlFor="password">
+            <FormField label="New Password (min. 6 characters)" htmlFor="password" error="">
               <div className="relative">
-                <Input id="password" type={showPass ? 'text' : 'password'} placeholder="••••••••" value={contactInfo.password} onChange={(e) => handleInputChange('password', e.target.value)} />
+                <Input id="password" type={showPass ? 'text' : 'password'} placeholder="••••••••" value={contactInfo.password || ''} onChange={(e) => handleInputChange('password', e.target.value)} />
                 <button type="button" onClick={() => setShowPass(!showPass)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-800">
                   {showPass ? <EyeOff size={18}/> : <Eye size={18}/>}
                 </button>
               </div>
             </FormField>
 
-            <FormField label="Confirm Password" htmlFor="confirm-password">
+            <FormField label="Confirm Password" htmlFor="confirm-password" error="">
               <Input id="confirm-password" type={showPass ? 'text' : 'password'} placeholder="••••••••" value={confirmPass} onChange={(e) => setConfirmPass(e.target.value)} />
             </FormField>
 
