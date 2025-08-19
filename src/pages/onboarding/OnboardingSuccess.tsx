@@ -9,7 +9,8 @@ import { useOnboarding } from '@/contexts/OnboardingContext';
 
 const OnboardingSuccess = () => {
   const { clearState } = useOnboarding();
-  
+  const navigate = useNavigate();
+
   // This effect cleans up the temporary onboarding form data when the user leaves this page.
   useEffect(() => {
     return () => {
@@ -17,11 +18,9 @@ const OnboardingSuccess = () => {
     };
   }, [clearState]);
 
-  // FIX: This function now forces a full page reload.
-  // This ensures the AuthContext re-initializes with the user's
-  // now-completed profile, guaranteeing the dashboard layout appears correctly.
+  // Use React Router's navigate for a smooth, single-page app transition.
   const handleGoToDashboard = () => {
-    window.location.href = '/customer/dashboard';
+    navigate('/customer/dashboard');
   };
 
   return (
