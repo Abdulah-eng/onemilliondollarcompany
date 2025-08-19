@@ -1,26 +1,31 @@
 // src/pages/onboarding/OnboardingSuccess.tsx
 
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Sparkles } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useAuth } from '@/contexts/AuthContext'; // <-- IMPORT useAuth
 
 const OnboardingSuccess = () => {
   const { clearState } = useOnboarding();
+  const { refreshProfile } = useAuth(); // <-- GET THE REFRESH FUNCTION
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // This cleans up the temporary form state when the user leaves.
+    // Clean up the form state when the user leaves this page.
     return () => {
       clearState();
     };
   }, [clearState]);
 
-  // THE FIX: This function forces a full page reload.
-  // This guarantees the AuthContext re-initializes with the user's
-  // now-completed profile, ensuring the dashboard layout appears correctly.
-  const handleGoToDashboard = () => {
-    window.location.href = '/customer/dashboard';
+  // THIS IS THE CORRECT LOGIC
+  const handleGoToDashboard = async () => {
+    // 1. First, tell the app to get the new profile data (onboarding_complete: true)
+    await refreshProfile();
+    // 2. Then, navigate. The router will now see the user is fully onboarded.
+    navigate('/customer/dashboard');
   };
 
   return (
@@ -37,12 +42,8 @@ const OnboardingSuccess = () => {
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold text-gray-800">
-                You're all set! 🎉
-              </h1>
-              <p className="text-gray-600">
-                We've crafted your personalized plan. Your wellness journey starts now.
-              </p>
+              <h1 className="text-3xl font-bold text-gray-800">You're all set! 🎉</h1>
+              <p className="text-gray-600">We've crafted your personalized plan. Your wellness journey starts now.</p>
             </div>
 
             <div className="space-y-3 text-left pt-4 border-t">
