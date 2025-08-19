@@ -1,28 +1,22 @@
+// src/contexts/OnboardingContext.tsx
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
-// Define the shape of the data we'll collect
+// Define the shape of our onboarding data
 const initialOnboardingState = {
   goals: [],
-  personalInfo: { weight: 0, height: 0, gender: '', dob: '', country: '' },
+  // FIX: Added 'name' to the initial state to match the form
+  personalInfo: { name: '', weight: 0, height: 0, gender: '', dob: '', country: '' },
   preferences: { allergies: [], trainingLikes: [], trainingDislikes: [], injuries: [], meditationExperience: '' },
   contactInfo: { avatarFile: null, avatarPreview: null, phone: '', password: '' },
 };
 
-interface OnboardingContextType {
-  state: typeof initialOnboardingState;
-  loading: boolean;
-  updateState: (step: string, data: any) => void;
-  completeOnboarding: () => Promise<void>;
-  clearState: () => void;
-}
+const OnboardingContext = createContext(undefined);
 
-const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
-
-export const OnboardingProvider = ({ children }: { children: React.ReactNode }) => {
+export const OnboardingProvider = ({ children }) => {
   const { user, profile, loading: authLoading } = useAuth();
   const [state, setState] = useState(initialOnboardingState);
   const [loading, setLoading] = useState(false);
@@ -32,34 +26,34 @@ export const OnboardingProvider = ({ children }: { children: React.ReactNode }) 
     if (profile) {
       setState(prevState => ({
         ...prevState,
+        // Pre-fill the name from the profile
+        personalInfo: {
+          ...prevState.personalInfo,
+          name: profile.full_name || '',
+        },
         contactInfo: {
           ...prevState.contactInfo,
           avatarPreview: profile.avatar_url || null,
-          phone: profile.phone || '',
         }
       }));
     }
   }, [profile]);
 
   // State update functions
-  const updateState = useCallback((step: string, data: any) => {
+  const updateState = useCallback((step, data) => {
     setState(prevState => ({ ...prevState, [step]: data }));
   }, []);
 
   const clearState = useCallback(() => setState(initialOnboardingState), []);
 
-  const completeOnboarding = async (): Promise<void> => {
-    if (!user) {
-      toast.error("Authentication error.");
-      return;
-    }
+  const completeOnboarding = async () => {
+    if (!user) return toast.error("Authentication error.");
     setLoading(true);
 
     try {
       let avatar_url = profile?.avatar_url;
-      const { avatarFile, password, phone } = state.contactInfo;
+      const { avatarFile, password } = state.contactInfo;
 
-      // 1. Upload avatar if a new one exists
       if (avatarFile) {
         const fileExt = avatarFile.name.split('.').pop();
         const filePath = `${user.id}/${Date.now()}.${fileExt}`;
@@ -69,28 +63,28 @@ export const OnboardingProvider = ({ children }: { children: React.ReactNode }) 
         avatar_url = urlData.publicUrl;
       }
 
-      // 2. Update user's password if they provided a new one
       if (password) {
         const { error: passwordError } = await supabase.auth.updateUser({ password });
         if (passwordError) throw passwordError;
       }
 
-      // 3. Prepare data for the 'profiles' table
+      // --- FIX: Added full_name to the profile update payload ---
       const profileUpdate = {
         id: user.id,
+        full_name: state.personalInfo.name, // <-- THIS WAS MISSING
         onboarding_complete: true,
         avatar_url,
-        phone,
+        phone: state.contactInfo.phone,
         updated_at: new Date().toISOString(),
       };
 
-      // 4. Prepare data for the 'onboarding_details' table
       const detailsUpdate = {
         user_id: user.id,
         weight: state.personalInfo.weight,
         height: state.personalInfo.height,
         gender: state.personalInfo.gender,
-        dob: state.personalInfo.dob,
+        // --- FIX: Send null instead of an empty string for the date ---
+        dob: state.personalInfo.dob || null, // <-- THIS FIXES THE DATE ERROR
         country: state.personalInfo.country,
         goals: state.goals,
         allergies: state.preferences.allergies,
@@ -100,7 +94,6 @@ export const OnboardingProvider = ({ children }: { children: React.ReactNode }) 
         meditation_experience: state.preferences.meditationExperience,
       };
 
-      // 5. Execute database transactions
       const { error: profileError } = await supabase.from('profiles').upsert(profileUpdate);
       if (profileError) throw profileError;
 
@@ -111,20 +104,14 @@ export const OnboardingProvider = ({ children }: { children: React.ReactNode }) 
 
     } catch (error) {
       console.error("Onboarding completion error:", error);
-      toast.error((error as Error).message || "Could not complete setup. Please try again.");
+      toast.error(error.message || "Could not complete setup. Please try again.");
       throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const value = {
-    state,
-    loading,
-    updateState,
-    completeOnboarding,
-    clearState,
-  };
+  const value = { state, loading, updateState, completeOnboarding, clearState };
 
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
 };
