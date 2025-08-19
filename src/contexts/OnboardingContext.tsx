@@ -5,10 +5,8 @@ import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
-// Define the shape of our onboarding data
 const initialOnboardingState = {
   goals: [],
-  // FIX: Added 'name' to the initial state to match the form
   personalInfo: { name: '', weight: 0, height: 0, gender: '', dob: '', country: '' },
   preferences: { allergies: [], trainingLikes: [], trainingDislikes: [], injuries: [], meditationExperience: '' },
   contactInfo: { avatarFile: null, avatarPreview: null, phone: '', password: '' },
@@ -17,29 +15,20 @@ const initialOnboardingState = {
 const OnboardingContext = createContext(undefined);
 
 export const OnboardingProvider = ({ children }) => {
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile } = useAuth();
   const [state, setState] = useState(initialOnboardingState);
   const [loading, setLoading] = useState(false);
 
-  // Pre-fill state with existing profile data
   useEffect(() => {
     if (profile) {
       setState(prevState => ({
         ...prevState,
-        // Pre-fill the name from the profile
-        personalInfo: {
-          ...prevState.personalInfo,
-          name: profile.full_name || '',
-        },
-        contactInfo: {
-          ...prevState.contactInfo,
-          avatarPreview: profile.avatar_url || null,
-        }
+        personalInfo: { ...prevState.personalInfo, name: profile.full_name || '' },
+        contactInfo: { ...prevState.contactInfo, avatarPreview: profile.avatar_url || null }
       }));
     }
   }, [profile]);
 
-  // State update functions
   const updateState = useCallback((step, data) => {
     setState(prevState => ({ ...prevState, [step]: data }));
   }, []);
@@ -57,8 +46,11 @@ export const OnboardingProvider = ({ children }) => {
       if (avatarFile) {
         const fileExt = avatarFile.name.split('.').pop();
         const filePath = `${user.id}/${Date.now()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, avatarFile);
+        
+        // Use upsert: true to allow overwriting an existing avatar
+        const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, avatarFile, { upsert: true });
         if (uploadError) throw uploadError;
+        
         const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
         avatar_url = urlData.publicUrl;
       }
@@ -68,23 +60,29 @@ export const OnboardingProvider = ({ children }) => {
         if (passwordError) throw passwordError;
       }
 
-      // --- FIX: Added full_name to the profile update payload ---
+      // --- FIX 1: Use a specific .update() call for the profiles table ---
       const profileUpdate = {
-        id: user.id,
-        full_name: state.personalInfo.name, // <-- THIS WAS MISSING
-        onboarding_complete: true,
+        full_name: state.personalInfo.name,
         avatar_url,
         phone: state.contactInfo.phone,
+        onboarding_complete: true,
         updated_at: new Date().toISOString(),
       };
 
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update(profileUpdate)
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
+
+      // --- FIX 2: Use a specific .upsert() for the details table ---
       const detailsUpdate = {
         user_id: user.id,
         weight: state.personalInfo.weight,
         height: state.personalInfo.height,
         gender: state.personalInfo.gender,
-        // --- FIX: Send null instead of an empty string for the date ---
-        dob: state.personalInfo.dob || null, // <-- THIS FIXES THE DATE ERROR
+        dob: state.personalInfo.dob || null,
         country: state.personalInfo.country,
         goals: state.goals,
         allergies: state.preferences.allergies,
@@ -92,12 +90,13 @@ export const OnboardingProvider = ({ children }) => {
         training_dislikes: state.preferences.trainingDislikes,
         injuries: state.preferences.injuries,
         meditation_experience: state.preferences.meditationExperience,
+        updated_at: new Date().toISOString(),
       };
+      
+      const { error: detailsError } = await supabase
+        .from('onboarding_details')
+        .upsert(detailsUpdate, { onConflict: 'user_id' });
 
-      const { error: profileError } = await supabase.from('profiles').upsert(profileUpdate);
-      if (profileError) throw profileError;
-
-      const { error: detailsError } = await supabase.from('onboarding_details').upsert(detailsUpdate);
       if (detailsError) throw detailsError;
 
       toast.success("Welcome! Your profile is complete.");
