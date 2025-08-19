@@ -21,7 +21,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  refreshProfile: () => Promise<void>; // <-- 1. ADDED TO THE TYPE
+  refreshProfile: () => Promise<void>; // <-- ADD THIS
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,91 +32,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   const createProfileIfMissing = useCallback(async (user: User) => {
-    console.log('🔧 Creating missing profile for user:', user.id);
-    const profileData = {
+    const { data, error } = await supabase.from('profiles').insert({
       id: user.id,
       email: user.email,
-      role: 'customer' as const,
+      role: 'customer',
       onboarding_complete: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    const { data, error } = await supabase.from('profiles').insert(profileData).select().single();
-    if (error) {
-      console.error('❌ Error creating profile:', error.message);
-      return null;
-    }
-    console.log('✅ Profile created successfully:', data);
+    }).select().single();
+    if (error) console.error('Error creating profile:', error.message);
     return data as Profile;
   }, []);
 
   const fetchProfile = useCallback(async (user: User) => {
-    console.log('🔍 Fetching profile for user:', user.id);
     const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
     if (error && error.code === 'PGRST116') {
-      console.log('🔧 No profile found, creating one...');
       return await createProfileIfMissing(user);
-    } else if (error) {
-      console.error('❌ Error fetching profile:', error.message);
-      return null;
     }
-    console.log('✅ Profile fetched:', data);
+    if (error) console.error('Error fetching profile:', error.message);
     return data as Profile;
   }, [createProfileIfMissing]);
 
-  // --- 2. THE NEW REFRESH FUNCTION ---
+  // --- THIS IS THE NEW FUNCTION TO ADD ---
   const refreshProfile = useCallback(async () => {
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     if (currentUser) {
-      console.log('🔄 Manually refreshing profile...');
       const profileData = await fetchProfile(currentUser);
       setProfile(profileData);
-      console.log('🔄 Profile refreshed.');
     }
   }, [fetchProfile]);
   // --- END OF NEW FUNCTION ---
 
   useEffect(() => {
-    console.log('🚀 AuthContext: Setting up auth listener');
     setLoading(true);
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔄 Auth state change:', { event, hasSession: !!session });
-      setUser(session?.user ?? null);
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('📋 Initial session check:', { hasSession: !!session });
-      setUser(session?.user ?? null);
-    });
-
-    return () => {
-      console.log('🧹 AuthContext: Cleaning up auth listener');
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      console.log('👤 User detected, fetching/creating profile...');
-      setLoading(true);
-      fetchProfile(user).then(profileData => {
-        console.log('🎯 Setting profile:', profileData);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        const profileData = await fetchProfile(currentUser);
         setProfile(profileData);
-        setLoading(false);
-      });
-    } else {
-      console.log('🚪 No user, clearing profile and stopping load');
-      setProfile(null);
+      } else {
+        setProfile(null);
+      }
       setLoading(false);
-    }
-  }, [user, fetchProfile]);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [fetchProfile]);
 
   const signOut = async () => {
-    console.log('🚪 Signing out...');
     await supabase.auth.signOut();
   };
 
-  const value = { user, profile, loading, signOut, refreshProfile }; // <-- 3. ADDED TO THE VALUE
+  const value = { user, profile, loading, signOut, refreshProfile }; // <-- ADD refreshProfile HERE
 
   return (
     <AuthContext.Provider value={value}>
