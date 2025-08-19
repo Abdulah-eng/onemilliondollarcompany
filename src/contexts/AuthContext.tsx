@@ -1,9 +1,9 @@
+// src/contexts/AuthContext.tsx
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
 
-// Define the Profile type clearly
 export interface Profile {
   id: string;
   role: 'customer' | 'coach';
@@ -21,6 +21,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>; // <-- 1. ADDED TO THE TYPE
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,10 +31,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Self-healing: create profile if missing
   const createProfileIfMissing = useCallback(async (user: User) => {
     console.log('🔧 Creating missing profile for user:', user.id);
-    
     const profileData = {
       id: user.id,
       email: user.email,
@@ -42,74 +41,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .insert(profileData)
-      .select()
-      .single();
-
+    const { data, error } = await supabase.from('profiles').insert(profileData).select().single();
     if (error) {
       console.error('❌ Error creating profile:', error.message);
       return null;
     }
-    
     console.log('✅ Profile created successfully:', data);
     return data as Profile;
   }, []);
 
-  // Fetch profile with self-healing capability
   const fetchProfile = useCallback(async (user: User) => {
     console.log('🔍 Fetching profile for user:', user.id);
-    
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
     if (error) {
       if (error.code === 'PGRST116') {
-        // No profile found - create one (self-healing)
         console.log('🔧 No profile found, creating one...');
         return await createProfileIfMissing(user);
       }
       console.error('❌ Error fetching profile:', error.message);
       return null;
     }
-    
     console.log('✅ Profile fetched:', data);
     return data as Profile;
   }, [createProfileIfMissing]);
+
+  // --- 2. THE NEW REFRESH FUNCTION ---
+  const refreshProfile = useCallback(async () => {
+    const currentUser = supabase.auth.getUser(); // Get the most current user session
+    if (currentUser) {
+      console.log('🔄 Manually refreshing profile...');
+      const profileData = await fetchProfile(currentUser);
+      setProfile(profileData);
+      console.log('🔄 Profile refreshed.');
+    }
+  }, [fetchProfile]);
+  // --- END OF NEW FUNCTION ---
 
   useEffect(() => {
     console.log('🚀 AuthContext: Setting up auth listener');
     setLoading(true);
     
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('🔄 Auth state change:', { event, hasSession: !!session, hasUser: !!session?.user });
-      
-      // Synchronously update user state
-      if (session?.user) {
-        setUser(session.user);
-      } else {
-        setUser(null);
-        setProfile(null);
-        setLoading(false); // No user = done loading
-      }
+      setUser(session?.user ?? null);
     });
 
-    // Check for existing session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('📋 Initial session check:', { hasSession: !!session, hasUser: !!session?.user });
-      if (session?.user) {
-        setUser(session.user);
-      } else {
-        setUser(null);
-        setProfile(null);
-        setLoading(false);
-      }
+      setUser(session?.user ?? null);
     });
 
     return () => {
@@ -118,31 +97,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  // Separate effect for profile fetching with self-healing
   useEffect(() => {
-    if (user && !profile) {
+    if (user) {
       console.log('👤 User detected, fetching/creating profile...');
+      setLoading(true);
       fetchProfile(user).then(profileData => {
         console.log('🎯 Setting profile:', profileData);
         setProfile(profileData);
-        setLoading(false); // Profile loaded = done loading
+        setLoading(false);
       }).catch(err => {
         console.error('❌ Profile fetch/create failed:', err);
-        setLoading(false); // Even on error, stop loading
+        setLoading(false);
       });
-    } else if (!user) {
-      console.log('🚪 No user, clearing profile');
+    } else {
+      console.log('🚪 No user, clearing profile and stopping load');
       setProfile(null);
+      setLoading(false);
     }
-  }, [user, profile, fetchProfile]);
+  }, [user, fetchProfile]);
 
   const signOut = async () => {
     console.log('🚪 Signing out...');
     await supabase.auth.signOut();
-    // onAuthStateChange will handle clearing the state
   };
 
-  const value = { user, profile, loading, signOut };
+  const value = { user, profile, loading, signOut, refreshProfile }; // <-- 3. ADDED TO THE VALUE
 
   return (
     <AuthContext.Provider value={value}>
