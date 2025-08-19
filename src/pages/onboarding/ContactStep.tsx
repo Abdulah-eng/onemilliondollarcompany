@@ -10,18 +10,27 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
 
+const validatePhone = (phone) => {
+    if (!phone) return ''; // Optional field
+    return /^[0-9+\-()\s]*$/.test(phone) ? '' : 'Invalid characters in phone number.';
+};
+
 const ContactStep = () => {
   const { state, updateState, completeOnboarding, loading } = useOnboarding();
   const navigate = useNavigate();
   const { contactInfo } = state;
   const [showPass, setShowPass] = useState(false);
   const [confirmPass, setConfirmPass] = useState('');
+  const [errors, setErrors] = useState({});
 
   const handleInputChange = (field, value) => {
+    if (field === 'phone') {
+        const error = validatePhone(value);
+        setErrors(prev => ({ ...prev, phone: error }));
+    }
     updateState('contactInfo', { ...contactInfo, [field]: value });
   };
 
-  // This function now correctly handles the file and creates a preview URL
   const handlePhotoChange = (file: File | null) => {
     updateState('contactInfo', {
       ...contactInfo,
@@ -30,27 +39,25 @@ const ContactStep = () => {
     });
   };
 
-  // This is the main fix: This function now saves the data before navigating.
   const handleNext = async () => {
     try {
       await completeOnboarding();
       navigate('/onboarding/success');
     } catch (error) {
-      // Error toast is handled within the context, so we don't need to do anything here.
       console.error("Failed to complete onboarding:", error);
     }
   };
 
-  const isFormValid = (!contactInfo.password || (contactInfo.password.length >= 6 && contactInfo.password === confirmPass));
+  const isPasswordValid = !contactInfo.password || (contactInfo.password.length >= 6 && contactInfo.password === confirmPass);
+  const isFormValid = isPasswordValid && !errors.phone;
 
   return (
     <OnboardingContainer
       title="Secure Your Account"
       subtitle="Add a photo and set a strong password to protect your account."
-      currentStep={4}
-      totalSteps={5}
+      currentStep={4} totalSteps={5}
       onBack={() => navigate('/onboarding/step-3')}
-      onNext={handleNext} // Use the new function here
+      onNext={handleNext}
       nextDisabled={!isFormValid || loading}
       isLoading={loading}
       nextLabel="Finish Setup"
@@ -62,11 +69,11 @@ const ContactStep = () => {
               <Label className="text-lg font-bold text-gray-800">Profile Photo (Optional)</Label>
               <AvatarUploadCompressed 
                 preview={contactInfo.avatarPreview} 
-                onChange={handlePhotoChange} // Use the new photo handler
+                onChange={handlePhotoChange}
               />
             </div>
             
-            <FormField label="Phone (Optional)" htmlFor="phone">
+            <FormField label="Phone (Optional)" htmlFor="phone" error={errors.phone}>
               <Input id="phone" type="tel" placeholder="+1 555 123 4567" value={contactInfo.phone} onChange={(e) => handleInputChange('phone', e.target.value)} />
             </FormField>
 
@@ -83,8 +90,8 @@ const ContactStep = () => {
               <Input id="confirm-password" type={showPass ? 'text' : 'password'} placeholder="••••••••" value={confirmPass} onChange={(e) => setConfirmPass(e.target.value)} />
             </FormField>
 
-            {contactInfo.password && confirmPass && contactInfo.password !== confirmPass && 
-              <p className="text-red-500 text-sm text-center">Passwords do not match.</p>
+            {!isPasswordValid && contactInfo.password &&
+              <p className="text-red-500 text-sm text-center">Passwords must match and be at least 6 characters.</p>
             }
           </CardContent>
         </Card>
@@ -93,10 +100,11 @@ const ContactStep = () => {
   );
 };
 
-const FormField = ({ label, htmlFor, children }) => (
+const FormField = ({ label, htmlFor, children, error }) => (
   <div className="space-y-2">
     <Label htmlFor={htmlFor} className="font-semibold text-gray-700">{label}</Label>
     {children}
+    {error && <p className="text-sm text-red-500">{error}</p>}
   </div>
 );
 
