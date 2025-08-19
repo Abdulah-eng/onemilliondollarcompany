@@ -1,7 +1,6 @@
 // src/pages/onboarding/OnboardingSuccess.tsx
 
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Sparkles } from 'lucide-react';
@@ -9,18 +8,19 @@ import { useOnboarding } from '@/contexts/OnboardingContext';
 
 const OnboardingSuccess = () => {
   const { clearState } = useOnboarding();
-  const navigate = useNavigate();
 
-  // This effect cleans up the temporary onboarding form data when the user leaves this page.
   useEffect(() => {
+    // This cleans up the temporary form state when the user leaves.
     return () => {
       clearState();
     };
   }, [clearState]);
 
-  // Use React Router's navigate for a smooth, single-page app transition.
+  // THE FIX: This function forces a full page reload.
+  // This guarantees the AuthContext re-initializes with the user's
+  // now-completed profile, ensuring the dashboard layout appears correctly.
   const handleGoToDashboard = () => {
-    navigate('/customer/dashboard');
+    window.location.href = '/customer/dashboard';
   };
 
   return (
