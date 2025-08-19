@@ -15,7 +15,7 @@ const initialOnboardingState = {
 const OnboardingContext = createContext(undefined);
 
 export const OnboardingProvider = ({ children }) => {
-  const { user, profile, refreshProfile } = useAuth(); // <-- Get refreshProfile
+  const { user, profile, refreshProfile } = useAuth();
   const [state, setState] = useState(initialOnboardingState);
   const [loading, setLoading] = useState(false);
 
@@ -40,31 +40,26 @@ export const OnboardingProvider = ({ children }) => {
     setLoading(true);
 
     try {
-      // ... (avatar upload and password update logic remains the same)
       let avatar_url = profile?.avatar_url;
       if (state.contactInfo.avatarFile) {
         const file = state.contactInfo.avatarFile;
         const filePath = `${user.id}/${Date.now()}_${file.name}`;
-        const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
-        if (uploadError) throw uploadError;
+        await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
         avatar_url = supabase.storage.from('avatars').getPublicUrl(filePath).data.publicUrl;
       }
+
       if (state.contactInfo.password) {
         await supabase.auth.updateUser({ password: state.contactInfo.password });
       }
 
-      // Update profiles table
       const profileUpdate = {
         full_name: state.personalInfo.name,
         avatar_url,
         phone: state.contactInfo.phone,
         onboarding_complete: true,
-        updated_at: new Date().toISOString(),
       };
-      const { error: profileError } = await supabase.from('profiles').update(profileUpdate).eq('id', user.id);
-      if (profileError) throw profileError;
+      await supabase.from('profiles').update(profileUpdate).eq('id', user.id);
 
-      // Upsert onboarding details
       const detailsUpdate = {
         user_id: user.id,
         weight: state.personalInfo.weight,
@@ -79,17 +74,11 @@ export const OnboardingProvider = ({ children }) => {
         injuries: state.preferences.injuries,
         meditation_experience: state.preferences.meditationExperience,
       };
-      const { error: detailsError } = await supabase.from('onboarding_details').upsert(detailsUpdate, { onConflict: 'user_id' });
-      if (detailsError) throw detailsError;
+      await supabase.from('onboarding_details').upsert(detailsUpdate, { onConflict: 'user_id' });
 
-      // --- THE CRITICAL FIX ---
-      // After all database operations are successful, force the AuthContext to refresh.
-      await refreshProfile();
-      
+      await refreshProfile(); // THIS IS THE KEY: REFRESH THE STATE
       toast.success("Welcome! Your profile is complete.");
-
     } catch (error) {
-      console.error("Onboarding completion error:", error);
       toast.error(error.message || "Could not complete setup.");
       throw error;
     } finally {
@@ -98,7 +87,6 @@ export const OnboardingProvider = ({ children }) => {
   };
 
   const value = { state, loading, updateState, completeOnboarding, clearState };
-
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
 };
 
