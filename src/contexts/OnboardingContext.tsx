@@ -1,7 +1,7 @@
 // src/contexts/OnboardingContext.tsx
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useAuth } from './AuthContext';
+import { useAuth } from './AuthContext'; // Make sure useAuth is imported
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
@@ -15,7 +15,8 @@ const initialOnboardingState = {
 const OnboardingContext = createContext(undefined);
 
 export const OnboardingProvider = ({ children }) => {
-  const { user, profile } = useAuth();
+  // --- FIX 1: Get the refreshProfile function from the AuthContext ---
+  const { user, profile, refreshProfile } = useAuth(); 
   const [state, setState] = useState(initialOnboardingState);
   const [loading, setLoading] = useState(false);
 
@@ -46,11 +47,8 @@ export const OnboardingProvider = ({ children }) => {
       if (avatarFile) {
         const fileExt = avatarFile.name.split('.').pop();
         const filePath = `${user.id}/${Date.now()}.${fileExt}`;
-        
-        // Use upsert: true to allow overwriting an existing avatar
         const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, avatarFile, { upsert: true });
         if (uploadError) throw uploadError;
-        
         const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
         avatar_url = urlData.publicUrl;
       }
@@ -60,7 +58,6 @@ export const OnboardingProvider = ({ children }) => {
         if (passwordError) throw passwordError;
       }
 
-      // --- FIX 1: Use a specific .update() call for the profiles table ---
       const profileUpdate = {
         full_name: state.personalInfo.name,
         avatar_url,
@@ -69,14 +66,9 @@ export const OnboardingProvider = ({ children }) => {
         updated_at: new Date().toISOString(),
       };
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update(profileUpdate)
-        .eq('id', user.id);
-
+      const { error: profileError } = await supabase.from('profiles').update(profileUpdate).eq('id', user.id);
       if (profileError) throw profileError;
 
-      // --- FIX 2: Use a specific .upsert() for the details table ---
       const detailsUpdate = {
         user_id: user.id,
         weight: state.personalInfo.weight,
@@ -93,12 +85,12 @@ export const OnboardingProvider = ({ children }) => {
         updated_at: new Date().toISOString(),
       };
       
-      const { error: detailsError } = await supabase
-        .from('onboarding_details')
-        .upsert(detailsUpdate, { onConflict: 'user_id' });
-
+      const { error: detailsError } = await supabase.from('onboarding_details').upsert(detailsUpdate, { onConflict: 'user_id' });
       if (detailsError) throw detailsError;
 
+      // --- FIX 2: Immediately refresh the profile data in the AuthContext ---
+      await refreshProfile();
+      
       toast.success("Welcome! Your profile is complete.");
 
     } catch (error) {
