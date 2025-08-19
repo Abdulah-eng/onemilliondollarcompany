@@ -9,8 +9,8 @@ import { OnboardingProvider } from "./contexts/OnboardingContext";
 import { Loader2 } from "lucide-react";
 
 // --- LAYOUTS ---
-import CustomerShell from "@/components/layouts/CustomerShell";
-import CoachShell from "@/components/layouts/CoachShell";
+import CustomerShell from "@/components/layout/CustomerShell";
+import CoachShell from "@/components/layout/CoachShell";
 
 // --- PAGES ---
 import LandingPage from "./pages/public/LandingPage";
@@ -31,88 +31,29 @@ const LoadingScreen = () => <div className="flex h-screen w-full items-center ju
 
 const queryClient = new QueryClient();
 
-// --- NEW, SIMPLIFIED ROUTING LOGIC ---
+// --- ROUTING LOGIC ---
 
-// Layout for Authentication pages (/login, /get-started)
-// If the user is already logged in, it redirects them to their correct dashboard.
+// This layout handles pages that should ONLY be seen by logged-out users.
 const AuthRedirectLayout = () => {
-  const { user, profile, loading } = useAuth();
-  
-  if (loading) {
-    console.log('🔄 AuthRedirectLayout: Loading...');
-    return <LoadingScreen />;
+  const { profile, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  if (profile) {
+    // User is logged in, redirect them away from auth pages.
+    if (profile.role === 'coach') return <Navigate to="/coach/dashboard" replace />;
+    if (profile.onboarding_complete) return <Navigate to="/customer/dashboard" replace />;
+    return <Navigate to="/onboarding/step-1" replace />;
   }
-  
-  if (!user) {
-    console.log('👤 AuthRedirectLayout: No user, showing auth page');
-    return <Outlet />; // User is not logged in, so show the login/signup page.
-  }
-
-  // User is logged in, redirect them based on profile
-  if (profile?.role === 'coach') {
-    console.log('🧑‍🏫 AuthRedirectLayout: Redirecting coach to dashboard');
-    return <Navigate to="/coach/dashboard" replace />;
-  }
-  
-  if (profile?.role === 'customer') {
-    if (profile.onboarding_complete) {
-      console.log('✅ AuthRedirectLayout: Redirecting completed customer to dashboard');
-      return <Navigate to="/customer/dashboard" replace />;
-    } else {
-      console.log('📝 AuthRedirectLayout: Redirecting incomplete customer to onboarding');
-      return <Navigate to="/onboarding/step-1" replace />;
-    }
-  }
-  
-  // If we have a user but no profile yet, show loading
-  console.log('⏳ AuthRedirectLayout: User exists but profile loading...');
-  return <LoadingScreen />;
+  return <Outlet />; // User is not logged in, show the login/signup page.
 };
 
-// Layout for all protected parts of the app.
-// It handles all role and onboarding checks.
+// This layout protects all routes for logged-in users.
 const ProtectedLayout = () => {
-  const { user, profile, loading } = useAuth();
+  const { profile, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  if (!profile) return <Navigate to="/login" replace />;
   
-  if (loading) {
-    console.log('🔄 ProtectedLayout: Loading...');
-    return <LoadingScreen />;
-  }
-  
-  if (!user) {
-    console.log('🚪 ProtectedLayout: No user, redirecting to login');
-    return <Navigate to="/login" replace />;
-  }
-  
-  if (!profile) {
-    console.log('⏳ ProtectedLayout: User exists but no profile, showing loading');
-    return <LoadingScreen />;
-  }
-
-  if (profile.role === 'coach') {
-    console.log('🧑‍🏫 ProtectedLayout: Coach accessing protected route');
-    return <CoachShell />; // Coaches see the coach layout
-  }
-
-  if (profile.role === 'customer') {
-    if (profile.onboarding_complete) {
-      console.log('✅ ProtectedLayout: Completed customer accessing protected route');
-      return <CustomerShell />; // Onboarded customers see the customer layout
-    } else {
-      console.log('📝 ProtectedLayout: Incomplete customer in onboarding flow');
-      // Customers who need to onboard are shown the onboarding flow.
-      // The OnboardingProvider wraps the <Outlet /> to manage state.
-      return (
-        <OnboardingProvider>
-          <Outlet />
-        </OnboardingProvider>
-      );
-    }
-  }
-
-  // Fallback if role is not recognized
-  console.log('❓ ProtectedLayout: Unknown role, redirecting to login');
-  return <Navigate to="/login" replace />;
+  // The user is logged in, so render the nested protected routes.
+  return <Outlet />;
 };
 
 
@@ -125,7 +66,7 @@ const App = () => (
         <AuthProvider>
           <Toaster richColors position="top-right" />
           <Routes>
-            {/* 1. Public Routes (e.g., Landing Page) */}
+            {/* 1. Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="*" element={<NotFound />} />
 
@@ -138,18 +79,21 @@ const App = () => (
 
             {/* 3. Protected Routes (for logged-in users) */}
             <Route element={<ProtectedLayout />}>
-              {/* Customer Routes */}
-              <Route path="/customer/dashboard" element={<CustomerDashboard />} />
+              <Route path="/customer/dashboard" element={<CustomerShell><CustomerDashboard /></CustomerShell>} />
+              <Route path="/coach/dashboard" element={<CoachShell><CoachDashboard /></CoachShell>} />
               
-              {/* Coach Routes */}
-              <Route path="/coach/dashboard" element={<CoachDashboard />} />
-
-              {/* Onboarding Flow */}
-              <Route path="/onboarding/step-1" element={<GoalSelectionStep />} />
-              <Route path="/onboarding/step-2" element={<PersonalInfoStep />} />
-              <Route path="/onboarding/step-3" element={<PreferencesStep />} />
-              <Route path="/onboarding/step-4" element={<ContactStep />} />
-              <Route path="/onboarding/success" element={<OnboardingSuccess />} />
+              {/* Onboarding Flow is now correctly wrapped */}
+              <Route path="/onboarding/*" element={
+                <OnboardingProvider>
+                  <Routes>
+                    <Route path="step-1" element={<GoalSelectionStep />} />
+                    <Route path="step-2" element={<PersonalInfoStep />} />
+                    <Route path="step-3" element={<PreferencesStep />} />
+                    <Route path="step-4" element={<ContactStep />} />
+                    <Route path="success" element={<OnboardingSuccess />} />
+                  </Routes>
+                </OnboardingProvider>
+              }/>
             </Route>
           </Routes>
         </AuthProvider>
