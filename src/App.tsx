@@ -1,5 +1,3 @@
-// src/App.tsx
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -26,39 +24,84 @@ import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess";
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
 import CoachDashboard from "./pages/coach/CoachDashboard";
 
-// --- LOADING COMPONENTS ---
-const LoadingScreen = () => <div className="flex h-screen w-full items-center justify-center bg-emerald-50"><Loader2 className="h-10 w-10 animate-spin text-emerald-500" /></div>;
-
 const queryClient = new QueryClient();
 
-// --- ROUTING LOGIC ---
+// --- LOADING COMPONENT ---
+const LoadingScreen = () => (
+  <div className="flex h-screen w-full items-center justify-center bg-emerald-50">
+    <Loader2 className="h-10 w-10 animate-spin text-emerald-500" />
+  </div>
+);
 
-// This layout handles pages that should ONLY be seen by logged-out users.
-const AuthRedirectLayout = () => {
+// --- LAYOUT COMPONENTS ---
+
+// Public routes - only accessible to logged-out users
+const PublicRoutesLayout = () => {
   const { profile, loading } = useAuth();
+  
   if (loading) return <LoadingScreen />;
+  
+  // If user is logged in, redirect to appropriate dashboard
   if (profile) {
-    // User is logged in, redirect them away from auth pages.
-    if (profile.role === 'coach') return <Navigate to="/coach/dashboard" replace />;
-    if (profile.onboarding_complete) return <Navigate to="/customer/dashboard" replace />;
+    if (profile.role === 'coach') {
+      return <Navigate to="/coach/dashboard" replace />;
+    }
+    if (profile.onboarding_complete) {
+      return <Navigate to="/customer/dashboard" replace />;
+    }
     return <Navigate to="/onboarding/step-1" replace />;
   }
-  return <Outlet />; // User is not logged in, show the login/signup page.
-};
-
-// This layout protects all routes for logged-in users.
-const ProtectedLayout = () => {
-  const { profile, loading } = useAuth();
-  if (loading) return <LoadingScreen />;
-  if (!profile) return <Navigate to="/login" replace />;
   
-  // The user is logged in, so render the nested protected routes.
+  // User is not logged in, show public pages
   return <Outlet />;
 };
 
+// Protected routes - only accessible to logged-in users
+const ProtectedRoutesLayout = () => {
+  const { profile, loading } = useAuth();
+  
+  if (loading) return <LoadingScreen />;
+  if (!profile) return <Navigate to="/login" replace />;
+  
+  return <Outlet />;
+};
+
+// Coach-only gate
+const CoachGate = () => {
+  const { profile, loading } = useAuth();
+  
+  if (loading) return <LoadingScreen />;
+  if (!profile) return <Navigate to="/login" replace />;
+  if (profile.role !== 'coach') return <Navigate to="/customer/dashboard" replace />;
+  
+  return <Outlet />;
+};
+
+// Customer-only gate
+const CustomerGate = () => {
+  const { profile, loading } = useAuth();
+  
+  if (loading) return <LoadingScreen />;
+  if (!profile) return <Navigate to="/login" replace />;
+  if (profile.role === 'coach') return <Navigate to="/coach/dashboard" replace />;
+  if (!profile.onboarding_complete) return <Navigate to="/onboarding/step-1" replace />;
+  
+  return <Outlet />;
+};
+
+// Onboarding gate - only for incomplete customers
+const OnboardingGate = () => {
+  const { profile, loading } = useAuth();
+  
+  if (loading) return <LoadingScreen />;
+  if (!profile) return <Navigate to="/login" replace />;
+  if (profile.role === 'coach') return <Navigate to="/coach/dashboard" replace />;
+  if (profile.onboarding_complete) return <Navigate to="/customer/dashboard" replace />;
+  
+  return <Outlet />;
+};
 
 // --- MAIN APP COMPONENT ---
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -66,39 +109,48 @@ const App = () => (
         <AuthProvider>
           <Toaster richColors position="top-right" />
           <Routes>
-            {/* 1. Public Routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="*" element={<NotFound />} />
-
-            {/* 2. Authentication Routes (for logged-out users) */}
-            <Route element={<AuthRedirectLayout />}>
+            {/* Public Routes */}
+            <Route element={<PublicRoutesLayout />}>
+              <Route path="/" element={<LandingPage />} />
               <Route path="/get-started" element={<GetStartedPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             </Route>
 
-            {/* 3. Protected Routes (for logged-in users) */}
-            <Route element={<ProtectedLayout />}>
-              <Route path="/customer/*" element={<CustomerShell />}>
-                <Route path="dashboard" element={<CustomerDashboard />} />
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoutesLayout />}>
+              {/* Coach Routes */}
+              <Route element={<CoachGate />}>
+                <Route path="/coach/*" element={<CoachShell />}>
+                  <Route path="dashboard" element={<CoachDashboard />} />
+                </Route>
               </Route>
-              <Route path="/coach/*" element={<CoachShell />}>
-                <Route path="dashboard" element={<CoachDashboard />} />
+
+              {/* Customer Routes */}
+              <Route element={<CustomerGate />}>
+                <Route path="/customer/*" element={<CustomerShell />}>
+                  <Route path="dashboard" element={<CustomerDashboard />} />
+                </Route>
               </Route>
-              
-              {/* Onboarding Flow is now correctly wrapped */}
-              <Route path="/onboarding/*" element={
-                <OnboardingProvider>
-                  <Routes>
-                    <Route path="step-1" element={<GoalSelectionStep />} />
-                    <Route path="step-2" element={<PersonalInfoStep />} />
-                    <Route path="step-3" element={<PreferencesStep />} />
-                    <Route path="step-4" element={<ContactStep />} />
-                    <Route path="success" element={<OnboardingSuccess />} />
-                  </Routes>
-                </OnboardingProvider>
-              }/>
+
+              {/* Onboarding Routes */}
+              <Route element={<OnboardingGate />}>
+                <Route path="/onboarding/*" element={
+                  <OnboardingProvider>
+                    <Routes>
+                      <Route path="step-1" element={<GoalSelectionStep />} />
+                      <Route path="step-2" element={<PersonalInfoStep />} />
+                      <Route path="step-3" element={<PreferencesStep />} />
+                      <Route path="step-4" element={<ContactStep />} />
+                      <Route path="success" element={<OnboardingSuccess />} />
+                    </Routes>
+                  </OnboardingProvider>
+                } />
+              </Route>
             </Route>
+
+            {/* Catch-all */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>

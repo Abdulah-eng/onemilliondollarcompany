@@ -77,7 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [fetchProfile]);
 
   useEffect(() => {
-    setLoading(true);
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const currentUser = session?.user;
       setUser(currentUser ?? null);
@@ -85,6 +85,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Synchronous state updates to prevent deadlocks
       if (currentUser) {
         // Defer async profile fetch using setTimeout to avoid blocking
+        setTimeout(() => {
+          fetchProfile(currentUser).then(setProfile);
+        }, 0);
+      } else {
+        setProfile(null);
+      }
+      
+      setLoading(false);
+    });
+
+    // THEN check for existing session immediately
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const currentUser = session?.user;
+      setUser(currentUser ?? null);
+      
+      if (currentUser) {
         setTimeout(() => {
           fetchProfile(currentUser).then(setProfile);
         }, 0);

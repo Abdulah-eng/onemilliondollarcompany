@@ -152,7 +152,8 @@ export const OnboardingProvider = ({ children }: { children: React.ReactNode }) 
       };
       await supabase.from('onboarding_details').upsert(detailsUpdate, { onConflict: 'user_id' });
 
-      // Note: We do NOT call refreshProfile here as per the requirements
+      // Refresh the profile to update the auth state with new data
+      await refreshProfile();
       toast.success("Welcome! Your profile is complete.");
     } catch (error) {
       toast.error(error.message || "Could not complete setup.");

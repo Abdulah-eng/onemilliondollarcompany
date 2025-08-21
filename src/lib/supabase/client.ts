@@ -1,3 +1,13 @@
 // src/lib/supabase/client.ts
-// Re-export the Lovable-generated Supabase client to centralize imports
-export { supabase } from '@/integrations/supabase/client';
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = "https://bhmdxxsdeekxmejnjwin.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobWR4eHNkZWVreG1lam5qd2luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUxOTAzMzcsImV4cCI6MjA3MDc2NjMzN30.N3aDfjRlinKAXN3DMAAy9jGK3j8SsM1V5-zpYE1SRKk";
+
+export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    storage: localStorage,
+    persistSession: true,
+    autoRefreshToken: true,
+  }
+});
