@@ -1,62 +1,65 @@
 // src/pages/customer/CustomerDashboard.tsx
-import WelcomeBanner from '@/components/customer/dashboard/WelcomeBanner';
+import WelcomeHeader from '@/components/customer/dashboard/WelcomeHeader';
 import TodaysFocus from '@/components/customer/dashboard/TodaysFocus';
-import ActionItems from '@/components/customer/dashboard/ActionItems';
-import UpgradePrompts from '@/components/customer/dashboard/UpgradePrompts';
+import Alerts from '@/components/customer/dashboard/Alerts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 /*
 TODO: Backend Integration Notes for CustomerDashboard
-- This component will become the main entry point for the customer's authenticated experience.
-- It should contain the primary data-fetching logic (e.g., using React Query) to get all the necessary data for the child components.
-- The fetched data (user profile, subscription status, today's tasks, etc.) will then be passed down as props to the individual components.
+- This component is the main entry point and should orchestrate all data fetching for the dashboard.
+- Use a library like React Query to fetch all necessary data in one place:
+  1. User's profile (`profiles` table)
+  2. User's subscription status (`subscriptions` table)
+  3. Today's assigned tasks (`assigned_workouts`, etc.)
+  4. Daily check-in status (`daily_logs` table)
+  5. Progress data and tips.
+- Pass this data down as props to the child components.
 */
 const CustomerDashboard = () => {
   return (
     <div className="space-y-8">
-      <WelcomeBanner />
+      {/* --- Main Header --- */}
+      <WelcomeHeader />
 
-      <div className="space-y-4">
-        <UpgradePrompts />
-        <ActionItems />
-      </div>
+      {/* --- Alerts and Prompts --- */}
+      <Alerts />
 
+      {/* --- Today's Core Tasks --- */}
       <TodaysFocus />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <ProgressSnapshot />
-        <MotivationCard />
-        <CoachTipCard />
+      {/* --- Secondary Widgets in a Grid --- */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <QuickStats />
+        <CoachTip />
       </div>
     </div>
   );
 };
 
-// --- Placeholder Widget Components ---
+// --- Widget Components ---
 
-const ProgressSnapshot = () => (
-  // TODO: Fetch recent progress data (e.g., weight change from 'daily_logs', workout streak from 'activity_logs').
-  <Card className="lg:col-span-1">
-    <CardHeader><CardTitle>Progress Snapshot</CardTitle></CardHeader>
-    <CardContent>
-      <p className="text-gray-600">Your weekly progress will be shown here. Keep up the great work!</p>
+const QuickStats = () => (
+  // TODO: Fetch real stats: workout streak, weight change, etc.
+  <Card className="lg:col-span-2">
+    <CardHeader><CardTitle>Your Progress at a Glance</CardTitle></CardHeader>
+    <CardContent className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
+      <StatBox value="7" label="Day Streak" />
+      <StatBox value="-1.2 kg" label="Weight Change" />
+      <StatBox value="85%" label="Program Adherence" />
     </CardContent>
   </Card>
 );
 
-const MotivationCard = () => (
-  // TODO: Fetch a random motivational quote from a 'quotes' table in Supabase.
-  <Card className="lg:col-span-1 bg-gradient-to-br from-teal-50 to-emerald-100">
-    <CardHeader><CardTitle>Quote of the Day</CardTitle></CardHeader>
-    <CardContent>
-      <p className="text-gray-700 italic">"The only bad workout is the one that didn't happen."</p>
-    </CardContent>
-  </Card>
+const StatBox = ({ value, label }) => (
+  <div className="bg-gray-50 p-4 rounded-lg">
+    <p className="text-2xl font-bold text-emerald-600">{value}</p>
+    <p className="text-sm text-gray-500">{label}</p>
+  </div>
 );
 
-const CoachTipCard = () => (
-    // TODO: Fetch a relevant tip. This could be from a 'tips' table, filtered by the user's primary goal (from 'onboarding_details').
-    <Card className="lg:col-span-1">
+const CoachTip = () => (
+    // TODO: Fetch a relevant tip from a 'tips' table based on user's goals.
+    <Card className="lg:col-span-1 bg-white">
         <CardHeader><CardTitle>💡 Coach's Tip</CardTitle></CardHeader>
         <CardContent>
             <p className="text-gray-600">Remember to stay hydrated, especially on days with cardio. It's key to reaching your goals!</p>
