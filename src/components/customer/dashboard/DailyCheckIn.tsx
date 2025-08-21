@@ -6,8 +6,8 @@ import { cn } from '@/lib/utils';
 
 /*
 TODO: Backend Integration Notes for DailyCheckIn
-- `isAlreadyCheckedIn`: Before rendering, query the `daily_logs` table to see if a record for the current user and today's date already exists.
-- `handleLogCheckIn`: On button click, this function should take the selected values (sleep, energy, mood, water) and INSERT a new row into the `daily_logs` table for the current user and date.
+- `isAlreadyCheckedIn`: Before rendering, query the `daily_logs` table for a record with the current user's ID and today's date.
+- `handleLogCheckIn`: On button click, INSERT a new row into the `daily_logs` table with the selected values.
 */
 const mockData = {
   isAlreadyCheckedIn: false,
@@ -28,12 +28,7 @@ const DailyCheckIn = () => {
   const [selectedSleep, setSelectedSleep] = useState(null);
 
   const handleLogCheckIn = () => {
-    // This is where you would send the data to Supabase
-    console.log({
-      mood: selectedMood,
-      energy: selectedEnergy,
-      sleep: selectedSleep,
-    });
+    console.log({ mood: selectedMood, energy: selectedEnergy, sleep: selectedSleep });
     setCheckedIn(true);
   };
 
