@@ -1,3 +1,4 @@
+
 // src/contexts/AuthContext.tsx
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
@@ -32,14 +33,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = useCallback(async (user: User) => {
-    const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-    if (error && error.code === 'PGRST116') {
-      const { data: newData, error: newError } = await supabase.from('profiles').insert({ id: user.id, email: user.email, role: 'customer' }).select().single();
-      if (newError) console.error('Error creating profile:', newError.message);
-      return newData as Profile;
+    try {
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      
+      if (error && error.code === 'PGRST116') {
+        // Profile doesn't exist, create it (self-healing)
+        console.log('Profile not found, creating new profile for user:', user.id);
+        const { data: newData, error: newError } = await supabase
+          .from('profiles')
+          .insert({ 
+            id: user.id, 
+            email: user.email, 
+            role: 'customer' 
+          })
+          .select()
+          .single();
+        
+        if (newError) {
+          console.error('Error creating profile:', newError.message);
+          return null;
+        }
+        return newData as Profile;
+      }
+      
+      if (error) {
+        console.error('Error fetching profile:', error.message);
+        return null;
+      }
+      
+      return data as Profile;
+    } catch (error) {
+      console.error('Unexpected error in fetchProfile:', error);
+      return null;
     }
-    if (error) console.error('Error fetching profile:', error.message);
-    return data as Profile;
   }, []);
 
   const refreshProfile = useCallback(async () => {
@@ -55,14 +81,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const currentUser = session?.user;
       setUser(currentUser ?? null);
+      
       if (currentUser) {
         const profileData = await fetchProfile(currentUser);
         setProfile(profileData);
       } else {
         setProfile(null);
       }
+      
       setLoading(false);
     });
+    
     return () => subscription.unsubscribe();
   }, [fetchProfile]);
 
