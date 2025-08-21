@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { sendMagicLink } from '@/lib/supabase/actions';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { AuthCard } from '@/components/shared/AuthCard';
-import { useRedirectIfAuthenticated } from '@/hooks/useRedirectIfAuthenticated';
+
 import { Loader2, MailCheck } from 'lucide-react';
 
 const formSchema = z.object({
@@ -23,7 +23,6 @@ const formSchema = z.object({
 
 const GetStartedPage = () => {
   const [isSuccess, setIsSuccess] = useState(false);
-  const { loading: authLoading } = useRedirectIfAuthenticated();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -40,9 +39,6 @@ const GetStartedPage = () => {
     }
   };
 
-  if (authLoading) {
-    return <div className="flex h-screen w-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
-  }
   
   if (isSuccess) {
     return (

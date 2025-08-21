@@ -9,8 +9,8 @@ import { OnboardingProvider } from "./contexts/OnboardingContext";
 import { Loader2 } from "lucide-react";
 
 // --- LAYOUTS ---
-import CustomerShell from "@/components/layout/CustomerShell";
-import CoachShell from "@/components/layout/CoachShell";
+import CustomerShell from "@/components/layouts/CustomerShell";
+import CoachShell from "@/components/layouts/CoachShell";
 
 // --- PAGES ---
 import LandingPage from "./pages/public/LandingPage";
@@ -34,7 +34,7 @@ const queryClient = new QueryClient();
 
 // --- ROUTING LOGIC ---
 
-const AuthRedirectLayout = () => {
+const PublicRoutesLayout = () => {
   const { profile, loading } = useAuth();
   if (loading) return <LoadingScreen />;
   if (profile) {
@@ -45,11 +45,41 @@ const AuthRedirectLayout = () => {
   return <Outlet />;
 };
 
-const ProtectedLayout = () => {
+const ProtectedRoutesLayout = () => {
   const { profile, loading } = useAuth();
   if (loading) return <LoadingScreen />;
   if (!profile) return <Navigate to="/login" replace />;
   return <Outlet />;
+};
+
+const CoachGate = () => {
+  const { profile, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  if (!profile) return <Navigate to="/login" replace />;
+  if (profile.role !== 'coach') return <Navigate to="/login" replace />;
+  return <CoachShell />;
+};
+
+const CustomerGate = () => {
+  const { profile, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  if (!profile) return <Navigate to="/login" replace />;
+  if (profile.role !== 'customer') return <Navigate to="/login" replace />;
+  if (!profile.onboarding_complete) return <Navigate to="/onboarding/step-1" replace />;
+  return <CustomerShell />;
+};
+
+const OnboardingGate = () => {
+  const { profile, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  if (!profile) return <Navigate to="/login" replace />;
+  if (profile.role !== 'customer') return <Navigate to="/login" replace />;
+  if (profile.onboarding_complete) return <Navigate to="/customer/dashboard" replace />;
+  return (
+    <OnboardingProvider>
+      <Outlet />
+    </OnboardingProvider>
+  );
 };
 
 // --- MAIN APP COMPONENT ---
@@ -63,38 +93,38 @@ const App = () => (
           <Routes>
             {/* 1. Public Routes */}
             <Route path="/" element={<LandingPage />} />
-            <Route path="*" element={<NotFound />} />
-
-            {/* 2. Authentication Routes */}
-            <Route element={<AuthRedirectLayout />}>
+            
+            {/* 2. Authentication Routes - Public but redirect if logged in */}
+            <Route element={<PublicRoutesLayout />}>
               <Route path="/get-started" element={<GetStartedPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             </Route>
 
             {/* 3. Protected Routes */}
-            <Route element={<ProtectedLayout />}>
-              <Route path="/customer/*" element={<CustomerShell />}>
-                {/* FIX: Use the imported CustomerDashboardPage */}
-                <Route path="dashboard" element={<CustomerDashboardPage />} />
-              </Route>
-              <Route path="/coach/*" element={<CoachShell />}>
-                 {/* FIX: Use the imported CoachDashboardPage */}
+            <Route element={<ProtectedRoutesLayout />}>
+              {/* Coach Routes */}
+              <Route path="/coach/*" element={<CoachGate />}>
                 <Route path="dashboard" element={<CoachDashboardPage />} />
               </Route>
               
-              <Route path="/onboarding/*" element={
-                <OnboardingProvider>
-                  <Routes>
-                    <Route path="step-1" element={<GoalSelectionStep />} />
-                    <Route path="step-2" element={<PersonalInfoStep />} />
-                    <Route path="step-3" element={<PreferencesStep />} />
-                    <Route path="step-4" element={<ContactStep />} />
-                    <Route path="success" element={<OnboardingSuccess />} />
-                  </Routes>
-                </OnboardingProvider>
-              }/>
+              {/* Customer Routes */}
+              <Route path="/customer/*" element={<CustomerGate />}>
+                <Route path="dashboard" element={<CustomerDashboardPage />} />
+              </Route>
+              
+              {/* Onboarding Routes */}
+              <Route path="/onboarding/*" element={<OnboardingGate />}>
+                <Route path="step-1" element={<GoalSelectionStep />} />
+                <Route path="step-2" element={<PersonalInfoStep />} />
+                <Route path="step-3" element={<PreferencesStep />} />
+                <Route path="step-4" element={<ContactStep />} />
+                <Route path="success" element={<OnboardingSuccess />} />
+              </Route>
             </Route>
+
+            {/* Catch all */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
