@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { Check, Droplets, BatteryFull, Smile, Moon } from 'lucide-react';
 
