@@ -4,14 +4,14 @@ import { Flame, TrendingUp, BedDouble } from 'lucide-react';
 
 /*
 TODO: Backend Integration Notes for QuickStats
-- `streak`: Calculate the user's current workout streak by checking consecutive days with completed workouts in the `activity_logs` table.
+- `streak`: Calculate the user's current workout streak from the `activity_logs` table.
 - `sleepAvg`: Calculate the average sleep rating from the `daily_logs` table for the last 7 days.
-- `energyTrend`: Compare the average energy rating from the last 3 days to the 3 days prior to that from the `daily_logs` table.
+- `energyTrend`: Compare the average energy rating from the last 3 days to the 3 days prior from `daily_logs`.
 */
 const mockData = {
   streak: 7,
-  sleepAvg: 'Good', // Could be 'Poor', 'Okay', 'Good'
-  energyTrend: 'up', // 'up', 'down', 'stable'
+  sleepAvg: 'Good',
+  energyTrend: 'up',
 };
 
 const QuickStats = () => {
