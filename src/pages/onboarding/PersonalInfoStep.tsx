@@ -79,21 +79,37 @@ const PersonalInfoStep = () => {
         const dobString = (year && month && day) ? `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}` : '';
         newPersonalInfo = { ...newPersonalInfo, ...dobParts, dob: dobString };
     } else {
-        const numValue = Number(value) || 0;
-        if (units === 'metric') {
-            newErrors[field] = validateField(field, numValue);
-            const fieldName = field.replace('_kg', '').replace('_cm', '');
-            newPersonalInfo[fieldName] = numValue;
-        } else {
-            newErrors[field] = validateField(field, numValue);
-            if (field === 'weight_lbs') {
-                newPersonalInfo.weight = Math.round(numValue * 0.453592);
+        // Store the string value for display
+        newPersonalInfo[field] = value;
+        
+        // Only validate if there's a value
+        if (value && value.trim() !== '') {
+            const numValue = Number(value);
+            if (!isNaN(numValue) && numValue > 0) {
+                newErrors[field] = validateField(field, numValue);
+                
+                // Convert to base units for storage
+                if (units === 'metric') {
+                    if (field === 'weight_kg') {
+                        newPersonalInfo.weight = numValue;
+                    } else if (field === 'height_cm') {
+                        newPersonalInfo.height = numValue;
+                    }
+                } else {
+                    if (field === 'weight_lbs') {
+                        newPersonalInfo.weight = Math.round(numValue * 0.453592);
+                    } else if (field === 'height_ft' || field === 'height_in') {
+                        const feet = field === 'height_ft' ? numValue : Number(personalInfo.height_ft || 0);
+                        const inches = field === 'height_in' ? numValue : Number(personalInfo.height_in || 0);
+                        newPersonalInfo.height = Math.round((feet * 30.48) + (inches * 2.54));
+                    }
+                }
             } else {
-                const feet = field === 'height_ft' ? numValue : Number(personalInfo.height_ft || 0);
-                const inches = field === 'height_in' ? numValue : Number(personalInfo.height_in || 0);
-                newPersonalInfo.height = Math.round((feet * 30.48) + (inches * 2.54));
-                newPersonalInfo[field] = numValue;
+                newErrors[field] = 'Please enter a valid number';
             }
+        } else {
+            // Clear errors for empty fields
+            newErrors[field] = '';
         }
     }
     
