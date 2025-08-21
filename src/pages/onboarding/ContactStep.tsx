@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
 
-const validatePhone = (phone) => {
+const validatePhone = (phone: string) => {
     if (!phone) return ''; // Optional field
     return /^[0-9+\-()\s]*$/.test(phone) ? '' : 'Invalid characters in phone number.';
 };
@@ -21,9 +21,9 @@ const ContactStep = () => {
   const { contactInfo } = state;
   const [showPass, setShowPass] = useState(false);
   const [confirmPass, setConfirmPass] = useState('');
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<{ phone?: string }>({});
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: string, value: string) => {
     if (field === 'phone') {
         const error = validatePhone(value);
         setErrors(prev => ({ ...prev, phone: error }));
@@ -74,7 +74,7 @@ const ContactStep = () => {
             </div>
             
             <FormField label="Phone (Optional)" htmlFor="phone" error={errors.phone || ''}>
-              <Input id="phone" type="tel" placeholder="+1 555 123 4567" value={contactInfo.phone || ''} onChange={(e) => handleInputChange('phone', e.target.value)} />
+              <Input id="phone" type="tel" placeholder="+1 555 123 4567" value={contactInfo.phone} onChange={(e) => handleInputChange('phone', e.target.value)} />
             </FormField>
 
             <FormField label="New Password (min. 6 characters)" htmlFor="password" error="">

@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
-const validateField = (name, value, allValues = {}) => {
+const validateField = (name: string, value: any, allValues: any = {}) => {
   switch (name) {
     case 'name':
     case 'country':
@@ -47,7 +47,7 @@ const PersonalInfoStep = () => {
   const { personalInfo } = state;
 
   const [units, setUnits] = useState('metric');
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     setErrors(prev => {
@@ -64,7 +64,7 @@ const PersonalInfoStep = () => {
     });
   }, [units]);
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: string, value: any) => {
     let newPersonalInfo = { ...personalInfo };
     let newErrors = { ...errors };
 
@@ -89,8 +89,8 @@ const PersonalInfoStep = () => {
             if (field === 'weight_lbs') {
                 newPersonalInfo.weight = Math.round(numValue * 0.453592);
             } else {
-                const feet = field === 'height_ft' ? numValue : (personalInfo.height_ft || 0);
-                const inches = field === 'height_in' ? numValue : (personalInfo.height_in || 0);
+                const feet = field === 'height_ft' ? numValue : Number(personalInfo.height_ft || 0);
+                const inches = field === 'height_in' ? numValue : Number(personalInfo.height_in || 0);
                 newPersonalInfo.height = Math.round((feet * 30.48) + (inches * 2.54));
                 newPersonalInfo[field] = numValue;
             }

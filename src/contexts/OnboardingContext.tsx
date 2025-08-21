@@ -5,7 +5,54 @@ import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
-const initialOnboardingState = {
+interface PersonalInfo {
+  name: string;
+  weight: number;
+  height: number;
+  gender: string;
+  dob: string;
+  country: string;
+  year: string;
+  month: string;
+  day: string;
+  weight_lbs: string;
+  height_ft: string;
+  height_in: string;
+  weight_kg: string;
+  height_cm: string;
+}
+
+interface Preferences {
+  allergies: string[];
+  trainingLikes: string[];
+  trainingDislikes: string[];
+  injuries: string[];
+  meditationExperience: string;
+}
+
+interface ContactInfo {
+  avatarFile: File | null;
+  avatarPreview: string | null;
+  phone: string;
+  password: string;
+}
+
+interface OnboardingState {
+  goals: string[];
+  personalInfo: PersonalInfo;
+  preferences: Preferences;
+  contactInfo: ContactInfo;
+}
+
+interface OnboardingContextValue {
+  state: OnboardingState;
+  loading: boolean;
+  updateState: (step: keyof OnboardingState, data: any) => void;
+  completeOnboarding: () => Promise<void>;
+  clearState: () => void;
+}
+
+const initialOnboardingState: OnboardingState = {
   goals: [],
   personalInfo: { 
     name: '', 
@@ -38,9 +85,9 @@ const initialOnboardingState = {
   },
 };
 
-const OnboardingContext = createContext(undefined);
+const OnboardingContext = createContext<OnboardingContextValue | undefined>(undefined);
 
-export const OnboardingProvider = ({ children }) => {
+export const OnboardingProvider = ({ children }: { children: React.ReactNode }) => {
   const { user, profile, refreshProfile } = useAuth();
   const [state, setState] = useState(initialOnboardingState);
   const [loading, setLoading] = useState(false);
@@ -55,14 +102,17 @@ export const OnboardingProvider = ({ children }) => {
     }
   }, [profile]);
 
-  const updateState = useCallback((step, data) => {
+  const updateState = useCallback((step: keyof OnboardingState, data: any) => {
     setState(prevState => ({ ...prevState, [step]: data }));
   }, []);
 
   const clearState = useCallback(() => setState(initialOnboardingState), []);
 
-  const completeOnboarding = async () => {
-    if (!user) return toast.error("Authentication error.");
+  const completeOnboarding = async (): Promise<void> => {
+    if (!user) {
+      toast.error("Authentication error.");
+      return;
+    }
     setLoading(true);
 
     try {
