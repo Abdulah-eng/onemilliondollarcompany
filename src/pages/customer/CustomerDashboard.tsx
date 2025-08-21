@@ -6,11 +6,6 @@ import QuickStats from '@/components/customer/dashboard/QuickStats';
 import DailyCheckIn from '@/components/customer/dashboard/DailyCheckIn';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-/*
-TODO: Backend Integration Notes for CustomerDashboard
-- This component is the main entry point and should orchestrate all data fetching.
-- Use a library like React Query to fetch all necessary data in one place and pass it down as props to the child components.
-*/
 const CustomerDashboard = () => {
   return (
     <div className="space-y-8">
@@ -40,7 +35,6 @@ const CustomerDashboard = () => {
 
 // --- Widget Component ---
 const CoachTip = () => (
-    // TODO: Fetch a relevant tip from a 'tips' table based on user's goals.
     <Card className="bg-white shadow-md">
         <CardHeader><CardTitle>💡 Coach's Tip</CardTitle></CardHeader>
         <CardContent>
