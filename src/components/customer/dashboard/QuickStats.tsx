@@ -1,52 +1,70 @@
 // src/components/customer/dashboard/QuickStats.tsx
 import { Card, CardContent } from '@/components/ui/card';
-import { Flame, TrendingUp, BedDouble } from 'lucide-react';
+import { Flame, TrendingUp, BedDouble, HeartPulse, Weight, ArrowUp, ArrowDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 /*
 TODO: Backend Integration Notes for QuickStats
-- `streak`: Calculate the user's current workout streak from the `activity_logs` table.
-- `sleepAvg`: Calculate the average sleep rating from the `daily_logs` table for the last 7 days.
-- `energyTrend`: Compare the average energy rating from the last 3 days to the 3 days prior from `daily_logs`.
+- All values and trends need to be calculated from user's historical data in `daily_logs` and `activity_logs`.
+- `streak`: Consective days with a completed workout.
+- `sleepAvg`: Average sleep rating for the last 7 days.
+- `energyTrend`: Compare the last 3 days' average energy to the previous 3 days.
+- `moodAvg`: Average mood rating for the last 7 days.
+- `weightTrend`: Compare the latest weight entry to the one from 7 days ago.
 */
 const mockData = {
   streak: 7,
   sleepAvg: 'Good',
   energyTrend: 'up',
+  moodAvg: 'Positive',
+  weightTrend: 'down',
 };
 
 const QuickStats = () => {
-  const { streak, sleepAvg, energyTrend } = mockData;
+  const { streak, sleepAvg, energyTrend, moodAvg, weightTrend } = mockData;
 
   const stats = [
-    { icon: <Flame className="text-orange-500" />, label: "Day Streak", value: `${streak} Days` },
-    { icon: <BedDouble className="text-blue-500" />, label: "Sleep Trend", value: sleepAvg },
-    { icon: <TrendingUp className="text-emerald-500" />, label: "Energy Level", value: energyTrend === 'up' ? 'Improving' : 'Stable' }
+    { icon: <Flame className="text-orange-400" />, label: "Day Streak", value: `${streak} Days` },
+    { icon: <BedDouble className="text-indigo-400" />, label: "Avg. Sleep", value: sleepAvg },
+    { icon: <HeartPulse className="text-rose-400" />, label: "Avg. Mood", value: moodAvg },
+    { icon: <TrendingUp className="text-emerald-500" />, label: "Energy Trend", value: "Improving", trend: energyTrend },
+    { icon: <Weight className="text-sky-500" />, label: "Weight Trend", value: "-0.5 kg", trend: weightTrend },
   ];
 
   return (
-    // This container handles the responsive layout
-    <div className="md:grid md:grid-cols-3 md:gap-4">
-      {/* On mobile, this will be a horizontal scroll container */}
-      <div className="md:col-span-3 flex md:grid md:grid-cols-3 gap-4 overflow-x-auto pb-2 -mb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    // FIX: Add padding to the parent to prevent shadow clipping on the scrolling container
+    <div className="p-1 -m-1">
+      {/* On mobile, this is a horizontal scroll container. On desktop, it's a grid. */}
+      <div className="flex md:grid md:grid-cols-3 lg:grid-cols-5 gap-4 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {stats.map((stat, index) => (
-          <StatCard key={index} icon={stat.icon} label={stat.label} value={stat.value} />
+          <StatCard key={index} icon={stat.icon} label={stat.label} value={stat.value} trend={stat.trend} />
         ))}
       </div>
     </div>
   );
 };
 
-const StatCard = ({ icon, label, value }) => (
+const StatCard = ({ icon, label, value, trend }) => (
   // Each card has a minimum width for scrolling, but is flexible for the grid
-  <div className="min-w-[200px] md:min-w-0 flex-1">
-    <Card className="bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 h-full">
-      <CardContent className="p-4 flex items-center gap-4">
-        <div className="bg-gray-100 p-3 rounded-full">
-          {icon}
+  <div className="min-w-[180px] md:min-w-0 flex-1">
+    <Card className="bg-slate-50 hover:bg-white shadow-sm hover:shadow-lg transition-all duration-300 h-full border-slate-200">
+      <CardContent className="p-4">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="bg-slate-200/50 p-2 rounded-lg">
+            {icon}
+          </div>
+          <p className="text-xs font-semibold text-slate-500">{label}</p>
         </div>
-        <div>
-          <p className="text-sm font-semibold text-gray-800">{value}</p>
-          <p className="text-xs text-gray-500">{label}</p>
+        <div className="flex items-baseline gap-2">
+            <p className="text-xl font-bold text-slate-800">{value}</p>
+            {trend && (
+                <div className={cn(
+                    "flex items-center text-xs font-bold",
+                    trend === 'up' ? 'text-emerald-600' : 'text-rose-600'
+                )}>
+                    {trend === 'up' ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                </div>
+            )}
         </div>
       </CardContent>
     </Card>
