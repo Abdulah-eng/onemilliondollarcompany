@@ -93,7 +93,13 @@ const DailyCheckIn = () => {
 
 // --- Sub-components for a cleaner structure ---
 
-const CheckInRow = ({ label, icon, children }) => (
+interface CheckInRowProps {
+  label: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}
+
+const CheckInRow: React.FC<CheckInRowProps> = ({ label, icon, children }) => (
   <div>
     <Label className="font-semibold text-gray-700 flex items-center gap-2 mb-3">
         {icon} {label}
@@ -102,7 +108,20 @@ const CheckInRow = ({ label, icon, children }) => (
   </div>
 );
 
-const EmojiSlider = ({ options, value, onChange }) => {
+interface Option {
+  value: number;
+  emoji: string;
+  label: string;
+  feedback: string;
+}
+
+interface EmojiSliderProps {
+  options: Option[];
+  value: number;
+  onChange: (value: number) => void;
+}
+
+const EmojiSlider: React.FC<EmojiSliderProps> = ({ options, value, onChange }) => {
   const selectedOption = options.find(opt => opt.value === value) || options[0];
 
   return (
@@ -137,7 +156,12 @@ const EmojiSlider = ({ options, value, onChange }) => {
   );
 };
 
-const WaterTracker = ({ value, onChange }) => {
+interface WaterTrackerProps {
+  value: number;
+  onChange: (value: number) => void;
+}
+
+const WaterTracker: React.FC<WaterTrackerProps> = ({ value, onChange }) => {
   const glasses = Array.from({ length: 8 }, (_, i) => i < value);
   const recommendation = "Aim for at least 8 glasses (2.5 liters) a day.";
 
