@@ -17,38 +17,39 @@ const mockData = {
 const QuickStats = () => {
   const { streak, sleepAvg, energyTrend } = mockData;
 
+  const stats = [
+    { icon: <Flame className="text-orange-500" />, label: "Day Streak", value: `${streak} Days` },
+    { icon: <BedDouble className="text-blue-500" />, label: "Sleep Trend", value: sleepAvg },
+    { icon: <TrendingUp className="text-emerald-500" />, label: "Energy Level", value: energyTrend === 'up' ? 'Improving' : 'Stable' }
+  ];
+
   return (
-    <Card className="bg-white shadow-md">
-      <CardContent className="p-4 grid grid-cols-3 divide-x divide-gray-200">
-        <StatItem
-          icon={<Flame className="text-orange-500" />}
-          label="Day Streak"
-          value={`${streak} Days`}
-        />
-        <StatItem
-          icon={<BedDouble className="text-blue-500" />}
-          label="Sleep Trend"
-          value={sleepAvg}
-        />
-        <StatItem
-          icon={<TrendingUp className="text-emerald-500" />}
-          label="Energy Level"
-          value={energyTrend === 'up' ? 'Improving' : 'Stable'}
-        />
-      </CardContent>
-    </Card>
+    // This container handles the responsive layout
+    <div className="md:grid md:grid-cols-3 md:gap-4">
+      {/* On mobile, this will be a horizontal scroll container */}
+      <div className="md:col-span-3 flex md:grid md:grid-cols-3 gap-4 overflow-x-auto pb-2 -mb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {stats.map((stat, index) => (
+          <StatCard key={index} icon={stat.icon} label={stat.label} value={stat.value} />
+        ))}
+      </div>
+    </div>
   );
 };
 
-const StatItem = ({ icon, label, value }) => (
-  <div className="px-4 flex items-center gap-3">
-    <div className="bg-gray-100 p-2 rounded-full">
-      {icon}
-    </div>
-    <div>
-      <p className="text-xs font-medium text-gray-500">{label}</p>
-      <p className="text-base font-bold text-gray-800">{value}</p>
-    </div>
+const StatCard = ({ icon, label, value }) => (
+  // Each card has a minimum width for scrolling, but is flexible for the grid
+  <div className="min-w-[200px] md:min-w-0 flex-1">
+    <Card className="bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 h-full">
+      <CardContent className="p-4 flex items-center gap-4">
+        <div className="bg-gray-100 p-3 rounded-full">
+          {icon}
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-gray-800">{value}</p>
+          <p className="text-xs text-gray-500">{label}</p>
+        </div>
+      </CardContent>
+    </Card>
   </div>
 );
 
