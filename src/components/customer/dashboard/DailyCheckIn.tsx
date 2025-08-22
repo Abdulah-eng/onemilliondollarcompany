@@ -75,7 +75,13 @@ const DailyCheckIn = () => {
   );
 };
 
-const CheckInRow = ({ label, icon, children }) => (
+interface CheckInRowProps {
+  label: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}
+
+const CheckInRow: React.FC<CheckInRowProps> = ({ label, icon, children }) => (
   <div>
     <Label className="font-semibold text-gray-700 flex items-center gap-2 mb-2">
         {icon} {label}
@@ -84,7 +90,13 @@ const CheckInRow = ({ label, icon, children }) => (
   </div>
 );
 
-const EmojiSlider = ({ options, value, onChange }) => (
+interface EmojiSliderProps {
+  options: { value: number; emoji: string }[];
+  value: number;
+  onChange: (value: number) => void;
+}
+
+const EmojiSlider: React.FC<EmojiSliderProps> = ({ options, value, onChange }) => (
   <div className="flex justify-between items-center px-1">
     {options.map((option) => (
       <button key={option.value} onClick={() => onChange(option.value)} className="transition-transform duration-200 ease-out hover:scale-125">
@@ -97,7 +109,12 @@ const EmojiSlider = ({ options, value, onChange }) => (
   </div>
 );
 
-const WaterTracker = ({ value, onChange }) => {
+interface WaterTrackerProps {
+  value: number;
+  onChange: (value: number) => void;
+}
+
+const WaterTracker: React.FC<WaterTrackerProps> = ({ value, onChange }) => {
   const glasses = Array.from({ length: 8 }, (_, i) => i < value);
   return (
     <div className="flex flex-wrap gap-2">
