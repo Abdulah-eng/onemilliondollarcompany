@@ -2,7 +2,6 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { Check, Droplets, BatteryFull, Smile, Moon } from 'lucide-react';
 
@@ -16,7 +15,6 @@ const mockData = {
   isAlreadyCheckedIn: false,
 };
 
-// --- Data for the interactive selectors with labels and feedback ---
 const sleepOptions = [
   { value: 1, emoji: '😴', label: 'Poor', feedback: 'Aim for 7-9 hours to feel your best.' },
   { value: 2, emoji: '🥱', label: 'Fair', feedback: 'A little more rest could boost your energy.' },
@@ -65,23 +63,25 @@ const DailyCheckIn = () => {
   return (
     <Card className="bg-white shadow-lg animate-fade-in-up">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-gray-800">Daily Check-in</CardTitle>
+        <CardTitle className="text-2xl font-bold text-gray-800 text-center">How are you feeling today?</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-8">
-        <CheckInRow icon={<Moon className="text-indigo-500" />} label="Sleep Quality">
-          <EmojiSlider options={sleepOptions} value={sleep} onChange={setSleep} />
-        </CheckInRow>
-        <CheckInRow icon={<BatteryFull className="text-green-500" />} label="Energy Level">
-          <EmojiSlider options={energyOptions} value={energy} onChange={setEnergy} />
-        </CheckInRow>
-        <CheckInRow icon={<Smile className="text-yellow-500" />} label="Mood">
-          <EmojiSlider options={moodOptions} value={mood} onChange={setMood} />
-        </CheckInRow>
-        <CheckInRow icon={<Droplets className="text-blue-500" />} label="Water Intake">
-          <WaterTracker value={water} onChange={setWater} />
-        </CheckInRow>
+      <CardContent className="space-y-6">
+        <div className="max-w-sm mx-auto space-y-6">
+            <CheckInRow icon={<Moon className="text-indigo-500" />} label="Sleep Quality">
+              <EmojiSlider options={sleepOptions} value={sleep} onChange={setSleep} />
+            </CheckInRow>
+            <CheckInRow icon={<BatteryFull className="text-green-500" />} label="Energy Level">
+              <EmojiSlider options={energyOptions} value={energy} onChange={setEnergy} />
+            </CheckInRow>
+            <CheckInRow icon={<Smile className="text-yellow-500" />} label="Mood">
+              <EmojiSlider options={moodOptions} value={mood} onChange={setMood} />
+            </CheckInRow>
+            <CheckInRow icon={<Droplets className="text-blue-500" />} label="Water Intake">
+              <WaterTracker value={water} onChange={setWater} />
+            </CheckInRow>
+        </div>
         
-        <div className="pt-4">
+        <div className="pt-4 max-w-sm mx-auto">
             <Button onClick={handleLogCheckIn} className="w-full bg-orange-500 hover:bg-orange-600 text-lg py-6 font-bold">
               Log Today's Check-in
             </Button>
@@ -91,15 +91,9 @@ const DailyCheckIn = () => {
   );
 };
 
-// --- Sub-components for a cleaner structure ---
+// --- Sub-components ---
 
-interface CheckInRowProps {
-  label: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}
-
-const CheckInRow: React.FC<CheckInRowProps> = ({ label, icon, children }) => (
+const CheckInRow = ({ label, icon, children }) => (
   <div>
     <Label className="font-semibold text-gray-700 flex items-center gap-2 mb-3">
         {icon} {label}
@@ -108,47 +102,30 @@ const CheckInRow: React.FC<CheckInRowProps> = ({ label, icon, children }) => (
   </div>
 );
 
-interface Option {
-  value: number;
-  emoji: string;
-  label: string;
-  feedback: string;
-}
-
-interface EmojiSliderProps {
-  options: Option[];
-  value: number;
-  onChange: (value: number) => void;
-}
-
-const EmojiSlider: React.FC<EmojiSliderProps> = ({ options, value, onChange }) => {
+const EmojiSlider = ({ options, value, onChange }) => {
   const selectedOption = options.find(opt => opt.value === value) || options[0];
 
   return (
     <div>
-      <div className="relative flex justify-between items-center px-2 h-12">
-        {/* Track */}
-        <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 h-1 bg-gray-200 rounded-full">
+      <div className="relative flex justify-between items-center h-12">
+        <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 h-1.5 bg-gray-200 rounded-full">
             <div 
                 className="absolute h-full bg-emerald-500 rounded-full transition-all duration-300 ease-out" 
                 style={{ width: `${((value - 1) / (options.length - 1)) * 100}%` }}
             />
         </div>
-        
-        {/* Emoji Buttons */}
         {options.map((option) => (
           <button
             key={option.value}
             onClick={() => onChange(option.value)}
-            className="relative z-10 transition-transform duration-200 ease-out hover:scale-125"
+            className="relative z-10 p-1 bg-white rounded-full transition-transform duration-200 ease-out hover:scale-125"
           >
-            <span className={cn("text-3xl transition-all duration-200", value === option.value ? 'opacity-100 scale-125' : 'opacity-50 grayscale hover:opacity-75')}>
+            <span className={cn("text-3xl transition-all duration-200", value === option.value ? 'opacity-100 scale-125' : 'opacity-40 grayscale hover:opacity-75')}>
               {option.emoji}
             </span>
           </button>
         ))}
       </div>
-      {/* Dynamic Feedback Label */}
       <p className="text-center text-sm font-semibold text-gray-600 mt-2 h-5">
         {selectedOption.label} - <span className="text-gray-500 font-normal italic">{selectedOption.feedback}</span>
       </p>
@@ -156,32 +133,27 @@ const EmojiSlider: React.FC<EmojiSliderProps> = ({ options, value, onChange }) =
   );
 };
 
-interface WaterTrackerProps {
-  value: number;
-  onChange: (value: number) => void;
-}
-
-const WaterTracker: React.FC<WaterTrackerProps> = ({ value, onChange }) => {
+const WaterTracker = ({ value, onChange }) => {
   const glasses = Array.from({ length: 8 }, (_, i) => i < value);
   const recommendation = "Aim for at least 8 glasses (2.5 liters) a day.";
 
   return (
     <div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex justify-center flex-wrap gap-2">
         {glasses.map((isFilled, i) => (
             <button
             key={i}
-            onClick={() => onChange(i + 1 === value ? i : i + 1)} // Allows deselecting the last one
+            onClick={() => onChange(i + 1 === value ? i : i + 1)}
             className={cn(
-                "w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110",
-                isFilled ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-400'
+                "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110",
+                isFilled ? 'bg-blue-500 text-white shadow-md' : 'bg-gray-200 text-gray-400'
             )}
             >
-            <Droplets size={16} />
+            <Droplets size={18} />
             </button>
         ))}
         </div>
-        <p className="text-xs text-gray-500 mt-2 italic">{recommendation}</p>
+        <p className="text-xs text-gray-500 mt-2 italic text-center">{recommendation}</p>
     </div>
   );
 };
