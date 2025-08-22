@@ -89,7 +89,24 @@ const DailyCheckIn = () => {
 
 // --- Modular Check-in Components ---
 
-const WaterModule = ({ value, onChange }) => {
+interface ModuleProps {
+  value: number;
+  onChange: (value: number) => void;
+}
+
+interface EnergyModuleProps extends ModuleProps {
+  trend: string;
+}
+
+interface CheckInModuleProps {
+  icon: React.ReactNode;
+  title: string;
+  feedback: string;
+  trend?: { icon: React.ReactNode; text: string };
+  children: React.ReactNode;
+}
+
+const WaterModule = ({ value, onChange }: ModuleProps) => {
     const feedback = value < 4 ? "Tip: Try to drink at least 8 glasses (2.5L) per day." : "Great job hydrating! This is key for energy.";
     return (
         <CheckInModule icon={<Droplets className="text-blue-500" />} title="Water Intake" feedback={feedback}>
@@ -104,13 +121,13 @@ const WaterModule = ({ value, onChange }) => {
     );
 };
 
-const SleepModule = ({ value, onChange }) => (
+const SleepModule = ({ value, onChange }: ModuleProps) => (
   <CheckInModule icon={<Moon className="text-indigo-500" />} title="Sleep Quality" feedback={sleepOptions[value - 1].feedback}>
     <EmojiSelector options={sleepOptions} value={value} onChange={onChange} />
   </CheckInModule>
 );
 
-const EnergyModule = ({ value, onChange, trend }) => {
+const EnergyModule = ({ value, onChange, trend }: EnergyModuleProps) => {
     const trendIcon = trend === 'up' ? <TrendingUp className="w-3 h-3 text-emerald-600" /> : <TrendingDown className="w-3 h-3 text-red-500" />;
     const trendText = `Trend: ${trend === 'up' ? 'Improving' : 'Declining'}`;
     const feedback = energyOptions[value - 1].feedback;
@@ -121,7 +138,7 @@ const EnergyModule = ({ value, onChange, trend }) => {
     );
 };
 
-const MoodModule = ({ value, onChange }) => (
+const MoodModule = ({ value, onChange }: ModuleProps) => (
   <CheckInModule icon={<Smile className="text-yellow-500" />} title="Mood" feedback={moodOptions[value - 1].feedback}>
     <EmojiSelector options={moodOptions} value={value} onChange={onChange} />
   </CheckInModule>
@@ -129,7 +146,7 @@ const MoodModule = ({ value, onChange }) => (
 
 // --- Reusable Building Blocks ---
 
-const CheckInModule = ({ icon, title, feedback, trend, children }) => (
+const CheckInModule = ({ icon, title, feedback, trend, children }: CheckInModuleProps) => (
   <Card className="bg-gray-50/50 flex flex-col">
     <CardHeader className="pb-2">
       <CardTitle className="text-base font-semibold flex items-center gap-2">
