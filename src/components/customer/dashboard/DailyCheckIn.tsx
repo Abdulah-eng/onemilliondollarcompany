@@ -1,8 +1,7 @@
 // src/components/customer/dashboard/DailyCheckIn.tsx
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { Check, Droplets, BatteryFull, Smile, Moon } from 'lucide-react';
 
@@ -10,32 +9,15 @@ import { Check, Droplets, BatteryFull, Smile, Moon } from 'lucide-react';
 TODO: Backend Integration Notes for DailyCheckIn
 - `isAlreadyCheckedIn`: Query `daily_logs` for a record with the current user's ID and today's date.
 - `handleLogCheckIn`: On button click, INSERT a new row into `daily_logs` with the selected values.
-- The feedback messages (e.g., "5% better than last week") will require fetching and comparing historical data from the `daily_logs` table.
 */
 const mockData = {
   isAlreadyCheckedIn: false,
 };
 
-const sleepOptions = [
-  { value: 1, emoji: '😴', label: 'Poor', feedback: 'Aim for 7-9 hours to feel your best.' },
-  { value: 2, emoji: '🥱', label: 'Fair', feedback: 'A little more rest could boost your energy.' },
-  { value: 3, emoji: '😐', label: 'Okay', feedback: 'A solid night. Consistency is key!' },
-  { value: 4, emoji: '😌', label: 'Good', feedback: 'Great job prioritizing rest!' },
-  { value: 5, emoji: '🤩', label: 'Excellent', feedback: 'You\'re ready to conquer the day!' },
-];
-const energyOptions = [
-  { value: 1, emoji: '🪫', label: 'Very Low', feedback: 'Your energy is up 5% from last week!' },
-  { value: 2, emoji: '🔋', label: 'Low', feedback: 'Consistent sleep can help boost this.' },
-  { value: 3, emoji: '⚡️', label: 'Good', feedback: 'Feeling energized! Let\'s do this.' },
-  { value: 4, emoji: '🚀', label: 'High', feedback: 'Ready for anything!' },
-];
-const moodOptions = [
-  { value: 1, emoji: '😩', label: 'Awful', feedback: 'It\'s okay to have off days. Be kind to yourself.' },
-  { value: 2, emoji: '😕', label: 'Bad', feedback: 'A short walk can often lift your spirits.' },
-  { value: 3, emoji: '😐', label: 'Okay', feedback: 'A neutral day is a good foundation to build on.' },
-  { value: 4, emoji: '😊', label: 'Good', feedback: 'Glad to see you\'re feeling good today!' },
-  { value: 5, emoji: '😁', label: 'Great!', feedback: 'Amazing! Let this positivity fuel your day.' },
-];
+// --- Data for the interactive selectors ---
+const sleepOptions = [ { value: 1, emoji: '😴' }, { value: 2, emoji: '🥱' }, { value: 3, emoji: '😐' }, { value: 4, emoji: '😌' }, { value: 5, emoji: '🤩' }];
+const energyOptions = [ { value: 1, emoji: '🪫' }, { value: 2, emoji: '🔋' }, { value: 3, emoji: '⚡️' }, { value: 4, emoji: '🚀' }];
+const moodOptions = [ { value: 1, emoji: '😩' }, { value: 2, emoji: '😕' }, { value: 3, emoji: '😐' }, { value: 4, emoji: '😊' }, { value: 5, emoji: '😁' }];
 
 const DailyCheckIn = () => {
   const [checkedIn, setCheckedIn] = useState(mockData.isAlreadyCheckedIn);
@@ -64,25 +46,18 @@ const DailyCheckIn = () => {
   return (
     <Card className="bg-white shadow-lg animate-fade-in-up">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-gray-800 text-center">How are you feeling today?</CardTitle>
+        <CardTitle className="text-2xl font-bold text-gray-800 text-center">Daily Check-in</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="max-w-sm mx-auto space-y-6">
-            <CheckInRow icon={<Moon className="text-indigo-500" />} label="Sleep Quality">
-              <EmojiSlider options={sleepOptions} value={sleep} onChange={setSleep} />
-            </CheckInRow>
-            <CheckInRow icon={<BatteryFull className="text-green-500" />} label="Energy Level">
-              <EmojiSlider options={energyOptions} value={energy} onChange={setEnergy} />
-            </CheckInRow>
-            <CheckInRow icon={<Smile className="text-yellow-500" />} label="Mood">
-              <EmojiSlider options={moodOptions} value={mood} onChange={setMood} />
-            </CheckInRow>
-            <CheckInRow icon={<Droplets className="text-blue-500" />} label="Water Intake">
-              <WaterTracker value={water} onChange={setWater} />
-            </CheckInRow>
+      <CardContent className="space-y-4">
+        {/* --- 2x2 Grid for Check-in Modules --- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <WaterModule value={water} onChange={setWater} />
+          <SleepModule value={sleep} onChange={setSleep} />
+          <EnergyModule value={energy} onChange={setEnergy} />
+          <MoodModule value={mood} onChange={setMood} />
         </div>
         
-        <div className="pt-4 max-w-sm mx-auto">
+        <div className="pt-4">
             <Button onClick={handleLogCheckIn} className="w-full bg-orange-500 hover:bg-orange-600 text-lg py-6 font-bold">
               Log Today's Check-in
             </Button>
@@ -92,71 +67,87 @@ const DailyCheckIn = () => {
   );
 };
 
-// --- Sub-components ---
+// --- Modular Check-in Components ---
 
-const CheckInRow = ({ label, icon, children }) => (
-  <div>
-    <Label className="font-semibold text-gray-700 flex items-center gap-2 mb-3">
-        {icon} {label}
-    </Label>
-    {children}
-  </div>
-);
-
-const EmojiSlider = ({ options, value, onChange }) => {
-  const selectedOption = options.find(opt => opt.value === value) || options[0];
-
-  return (
-    <div>
-      <div className="relative flex justify-between items-center h-12">
-        <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 h-1.5 bg-gray-200 rounded-full">
-            <div 
-                className="absolute h-full bg-emerald-500 rounded-full transition-all duration-300 ease-out" 
-                style={{ width: `${((value - 1) / (options.length - 1)) * 100}%` }}
-            />
-        </div>
-        {options.map((option) => (
+const WaterModule = ({ value, onChange }) => (
+  <Card className="bg-gray-50/50">
+    <CardHeader className="pb-2">
+      <CardTitle className="text-base font-semibold flex items-center gap-2">
+        <Droplets className="text-blue-500" /> Water Intake
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="flex flex-wrap gap-2 justify-center">
+        {Array.from({ length: 8 }).map((_, i) => (
           <button
-            key={option.value}
-            onClick={() => onChange(option.value)}
-            className="relative z-10 p-1 bg-white rounded-full transition-transform duration-200 ease-out hover:scale-125"
-          >
-            <span className={cn("text-3xl transition-all duration-200", value === option.value ? 'opacity-100 scale-125' : 'opacity-40 grayscale hover:opacity-75')}>
-              {option.emoji}
-            </span>
-          </button>
-        ))}
-      </div>
-      <p className="text-center text-sm font-semibold text-gray-600 mt-2 h-5">
-        {selectedOption.label} - <span className="text-gray-500 font-normal italic">{selectedOption.feedback}</span>
-      </p>
-    </div>
-  );
-};
-
-const WaterTracker = ({ value, onChange }) => {
-  const glasses = Array.from({ length: 8 }, (_, i) => i < value);
-  const recommendation = "Aim for at least 8 glasses (2.5 liters) a day.";
-
-  return (
-    <div>
-        <div className="flex justify-center flex-wrap gap-2">
-        {glasses.map((isFilled, i) => (
-            <button
             key={i}
             onClick={() => onChange(i + 1 === value ? i : i + 1)}
             className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110",
-                isFilled ? 'bg-blue-500 text-white shadow-md' : 'bg-gray-200 text-gray-400'
+              "w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110",
+              i < value ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-400'
             )}
-            >
-            <Droplets size={18} />
-            </button>
+          >
+            <Droplets size={16} />
+          </button>
         ))}
-        </div>
-        <p className="text-xs text-gray-500 mt-2 italic text-center">{recommendation}</p>
-    </div>
-  );
-};
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const SleepModule = ({ value, onChange }) => (
+  <Card className="bg-gray-50/50">
+    <CardHeader className="pb-2">
+      <CardTitle className="text-base font-semibold flex items-center gap-2">
+        <Moon className="text-indigo-500" /> Sleep Quality
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <EmojiSelector options={sleepOptions} value={value} onChange={onChange} />
+    </CardContent>
+  </Card>
+);
+
+const EnergyModule = ({ value, onChange }) => (
+  <Card className="bg-gray-50/50">
+    <CardHeader className="pb-2">
+      <CardTitle className="text-base font-semibold flex items-center gap-2">
+        <BatteryFull className="text-green-500" /> Energy Level
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <EmojiSelector options={energyOptions} value={value} onChange={onChange} />
+    </CardContent>
+  </Card>
+);
+
+const MoodModule = ({ value, onChange }) => (
+  <Card className="bg-gray-50/50">
+    <CardHeader className="pb-2">
+      <CardTitle className="text-base font-semibold flex items-center gap-2">
+        <Smile className="text-yellow-500" /> Mood
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <EmojiSelector options={moodOptions} value={value} onChange={onChange} />
+    </CardContent>
+  </Card>
+);
+
+const EmojiSelector = ({ options, value, onChange }) => (
+  <div className="flex justify-between items-center pt-2">
+    {options.map((option) => (
+      <button
+        key={option.value}
+        onClick={() => onChange(option.value)}
+        className="transition-transform duration-200 ease-out hover:scale-125"
+      >
+        <span className={cn("text-3xl transition-all duration-200", value === option.value ? 'opacity-100 scale-110' : 'opacity-40 grayscale hover:opacity-75')}>
+          {option.emoji}
+        </span>
+      </button>
+    ))}
+  </div>
+);
 
 export default DailyCheckIn;
