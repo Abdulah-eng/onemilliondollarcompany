@@ -2,20 +2,13 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { Check, Droplets, BatteryFull, Smile, Moon } from 'lucide-react';
 
-/*
-TODO: Backend Integration Notes for DailyCheckIn
-- `isAlreadyCheckedIn`: Before rendering, query the `daily_logs` table for a record with the current user's ID and today's date.
-- `handleLogCheckIn`: On button click, INSERT a new row into the `daily_logs` table with the selected values (sleep, energy, mood, water).
-*/
 const mockData = {
   isAlreadyCheckedIn: false,
 };
 
-// --- Data for the interactive selectors ---
 const sleepOptions = [ { value: 1, emoji: '😴' }, { value: 2, emoji: '🥱' }, { value: 3, emoji: '😐' }, { value: 4, emoji: '😌' }, { value: 5, emoji: '🤩' }];
 const energyOptions = [ { value: 1, emoji: '🪫' }, { value: 2, emoji: '🔋' }, { value: 3, emoji: '⚡️' }, { value: 4, emoji: '🚀' }];
 const moodOptions = [ { value: 1, emoji: '😩' }, { value: 2, emoji: '😕' }, { value: 3, emoji: '😐' }, { value: 4, emoji: '😊' }, { value: 5, emoji: '😁' }];
@@ -42,7 +35,7 @@ const DailyCheckIn = () => {
 
   if (checkedIn) {
     return (
-      <Card className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg">
+      <Card className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
         <CardContent className="p-6 text-center flex flex-col items-center gap-2">
           <Check className="w-10 h-10 bg-white/20 text-white rounded-full p-2"/>
           <h3 className="text-xl font-bold">Thanks for checking in today!</h3>
@@ -55,15 +48,12 @@ const DailyCheckIn = () => {
   return (
     <Card className="bg-white shadow-lg animate-fade-in-up">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-gray-800">How are you feeling today?</CardTitle>
+        <CardTitle className="text-xl font-bold text-gray-800">How are you feeling today?</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-8">
-        {/* --- Water Tracker --- */}
+      <CardContent className="space-y-6">
         <CheckInRow icon={<Droplets className="text-blue-500" />} label="Water Intake">
           <WaterTracker value={water} onChange={setWater} />
         </CheckInRow>
-        
-        {/* --- Sliders --- */}
         <CheckInRow icon={<Moon className="text-indigo-500" />} label="Sleep Quality">
           <EmojiSlider options={sleepOptions} value={sleep} onChange={setSleep} />
         </CheckInRow>
@@ -73,11 +63,9 @@ const DailyCheckIn = () => {
         <CheckInRow icon={<Smile className="text-yellow-500" />} label="Mood">
           <EmojiSlider options={moodOptions} value={mood} onChange={setMood} />
         </CheckInRow>
-
-        {/* --- Feedback & Action --- */}
         <div className="text-center pt-4 border-t">
             <p className="text-sm text-gray-600 italic mb-4">{feedbackMessage}</p>
-            <Button onClick={handleLogCheckIn} className="w-full bg-orange-500 hover:bg-orange-600 text-lg py-6 font-bold">
+            <Button onClick={handleLogCheckIn} className="w-full bg-orange-500 hover:bg-orange-600 font-bold">
               Log Today's Check-in
             </Button>
         </div>
@@ -86,11 +74,9 @@ const DailyCheckIn = () => {
   );
 };
 
-// --- Sub-components for a cleaner structure ---
-
 const CheckInRow = ({ label, icon, children }) => (
   <div>
-    <Label className="font-semibold text-gray-700 flex items-center gap-2 mb-3">
+    <Label className="font-semibold text-gray-700 flex items-center gap-2 mb-2">
         {icon} {label}
     </Label>
     {children}
@@ -98,14 +84,11 @@ const CheckInRow = ({ label, icon, children }) => (
 );
 
 const EmojiSlider = ({ options, value, onChange }) => (
-  <div className="flex justify-between items-center px-2">
+  <div className="flex justify-between items-center px-1">
     {options.map((option) => (
-      <button
-        key={option.value}
-        onClick={() => onChange(option.value)}
-        className="transition-transform duration-200 ease-out hover:scale-125"
-      >
-        <span className={cn("text-4xl", value === option.value ? 'opacity-100' : 'opacity-40 grayscale group-hover:opacity-60')}>
+      <button key={option.value} onClick={() => onChange(option.value)} className="transition-transform duration-200 ease-out hover:scale-125">
+        {/* --- SIZE ADJUSTMENT --- */}
+        <span className={cn("text-3xl", value === option.value ? 'opacity-100' : 'opacity-40 grayscale group-hover:opacity-60')}>
           {option.emoji}
         </span>
       </button>
@@ -116,17 +99,18 @@ const EmojiSlider = ({ options, value, onChange }) => (
 const WaterTracker = ({ value, onChange }) => {
   const glasses = Array.from({ length: 8 }, (_, i) => i < value);
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-wrap gap-2">
       {glasses.map((isFilled, i) => (
         <button
           key={i}
           onClick={() => onChange(i + 1)}
+          // --- SIZE ADJUSTMENT ---
           className={cn(
-            "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110",
+            "w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110",
             isFilled ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-400'
           )}
         >
-          <Droplets size={20} />
+          <Droplets size={16} />
         </button>
       ))}
     </div>
