@@ -18,7 +18,6 @@ const mockData = {
   }
 };
 
-// --- Data for the interactive selectors with detailed feedback ---
 const sleepOptions = [
   { value: 1, emoji: '😴', label: '< 5 hrs', feedback: 'Tip: Try to avoid screens 30 minutes before bed.' },
   { value: 2, emoji: '🥱', label: '5-6 hrs', feedback: 'A little more rest could boost your energy.' },
@@ -87,18 +86,18 @@ const DailyCheckIn = () => {
       <CardContent className="space-y-4">
         <div
           ref={scrollContainerRef}
-          className="flex lg:grid lg:grid-cols-2 gap-4 overflow-x-auto snap-x snap-mandatory p-1 -m-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className="flex lg:grid lg:grid-cols-2 gap-4 overflow-x-auto snap-x snap-mandatory p-2 -m-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
-          <div ref={el => itemRefs.current[0] = el} className="min-w-full flex-shrink-0 snap-start lg:min-w-0">
+          <div ref={el => itemRefs.current[0] = el} className="min-w-full flex-shrink-0 snap-start lg:min-w-0 p-1">
             <WaterModule value={water} onChange={(val) => { setWater(val); setTimeout(() => setActiveStep(1), 1000); }} />
           </div>
-          <div ref={el => itemRefs.current[1] = el} className="min-w-full flex-shrink-0 snap-start lg:min-w-0">
+          <div ref={el => itemRefs.current[1] = el} className="min-w-full flex-shrink-0 snap-start lg:min-w-0 p-1">
             <SleepModule value={sleep} onChange={(val) => { setSleep(val); setTimeout(() => setActiveStep(2), 1000); }} />
           </div>
-          <div ref={el => itemRefs.current[2] = el} className="min-w-full flex-shrink-0 snap-start lg:min-w-0">
+          <div ref={el => itemRefs.current[2] = el} className="min-w-full flex-shrink-0 snap-start lg:min-w-0 p-1">
             <EnergyModule value={energy} onChange={(val) => { setEnergy(val); setTimeout(() => setActiveStep(3), 1000); }} trend={mockData.trends.energyTrend} />
           </div>
-          <div ref={el => itemRefs.current[3] = el} className="min-w-full flex-shrink-0 snap-start lg:min-w-0">
+          <div ref={el => itemRefs.current[3] = el} className="min-w-full flex-shrink-0 snap-start lg:min-w-0 p-1">
             <MoodModule value={mood} onChange={setMood} />
           </div>
         </div>
@@ -126,9 +125,9 @@ const WaterModule = ({ value, onChange }) => {
     const feedback = value === 0 ? "Tap to log your water intake." : value < 8 ? `Current: ${totalLiters}L / Goal: 2.5L` : "Goal Reached! Great job hydrating.";
     return (
         <CheckInModule icon={<Droplets className="text-blue-500" />} title="Water Intake" feedback={feedback}>
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="flex flex-wrap gap-1.5 justify-center">
                 {Array.from({ length: 8 }).map((_, i) => (
-                <button key={i} onClick={() => onChange(i + 1)} className={cn("w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110", i < value ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-400')}>
+                <button key={i} onClick={() => onChange(i + 1 === value ? i : i + 1)} className={cn("w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110", i < value ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-400')}>
                     <Droplets size={16} />
                 </button>
                 ))}
@@ -169,7 +168,7 @@ const CheckInModule = ({ icon, title, feedback, trend, children }) => (
         {trend?.text && <span className="ml-auto flex items-center gap-1 text-xs font-medium text-gray-500">{trend.icon} {trend.text}</span>}
       </CardTitle>
     </CardHeader>
-    <CardContent className="flex-1 flex flex-col justify-between">
+    <CardContent className="flex-1 flex flex-col justify-between p-4">
         {children}
         <FeedbackMessage text={feedback} />
     </CardContent>
