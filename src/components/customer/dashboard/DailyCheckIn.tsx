@@ -160,7 +160,7 @@ const MoodModule = ({ value, onChange }) => (
 
 // --- Reusable Building Blocks ---
 
-const CheckInModule = ({ icon, title, feedback, trend, children }) => (
+const CheckInModule = ({ icon, title, feedback, trend, children }: { icon: any; title: any; feedback: any; trend?: any; children: any; }) => (
   <Card className="bg-slate-50 border-slate-200 h-full flex flex-col">
     <CardHeader className="pb-2">
       <CardTitle className="text-base font-semibold flex items-center gap-2 text-slate-700">

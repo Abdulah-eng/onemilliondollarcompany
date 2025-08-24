@@ -1,7 +1,7 @@
 // src/components/customer/dashboard/WelcomeHeader.tsx
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Flame, Droplets, BedDouble, Weight, TrendingUp, Lock, HeartPulse } from 'lucide-react';
+import { Flame, Droplets, BedDouble, Weight, TrendingUp, Lock, HeartPulse, BatteryFull } from 'lucide-react';
 
 /*
 TODO: Backend Integration Notes for WelcomeHeader
