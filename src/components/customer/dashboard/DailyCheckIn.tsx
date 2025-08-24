@@ -69,21 +69,22 @@ const DailyCheckIn = () => {
 
   if (checkedIn) {
     return (
-      <Card className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg">
-        <CardContent className="p-6 text-center flex flex-col items-center gap-2">
-          <Check className="w-10 h-10 bg-white/20 text-white rounded-full p-2"/>
-          <h3 className="text-xl font-bold">Thanks for checking in today!</h3>
-        </CardContent>
-      </Card>
+      <div>
+        <h2 className="text-xl font-bold text-gray-700 mb-4">Daily Check-in</h2>
+        <Card className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg">
+          <CardContent className="p-6 text-center flex flex-col items-center gap-2">
+            <Check className="w-10 h-10 bg-white/20 text-white rounded-full p-2"/>
+            <h3 className="text-xl font-bold">Thanks for checking in today!</h3>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="bg-white shadow-lg animate-fade-in-up overflow-hidden">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-gray-800 text-center">Daily Check-in</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="animate-fade-in-up">
+      <h2 className="text-xl font-bold text-gray-700 mb-4">Daily Check-in</h2>
+      <div className="space-y-4">
         <div
           ref={scrollContainerRef}
           className="flex lg:grid lg:grid-cols-2 gap-4 overflow-x-auto snap-x snap-mandatory p-2 -m-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
@@ -113,8 +114,8 @@ const DailyCheckIn = () => {
               {isComplete ? "Log Today's Check-in" : "Complete All Items"}
             </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -160,8 +161,8 @@ const MoodModule = ({ value, onChange }) => (
 
 // --- Reusable Building Blocks ---
 
-const CheckInModule = ({ icon, title, feedback, trend, children }: { icon: any; title: any; feedback: any; trend?: any; children: any; }) => (
-  <Card className="bg-slate-50 border-slate-200 h-full flex flex-col">
+const CheckInModule = ({ icon, title, feedback, trend, children }) => (
+  <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
     <CardHeader className="pb-2">
       <CardTitle className="text-base font-semibold flex items-center gap-2 text-slate-700">
         {icon} {title}
