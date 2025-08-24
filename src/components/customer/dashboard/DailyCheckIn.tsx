@@ -46,20 +46,6 @@ const DailyCheckIn = () => {
   const [energy, setEnergy] = useState(0);
   const [mood, setMood] = useState(0);
 
-  const [activeStep, setActiveStep] = useState(0);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  useEffect(() => {
-    if (itemRefs.current[activeStep]) {
-      itemRefs.current[activeStep]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'start',
-      });
-    }
-  }, [activeStep]);
-
   const handleLogCheckIn = () => {
     console.log({ water, sleep, energy, mood });
     setCheckedIn(true);
@@ -85,31 +71,16 @@ const DailyCheckIn = () => {
     <div className="animate-fade-in-up">
       <h2 className="text-xl font-bold text-gray-700 mb-4">Daily Check-in</h2>
       <div className="space-y-4">
-        <div
-          ref={scrollContainerRef}
-          className="flex lg:grid lg:grid-cols-2 gap-4 overflow-x-auto snap-x snap-mandatory p-2 -m-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-        >
-          <div ref={el => itemRefs.current[0] = el} className="min-w-full flex-shrink-0 snap-start lg:min-w-0 p-1">
-            <WaterModule value={water} onChange={(val) => { setWater(val); setTimeout(() => setActiveStep(1), 1000); }} />
-          </div>
-          <div ref={el => itemRefs.current[1] = el} className="min-w-full flex-shrink-0 snap-start lg:min-w-0 p-1">
-            <SleepModule value={sleep} onChange={(val) => { setSleep(val); setTimeout(() => setActiveStep(2), 1000); }} />
-          </div>
-          <div ref={el => itemRefs.current[2] = el} className="min-w-full flex-shrink-0 snap-start lg:min-w-0 p-1">
-            <EnergyModule value={energy} onChange={(val) => { setEnergy(val); setTimeout(() => setActiveStep(3), 1000); }} trend={mockData.trends.energyTrend} />
-          </div>
-          <div ref={el => itemRefs.current[3] = el} className="min-w-full flex-shrink-0 snap-start lg:min-w-0 p-1">
-            <MoodModule value={mood} onChange={setMood} />
-          </div>
-        </div>
-
-        <div className="flex lg:hidden justify-center gap-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <button key={i} onClick={() => setActiveStep(i)} className={cn("w-2 h-2 rounded-full transition-all", activeStep === i ? 'bg-orange-500 scale-125' : 'bg-gray-300')}/>
-          ))}
+        {/* The grid now has a max-width and is centered */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+          <WaterModule value={water} onChange={setWater} />
+          <SleepModule value={sleep} onChange={setSleep} />
+          <EnergyModule value={energy} onChange={setEnergy} trend={mockData.trends.energyTrend} />
+          <MoodModule value={mood} onChange={setMood} />
         </div>
         
-        <div className="pt-2">
+        {/* The button is also centered with a max-width */}
+        <div className="pt-2 max-w-2xl mx-auto">
             <Button onClick={handleLogCheckIn} disabled={!isComplete} size="lg" className="w-full bg-orange-500 hover:bg-orange-600 font-bold disabled:bg-gray-300">
               {isComplete ? "Log Today's Check-in" : "Complete All Items"}
             </Button>
