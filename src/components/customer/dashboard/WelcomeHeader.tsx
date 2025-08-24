@@ -1,27 +1,24 @@
 // src/components/customer/dashboard/WelcomeHeader.tsx
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Flame, Droplets, BatteryFull, Smile, BedDouble, Weight, TrendingUp, Lock } from 'lucide-react';
+import { Flame, Droplets, BedDouble, Weight, TrendingUp, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /*
 TODO: Backend Integration Notes for WelcomeHeader
-- `userName`: Fetch the user's first name from `profiles.full_name`.
-- `plan`: Fetch the user's current subscription plan ('standard', 'premium', etc.).
-- The value for each stat needs to be calculated from the user's historical data in `daily_logs` and `activity_logs`.
-- The `goalAdherence` requires comparing completed tasks vs. assigned tasks over the last 7 days.
+- `userName`: Fetch from `profiles.full_name`.
+- `plan`: Fetch from a `subscriptions` table.
+- All stat values and trends need to be calculated from `daily_logs` and `activity_logs`.
 */
 const mockData = {
   userName: 'Alex',
-  plan: 'standard', // Change to 'premium' to see all stats unlocked
+  plan: 'standard', // 'standard' or 'premium'
   stats: {
     streak: 7,
     avgWater: '2.1 L',
-    avgEnergy: 'Good',
     avgSleep: '7.5 hrs',
-    avgMood: 'Positive',
     weightTrend: '-0.5 kg',
-    goalAdherence: 85, // in percent
+    goalAdherence: 85,
   },
 };
 
@@ -30,21 +27,20 @@ const WelcomeHeader = () => {
   const timeOfDay = new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening';
 
   const statItems = [
-    { label: "7-Day Streak", value: `${stats.streak} Days`, icon: <Flame />, premium: false },
-    { label: "Avg. Water", value: stats.avgWater, icon: <Droplets />, premium: false },
-    { label: "Avg. Energy", value: stats.avgEnergy, icon: <BatteryFull />, premium: false },
-    { label: "Avg. Sleep", value: stats.avgSleep, icon: <BedDouble />, premium: true },
-    { label: "Weight Trend", value: stats.weightTrend, icon: <Weight />, premium: true },
-    { label: "Goal Adherence", value: `${stats.goalAdherence}%`, icon: <TrendingUp />, premium: true },
+    { label: "7-Day Streak", value: `${stats.streak} Days`, icon: <Flame size={18} />, premium: false },
+    { label: "Avg. Water", value: stats.avgWater, icon: <Droplets size={18} />, premium: false },
+    { label: "Avg. Sleep", value: stats.avgSleep, icon: <BedDouble size={18} />, premium: true },
+    { label: "Weight Trend", value: stats.weightTrend, icon: <Weight size={18} />, premium: true },
+    { label: "Goal Adherence", value: `${stats.goalAdherence}%`, icon: <TrendingUp size={18} />, premium: true },
   ];
 
   return (
     <Card className="border-none bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-lg animate-fade-in-down overflow-hidden">
       <CardContent className="p-6">
-        <h1 className="text-3xl font-bold">Good {timeOfDay}, {userName}</h1>
-        <p className="opacity-80 mt-1">Here is your weekly overview.</p>
+        <h1 className="text-2xl font-bold">Good {timeOfDay}, {userName}</h1>
+        <p className="opacity-80 mt-1 text-sm">Here is your weekly overview.</p>
         
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {statItems.map((stat) => (
             <StatCard
               key={stat.label}
@@ -61,26 +57,26 @@ const WelcomeHeader = () => {
 const StatCard = ({ icon, label, value, isLocked }) => {
   if (isLocked) {
     return (
-      <div className="relative bg-white/10 rounded-lg p-4 text-center backdrop-blur-sm">
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-            <Lock className="text-white/70" />
-            <p className="text-xs font-bold">Premium</p>
-            <Button size="sm" variant="secondary" className="h-7 text-xs">Upgrade</Button>
+      <div className="relative bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm flex flex-col justify-center items-center min-h-[90px]">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 z-10">
+            <Lock size={16} className="text-white/70" />
+            <p className="text-[10px] font-bold">Premium</p>
+            <Button size="sm" variant="secondary" className="h-6 px-2 text-[10px]">Upgrade</Button>
         </div>
-        <div className="blur-sm select-none">
+        <div className="blur-sm select-none pointer-events-none">
           <div className="mx-auto w-fit rounded-full bg-white/10 p-2">{icon}</div>
-          <p className="mt-2 font-bold text-lg">{value}</p>
-          <p className="text-xs opacity-70">{label}</p>
+          <p className="mt-1 font-semibold text-sm">{value}</p>
+          <p className="text-[10px] opacity-70">{label}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white/10 rounded-lg p-4 text-center hover:bg-white/20 transition-colors cursor-pointer">
+    <div className="bg-white/10 rounded-lg p-3 text-center hover:bg-white/20 transition-colors cursor-pointer flex flex-col justify-center min-h-[90px]">
       <div className="mx-auto w-fit rounded-full bg-white/10 p-2">{icon}</div>
-      <p className="mt-2 font-bold text-lg">{value}</p>
-      <p className="text-xs opacity-70">{label}</p>
+      <p className="mt-1 font-semibold text-sm">{value}</p>
+      <p className="text-[10px] opacity-70">{label}</p>
     </div>
   );
 };
