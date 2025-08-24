@@ -1,7 +1,7 @@
 // src/components/customer/dashboard/WelcomeHeader.tsx
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Flame, Droplets, BedDouble, Weight, TrendingUp, Lock, HeartPulse, BatteryFull } from 'lucide-react';
+import { Flame, Droplets, BedDouble, Weight, TrendingUp, Lock, HeartPulse, Battery } from 'lucide-react';
 
 /*
 TODO: Backend Integration Notes for WelcomeHeader
@@ -32,7 +32,7 @@ const WelcomeHeader = () => {
   const statItems = [
     { label: "7-Day Streak", value: `${stats.streak} Days`, icon: <Flame size={16} />, requiredPlan: 'otp' },
     { label: "Avg. Water", value: stats.avgWater, icon: <Droplets size={16} />, requiredPlan: 'otp' },
-    { label: "Avg. Energy", value: stats.avgEnergy, icon: <BatteryFull size={16} />, requiredPlan: 'otp' },
+    { label: "Avg. Energy", value: stats.avgEnergy, icon: <Battery size={16} />, requiredPlan: 'otp' },
     { label: "Avg. Mood", value: stats.avgMood, icon: <HeartPulse size={16} />, requiredPlan: 'otp' },
     { label: "Avg. Sleep", value: stats.avgSleep, icon: <BedDouble size={16} />, requiredPlan: 'otp' },
     { label: "Weight Trend", value: stats.weightTrend, icon: <Weight size={16} />, requiredPlan: 'premium' },
