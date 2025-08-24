@@ -39,7 +39,7 @@ const QuickStats = () => {
     <div>
         <h2 className="text-xl font-bold text-gray-700 mb-4">Your Weekly Stats</h2>
         <div className="p-1 -m-1">
-            <div className="flex gap-4 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="flex gap-3 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {statItems.map((stat) => (
                     <StatCard
                     key={stat.label}
@@ -54,21 +54,22 @@ const QuickStats = () => {
 };
 
 const StatCard = ({ icon, label, value, isLocked }) => (
-  <Card className={cn("min-w-[160px] flex-1 bg-slate-50 hover:bg-white shadow-sm hover:shadow-lg transition-all duration-300 border-slate-200", isLocked && 'relative')}>
+  <Card className="min-w-[160px] flex-1 bg-slate-50 hover:bg-white shadow-sm hover:shadow-lg transition-all duration-300 border-slate-200">
     <CardContent className="p-4">
-      <div className={cn(isLocked && 'blur-sm select-none pointer-events-none')}>
-        <div className="flex items-center gap-3 mb-2">
-          <div className="text-slate-500">{icon}</div>
-          <p className="text-xs font-semibold text-slate-500">{label}</p>
-        </div>
-        <p className="text-2xl font-bold text-slate-800">{value}</p>
+      <div className="flex items-center gap-3 mb-2">
+        <div className="text-slate-500">{icon}</div>
+        <p className="text-xs font-semibold text-slate-500">{label}</p>
       </div>
-      {isLocked && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 z-10 bg-slate-50/80">
-            <Lock size={18} className="text-slate-600" />
-            <p className="text-xs font-bold text-slate-700">Premium</p>
+      {isLocked ? (
+        <div className="flex items-center justify-between mt-1">
+            <div className="flex items-center gap-1 text-xs font-bold text-slate-700">
+                <Lock size={12} />
+                <span>Premium</span>
+            </div>
             <Button size="sm" className="h-6 px-2 text-xs bg-orange-500 hover:bg-orange-600">Upgrade</Button>
         </div>
+      ) : (
+        <p className="text-2xl font-bold text-slate-800">{value}</p>
       )}
     </CardContent>
   </Card>
