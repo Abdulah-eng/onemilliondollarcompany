@@ -2,14 +2,14 @@
 import WelcomeHeader from '@/components/customer/dashboard/WelcomeHeader';
 import TodaysFocus from '@/components/customer/dashboard/TodaysFocus';
 import Alerts from '@/components/customer/dashboard/Alerts';
-import QuickStats from '@/components/customer/dashboard/QuickStats';
+// We no longer need QuickStats as it's merged into WelcomeHeader
 import DailyCheckIn from '@/components/customer/dashboard/DailyCheckIn';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const CustomerDashboard = () => {
   return (
     <div className="space-y-8">
-      {/* --- Main Header --- */}
+      {/* --- The New, Combined Welcome Header & Stats --- */}
       <WelcomeHeader />
 
       {/* --- Alerts and Prompts --- */}
@@ -19,7 +19,7 @@ const CustomerDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column (Main Tasks) */}
         <div className="lg:col-span-2 space-y-8">
-          <QuickStats />
+          {/* QuickStats component is removed from here */}
           <DailyCheckIn />
           <TodaysFocus />
         </div>
