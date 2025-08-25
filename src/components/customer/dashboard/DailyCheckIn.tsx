@@ -70,7 +70,7 @@ const DailyCheckIn = () => {
   if (checkedIn) {
     return (
       <div>
-        <h2 className="text-xl font-bold text-gray-700 mb-4">Daily Check-in</h2>
+        <h2 className="text-xl font-bold text-slate-700 mb-4">Daily Check-in</h2>
         <Card className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg">
           <CardContent className="p-6 text-center flex flex-col items-center gap-2">
             <Check className="w-10 h-10 bg-white/20 text-white rounded-full p-2"/>
@@ -83,7 +83,7 @@ const DailyCheckIn = () => {
 
   return (
     <div className="animate-fade-in-up">
-      <h2 className="text-xl font-bold text-gray-700 mb-4">Daily Check-in</h2>
+      <h2 className="text-xl font-bold text-slate-700 mb-4">Daily Check-in</h2>
       <div className="space-y-4">
         <div
           ref={scrollContainerRef}
@@ -166,7 +166,7 @@ const CheckInModule = ({ icon, title, feedback, trend, children }) => (
     <CardHeader className="pb-2">
       <CardTitle className="text-base font-semibold flex items-center gap-2 text-slate-700">
         {icon} {title}
-        {trend?.text && <span className="ml-auto flex items-center gap-1 text-xs font-medium text-gray-500">{trend.icon} {trend.text}</span>}
+        {trend?.text && <span className="ml-auto flex items-center gap-1 text-xs font-medium text-slate-500">{trend.icon} {trend.text}</span>}
       </CardTitle>
     </CardHeader>
     <CardContent className="flex-1 flex flex-col justify-center p-4">
@@ -180,7 +180,7 @@ const EmojiSlider = ({ options, value, onChange, showLabels = false }) => (
   <div className="relative flex justify-between items-center pt-2 max-w-xs mx-auto w-full">
     {options.map((option) => (
       <div key={option.value} className="flex flex-col items-center gap-1">
-        {showLabels && <span className="text-xs font-medium text-gray-500 h-4">{option.label}</span>}
+        {showLabels && <span className="text-xs font-medium text-slate-500 h-4">{option.label}</span>}
         <button onClick={() => onChange(option.value)} className="transition-transform duration-200 ease-out hover:scale-125">
           <span className={cn("text-3xl transition-all duration-200", value === option.value ? 'opacity-100 scale-110' : 'opacity-40 grayscale hover:opacity-75')}>
             {option.emoji}
@@ -192,7 +192,7 @@ const EmojiSlider = ({ options, value, onChange, showLabels = false }) => (
 );
 
 const FeedbackMessage = ({ text }) => (
-    <p key={text} className="text-xs text-gray-500 italic text-center mt-3 h-8 animate-fade-in">
+    <p key={text} className="text-xs text-slate-500 italic text-center mt-3 h-8 animate-fade-in">
         {text}
     </p>
 );
