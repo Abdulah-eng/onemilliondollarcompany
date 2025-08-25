@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Check, Droplets, BatteryFull, Smile, Moon, TrendingUp } from 'lucide-react';
+import { Check, Droplets, Battery, Smile, Moon, TrendingUp } from 'lucide-react';
 
 /*
 TODO: Backend Integration Notes for DailyCheckIn
@@ -152,7 +152,7 @@ const EnergyModule = ({ value, onChange, trend }) => {
     const trendIcon = trend === 'up' ? <TrendingUp className="w-3 h-3 text-emerald-600" /> : null;
     const trendText = trend === 'up' ? 'Improving' : '';
     return (
-        <CheckInModule icon={<BatteryFull className="text-green-500" />} title="Energy Level" feedback={value > 0 ? energyOptions[value - 1].feedback : "Rate your energy level."} trend={{icon: trendIcon, text: trendText}}>
+        <CheckInModule icon={<Battery className="text-green-500" />} title="Energy Level" feedback={value > 0 ? energyOptions[value - 1].feedback : "Rate your energy level."} trend={{icon: trendIcon, text: trendText}}>
             <EmojiSlider options={energyOptions} value={value} onChange={onChange} />
         </CheckInModule>
     );
@@ -166,7 +166,15 @@ const MoodModule = ({ value, onChange }) => (
 
 // --- Reusable Building Blocks ---
 
-const CheckInModule = ({ icon, title, feedback, trend, children }) => (
+interface CheckInModuleProps {
+  icon: React.ReactNode;
+  title: string;
+  feedback: string;
+  trend?: { icon: React.ReactNode; text: string };
+  children: React.ReactNode;
+}
+
+const CheckInModule: React.FC<CheckInModuleProps> = ({ icon, title, feedback, trend, children }) => (
   <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
     <CardHeader className="pb-2">
       <CardTitle className="text-base font-semibold flex items-center gap-2 text-slate-700">

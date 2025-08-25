@@ -64,7 +64,16 @@ const statCardThemes = {
     locked: 'bg-slate-100 border-slate-200 text-slate-800',
 };
 
-const StatCard = ({ emoji, label, value, isLocked, trend, color }) => {
+interface StatCardProps {
+  emoji: string;
+  label: string;
+  value: string;
+  isLocked: boolean;
+  trend?: string;
+  color: string;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ emoji, label, value, isLocked, trend, color }) => {
   const theme = isLocked ? statCardThemes.locked : statCardThemes[color];
   
   return (
