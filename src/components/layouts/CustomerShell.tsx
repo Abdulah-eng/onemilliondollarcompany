@@ -9,7 +9,8 @@ import { customerNavItems, customerBottomNavItems } from '@/lib/navItems';
 const CustomerShell = () => {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
+      {/* THE FIX: Added the 'theme-dashboard' class and changed bg-gray-50 to bg-background */}
+      <div className="theme-dashboard min-h-screen flex w-full bg-background">
         <SideNav navItems={customerNavItems} bottomNavItems={customerBottomNavItems} />
         <div className="flex-1 flex flex-col min-w-0">
           <TopNav />
