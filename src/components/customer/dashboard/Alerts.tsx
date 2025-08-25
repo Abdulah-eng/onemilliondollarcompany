@@ -1,7 +1,7 @@
 // src/components/customer/dashboard/Alerts.tsx
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { X, ArrowRight, Star, CalendarCheck2 } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
 
 /*
 TODO: Backend Integration Notes for Alerts
@@ -23,7 +23,6 @@ const Alerts = () => {
         emojiBg: 'bg-blue-100',
         title: "Daily Check-in Pending",
         description: "Log your progress for today.",
-        actionText: "Check In"
       });
     }
     if (mockData.plan === 'standard') {
@@ -33,7 +32,6 @@ const Alerts = () => {
         emojiBg: 'bg-orange-100',
         title: "Unlock Premium Features",
         description: "Get advanced analytics and more.",
-        actionText: "Go Premium"
       });
     }
     return alerts;
@@ -65,8 +63,8 @@ const Alerts = () => {
   );
 };
 
-const AlertItem = ({ emoji, emojiBg, title, description, actionText, onDismiss }) => (
-  <div className="p-4 px-6 flex items-center gap-4 group hover:bg-slate-50/50 transition-colors cursor-pointer">
+const AlertItem = ({ emoji, emojiBg, title, description, onDismiss }) => (
+  <div className="p-4 px-6 flex items-center gap-4 group hover:bg-slate-50/50 transition-colors">
     <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg ${emojiBg}`}>
       <span className="text-xl">{emoji}</span>
     </div>
@@ -74,12 +72,14 @@ const AlertItem = ({ emoji, emojiBg, title, description, actionText, onDismiss }
       <h3 className="font-semibold text-slate-700">{title}</h3>
       <p className="text-sm text-slate-500">{description}</p>
     </div>
-    <div className="flex items-center gap-4">
-        <button className="text-sm font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1">
-            {actionText} <ArrowRight className="w-4 h-4" />
+    <div className="flex items-center gap-2">
+        {/* Proceed Button */}
+        <button className="p-2 rounded-full text-slate-500 hover:bg-orange-100 hover:text-orange-600 transition-colors">
+            <ArrowRight className="w-5 h-5" />
         </button>
-        <button onClick={(e) => { e.stopPropagation(); onDismiss(); }} className="p-1 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
-            <X className="w-4 h-4" />
+        {/* Dismiss Button */}
+        <button onClick={onDismiss} className="p-2 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors">
+            <X className="w-5 h-5" />
         </button>
     </div>
   </div>
