@@ -1,5 +1,5 @@
 // src/components/customer/dashboard/DailyCheckIn.tsx
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -49,36 +49,29 @@ const DailyCheckIn = () => {
   const [activeStep, setActiveStep] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Auto-scroll to active step
+  // Auto-scroll to active step when a selection is made
   useEffect(() => {
     if (itemRefs.current[activeStep]) {
       itemRefs.current[activeStep]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
   }, [activeStep]);
 
-  // FIX: Observer to update active step on manual scroll
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const index = itemRefs.current.indexOf(entry.target as HTMLDivElement);
-            if (index !== -1) {
-              setActiveStep(index);
-            }
-          }
-        });
-      },
-      { root: scrollContainerRef.current, threshold: 0.6 }
-    );
-
-    itemRefs.current.forEach(ref => {
-      if (ref) observer.observe(ref);
-    });
-
-    return () => observer.disconnect();
-  }, []);
+  // FIX: More performant scroll handler to update dots on manual swipe
+  const handleScroll = () => {
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    scrollTimeoutRef.current = setTimeout(() => {
+      if (!scrollContainerRef.current) return;
+      const { scrollLeft, clientWidth } = scrollContainerRef.current;
+      const newActiveStep = Math.round(scrollLeft / clientWidth);
+      if (newActiveStep !== activeStep) {
+        setActiveStep(newActiveStep);
+      }
+    }, 150); // Debounce to avoid rapid state updates during scroll
+  };
 
   const handleLogCheckIn = () => {
     console.log({ water, sleep, energy, mood });
@@ -107,6 +100,7 @@ const DailyCheckIn = () => {
       <div className="space-y-4">
         <div
           ref={scrollContainerRef}
+          onScroll={handleScroll}
           className="flex lg:grid lg:grid-cols-2 gap-4 overflow-x-auto snap-x snap-mandatory p-2 -m-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           <div ref={el => itemRefs.current[0] = el} className="min-w-full flex-shrink-0 snap-center lg:min-w-0 p-1">
