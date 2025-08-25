@@ -50,15 +50,35 @@ const DailyCheckIn = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Auto-scroll to active step
   useEffect(() => {
     if (itemRefs.current[activeStep]) {
-      itemRefs.current[activeStep]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center',
-      });
+      itemRefs.current[activeStep]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
   }, [activeStep]);
+
+  // FIX: Observer to update active step on manual scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const index = itemRefs.current.indexOf(entry.target as HTMLDivElement);
+            if (index !== -1) {
+              setActiveStep(index);
+            }
+          }
+        });
+      },
+      { root: scrollContainerRef.current, threshold: 0.6 }
+    );
+
+    itemRefs.current.forEach(ref => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleLogCheckIn = () => {
     console.log({ water, sleep, energy, mood });
@@ -70,7 +90,7 @@ const DailyCheckIn = () => {
   if (checkedIn) {
     return (
       <div>
-        <h2 className="text-xl font-bold text-slate-700 mb-4">Daily Check-in</h2>
+        <h2 className="text-xl font-bold text-slate-800 mb-4">Daily Check-in</h2>
         <Card className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg">
           <CardContent className="p-6 text-center flex flex-col items-center gap-2">
             <Check className="w-10 h-10 bg-white/20 text-white rounded-full p-2"/>
@@ -83,7 +103,7 @@ const DailyCheckIn = () => {
 
   return (
     <div className="animate-fade-in-up">
-      <h2 className="text-xl font-bold text-slate-700 mb-4">Daily Check-in</h2>
+      <h2 className="text-xl font-bold text-slate-800 mb-4">Daily Check-in</h2>
       <div className="space-y-4">
         <div
           ref={scrollContainerRef}
