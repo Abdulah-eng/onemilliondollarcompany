@@ -1,7 +1,7 @@
 // src/components/customer/dashboard/QuickStats.tsx
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Droplets, BedDouble, Weight, TrendingUp, Lock, HeartPulse, BatteryFull, ArrowUp, ArrowDown } from 'lucide-react';
+import { Lock, ArrowUp, ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /*
@@ -26,13 +26,14 @@ const QuickStats = () => {
   const planLevels = { otp: 1, standard: 2, premium: 3 };
   const userPlanLevel = planLevels[plan] || 0;
 
+  // FIX: Replaced lucide-react icons with emojis
   const statItems = [
-    { label: "Avg. Water", value: stats.avgWater, icon: <Droplets />, requiredPlan: 'otp', color: 'blue' },
-    { label: "Avg. Energy", value: stats.avgEnergy, icon: <BatteryFull />, requiredPlan: 'otp', color: 'green' },
-    { label: "Avg. Sleep", value: stats.avgSleep, icon: <BedDouble />, requiredPlan: 'otp', color: 'indigo' },
-    { label: "Avg. Mood", value: stats.avgMood, icon: <HeartPulse />, requiredPlan: 'otp', color: 'rose' },
-    { label: "Weight Trend", value: stats.weightTrend, icon: <Weight />, requiredPlan: 'premium', trend: 'down', color: 'sky' },
-    { label: "Goal Adherence", value: `${stats.goalAdherence}%`, icon: <TrendingUp />, requiredPlan: 'premium', trend: 'up', color: 'purple' },
+    { label: "Avg. Water", value: stats.avgWater, emoji: '💧', requiredPlan: 'otp', color: 'blue' },
+    { label: "Avg. Energy", value: stats.avgEnergy, emoji: '⚡️', requiredPlan: 'otp', color: 'green' },
+    { label: "Avg. Sleep", value: stats.avgSleep, emoji: '😴', requiredPlan: 'otp', color: 'indigo' },
+    { label: "Avg. Mood", value: stats.avgMood, emoji: '😊', requiredPlan: 'otp', color: 'rose' },
+    { label: "Weight Trend", value: stats.weightTrend, emoji: '⚖️', requiredPlan: 'premium', trend: 'down', color: 'sky' },
+    { label: "Goal Adherence", value: `${stats.goalAdherence}%`, emoji: '🎯', requiredPlan: 'premium', trend: 'up', color: 'purple' },
   ];
 
   return (
@@ -63,14 +64,15 @@ const statCardThemes = {
     locked: 'bg-slate-100 border-slate-200 text-slate-800',
 };
 
-const StatCard = ({ icon, label, value, isLocked, trend, color }) => {
+const StatCard = ({ emoji, label, value, isLocked, trend, color }) => {
   const theme = isLocked ? statCardThemes.locked : statCardThemes[color];
   
   return (
     <Card className={cn("min-w-[160px] flex-1 shadow-sm hover:shadow-lg transition-all duration-300 border bg-gradient-to-br", theme)}>
         <CardContent className="p-4 flex flex-col justify-between h-full">
             <div className="flex items-center gap-2 mb-1 text-slate-600">
-                {icon}
+                {/* FIX: Render emoji as text in a span */}
+                <span className="text-lg">{emoji}</span>
                 <p className="text-xs font-semibold">{label}</p>
             </div>
             
