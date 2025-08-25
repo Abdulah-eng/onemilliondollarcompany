@@ -1,9 +1,8 @@
 // src/components/customer/dashboard/Alerts.tsx
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { X, ArrowRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { X, ArrowRight, Trash2 } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 
 /*
 TODO: Backend Integration Notes for Alerts
@@ -19,12 +18,9 @@ const mockData = {
 const useIsTouchDevice = () => {
   const [isTouch, setIsTouch] = useState(false);
   useEffect(() => {
-    const onResize = () => {
-      setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
-    };
-    window.addEventListener('resize', onResize);
-    onResize(); // Initial check
-    return () => window.removeEventListener('resize', onResize);
+    // This check is more reliable than just checking window properties
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+    setIsTouch(isTouchDevice);
   }, []);
   return isTouch;
 };
@@ -83,6 +79,7 @@ const Alerts = () => {
 
 const AlertItem = ({ emoji, emojiBg, title, description, onDismiss }) => {
   const isTouchDevice = useIsTouchDevice();
+  const x = useMotionValue(0); // Tracks the swipe distance
 
   const handleProceed = () => {
     console.log(`Proceeding with: ${title}`);
@@ -90,27 +87,35 @@ const AlertItem = ({ emoji, emojiBg, title, description, onDismiss }) => {
   };
 
   const handleDragEnd = (event, info) => {
-    if (info.offset.x < -80) { // Swipe threshold
+    if (info.offset.x < -80) { // If swiped far enough to the left
       onDismiss();
     }
   };
 
+  // The red background fades in as the user swipes
+  const backgroundOpacity = useTransform(x, [-100, 0], [1, 0]);
+
   return (
     <motion.div
-      exit={{ opacity: 0, height: 0, transition: { duration: 0.3 } }}
+      exit={{ opacity: 0, height: 0, transition: { duration: 0.2 } }}
       className="relative bg-white group"
     >
       {/* Red "Delete" background for swipe gesture (TOUCH ONLY) */}
       {isTouchDevice && (
-          <div className="absolute inset-y-0 right-0 flex items-center justify-end bg-red-100 text-red-600 px-6">
-              <X />
-          </div>
+        <motion.div 
+          className="absolute inset-y-0 right-0 flex items-center justify-end bg-red-100 text-red-600 px-6"
+          style={{ opacity: backgroundOpacity }}
+        >
+          <Trash2 />
+        </motion.div>
       )}
 
       {/* Main Alert Content */}
       <motion.div
         drag={isTouchDevice ? "x" : false}
         dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.1}
+        style={{ x }}
         onDragEnd={handleDragEnd}
         onTap={isTouchDevice ? handleProceed : undefined}
         className="relative p-4 px-6 flex items-center gap-4 hover:bg-slate-50/50 transition-colors cursor-pointer"
