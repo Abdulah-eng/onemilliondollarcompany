@@ -10,7 +10,8 @@ TODO: Backend Integration Notes for Alerts
 const mockData = {
   plan: 'standard', // 'none', 'trial', 'otp', 'standard', 'expiring'
   needsCheckIn: true,
-  isFirstTimeLogin: true,
+  // FIX: Set these to false to allow the component to render for demonstration.
+  isFirstTimeLogin: false,
   hasNewProgram: false,
 };
 
