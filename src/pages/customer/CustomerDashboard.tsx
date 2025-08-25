@@ -1,3 +1,4 @@
+// src/pages/customer/CustomerDashboard.tsx
 import WelcomeHeader from '@/components/customer/dashboard/WelcomeHeader';
 import TodaysFocus from '@/components/customer/dashboard/TodaysFocus';
 import Alerts from '@/components/customer/dashboard/Alerts';
@@ -11,15 +12,22 @@ const CustomerDashboard = () => {
       {/* --- Header and Welcome Section --- */}
       <WelcomeHeader />
 
-      {/* --- Alerts and Prompts --- */}
+      {/* --- Alerts and Prompts (Now visible) --- */}
       <Alerts />
 
-      {/* --- Main Dashboard Content (Single-Column Layout) --- */}
-      <div className="space-y-8 max-w-5xl mx-auto">
-        <DailyCheckIn />
-        <QuickStats />
-        <TodaysFocus />
-        <CoachTip />
+      {/* --- Main Dashboard Content Grid --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column (Main Tasks) */}
+        <div className="lg:col-span-2 space-y-8">
+          <DailyCheckIn />
+          <QuickStats />
+          <TodaysFocus />
+        </div>
+
+        {/* Right Column (Secondary Widgets) */}
+        <div className="lg:col-span-1 space-y-8">
+          <CoachTip />
+        </div>
       </div>
     </div>
   );
