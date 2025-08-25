@@ -1,35 +1,52 @@
 // src/components/customer/dashboard/Alerts.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X, ArrowRight, Trash2 } from 'lucide-react';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, useAnimation } from 'framer-motion';
 
+/*
+TODO: Backend Integration Notes for Alerts
+- The initial list of alerts should be generated based on the user's real-time data.
+- When an alert is dismissed, its ID should be stored to prevent it from reappearing.
+*/
 const mockData = {
   plan: 'standard',
   needsCheckIn: true,
 };
 
-// Hook: detect device type
-const useDeviceType = () => {
-  const [device, setDevice] = useState<"desktop" | "ipad" | "mobile">("desktop");
+// Robust device detector (avoids iPad false negatives)
+type DeviceType = 'desktop' | 'ipad' | 'mobile' | 'unknown';
+
+const useDeviceType = (): DeviceType => {
+  const [device, setDevice] = useState<DeviceType>('unknown');
 
   useEffect(() => {
-    const updateDevice = () => {
-      const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    const compute = () => {
+      const hasTouch =
+        ('ontouchstart' in window) ||
+        (navigator as any).msMaxTouchPoints > 0 ||
+        navigator.maxTouchPoints > 0 ||
+        window.matchMedia?.('(any-pointer: coarse)').matches ||
+        window.matchMedia?.('(pointer: coarse)').matches;
+
       const width = window.innerWidth;
 
-      if (!isTouch) {
-        setDevice("desktop");
+      if (!hasTouch) {
+        setDevice('desktop');
       } else if (width >= 768) {
-        setDevice("ipad");
+        setDevice('ipad');
       } else {
-        setDevice("mobile");
+        setDevice('mobile');
       }
     };
 
-    updateDevice(); // run immediately
-    window.addEventListener("resize", updateDevice);
-    return () => window.removeEventListener("resize", updateDevice);
+    compute(); // initial
+    window.addEventListener('resize', compute);
+    window.addEventListener('orientationchange', compute);
+    return () => {
+      window.removeEventListener('resize', compute);
+      window.removeEventListener('orientationchange', compute);
+    };
   }, []);
 
   return device;
@@ -43,8 +60,8 @@ const Alerts = () => {
         id: 'check-in',
         emoji: '🗓️',
         emojiBg: 'bg-blue-100',
-        title: "Daily Check-in Pending",
-        description: "Log your progress for today.",
+        title: 'Daily Check-in Pending',
+        description: 'Log your progress for today.',
       });
     }
     if (mockData.plan === 'standard') {
@@ -52,8 +69,8 @@ const Alerts = () => {
         id: 'upgrade-premium',
         emoji: '⭐',
         emojiBg: 'bg-orange-100',
-        title: "Unlock Premium Features",
-        description: "Get advanced analytics and more.",
+        title: 'Unlock Premium Features',
+        description: 'Get advanced analytics and more.',
       });
     }
     return alerts;
@@ -62,12 +79,10 @@ const Alerts = () => {
   const [visibleAlerts, setVisibleAlerts] = useState(getInitialAlerts);
 
   const handleDismiss = (alertId: string) => {
-    setVisibleAlerts(currentAlerts => currentAlerts.filter(alert => alert.id !== alertId));
+    setVisibleAlerts((current) => current.filter((a) => a.id !== alertId));
   };
 
-  if (visibleAlerts.length === 0) {
-    return null;
-  }
+  if (visibleAlerts.length === 0) return null;
 
   return (
     <Card className="bg-white shadow-md">
@@ -89,53 +104,98 @@ const Alerts = () => {
 
 const AlertItem = ({ emoji, emojiBg, title, description, onDismiss }) => {
   const device = useDeviceType();
+  const isTouch = device === 'ipad' || device === 'mobile';
+
+  // Motion
   const x = useMotionValue(0);
+  const controls = useAnimation();
+  const bgOpacity = useTransform(x, [-120, 0], [1, 0]);
+
+  // For reliable tap detection on iOS (works alongside drag)
+  const downRef = useRef<{ x: number; y: number; t: number } | null>(null);
 
   const handleProceed = () => {
     console.log(`Proceeding with: ${title}`);
     // Add navigation logic here
   };
 
+  // Dismiss with animated slide-out, then remove
+  const animateDismiss = async () => {
+    await controls.start({
+      x: -window.innerWidth, // slide fully left
+      opacity: 0,
+      transition: { duration: 0.22, ease: 'easeOut' },
+    });
+    onDismiss();
+  };
+
   const handleDragEnd = (_event, info) => {
     if (info.offset.x < -80) {
-      onDismiss();
+      // Sufficient swipe → animate out then remove
+      animateDismiss();
     } else {
-      x.set(0); // snap back if not far enough
+      // Not far enough → snap back
+      controls.start({ x: 0, transition: { type: 'spring', stiffness: 500, damping: 35 } });
     }
   };
 
-  const backgroundOpacity = useTransform(x, [-100, 0], [1, 0]);
-  const isTouch = device === "ipad" || device === "mobile";
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (!isTouch) return;
+    downRef.current = { x: e.clientX, y: e.clientY, t: performance.now() };
+  };
+
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (!isTouch) return;
+    const start = downRef.current;
+    downRef.current = null;
+    if (!start) return;
+
+    const dx = Math.abs(e.clientX - start.x);
+    const dy = Math.abs(e.clientY - start.y);
+    const dt = performance.now() - start.t;
+
+    // Heuristics for "tap": short, minimal movement
+    if (dx < 8 && dy < 8 && dt < 250) {
+      handleProceed();
+    }
+  };
 
   return (
     <motion.div
-      exit={{ opacity: 0, height: 0, transition: { duration: 0.2 } }}
+      initial={{ opacity: 1, height: 'auto' }}
+      exit={{ x: -140, opacity: 0, height: 0, transition: { duration: 0.2 } }}
       className="relative bg-white group"
     >
-      {/* Swipe background (iPad & Mobile only) */}
+      {/* Right-side delete background (touch only) */}
       {isTouch && (
-        <motion.div 
+        <motion.div
           className="absolute inset-y-0 right-0 flex items-center justify-end bg-red-100 text-red-600 px-6"
-          style={{ opacity: backgroundOpacity }}
+          style={{ opacity: bgOpacity }}
+          aria-hidden="true"
         >
           <Trash2 />
         </motion.div>
       )}
 
-      {/* Main alert row */}
+      {/* Draggable row */}
       <motion.div
-        drag={isTouch ? "x" : false}
+        drag={isTouch ? 'x' : false}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.1}
-        style={{ x, touchAction: "pan-y" }}
+        dragMomentum={false}
+        animate={controls}
+        style={{
+          x,
+          touchAction: isTouch ? 'pan-y' : 'auto', // allow horizontal pan while keeping vertical scroll
+          WebkitTapHighlightColor: 'transparent',
+        }}
         onDragEnd={isTouch ? handleDragEnd : undefined}
-        className="relative p-4 px-6 flex items-center gap-4 hover:bg-slate-50/50 transition-colors"
+        onPointerDown={isTouch ? onPointerDown : undefined}
+        onPointerUp={isTouch ? onPointerUp : undefined}
+        className="relative p-4 px-6 flex items-center gap-4 hover:bg-slate-50/50 transition-colors select-none"
       >
-        {/* Tap handler wrapper (only for touch devices) */}
-        <div
-          className="flex flex-1 items-center gap-4 cursor-pointer active:bg-slate-100"
-          onClick={isTouch ? handleProceed : undefined}
-        >
+        {/* Tap zone (fills the row) */}
+        <div className="flex flex-1 items-center gap-4 cursor-pointer active:bg-slate-100">
           <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg ${emojiBg}`}>
             <span className="text-xl">{emoji}</span>
           </div>
@@ -145,18 +205,26 @@ const AlertItem = ({ emoji, emojiBg, title, description, onDismiss }) => {
           </div>
         </div>
 
-        {/* Desktop-only buttons */}
-        {device === "desktop" && (
+        {/* Desktop-only buttons (never render while device is unknown to avoid flash) */}
+        {device === 'desktop' && (
           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
-              onClick={(e) => { e.stopPropagation(); onDismiss(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDismiss();
+              }}
               className="p-2 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-600"
+              aria-label="Dismiss"
             >
               <X className="w-5 h-5" />
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); handleProceed(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleProceed();
+              }}
               className="p-2 rounded-full text-slate-500 hover:bg-orange-100 hover:text-orange-600"
+              aria-label="Proceed"
             >
               <ArrowRight className="w-5 h-5" />
             </button>
