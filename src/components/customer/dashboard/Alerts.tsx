@@ -19,7 +19,12 @@ const mockData = {
 const useIsTouchDevice = () => {
   const [isTouch, setIsTouch] = useState(false);
   useEffect(() => {
-    setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    const onResize = () => {
+      setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    };
+    window.addEventListener('resize', onResize);
+    onResize(); // Initial check
+    return () => window.removeEventListener('resize', onResize);
   }, []);
   return isTouch;
 };
