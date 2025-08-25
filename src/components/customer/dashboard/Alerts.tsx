@@ -4,21 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X, ArrowRight, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 
-/*
-TODO: Backend Integration Notes for Alerts
-- The initial list of alerts should be generated based on the user's real-time data.
-- When an alert is dismissed, its ID should be stored to prevent it from reappearing.
-*/
 const mockData = {
   plan: 'standard',
   needsCheckIn: true,
 };
 
-// A simple hook to check if the device is touch-capable
+// Detect if touch device (iPad + Mobile)
 const useIsTouchDevice = () => {
   const [isTouch, setIsTouch] = useState(false);
   useEffect(() => {
-    // This check is more reliable than just checking window properties
     const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
     setIsTouch(isTouchDevice);
   }, []);
@@ -79,20 +73,19 @@ const Alerts = () => {
 
 const AlertItem = ({ emoji, emojiBg, title, description, onDismiss }) => {
   const isTouchDevice = useIsTouchDevice();
-  const x = useMotionValue(0); // Tracks the swipe distance
+  const x = useMotionValue(0);
 
   const handleProceed = () => {
     console.log(`Proceeding with: ${title}`);
     // Add navigation logic here
   };
 
-  const handleDragEnd = (event, info) => {
-    if (info.offset.x < -80) { // If swiped far enough to the left
+  const handleDragEnd = (_event, info) => {
+    if (info.offset.x < -80) {
       onDismiss();
     }
   };
 
-  // The red background fades in as the user swipes
   const backgroundOpacity = useTransform(x, [-100, 0], [1, 0]);
 
   return (
@@ -100,7 +93,7 @@ const AlertItem = ({ emoji, emojiBg, title, description, onDismiss }) => {
       exit={{ opacity: 0, height: 0, transition: { duration: 0.2 } }}
       className="relative bg-white group"
     >
-      {/* Red "Delete" background for swipe gesture (TOUCH ONLY) */}
+      {/* Red background for swipe (iPad + Mobile only) */}
       {isTouchDevice && (
         <motion.div 
           className="absolute inset-y-0 right-0 flex items-center justify-end bg-red-100 text-red-600 px-6"
@@ -110,13 +103,12 @@ const AlertItem = ({ emoji, emojiBg, title, description, onDismiss }) => {
         </motion.div>
       )}
 
-      {/* Main Alert Content */}
       <motion.div
         drag={isTouchDevice ? "x" : false}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.1}
         style={{ x }}
-        onDragEnd={handleDragEnd}
+        onDragEnd={isTouchDevice ? handleDragEnd : undefined}
         onTap={isTouchDevice ? handleProceed : undefined}
         className="relative p-4 px-6 flex items-center gap-4 hover:bg-slate-50/50 transition-colors cursor-pointer"
       >
@@ -128,16 +120,16 @@ const AlertItem = ({ emoji, emojiBg, title, description, onDismiss }) => {
           <p className="text-sm text-slate-500">{description}</p>
         </div>
         
-        {/* Desktop-only buttons */}
+        {/* Desktop-only buttons (hidden on iPad & Mobile) */}
         {!isTouchDevice && (
-            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={(e) => { e.stopPropagation(); onDismiss(); }} className="p-2 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-600">
-                    <X className="w-5 h-5" />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); handleProceed(); }} className="p-2 rounded-full text-slate-500 hover:bg-orange-100 hover:text-orange-600">
-                    <ArrowRight className="w-5 h-5" />
-                </button>
-            </div>
+          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button onClick={(e) => { e.stopPropagation(); onDismiss(); }} className="p-2 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-600">
+              <X className="w-5 h-5" />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); handleProceed(); }} className="p-2 rounded-full text-slate-500 hover:bg-orange-100 hover:text-orange-600">
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
         )}
       </motion.div>
     </motion.div>
