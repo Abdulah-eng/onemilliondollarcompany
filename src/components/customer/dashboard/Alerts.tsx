@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, CalendarCheck2, Star, Zap, Clock, X, ArrowRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 /*
 TODO: Backend Integration Notes for Alerts
