@@ -9,14 +9,38 @@ const mockData = {
   needsCheckIn: true,
 };
 
-// Detect if touch device (iPad + Mobile)
-const useIsTouchDevice = () => {
-  const [isTouch, setIsTouch] = useState(false);
+// Hook: detect device type
+const useDeviceType = () => {
+  const [device, setDevice] = useState<"desktop" | "ipad" | "mobile">("desktop");
+
   useEffect(() => {
-    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
-    setIsTouch(isTouchDevice);
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    const width = window.innerWidth;
+
+    if (!isTouch) {
+      setDevice("desktop");
+    } else if (width >= 768) {
+      setDevice("ipad");
+    } else {
+      setDevice("mobile");
+    }
+
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (!isTouch) {
+        setDevice("desktop");
+      } else if (width >= 768) {
+        setDevice("ipad");
+      } else {
+        setDevice("mobile");
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
-  return isTouch;
+
+  return device;
 };
 
 const Alerts = () => {
@@ -72,7 +96,7 @@ const Alerts = () => {
 };
 
 const AlertItem = ({ emoji, emojiBg, title, description, onDismiss }) => {
-  const isTouchDevice = useIsTouchDevice();
+  const device = useDeviceType();
   const x = useMotionValue(0);
 
   const handleProceed = () => {
@@ -88,13 +112,15 @@ const AlertItem = ({ emoji, emojiBg, title, description, onDismiss }) => {
 
   const backgroundOpacity = useTransform(x, [-100, 0], [1, 0]);
 
+  const isTouch = device === "ipad" || device === "mobile";
+
   return (
     <motion.div
       exit={{ opacity: 0, height: 0, transition: { duration: 0.2 } }}
       className="relative bg-white group"
     >
-      {/* Red background for swipe (iPad + Mobile only) */}
-      {isTouchDevice && (
+      {/* Swipe background only for iPad & Mobile */}
+      {isTouch && (
         <motion.div 
           className="absolute inset-y-0 right-0 flex items-center justify-end bg-red-100 text-red-600 px-6"
           style={{ opacity: backgroundOpacity }}
@@ -104,12 +130,12 @@ const AlertItem = ({ emoji, emojiBg, title, description, onDismiss }) => {
       )}
 
       <motion.div
-        drag={isTouchDevice ? "x" : false}
+        drag={isTouch ? "x" : false}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.1}
         style={{ x }}
-        onDragEnd={isTouchDevice ? handleDragEnd : undefined}
-        onTap={isTouchDevice ? handleProceed : undefined}
+        onDragEnd={isTouch ? handleDragEnd : undefined}
+        onTap={isTouch ? handleProceed : undefined}
         className="relative p-4 px-6 flex items-center gap-4 hover:bg-slate-50/50 transition-colors cursor-pointer"
       >
         <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg ${emojiBg}`}>
@@ -120,8 +146,8 @@ const AlertItem = ({ emoji, emojiBg, title, description, onDismiss }) => {
           <p className="text-sm text-slate-500">{description}</p>
         </div>
         
-        {/* Desktop-only buttons (hidden on iPad & Mobile) */}
-        {!isTouchDevice && (
+        {/* Desktop-only buttons */}
+        {device === "desktop" && (
           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button onClick={(e) => { e.stopPropagation(); onDismiss(); }} className="p-2 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-600">
               <X className="w-5 h-5" />
