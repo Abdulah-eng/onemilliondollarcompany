@@ -21,8 +21,11 @@ const WelcomeHeader = () => {
   return (
     <Card className="relative border-none bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-lg animate-fade-in-down overflow-hidden">
       <CardContent className="p-6">
-        <h1 className="text-2xl font-bold">Good {timeOfDay}, {userName} 👋</h1>
-        <p className="opacity-80 mt-1 text-sm italic">"{quote}"</p>
+        {/* FIX: The text content is now wrapped in a div with padding on the right */}
+        <div className="pr-28"> {/* This padding prevents overlap with the badge */}
+          <h1 className="text-2xl font-bold">Good {timeOfDay}, {userName} 👋</h1>
+          <p className="opacity-80 mt-1 text-sm italic">"{quote}"</p>
+        </div>
         
         {/* Streak Badge in top right corner */}
         <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-2">
