@@ -1,5 +1,5 @@
 // src/components/customer/dashboard/DailyCheckIn.tsx
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -51,33 +51,23 @@ const DailyCheckIn = () => {
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Auto-scroll to active step when a selection is made
   useEffect(() => {
     if (itemRefs.current[activeStep]) {
       itemRefs.current[activeStep]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
   }, [activeStep]);
 
-  // FIX: More performant scroll handler to update dots on manual swipe
   const handleScroll = () => {
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     scrollTimeoutRef.current = setTimeout(() => {
       if (!scrollContainerRef.current) return;
       const { scrollLeft, clientWidth } = scrollContainerRef.current;
       const newActiveStep = Math.round(scrollLeft / clientWidth);
-      if (newActiveStep !== activeStep) {
-        setActiveStep(newActiveStep);
-      }
-    }, 150); // Debounce to avoid rapid state updates during scroll
+      if (newActiveStep !== activeStep) setActiveStep(newActiveStep);
+    }, 150);
   };
 
-  const handleLogCheckIn = () => {
-    console.log({ water, sleep, energy, mood });
-    setCheckedIn(true);
-  };
-  
+  const handleLogCheckIn = () => setCheckedIn(true);
   const isComplete = water > 0 && sleep > 0 && energy > 0 && mood > 0;
 
   if (checkedIn) {
@@ -184,14 +174,16 @@ const CheckInModule = ({ icon, title, feedback, trend, children }) => (
       </CardTitle>
     </CardHeader>
     <CardContent className="flex-1 flex flex-col justify-center p-4">
-        {children}
+        <div className="max-w-xs mx-auto w-full">
+            {children}
+        </div>
         <FeedbackMessage text={feedback} />
     </CardContent>
   </Card>
 );
 
 const EmojiSlider = ({ options, value, onChange, showLabels = false }) => (
-  <div className="relative flex justify-between items-center pt-2 max-w-xs mx-auto w-full">
+  <div className="relative flex justify-between items-center pt-2 w-full">
     {options.map((option) => (
       <div key={option.value} className="flex flex-col items-center gap-1">
         {showLabels && <span className="text-xs font-medium text-slate-500 h-4">{option.label}</span>}
