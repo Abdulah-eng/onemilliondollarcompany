@@ -130,7 +130,8 @@ const WaterModule = ({ value, onChange }) => {
     const feedback = value === 0 ? "Tap to log your water intake." : value < 8 ? `Current: ${totalLiters}L / Goal: 2.5L` : "Goal Reached! Great job hydrating.";
     return (
         <CheckInModule icon={<Droplets className="text-blue-500" />} title="Water Intake" feedback={feedback}>
-            <div className="flex flex-wrap gap-1.5 justify-center max-w-[280px] mx-auto">
+            {/* FIX: Removed max-w- class to allow flexbox to use available space */}
+            <div className="flex flex-wrap gap-1.5 justify-center mx-auto">
                 {Array.from({ length: 8 }).map((_, i) => (
                 <button key={i} onClick={() => onChange(i + 1 === value ? i : i + 1)} className={cn("w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110", i < value ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-400')}>
                     <Droplets size={16} />
