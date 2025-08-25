@@ -28,6 +28,7 @@ const QuickStats = () => {
   const userPlanLevel = planLevels[plan] || 0;
 
   const statItems = [
+    { label: "7-Day Streak", value: `${stats.streak} Days`, icon: <Flame />, requiredPlan: 'otp', color: 'orange' },
     { label: "Avg. Water", value: stats.avgWater, icon: <Droplets />, requiredPlan: 'otp', color: 'blue' },
     { label: "Avg. Energy", value: stats.avgEnergy, icon: <BatteryFull />, requiredPlan: 'otp', color: 'green' },
     { label: "Avg. Sleep", value: stats.avgSleep, icon: <BedDouble />, requiredPlan: 'otp', color: 'indigo' },
@@ -39,14 +40,16 @@ const QuickStats = () => {
   return (
     <div>
         <h2 className="text-xl font-bold text-slate-800 mb-4">Your Weekly Stats</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {statItems.map((stat) => (
-                <StatCard
-                key={stat.label}
-                {...stat}
-                isLocked={planLevels[stat.requiredPlan] > userPlanLevel}
-                />
-            ))}
+        <div className="p-1 -m-1">
+            <div className="flex gap-3 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {statItems.map((stat) => (
+                    <StatCard
+                    key={stat.label}
+                    {...stat}
+                    isLocked={planLevels[stat.requiredPlan] > userPlanLevel}
+                    />
+                ))}
+            </div>
         </div>
     </div>
   );
@@ -67,7 +70,7 @@ const StatCard = ({ icon, label, value, isLocked, trend, color }) => {
   const theme = isLocked ? statCardThemes.locked : statCardThemes[color];
   
   return (
-    <Card className={cn("shadow-sm hover:shadow-lg transition-all duration-300 border bg-gradient-to-br", theme)}>
+    <Card className={cn("min-w-[160px] flex-1 shadow-sm hover:shadow-lg transition-all duration-300 border bg-gradient-to-br", theme)}>
         <CardContent className="p-4 flex flex-col justify-between h-full">
             <div className="flex items-center gap-2 mb-1 text-slate-600">
                 {icon}
