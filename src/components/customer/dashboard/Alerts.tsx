@@ -1,20 +1,17 @@
+// src/components/customer/dashboard/Alerts.tsx
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { X, ArrowRight, Trash2 } from "lucide-react";
 
-// Detect device type
+// --- Detect device type ---
 function useDeviceType() {
   const [device, setDevice] = useState<"desktop" | "ipad" | "mobile">("desktop");
 
   useEffect(() => {
     const checkDevice = () => {
-      if (window.innerWidth <= 768) {
-        setDevice("mobile");
-      } else if (window.innerWidth <= 1024) {
-        setDevice("ipad");
-      } else {
-        setDevice("desktop");
-      }
+      if (window.innerWidth <= 768) setDevice("mobile");
+      else if (window.innerWidth <= 1024) setDevice("ipad");
+      else setDevice("desktop");
     };
     checkDevice();
     window.addEventListener("resize", checkDevice);
@@ -24,6 +21,7 @@ function useDeviceType() {
   return device;
 }
 
+// --- Single Alert Item ---
 const AlertItem = ({ emoji, emojiBg, title, description, extra, onDismiss, isFirst, isLast }) => {
   const device = useDeviceType();
   const x = useMotionValue(0);
@@ -34,10 +32,8 @@ const AlertItem = ({ emoji, emojiBg, title, description, extra, onDismiss, isFir
 
   const handleDragEnd = (_event, info) => {
     if (info.offset.x < -80) {
-      // swipe left = dismiss
       onDismiss();
     } else {
-      // reset if not far enough
       x.set(0);
     }
   };
@@ -48,11 +44,9 @@ const AlertItem = ({ emoji, emojiBg, title, description, extra, onDismiss, isFir
   return (
     <motion.div
       exit={{ opacity: 0, height: 0, transition: { duration: 0.2 } }}
-      className={`relative bg-white group w-full ${
-        isFirst ? "rounded-t-2xl" : ""
-      } ${isLast ? "rounded-b-2xl overflow-hidden" : ""}`}
+      className={`relative bg-white group w-full ${isFirst ? "rounded-t-2xl" : ""} ${isLast ? "rounded-b-2xl overflow-hidden" : ""}`}
     >
-      {/* red swipe background */}
+      {/* swipe background */}
       {isTouch && (
         <motion.div
           className="absolute inset-y-0 right-0 flex items-center justify-end bg-red-100 text-red-600 px-6"
@@ -62,7 +56,7 @@ const AlertItem = ({ emoji, emojiBg, title, description, extra, onDismiss, isFir
         </motion.div>
       )}
 
-      {/* main content */}
+      {/* content */}
       <motion.div
         drag={isTouch ? "x" : false}
         dragConstraints={{ left: -100, right: 0 }}
@@ -72,25 +66,16 @@ const AlertItem = ({ emoji, emojiBg, title, description, extra, onDismiss, isFir
         onTap={isTouch ? handleProceed : undefined}
         className="relative p-4 px-6 flex items-center gap-4 hover:bg-slate-50/50 transition-colors cursor-pointer"
       >
-        {/* emoji */}
         <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg ${emojiBg}`}>
           <span className="text-xl">{emoji}</span>
         </div>
 
-        {/* text / info section */}
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-slate-700">{title}</h3>
           <p className="text-sm text-slate-500">{description}</p>
-
-          {/* extra info fields (preserved context) */}
-          {extra && (
-            <div className="mt-1 text-xs text-slate-400">
-              {extra}
-            </div>
-          )}
+          {extra && <div className="mt-1 text-xs text-slate-400">{extra}</div>}
         </div>
 
-        {/* desktop buttons */}
         {device === "desktop" && (
           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
@@ -118,7 +103,8 @@ const AlertItem = ({ emoji, emojiBg, title, description, extra, onDismiss, isFir
   );
 };
 
-export default function AlertList() {
+// --- Alerts List ---
+export default function Alerts() {
   const [alerts, setAlerts] = useState([
     {
       id: 1,
@@ -144,14 +130,20 @@ export default function AlertList() {
       description: "Don’t forget to drink water today.",
       extra: "Goal: 2.5L • Current: 0.8L",
     },
+    {
+      id: 4,
+      emoji: "💡",
+      emojiBg: "bg-green-100",
+      title: "Coach's Tip",
+      description: "Remember to stay hydrated, especially on days with cardio. It's key to reaching your goals!",
+      extra: "Tip by Coach • Today",
+    },
   ]);
 
-  const handleDismiss = (id: number) => {
-    setAlerts((prev) => prev.filter((a) => a.id !== id));
-  };
+  const handleDismiss = (id: number) => setAlerts((prev) => prev.filter((a) => a.id !== id));
 
   return (
-    <div className="w-full mx-auto mt-12 shadow-lg rounded-2xl overflow-hidden">
+    <div className="w-full mx-auto mt-4 shadow-lg rounded-2xl overflow-hidden">
       <AnimatePresence>
         {alerts.map((alert, index) => (
           <AlertItem
