@@ -23,9 +23,11 @@ import PersonalInfoStep from "./pages/onboarding/PersonalInfoStep";
 import PreferencesStep from "./pages/onboarding/PreferencesStep";
 import ContactStep from "./pages/onboarding/ContactStep";
 import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess";
-// FIX: The correct dashboard pages are imported here
 import CustomerDashboardPage from "./pages/customer/CustomerDashboard";
 import CoachDashboardPage from "./pages/coach/CoachDashboard";
+// --- NEW PAGE IMPORT ---
+import MyProgramsPage from "./pages/customer/MyProgramsPage";
+
 
 // --- LOADING COMPONENT ---
 const LoadingScreen = () => <div className="flex h-screen w-full items-center justify-center bg-emerald-50"><Loader2 className="h-10 w-10 animate-spin text-emerald-500" /></div>;
@@ -111,6 +113,8 @@ const App = () => (
               {/* Customer Routes */}
               <Route path="/customer/*" element={<CustomerGate />}>
                 <Route path="dashboard" element={<CustomerDashboardPage />} />
+                {/* --- NEW ROUTE ADDED HERE --- */}
+                <Route path="programs" element={<MyProgramsPage />} />
               </Route>
               
               {/* Onboarding Routes */}
