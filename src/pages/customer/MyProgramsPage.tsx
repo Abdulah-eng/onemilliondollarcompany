@@ -1,19 +1,36 @@
 // src/pages/customer/Programs.tsx
-
 import { useState, useEffect, useMemo, useRef } from "react";
 import { format, addDays, isSameDay, isToday } from "date-fns";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { CheckCircle2, Dumbbell, Apple, Brain } from "lucide-react";
+import { CheckCircle2, Dumbbell, Apple, Brain, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// --- Type config for program indicators ---
-const typeConfig: Record<string, { Icon: any; color: string; dot: string }> = {
-  fitness: { Icon: Dumbbell, color: "bg-emerald-500", dot: "bg-emerald-500" },
-  nutrition: { Icon: Apple, color: "bg-amber-500", dot: "bg-amber-500" },
-  mental: { Icon: Brain, color: "bg-indigo-500", dot: "bg-indigo-500" },
+// --- Type config ---
+const typeConfig: Record<
+  string,
+  { Icon: any; color: string; dot: string; missed: string }
+> = {
+  fitness: {
+    Icon: Dumbbell,
+    color: "bg-emerald-500",
+    dot: "bg-emerald-500",
+    missed: "bg-emerald-300",
+  },
+  nutrition: {
+    Icon: Apple,
+    color: "bg-amber-500",
+    dot: "bg-amber-500",
+    missed: "bg-amber-300",
+  },
+  mental: {
+    Icon: Brain,
+    color: "bg-indigo-500",
+    dot: "bg-indigo-500",
+    missed: "bg-indigo-300",
+  },
 };
 
 // --- Horizontal Calendar ---
@@ -32,7 +49,7 @@ const HorizontalCalendar = ({
     []
   );
 
-  // center selected date on mount
+  // Center on mount
   useEffect(() => {
     const selectedElement = document.getElementById(
       `date-${format(selectedDate, "yyyy-MM-dd")}`
@@ -80,7 +97,12 @@ const HorizontalCalendar = ({
               {dayPrograms.map((p, i) => (
                 <div
                   key={i}
-                  className={cn("w-1.5 h-1.5 rounded-full", typeConfig[p.type].dot)}
+                  className={cn(
+                    "w-1.5 h-1.5 rounded-full",
+                    p.status === "missed"
+                      ? typeConfig[p.type].missed
+                      : typeConfig[p.type].dot
+                  )}
                 />
               ))}
             </div>
@@ -92,14 +114,21 @@ const HorizontalCalendar = ({
 };
 
 // --- Program Card ---
-const ProgramCard = ({ program, onClick }: { program: any; onClick: () => void }) => {
+const ProgramCard = ({
+  program,
+  onClick,
+}: {
+  program: any;
+  onClick: () => void;
+}) => {
   const { Icon, color } = typeConfig[program.type];
   const isCompleted = program.progress === 100;
+  const isMissed = program.status === "missed";
 
   return (
     <Card
       onClick={onClick}
-      className="cursor-pointer hover:shadow-lg transition rounded-2xl border border-slate-200 bg-transparent backdrop-blur-sm"
+      className="cursor-pointer hover:shadow-lg transition rounded-2xl border border-slate-200 bg-white"
     >
       <CardContent className="p-4 flex flex-col gap-3">
         <div className="flex items-center justify-between">
@@ -110,13 +139,19 @@ const ProgramCard = ({ program, onClick }: { program: any; onClick: () => void }
             <h3 className="font-bold text-slate-800">{program.title}</h3>
           </div>
           {isCompleted && <CheckCircle2 className="w-6 h-6 text-emerald-500" />}
+          {isMissed && <XCircle className="w-6 h-6 text-red-400" />}
         </div>
+
         <div className="text-sm text-slate-500">
           {program.plan.length} {program.plan.length > 1 ? "tasks" : "task"}
         </div>
+
         <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
           <div
-            className="bg-emerald-500 h-2 rounded-full transition-all duration-500"
+            className={cn(
+              "h-2 rounded-full transition-all duration-500",
+              isMissed ? "bg-red-400" : "bg-emerald-500"
+            )}
             style={{ width: `${program.progress}%` }}
           />
         </div>
@@ -131,31 +166,37 @@ export default function ProgramsPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedProgram, setSelectedProgram] = useState<any>(null);
 
-  // --- mock programs ---
+  // --- Mock Data ---
   const programs = [
     {
       id: 1,
-      title: "Strength Training",
+      title: "Leg Day",
       type: "fitness",
       date: new Date(),
       progress: 60,
-      plan: ["Warm-up", "Squats", "Push-ups"],
+      plan: ["Squats 3x15", "Lunges 3x15"],
+      status: "in-progress",
+      week: 1,
     },
     {
       id: 2,
-      title: "Balanced Diet Plan",
+      title: "Nutrition Day",
       type: "nutrition",
       date: new Date(),
-      progress: 100,
-      plan: ["Breakfast", "Lunch", "Dinner"],
+      progress: 0,
+      plan: ["Breakfast: Oatmeal", "Lunch: Banana", "Dinner: Pizza"],
+      status: "missed",
+      week: 1,
     },
     {
       id: 3,
-      title: "Mindfulness Session",
+      title: "Mindfulness",
       type: "mental",
       date: addDays(new Date(), 2),
       progress: 0,
       plan: ["Breathing", "Meditation"],
+      status: "pending",
+      week: 1,
     },
   ];
 
@@ -192,7 +233,7 @@ export default function ProgramsPage() {
         programs={programs}
       />
 
-      {/* Programs for the selected day */}
+      {/* Programs for the day */}
       <div className="space-y-4">
         {todaysPrograms.length === 0 ? (
           <div className="text-center py-12 rounded-2xl text-slate-500 border border-dashed border-slate-300">
@@ -209,13 +250,18 @@ export default function ProgramsPage() {
         )}
       </div>
 
-      {/* Drawer/Dialog for program details */}
+      {/* Drawer/Dialog for details */}
       {isMobile ? (
-        <Drawer open={!!selectedProgram} onOpenChange={() => setSelectedProgram(null)}>
+        <Drawer
+          open={!!selectedProgram}
+          onOpenChange={() => setSelectedProgram(null)}
+        >
           <DrawerContent className="p-4">
             {selectedProgram && (
               <div>
-                <h2 className="text-xl font-bold mb-2">{selectedProgram.title}</h2>
+                <h2 className="text-xl font-bold mb-2">
+                  {selectedProgram.title}
+                </h2>
                 <ul className="list-disc pl-5 space-y-1">
                   {selectedProgram.plan.map((step: string, i: number) => (
                     <li key={i}>{step}</li>
@@ -226,11 +272,16 @@ export default function ProgramsPage() {
           </DrawerContent>
         </Drawer>
       ) : (
-        <Dialog open={!!selectedProgram} onOpenChange={() => setSelectedProgram(null)}>
+        <Dialog
+          open={!!selectedProgram}
+          onOpenChange={() => setSelectedProgram(null)}
+        >
           <DialogContent className="sm:max-w-md">
             {selectedProgram && (
               <div>
-                <h2 className="text-xl font-bold mb-2">{selectedProgram.title}</h2>
+                <h2 className="text-xl font-bold mb-2">
+                  {selectedProgram.title}
+                </h2>
                 <ul className="list-disc pl-5 space-y-1">
                   {selectedProgram.plan.map((step: string, i: number) => (
                     <li key={i}>{step}</li>
