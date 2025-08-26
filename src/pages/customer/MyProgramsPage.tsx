@@ -11,7 +11,7 @@ import TaskCard, { ScheduledTask } from "@/components/customer/programsoverview/
 import WeeklyCalendar from "@/components/customer/programsoverview/WeeklyCalendar";
 
 // MOCK DATA (same as before)
-import { mockPrograms, generateDailySchedule } from "./mockPrograms";
+import { mockPrograms, generateDailySchedule } from "@/mockdata/programs/mockprograms";
 
 export default function MyProgramsPage() {
   const [tab, setTab] = useState("active");
