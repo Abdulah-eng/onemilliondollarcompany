@@ -9,8 +9,8 @@ import { OnboardingProvider } from "./contexts/OnboardingContext";
 import { Loader2 } from "lucide-react";
 
 // --- LAYOUTS ---
-import CustomerShell from "@/components/layouts/CustomerShell";
-import CoachShell from "@/components/layouts/CoachShell";
+import AppShell from "@/components/layouts/AppShell";
+import RoleGate from "@/components/routing/RoleGate";
 
 // --- PAGES ---
 import LandingPage from "./pages/public/LandingPage";
@@ -54,32 +54,6 @@ const ProtectedRoutesLayout = () => {
   return <Outlet />;
 };
 
-const CoachGate = () => {
-  const { profile, loading } = useAuth();
-  if (loading) return <LoadingScreen />;
-  if (!profile) return <Navigate to="/login" replace />;
-  if (profile.role !== 'coach') return <Navigate to="/login" replace />;
-  // The CoachShell now wraps the Outlet, providing the layout for all coach pages
-  return (
-    <CoachShell>
-      <Outlet />
-    </CoachShell>
-  );
-};
-
-const CustomerGate = () => {
-  const { profile, loading } = useAuth();
-  if (loading) return <LoadingScreen />;
-  if (!profile) return <Navigate to="/login" replace />;
-  if (profile.role !== 'customer') return <Navigate to="/login" replace />;
-  if (!profile.onboarding_complete) return <Navigate to="/onboarding/step-1" replace />;
-  // The CustomerShell now wraps the Outlet, providing the layout for all customer pages
-  return (
-    <CustomerShell>
-      <Outlet />
-    </CustomerShell>
-  );
-};
 
 const OnboardingGate = () => {
   const { profile, loading } = useAuth();
@@ -116,16 +90,15 @@ const App = () => (
             {/* 3. Protected Routes */}
             <Route element={<ProtectedRoutesLayout />}>
               {/* Coach Routes */}
-              <Route path="/coach" element={<CoachGate />}>
-                <Route path="dashboard" element={<CoachDashboardPage />} />
+              <Route element={<RoleGate allowedRole="coach"><AppShell /></RoleGate>}>
+                <Route path="/coach/dashboard" element={<CoachDashboardPage />} />
                 {/* Add other coach routes here */}
               </Route>
               
               {/* Customer Routes */}
-              <Route path="/customer" element={<CustomerGate />}>
-                <Route path="dashboard" element={<CustomerDashboardPage />} />
-                {/* --- 2. ADD THE NEW PROGRAMS ROUTE HERE --- */}
-                <Route path="programs" element={<MyProgramsPage />} />
+              <Route element={<RoleGate allowedRole="customer"><AppShell /></RoleGate>}>
+                <Route path="/customer/dashboard" element={<CustomerDashboardPage />} />
+                <Route path="/customer/programs" element={<MyProgramsPage />} />
                 {/* Add other customer routes here */}
               </Route>
               
