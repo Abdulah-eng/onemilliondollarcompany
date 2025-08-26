@@ -1,66 +1,59 @@
-import { useRef, useMemo, useEffect } from "react";
-import { addDays, format, isSameDay, isToday, isPast } from "date-fns";
+// src/components/customer/programsoverview/WeeklyCalendar.tsx
+import { addDays, startOfWeek, format, isSameDay, isToday, isPast } from "date-fns";
+import { ScheduledTask, typeConfig } from "./TaskCard";
 import { cn } from "@/lib/utils";
-import { ScheduledTask } from "@/pages/customer/MyProgramsPage"; // reuse type
-import { typeConfig } from "./TaskCard";
 
-const dayNameToIndex: Record<string, number> = {
-  Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3,
-  Friday: 4, Saturday: 5, Sunday: 6
-};
-
-export const HorizontalCalendar = ({
+export default function WeeklyCalendar({
   selectedDate,
   setSelectedDate,
   schedule,
+  weekOffset,
+  setWeekOffset,
 }: {
   selectedDate: Date;
   setSelectedDate: (date: Date) => void;
   schedule: ScheduledTask[];
-}) => {
-  const dateListRef = useRef<HTMLDivElement>(null);
-  const dates = useMemo(() => Array.from({ length: 60 }, (_, i) => addDays(new Date(), i - 30)), []);
-
-  useEffect(() => {
-    const selectedEl = document.getElementById(`date-${format(selectedDate, "yyyy-MM-dd")}`);
-    if (selectedEl && dateListRef.current) {
-      const scrollLeft = selectedEl.offsetLeft - dateListRef.current.offsetWidth / 2 + selectedEl.offsetWidth / 2;
-      dateListRef.current.scrollTo({ left: scrollLeft, behavior: "smooth" });
-    }
-  }, [selectedDate]);
+  weekOffset: number;
+  setWeekOffset: (offset: number) => void;
+}) {
+  const weekStart = startOfWeek(addDays(new Date(), weekOffset * 7), { weekStartsOn: 1 });
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   return (
-    <div ref={dateListRef} className="flex space-x-3 overflow-x-auto pb-4 scrollbar-hide scroll-smooth">
-      {dates.map((date) => {
-        const isSelected = isSameDay(date, selectedDate);
-        const dayTasks = schedule.filter((t) => isSameDay(t.date, date));
-        const uniqueTypes = [...new Set(dayTasks.map((t) => t.type))] as const;
+    <div className="flex flex-col gap-2">
+      <div className="flex justify-between items-center mb-2">
+        <button onClick={() => setWeekOffset(weekOffset - 1)} className="px-3 py-1 rounded bg-emerald-500 text-white">◀ Prev</button>
+        <span className="font-semibold">{format(weekStart, "MMM do")} - {format(addDays(weekStart, 6), "MMM do")}</span>
+        <button onClick={() => setWeekOffset(weekOffset + 1)} className="px-3 py-1 rounded bg-emerald-500 text-white">Next ▶</button>
+      </div>
+      <div className="flex justify-between">
+        {weekDays.map((date) => {
+          const dayTasks = schedule.filter(t => isSameDay(t.date, date));
+          const uniqueTypes = [...new Set(dayTasks.map(t => t.type))] as const;
 
-        return (
-          <button
-            key={date.toString()}
-            id={`date-${format(date, "yyyy-MM-dd")}`}
-            onClick={() => setSelectedDate(date)}
-            className={cn(
-              "flex flex-col items-center justify-center p-2 rounded-xl w-16 h-24 transition-all duration-200 shrink-0 border-2",
-              isSelected ? "bg-emerald-500 text-white border-emerald-500 shadow-lg" : "bg-white hover:bg-slate-100 border-transparent",
-              isToday(date) && !isSelected && "border-emerald-500"
-            )}
-          >
-            <span className="text-xs uppercase font-semibold opacity-70">{format(date, "EEE")}</span>
-            <span className="text-2xl font-bold">{format(date, "d")}</span>
-            <div className="flex gap-1 mt-1 h-2">
-              {uniqueTypes.map((type) => {
-                const tasksOfType = dayTasks.filter((t) => t.type === type);
-                const isAnyMissed = tasksOfType.some(t => t.status === "missed" && isPast(t.date) && !isToday(t.date));
-                return (
-                  <div key={type} className={cn("w-2 h-2 rounded-full", isAnyMissed ? typeConfig[type].missedDot : typeConfig[type].dot)} />
-                );
-              })}
-            </div>
-          </button>
-        );
-      })}
+          return (
+            <button
+              key={date.toString()}
+              onClick={() => setSelectedDate(date)}
+              className={cn(
+                "flex flex-col items-center justify-center p-2 rounded-xl w-16 transition-all duration-200",
+                isSameDay(date, selectedDate) ? "bg-emerald-500 text-white shadow-lg" : "bg-white hover:bg-slate-100",
+                isToday(date) && "border-2 border-emerald-500"
+              )}
+            >
+              <span className="text-xs font-semibold">{format(date, "EEE")}</span>
+              <span className="text-2xl font-bold">{format(date, "d")}</span>
+              <div className="flex gap-1 mt-1 h-2">
+                {uniqueTypes.map((type) => {
+                  const tasksOfType = dayTasks.filter((t) => t.type === type);
+                  const isAnyMissed = tasksOfType.some(t => t.status === "missed" && isPast(t.date) && !isToday(t.date));
+                  return <div key={type} className={cn("w-2 h-2 rounded-full", isAnyMissed ? typeConfig[type].missedDot : typeConfig[type].dot)} />;
+                })}
+              </div>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
-};
+}
