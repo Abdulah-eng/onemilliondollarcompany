@@ -1,44 +1,136 @@
-// src/components/customer/dashboard/TodaysFocus.tsx
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dumbbell, UtensilsCrossed, BrainCircuit, CheckCircle2 } from 'lucide-react';
+// src/components/customer/dashboard/TodaysProgram.tsx
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Clock, ShoppingBag } from "lucide-react";
 
 const mockData = {
-  workout: { title: 'Full Body Strength A', completed: true, requiresGym: true },
-  nutrition: { title: 'High-Protein Meal Plan', completed: false, shoppingListAvailable: true },
-  mental: { title: '5-Minute Mindful Breathing', completed: false }
+  day: "Monday",
+  workout: {
+    title: "Leg Day",
+    exercises: [
+      { name: "Squat", sets: "3x5" },
+      { name: "Lunges", sets: "3x15" },
+      { name: "Leg Press", sets: "3x10" },
+    ],
+    duration: "45 minutes",
+    equipment: "Gym",
+    image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=800", // example
+  },
+  nutrition: {
+    title: "Lunch – Eggs Benedict",
+    ingredients: ["Eggs", "Bread", "Avocado", "Spinach"],
+    shoppingListAvailable: true,
+    image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=800",
+  },
+  mental: {
+    title: "Afternoon Meditation",
+    duration: "15 minutes",
+    time: "16:00",
+    image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=800",
+  },
 };
 
-const TodaysFocus = () => {
-  const { workout, nutrition, mental } = mockData;
+const TodaysProgram = () => {
+  const { day, workout, nutrition, mental } = mockData;
 
   return (
-    <div>
-      <h2 className="text-xl font-bold text-gray-700 mb-4">Today's Focus</h2>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <FocusCard icon={<Dumbbell />} title="Workout" task={workout.title} completed={workout.completed} tags={workout.requiresGym ? [{ text: 'Gym' }] : []} />
-        <FocusCard icon={<UtensilsCrossed />} title="Nutrition" task={nutrition.title} completed={nutrition.completed} tags={nutrition.shoppingListAvailable ? [{ text: 'Shopping List' }] : []} />
-        <FocusCard icon={<BrainCircuit />} title="Mental Wellness" task={mental.title} completed={mental.completed} />
-      </div>
+    <div className="w-full space-y-6">
+      <h2 className="text-2xl font-bold text-slate-800">
+        {day} – Your Focus Today
+      </h2>
+
+      {/* Workout */}
+      <Card className="overflow-hidden rounded-2xl shadow-sm border border-slate-100">
+        <div className="h-40 w-full overflow-hidden">
+          <img
+            src={workout.image}
+            alt="Workout"
+            className="object-cover w-full h-full"
+          />
+        </div>
+        <CardContent className="p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-semibold">
+              🏋️ {workout.title}
+            </h3>
+            <span className="text-sm text-slate-500 flex items-center">
+              <Clock className="w-4 h-4 mr-1" /> {workout.duration}
+            </span>
+          </div>
+          <p className="text-sm text-slate-500">
+            Equipment: {workout.equipment}
+          </p>
+          <ul className="text-slate-700 text-sm space-y-1">
+            {workout.exercises.map((ex, i) => (
+              <li key={i} className="flex justify-between">
+                <span>{ex.name}</span>
+                <span className="font-medium">{ex.sets}</span>
+              </li>
+            ))}
+          </ul>
+          <Button className="w-full rounded-xl mt-3">Start Workout</Button>
+        </CardContent>
+      </Card>
+
+      {/* Nutrition */}
+      <Card className="overflow-hidden rounded-2xl shadow-sm border border-slate-100">
+        <div className="h-40 w-full overflow-hidden">
+          <img
+            src={nutrition.image}
+            alt="Nutrition"
+            className="object-cover w-full h-full"
+          />
+        </div>
+        <CardContent className="p-5 space-y-3">
+          <h3 className="text-xl font-semibold">🥗 {nutrition.title}</h3>
+          <ul className="flex flex-wrap gap-2 text-sm text-slate-600">
+            {nutrition.ingredients.map((item, i) => (
+              <li
+                key={i}
+                className="px-2 py-1 bg-slate-100 rounded-full text-xs"
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+          {nutrition.shoppingListAvailable && (
+            <Button
+              variant="outline"
+              className="w-full rounded-xl mt-3 flex items-center justify-center gap-2"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              Get Shopping List
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Mental */}
+      <Card className="overflow-hidden rounded-2xl shadow-sm border border-slate-100">
+        <div className="h-40 w-full overflow-hidden">
+          <img
+            src={mental.image}
+            alt="Meditation"
+            className="object-cover w-full h-full"
+          />
+        </div>
+        <CardContent className="p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-semibold">
+              🧘 {mental.title}
+            </h3>
+            <span className="text-sm text-slate-500 flex items-center">
+              <Clock className="w-4 h-4 mr-1" /> {mental.duration}
+            </span>
+          </div>
+          <p className="text-sm text-slate-500">
+            Scheduled: {mental.time}
+          </p>
+          <Button className="w-full rounded-xl mt-3">Start Meditation</Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-const FocusCard = ({ icon, title, task, completed, tags = [] }) => (
-  <Card className="bg-white shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer group">
-    <CardHeader className="flex flex-row items-center justify-between pb-2">
-      <CardTitle className="text-base font-semibold text-gray-700">{title}</CardTitle>
-      <div className="text-orange-500">{icon}</div>
-    </CardHeader>
-    <CardContent>
-      {/* --- SIZE ADJUSTMENT --- */}
-      <p className="text-lg font-bold text-gray-900 truncate group-hover:text-orange-600 transition-colors">{task}</p>
-      <div className="flex items-center text-sm text-gray-500 mt-2">
-        {completed ? <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" /> : <div className="w-4 h-4 mr-2 border-2 border-gray-300 rounded-full" />}
-        <span>{completed ? 'Completed' : 'Pending'}</span>
-        <div className="ml-auto">{tags.map(tag => <span key={tag.text} className="text-xs font-semibold bg-gray-100 text-gray-800 px-2 py-1 rounded-full">{tag.text}</span>)}</div>
-      </div>
-    </CardContent>
-  </Card>
-);
-
-export default TodaysFocus;
+export default TodaysProgram;
