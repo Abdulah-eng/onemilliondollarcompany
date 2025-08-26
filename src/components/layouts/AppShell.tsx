@@ -10,16 +10,12 @@ import {
   customerNavItems, 
   customerBottomNavItems, 
   coachNavItems, 
-  coachBottomNavItems,
-  NavItem
+  coachBottomNavItems
 } from '@/lib/navItems';
 
 const AppShell = () => {
-  // Get the user's profile from the authentication context
   const { profile } = useAuth();
 
-  // Determine which navigation items to use based on the user's role.
-  // useMemo ensures this logic only re-runs if the user's role changes.
   const { navItems, bottomNavItems } = useMemo(() => {
     if (profile?.role === 'coach') {
       return {
