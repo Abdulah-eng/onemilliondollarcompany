@@ -21,10 +21,10 @@ export interface NavItem {
 
 export const customerNavItems: NavItem[] = [
   { name: 'Home', href: '/customer/dashboard', icon: Home },
-  // FIX: Corrected the href to match the router's path
   { name: 'My Programs', href: '/customer/programs', icon: BookOpen },
   { name: 'Library', href: '/customer/library', icon: Library },
-  { name 'Progress', href: '/customer/progress', icon: TrendingUp },
+  // --- FIX: Added the missing colon after 'name' ---
+  { name: 'Progress', href: '/customer/progress', icon: TrendingUp },
   { name: 'My Coach', href: '/customer/my-coach', icon: Users },
   { name: 'Blog', href: '/customer/blog', icon: FileText },
   { name: 'Shop', href: '/customer/shop', icon: ShoppingBag },
