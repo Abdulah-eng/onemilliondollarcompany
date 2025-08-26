@@ -25,7 +25,7 @@ import ContactStep from "./pages/onboarding/ContactStep";
 import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess";
 import CustomerDashboardPage from "./pages/customer/CustomerDashboard";
 import CoachDashboardPage from "./pages/coach/CoachDashboard";
-// --- NEW PAGE IMPORT ---
+// --- 1. IMPORT THE NEW PAGE ---
 import MyProgramsPage from "./pages/customer/MyProgramsPage";
 
 
@@ -59,7 +59,12 @@ const CoachGate = () => {
   if (loading) return <LoadingScreen />;
   if (!profile) return <Navigate to="/login" replace />;
   if (profile.role !== 'coach') return <Navigate to="/login" replace />;
-  return <CoachShell />;
+  // The CoachShell now wraps the Outlet, providing the layout for all coach pages
+  return (
+    <CoachShell>
+      <Outlet />
+    </CoachShell>
+  );
 };
 
 const CustomerGate = () => {
@@ -68,7 +73,12 @@ const CustomerGate = () => {
   if (!profile) return <Navigate to="/login" replace />;
   if (profile.role !== 'customer') return <Navigate to="/login" replace />;
   if (!profile.onboarding_complete) return <Navigate to="/onboarding/step-1" replace />;
-  return <CustomerShell />;
+  // The CustomerShell now wraps the Outlet, providing the layout for all customer pages
+  return (
+    <CustomerShell>
+      <Outlet />
+    </CustomerShell>
+  );
 };
 
 const OnboardingGate = () => {
@@ -96,7 +106,7 @@ const App = () => (
             {/* 1. Public Routes */}
             <Route path="/" element={<LandingPage />} />
             
-            {/* 2. Authentication Routes - Public but redirect if logged in */}
+            {/* 2. Authentication Routes */}
             <Route element={<PublicRoutesLayout />}>
               <Route path="/get-started" element={<GetStartedPage />} />
               <Route path="/login" element={<LoginPage />} />
@@ -106,19 +116,21 @@ const App = () => (
             {/* 3. Protected Routes */}
             <Route element={<ProtectedRoutesLayout />}>
               {/* Coach Routes */}
-              <Route path="/coach/*" element={<CoachGate />}>
+              <Route path="/coach" element={<CoachGate />}>
                 <Route path="dashboard" element={<CoachDashboardPage />} />
+                {/* Add other coach routes here */}
               </Route>
               
               {/* Customer Routes */}
-              <Route path="/customer/*" element={<CustomerGate />}>
+              <Route path="/customer" element={<CustomerGate />}>
                 <Route path="dashboard" element={<CustomerDashboardPage />} />
-                {/* --- NEW ROUTE ADDED HERE --- */}
+                {/* --- 2. ADD THE NEW PROGRAMS ROUTE HERE --- */}
                 <Route path="programs" element={<MyProgramsPage />} />
+                {/* Add other customer routes here */}
               </Route>
               
               {/* Onboarding Routes */}
-              <Route path="/onboarding/*" element={<OnboardingGate />}>
+              <Route path="/onboarding" element={<OnboardingGate />}>
                 <Route path="step-1" element={<GoalSelectionStep />} />
                 <Route path="step-2" element={<PersonalInfoStep />} />
                 <Route path="step-3" element={<PreferencesStep />} />
