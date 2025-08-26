@@ -9,7 +9,6 @@ import { OnboardingProvider } from "./contexts/OnboardingContext";
 import { Loader2 } from "lucide-react";
 
 // --- LAYOUTS ---
-// FIX: Replaced CustomerShell and CoachShell with the new unified AppShell
 import AppShell from "@/components/layouts/AppShell";
 
 // --- PAGES ---
@@ -25,7 +24,7 @@ import ContactStep from "./pages/onboarding/ContactStep";
 import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess";
 import CustomerDashboardPage from "./pages/customer/CustomerDashboard";
 import CoachDashboardPage from "./pages/coach/CoachDashboard";
-import MyProgramsPage from "./pages/customer/MyProgramsPage"; // Ensure this is imported
+import MyProgramsPage from "./pages/customer/MyProgramsPage";
 
 // --- LOADING COMPONENT ---
 const LoadingScreen = () => <div className="flex h-screen w-full items-center justify-center bg-emerald-50"><Loader2 className="h-10 w-10 animate-spin text-emerald-500" /></div>;
@@ -57,7 +56,6 @@ const CoachGate = () => {
   if (loading) return <LoadingScreen />;
   if (!profile) return <Navigate to="/login" replace />;
   if (profile.role !== 'coach') return <Navigate to="/login" replace />;
-  // FIX: Now returns the unified AppShell
   return <AppShell />;
 };
 
@@ -67,7 +65,6 @@ const CustomerGate = () => {
   if (!profile) return <Navigate to="/login" replace />;
   if (profile.role !== 'customer') return <Navigate to="/login" replace />;
   if (!profile.onboarding_complete) return <Navigate to="/onboarding/step-1" replace />;
-  // FIX: Now returns the unified AppShell
   return <AppShell />;
 };
 
@@ -134,7 +131,7 @@ const App = () => (
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
-  </QueryClientProvider>
+  </QueryリClientProvider>
 );
 
 export default App;
