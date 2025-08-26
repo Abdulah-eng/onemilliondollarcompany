@@ -1,7 +1,7 @@
 // src/components/customer/dashboard/TodaysProgram.tsx
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Clock, Flame, Salad, BrainCircuit } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Clock, Star, Flame, Salad, BrainCircuit } from "lucide-react";
 import { ComponentType } from "react";
 
 // --- Data Layer (Unchanged) ---
@@ -9,7 +9,7 @@ const agendaItems = [
   {
     id: 1,
     type: "fitness",
-    time: "Morning",
+    time: "Morning Workout",
     details: {
       title: "Full Body Strength",
       exercises: [
@@ -43,27 +43,27 @@ const agendaItems = [
   },
 ];
 
-// --- Configuration with a subtle, accent-based color palette ---
+// --- Configuration with a muted, professional color palette ---
 const programConfig: {
   [key: string]: {
     Icon: ComponentType<{ className?: string }>;
-    tagClasses: string;
+    buttonClass: string;
     title: string;
   };
 } = {
   fitness: {
     Icon: Flame,
-    tagClasses: "bg-orange-100 text-orange-800",
+    buttonClass: "bg-slate-800 hover:bg-slate-900",
     title: "Fitness",
   },
   nutrition: {
     Icon: Salad,
-    tagClasses: "bg-green-100 text-green-800",
+    buttonClass: "bg-teal-700 hover:bg-teal-800",
     title: "Nutrition",
   },
   mental: {
     Icon: BrainCircuit,
-    tagClasses: "bg-blue-100 text-blue-800",
+    buttonClass: "bg-indigo-700 hover:bg-indigo-800",
     title: "Mindfulness",
   },
 };
@@ -73,86 +73,86 @@ const TodaysProgram = () => {
   const primaryProgram = agendaItems[0];
   const secondaryPrograms = agendaItems.slice(1);
   const primaryConfig = programConfig[primaryProgram.type];
-  const today = new Date();
-  
-  const formattedDate = new Intl.DateTimeFormat('en-GB', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(today);
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-8">
-      <div>
-        <p className="text-sm text-slate-500">{formattedDate}</p>
-        <h2 className="text-2xl font-bold text-slate-800">Your Day Ahead</h2>
+    <div className="w-full max-w-5xl mx-auto space-y-6">
+      <div className="px-2">
+        <p className="text-sm text-slate-500">Tuesday, 26 August 2025</p>
+        <h2 className="text-2xl font-bold text-slate-800">Today's Focus 💪</h2>
       </div>
 
-      {/* Primary Program Card */}
-      <Card className="w-full overflow-hidden border-slate-200 shadow-sm rounded-2xl">
-        <CardHeader className="p-0">
-          <img
-            src={primaryProgram.details.image}
-            alt={primaryProgram.details.title}
-            className="object-cover w-full h-48"
-          />
-        </CardHeader>
-        <CardContent className="p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className={`flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-semibold rounded-full ${primaryConfig.tagClasses}`}>
-              <primaryConfig.Icon className="w-3.5 h-3.5" />
-              {primaryConfig.title}
-            </span>
-            {primaryProgram.details.duration && (
-              <span className="flex items-center gap-1.5 text-xs text-slate-500">
-                <Clock className="w-3.5 h-3.5" />
-                {primaryProgram.details.duration}
+      {/* Primary Program Card (Full Width) */}
+      <Card className="relative w-full overflow-hidden border-0 shadow-xl rounded-3xl group">
+        <img
+          src={primaryProgram.details.image}
+          alt={primaryProgram.details.title}
+          className="absolute inset-0 object-cover w-full h-full transition-transform duration-500 ease-in-out group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+        
+        <CardContent className="relative flex flex-col justify-end min-h-[340px] p-5 text-white md:p-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-2 px-3 py-1 text-xs font-semibold rounded-full bg-white/10 backdrop-blur-sm">
+                <Star className="w-3.5 h-3.5 text-yellow-300" />
+                Main Goal
               </span>
-            )}
-          </div>
+              <p className="text-xs font-medium opacity-80">{primaryProgram.time}</p>
+            </div>
 
-          <h3 className="text-xl font-bold text-slate-800">{primaryProgram.details.title}</h3>
-          
-          {primaryProgram.type === 'fitness' && (
-            <ul className="pt-1 space-y-1 text-sm text-slate-600">
-              {primaryProgram.details.exercises.map((ex) => (
-                <li key={ex.name} className="flex justify-between">
-                  <span>{ex.name}</span>
-                  <span className="font-mono font-medium text-slate-700">{ex.sets}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-          <Button className="w-full mt-2 font-semibold bg-slate-800 hover:bg-slate-700">
-            Start Now
-          </Button>
+            <h3 className="text-3xl font-bold tracking-tight">
+              {primaryProgram.details.title}
+            </h3>
+
+            {primaryProgram.type === 'fitness' && (
+              <ul className="grid grid-cols-1 text-sm opacity-90 md:grid-cols-2 gap-x-6 gap-y-1">
+                {primaryProgram.details.exercises.map((ex) => (
+                  <li key={ex.name} className="flex justify-between">
+                    <span>{ex.name}</span>
+                    <span className="font-mono font-medium">{ex.sets}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <div className="pt-2">
+              <Button className={`font-semibold text-white rounded-lg ${primaryConfig.buttonClass}`}>
+                🚀 Start Program
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
       {/* Secondary Programs Section */}
       {secondaryPrograms.length > 0 && (
-        <div>
-          <h3 className="mb-3 text-lg font-bold text-slate-700">Later Today</h3>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="pt-6">
+          <h3 className="mb-4 text-xl font-bold text-slate-700 px-2">Later Today</h3>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {secondaryPrograms.map((item) => {
               const config = programConfig[item.type];
               return (
-                <Card key={item.id} className="flex flex-row items-center w-full overflow-hidden border-slate-200 shadow-sm rounded-2xl">
+                <Card key={item.id} className="relative w-full overflow-hidden border-0 shadow-lg rounded-3xl group">
                   <img
                     src={item.details.image}
                     alt={item.details.title}
-                    className="object-cover w-28 h-full"
+                    className="absolute inset-0 object-cover w-full h-full transition-transform duration-500 ease-in-out group-hover:scale-105"
                   />
-                  <CardContent className="flex-1 p-3">
-                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-semibold rounded-full ${config.tagClasses}`}>
-                      <config.Icon className="w-3.5 h-3.5" />
-                      {config.title}
-                    </span>
-                    <p className="mt-1 font-semibold text-slate-800">{item.details.title}</p>
-                    <p className="text-xs text-slate-500">{item.time}</p>
-                    <Button variant="outline" size="sm" className="w-full mt-2">
-                      View
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  
+                  <CardContent className="relative flex flex-col justify-end min-h-[220px] p-4 text-white space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-2 px-2.5 py-1 font-semibold rounded-full bg-white/10 backdrop-blur-sm">
+                          <config.Icon className="w-3.5 h-3.5" />
+                          {config.title}
+                        </span>
+                        <p className="font-medium opacity-80">{item.time}</p>
+                    </div>
+
+                    <h4 className="text-lg font-bold">{item.details.title}</h4>
+                    
+                    <Button size="sm" className={`w-full font-semibold text-white rounded-lg ${config.buttonClass}`}>
+                      Begin
                     </Button>
                   </CardContent>
                 </Card>
