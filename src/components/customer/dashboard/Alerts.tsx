@@ -24,7 +24,7 @@ function useDeviceType() {
   return device;
 }
 
-const AlertItem = ({ emoji, emojiBg, title, description, onDismiss, isFirst, isLast }) => {
+const AlertItem = ({ emoji, emojiBg, title, description, extra, onDismiss, isFirst, isLast }) => {
   const device = useDeviceType();
   const x = useMotionValue(0);
 
@@ -48,7 +48,7 @@ const AlertItem = ({ emoji, emojiBg, title, description, onDismiss, isFirst, isL
   return (
     <motion.div
       exit={{ opacity: 0, height: 0, transition: { duration: 0.2 } }}
-      className={`relative bg-white group ${
+      className={`relative bg-white group w-full ${
         isFirst ? "rounded-t-2xl" : ""
       } ${isLast ? "rounded-b-2xl overflow-hidden" : ""}`}
     >
@@ -77,10 +77,17 @@ const AlertItem = ({ emoji, emojiBg, title, description, onDismiss, isFirst, isL
           <span className="text-xl">{emoji}</span>
         </div>
 
-        {/* text */}
-        <div className="flex-1">
+        {/* text / info section */}
+        <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-slate-700">{title}</h3>
           <p className="text-sm text-slate-500">{description}</p>
+
+          {/* extra info fields (preserved context) */}
+          {extra && (
+            <div className="mt-1 text-xs text-slate-400">
+              {extra}
+            </div>
+          )}
         </div>
 
         {/* desktop buttons */}
@@ -119,6 +126,7 @@ export default function AlertList() {
       emojiBg: "bg-yellow-100",
       title: "New Feature",
       description: "You can now swipe to dismiss on mobile!",
+      extra: "Released 2h ago • By system",
     },
     {
       id: 2,
@@ -126,6 +134,7 @@ export default function AlertList() {
       emojiBg: "bg-red-100",
       title: "Streak",
       description: "You've worked out 5 days in a row!",
+      extra: "Level: Bronze • XP +30",
     },
     {
       id: 3,
@@ -133,6 +142,7 @@ export default function AlertList() {
       emojiBg: "bg-blue-100",
       title: "Hydration",
       description: "Don’t forget to drink water today.",
+      extra: "Goal: 2.5L • Current: 0.8L",
     },
   ]);
 
@@ -141,7 +151,7 @@ export default function AlertList() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-12 shadow-lg rounded-2xl overflow-hidden">
+    <div className="w-full mx-auto mt-12 shadow-lg rounded-2xl overflow-hidden">
       <AnimatePresence>
         {alerts.map((alert, index) => (
           <AlertItem
