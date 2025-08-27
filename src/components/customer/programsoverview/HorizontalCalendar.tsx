@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { ScheduledTask, typeConfig } from "@/mockdata/programs/mockprograms";
 import { useState, useMemo, useEffect, useRef, memo } from "react";
 
-// Group dates by week number
+// Helper: group dates by week number
 const groupDatesByWeek = (dates: Date[], programStartDate: Date) => {
   const grouped: { [week: number]: Date[] } = {};
   dates.forEach((date) => {
@@ -28,11 +28,13 @@ const groupDatesByWeek = (dates: Date[], programStartDate: Date) => {
 
 // Calendar day component
 const CalendarDay = memo(function CalendarDay({
+  id, // ✅ ID prop added
   date,
   tasks,
   selectedDate,
   setSelectedDate,
 }: {
+  id: string; // ✅ ID prop type added
   date: Date;
   tasks: ScheduledTask[];
   selectedDate: Date;
@@ -46,6 +48,7 @@ const CalendarDay = memo(function CalendarDay({
 
   return (
     <button
+      id={id} // ✅ ID applied to the button element
       onClick={() => setSelectedDate(date)}
       className={cn(
         "p-2 rounded-xl min-w-[60px] text-center flex-shrink-0 flex flex-col items-center justify-center h-24 border-2 transition-transform duration-200",
@@ -110,24 +113,20 @@ export default function HorizontalCalendar({
 
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-  // Scroll to today on mount
+  // ✅ EFFECT TO SCROLL TO TODAY ON MOUNT
   useEffect(() => {
-    const today = new Date();
-
-    // If selectedDate is not set, default to today
-    setSelectedDate((prev) => prev || today);
-
     const scrollToToday = () => {
-      const todayEl = document.getElementById(`date-${format(today, "yyyy-MM-dd")}`);
+      const todayEl = document.getElementById(`date-${format(new Date(), "yyyy-MM-dd")}`);
       if (todayEl && scrollRef.current) {
         const scrollLeft = todayEl.offsetLeft - scrollRef.current.offsetWidth / 2 + todayEl.offsetWidth / 2;
         scrollRef.current.scrollTo({ left: scrollLeft, behavior: "smooth" });
       }
     };
 
-    // Use requestAnimationFrame to ensure DOM is fully rendered
-    requestAnimationFrame(scrollToToday);
-  }, [setSelectedDate]);
+    // Use a short timeout to ensure the DOM is fully rendered before scrolling
+    const timer = setTimeout(scrollToToday, 100);
+    return () => clearTimeout(timer); // Cleanup timeout on unmount
+  }, []); // Empty dependency array ensures this runs only once on mount
 
   // Handle visible week on scroll
   const onScroll = () => {
@@ -173,6 +172,7 @@ export default function HorizontalCalendar({
             {dates.map((date) => (
               <CalendarDay
                 key={date.toString()}
+                id={`date-${format(date, "yyyy-MM-dd")}`} // ✅ ID prop passed here
                 date={date}
                 tasks={tasksByDate[format(date, "yyyy-MM-dd")] || []}
                 selectedDate={selectedDate}
