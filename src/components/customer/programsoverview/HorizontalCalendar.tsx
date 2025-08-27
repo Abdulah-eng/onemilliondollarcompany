@@ -32,15 +32,11 @@ const CalendarDay = memo(function CalendarDay({
   tasks,
   selectedDate,
   setSelectedDate,
-  weekNumber,
-  refCallback,
 }: {
   date: Date;
   tasks: ScheduledTask[];
   selectedDate: Date;
   setSelectedDate: (d: Date) => void;
-  weekNumber: number;
-  refCallback?: (el: HTMLButtonElement | null) => void;
 }) {
   const hasMissedTasks = isPast(date) && !isToday(date) && tasks.some((t) => t.status === "missed");
   const distinctTasks = useMemo(
@@ -50,9 +46,6 @@ const CalendarDay = memo(function CalendarDay({
 
   return (
     <button
-      ref={refCallback}
-      data-week={weekNumber}
-      id={`date-${format(date, "yyyy-MM-dd")}`}
       onClick={() => setSelectedDate(date)}
       className={cn(
         "p-2 rounded-xl min-w-[60px] text-center flex-shrink-0 flex flex-col items-center justify-center h-24 border-2 transition-transform duration-200",
@@ -93,9 +86,7 @@ export default function HorizontalCalendar({
   programEndDate: Date;
 }) {
   const [visibleWeek, setVisibleWeek] = useState(1);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const weekMarkerRefs = useRef<{ [week: number]: HTMLButtonElement | null }>({});
-  const lastVisibleWeek = useRef(1);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const totalWeeks = useMemo(
     () => differenceInWeeks(programEndDate, programStartDate) + 1,
@@ -119,47 +110,31 @@ export default function HorizontalCalendar({
 
   // Scroll to today on mount
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const todayEl = document.getElementById(`date-${format(new Date(), "yyyy-MM-dd")}`);
-      if (todayEl && scrollContainerRef.current) {
-        const scrollLeft = todayEl.offsetLeft - scrollContainerRef.current.offsetWidth / 2 + todayEl.offsetWidth / 2;
-        scrollContainerRef.current.scrollTo({ left: scrollLeft, behavior: "smooth" });
-      }
-    }, 50);
-    return () => clearTimeout(timer);
+    const todayEl = document.getElementById(`date-${format(new Date(), "yyyy-MM-dd")}`);
+    if (todayEl && scrollRef.current) {
+      const scrollLeft = todayEl.offsetLeft - scrollRef.current.offsetWidth / 2 + todayEl.offsetWidth / 2;
+      scrollRef.current.scrollTo({ left: scrollLeft, behavior: "smooth" });
+    }
   }, []);
 
-  // Intersection observer to track visible week
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const week = Number(entry.target.getAttribute("data-week"));
-            if (week && lastVisibleWeek.current !== week) {
-              lastVisibleWeek.current = week;
-              setVisibleWeek(week);
-            }
-          }
-        });
-      },
-      { root: scrollContainerRef.current, threshold: 0.5 }
-    );
+  // Handle visible week on scroll
+  const onScroll = () => {
+    if (!scrollRef.current) return;
+    const scrollLeft = scrollRef.current.scrollLeft;
+    const children = Array.from(scrollRef.current.children) as HTMLElement[];
+    let closestWeek = 1;
+    let minDistance = Infinity;
 
-    Object.values(weekMarkerRefs.current).forEach((el) => el && observer.observe(el));
-    return () => observer.disconnect();
-  }, [groupedDates]);
-
-  // Scroll snapping
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    container.style.scrollSnapType = "x mandatory";
-    container.querySelectorAll("div[data-week]").forEach((weekDiv) => {
-      (weekDiv as HTMLElement).style.scrollSnapAlign = "start";
+    children.forEach((weekDiv, i) => {
+      const distance = Math.abs(weekDiv.offsetLeft - scrollLeft);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestWeek = i + 1;
+      }
     });
-  }, [groupedDates]);
+
+    if (closestWeek !== visibleWeek) setVisibleWeek(closestWeek);
+  };
 
   return (
     <div className="w-full space-y-4">
@@ -168,28 +143,22 @@ export default function HorizontalCalendar({
       </div>
 
       <div
-        ref={scrollContainerRef}
-        className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-hide -mx-4 px-4 scroll-smooth"
+        ref={scrollRef}
+        onScroll={onScroll}
+        className="flex overflow-x-auto gap-2 py-2 scrollbar-hide scroll-smooth snap-x snap-mandatory -mx-4 px-4"
       >
         {Object.entries(groupedDates).map(([weekNumber, dates]) => (
           <div
             key={`week-${weekNumber}`}
-            className="flex items-center gap-2"
-            data-week={weekNumber}
+            className="flex gap-2 snap-start min-w-full justify-center"
           >
-            {dates.map((date, index) => (
+            {dates.map((date) => (
               <CalendarDay
                 key={date.toString()}
                 date={date}
                 tasks={tasksByDate[format(date, "yyyy-MM-dd")] || []}
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
-                weekNumber={Number(weekNumber)}
-                refCallback={
-                  index === 0
-                    ? (el) => (weekMarkerRefs.current[Number(weekNumber)] = el)
-                    : undefined
-                }
               />
             ))}
           </div>
