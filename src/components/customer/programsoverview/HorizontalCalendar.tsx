@@ -26,7 +26,7 @@ const groupDatesByWeek = (dates: Date[], programStartDate: Date) => {
   return grouped;
 };
 
-// Individual day component
+// Calendar day component
 const CalendarDay = memo(function CalendarDay({
   date,
   tasks,
@@ -108,14 +108,26 @@ export default function HorizontalCalendar({
     return map;
   }, [schedule]);
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
   // Scroll to today on mount
   useEffect(() => {
-    const todayEl = document.getElementById(`date-${format(new Date(), "yyyy-MM-dd")}`);
-    if (todayEl && scrollRef.current) {
-      const scrollLeft = todayEl.offsetLeft - scrollRef.current.offsetWidth / 2 + todayEl.offsetWidth / 2;
-      scrollRef.current.scrollTo({ left: scrollLeft, behavior: "smooth" });
-    }
-  }, []);
+    const today = new Date();
+
+    // If selectedDate is not set, default to today
+    setSelectedDate((prev) => prev || today);
+
+    const scrollToToday = () => {
+      const todayEl = document.getElementById(`date-${format(today, "yyyy-MM-dd")}`);
+      if (todayEl && scrollRef.current) {
+        const scrollLeft = todayEl.offsetLeft - scrollRef.current.offsetWidth / 2 + todayEl.offsetWidth / 2;
+        scrollRef.current.scrollTo({ left: scrollLeft, behavior: "smooth" });
+      }
+    };
+
+    // Use requestAnimationFrame to ensure DOM is fully rendered
+    requestAnimationFrame(scrollToToday);
+  }, [setSelectedDate]);
 
   // Handle visible week on scroll
   const onScroll = () => {
@@ -135,9 +147,6 @@ export default function HorizontalCalendar({
 
     if (closestWeek !== visibleWeek) setVisibleWeek(closestWeek);
   };
-
-  // Detect mobile
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   return (
     <div className="w-full space-y-4">
