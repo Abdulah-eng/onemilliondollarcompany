@@ -1,48 +1,67 @@
 import { ScheduledTask, typeConfig } from "@/mockdata/programs/mockprograms";
-import { CheckCircle2, XCircle, Dumbbell, Apple, Brain } from "lucide-react";
+import { CheckCircle2, PlayCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// Mapping of type to a Lucide icon component
-const iconMap = {
-  fitness: Dumbbell,
-  nutrition: Apple,
-  mental: Brain,
-};
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export function TaskCard({ task, onClick }: { task: ScheduledTask; onClick: () => void }) {
-  // ✅ Now uses the single, shared typeConfig from mockprograms.ts
   const config = typeConfig[task.type];
-  const Icon = iconMap[task.type];
-
   const isCompleted = task.status === "completed";
-  const isMissed = task.status === "missed" && !isCompleted;
+  const isPending = task.status === "pending" || task.status === "in-progress";
 
-  // Define color based on status for progress bar and icon
-  const colorClass = isMissed ? "bg-red-400" : isCompleted ? "bg-emerald-500" : "bg-blue-500";
-  
+  const handleButtonClick = (e: React.MouseEvent) => {
+    // Stop the card's own onClick event from firing when the button is clicked
+    e.stopPropagation(); 
+    // For now, this can navigate to a blank page or just log to the console
+    console.log(`Starting task: ${task.title}`);
+    // Example navigation (if using a router like Next.js or React Router)
+    // router.push('/program/start'); 
+  };
+
   return (
-    <div 
-      onClick={onClick} 
-      className="cursor-pointer group bg-white hover:shadow-xl transition-all duration-300 rounded-2xl border border-slate-200 overflow-hidden flex items-center p-4 gap-4"
+    <div
+      onClick={onClick}
+      className="relative cursor-pointer w-full overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-3xl group min-h-[220px]"
     >
-      <span className={cn("p-3 rounded-full", colorClass)}>
-        <Icon className="w-6 h-6 text-white" />
-      </span>
+      {/* Background Image */}
+      <img
+        src={config.imageUrl}
+        alt={task.title}
+        className="absolute inset-0 object-cover w-full h-full transition-transform duration-500 ease-in-out group-hover:scale-105"
+      />
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
       
-      <div className="flex-1 space-y-2">
-        <div className="flex justify-between items-start">
-            <h3 className="font-bold text-slate-800">{task.title}</h3>
-            {isCompleted && <CheckCircle2 className="w-6 h-6 text-emerald-500 flex-shrink-0" />}
-            {isMissed && <XCircle className="w-6 h-6 text-red-400 flex-shrink-0" />}
+      <div className="relative flex flex-col justify-between h-full p-6 text-white">
+        {/* Top Section with Status */}
+        <div className="flex justify-between items-center">
+          <Badge
+            variant="secondary"
+            className="bg-white/10 backdrop-blur-sm border-0 text-white font-semibold"
+          >
+            {config.emoji} {task.type.charAt(0).toUpperCase() + task.type.slice(1)}
+          </Badge>
+          {isCompleted && <CheckCircle2 className="w-6 h-6 text-emerald-300" />}
         </div>
         
-        <div className="text-sm text-slate-500 -mt-1">{task.content.length} items</div>
-        
-        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-          <div 
-            className={cn("h-2 rounded-full transition-all duration-500", colorClass)} 
-            style={{ width: `${task.progress}%` }} 
-          />
+        {/* Bottom Section with Title and Button */}
+        <div className="space-y-3">
+          <h3 className="text-2xl md:text-3xl font-bold tracking-tight">
+            {task.title}
+          </h3>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium opacity-80">{task.content.length} items</p>
+            {isPending && (
+              <Button 
+                onClick={handleButtonClick}
+                size="sm" 
+                className="font-semibold text-slate-900 rounded-full bg-white hover:bg-slate-200 h-9 px-5"
+              >
+                <PlayCircle className="w-4 h-4 mr-2" />
+                {task.status === "in-progress" ? "Resume" : "Start"}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
