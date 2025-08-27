@@ -1,8 +1,17 @@
-import { format, addDays, isSameDay, isPast, isToday } from "date-fns";
+import {
+  format,
+  addDays,
+  subDays,
+  isSameDay,
+  isPast,
+  isToday,
+  startOfWeek,
+  endOfWeek,
+} from "date-fns";
 import { cn } from "@/lib/utils";
-// ✅ CORRECTED IMPORT: Now importing both ScheduledTask and the shared typeConfig
 import { ScheduledTask, typeConfig } from "@/mockdata/programs/mockprograms";
-import { useMemo, useRef, useEffect } from "react";
+import { useState, useMemo } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function HorizontalCalendar({
   selectedDate,
@@ -13,38 +22,54 @@ export default function HorizontalCalendar({
   setSelectedDate: (d: Date) => void;
   schedule: ScheduledTask[];
 }) {
-  const dateListRef = useRef<HTMLDivElement>(null);
+  // State to manage the week being displayed. Defaults to the current date.
+  const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Create a scrolling list of dates (30 days past, today, 30 days future)
-  const dates = useMemo(
-    () => Array.from({ length: 61 }, (_, i) => addDays(new Date(), i - 30)),
-    []
-  );
+  // Calculate the start and end of the week based on the current date
+  const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
 
-  // Scroll to today's date on initial component mount
-  useEffect(() => {
-    const todayElement = document.getElementById(
-      `date-${format(new Date(), "yyyy-MM-dd")}`
-    );
-    if (todayElement && dateListRef.current) {
-      const scrollLeft =
-        todayElement.offsetLeft -
-        dateListRef.current.offsetWidth / 2 +
-        todayElement.offsetWidth / 2;
-      dateListRef.current.scrollTo({ left: scrollLeft, behavior: "smooth" });
-    }
-  }, []);
+  // Generate an array of 7 dates for the current week
+  const weekDates = useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  }, [weekStart]);
+
+  const handlePrevWeek = () => {
+    setCurrentDate(subDays(currentDate, 7));
+  };
+
+  const handleNextWeek = () => {
+    setCurrentDate(addDays(currentDate, 7));
+  };
 
   return (
-    <div className="w-full">
-      <div
-        ref={dateListRef}
-        className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide"
-      >
-        {dates.map((date) => {
+    <div className="w-full space-y-4">
+      {/* ## Week Navigation Header ## */}
+      <div className="flex justify-between items-center px-2">
+        <button
+          onClick={handlePrevWeek}
+          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          aria-label="Previous week"
+        >
+          <ChevronLeft className="w-5 h-5 text-gray-600" />
+        </button>
+        <div className="text-center font-semibold text-gray-800">
+          {format(weekStart, "MMMM d")} - {format(weekEnd, "d, yyyy")}
+        </div>
+        <button
+          onClick={handleNextWeek}
+          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          aria-label="Next week"
+        >
+          <ChevronRight className="w-5 h-5 text-gray-600" />
+        </button>
+      </div>
+
+      {/* ## Days of the Week Grid ## */}
+      <div className="grid grid-cols-7 gap-2">
+        {weekDates.map((date) => {
           const tasks = schedule.filter((t) => isSameDay(t.date, date));
           const hasTasks = tasks.length > 0;
-          // A day is "missed" if it's in the past and has at least one task with the 'missed' status
           const hasMissedTasks =
             isPast(date) &&
             !isToday(date) &&
@@ -53,19 +78,15 @@ export default function HorizontalCalendar({
           return (
             <button
               key={date.toString()}
-              id={`date-${format(date, "yyyy-MM-dd")}`}
               onClick={() => setSelectedDate(date)}
               className={cn(
-                "p-2 rounded-xl min-w-[60px] text-center flex-shrink-0 transition-all duration-200 border-2",
-                // Style for the currently selected date
+                "p-2 rounded-xl text-center flex-shrink-0 transition-all duration-200 border-2 flex flex-col items-center justify-center h-24",
                 isSameDay(date, selectedDate)
                   ? "bg-emerald-500 text-white border-emerald-500 shadow-md scale-105"
                   : "bg-white hover:bg-gray-100",
-                // Style to highlight today's date (if not selected)
                 isToday(date) && !isSameDay(date, selectedDate)
                   ? "border-emerald-500"
                   : "border-transparent",
-                // Style to grey out past days with missed tasks (if not selected)
                 hasMissedTasks && !isSameDay(date, selectedDate)
                   ? "bg-gray-100 text-gray-400 border-gray-200"
                   : ""
@@ -82,8 +103,7 @@ export default function HorizontalCalendar({
                       key={t.id}
                       className={cn(
                         "w-2 h-2 rounded-full",
-                        // ✅ CORRECTED LOGIC: Color each dot based on its individual task status
-                        t.status === "missed" && isPast(t.date) && !isToday(t.date)
+                        t.status === "missed" && isPast(t.date) && !isToday(date)
                           ? typeConfig[t.type].missedDot
                           : typeConfig[t.type].dot
                       )}
