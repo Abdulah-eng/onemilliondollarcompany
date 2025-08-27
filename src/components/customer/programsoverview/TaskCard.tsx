@@ -23,11 +23,13 @@ export function TaskCard({ task, onClick }: { task: ScheduledTask; onClick: () =
       <img
         src={config.imageUrl}
         alt={task.title}
+        loading="lazy"
         className="absolute inset-0 object-cover w-full h-full transition-transform duration-500 ease-in-out group-hover:scale-105"
       />
+
       {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-      
+
       <div className="relative flex flex-col justify-between h-full p-6 text-white">
         {/* Top Section: Category & Status */}
         <div className="flex justify-between items-center">
@@ -39,8 +41,8 @@ export function TaskCard({ task, onClick }: { task: ScheduledTask; onClick: () =
           </Badge>
           {isCompleted && <CheckCircle2 className="w-6 h-6 text-emerald-300" />}
         </div>
-        
-        {/* Middle Section: Title & Program */}
+
+        {/* Middle Section */}
         <div className="space-y-2 mt-2">
           <h3 className="text-3xl md:text-4xl font-bold tracking-tight drop-shadow-md">
             {task.title}
@@ -57,7 +59,7 @@ export function TaskCard({ task, onClick }: { task: ScheduledTask; onClick: () =
         {/* Bottom Section: Button */}
         {isPending && (
           <div className="pt-3">
-            <Button 
+            <Button
               onClick={handleButtonClick}
               className="font-semibold text-slate-900 rounded-full bg-white hover:bg-slate-200 h-11 px-6 shadow-lg flex items-center justify-center"
             >
