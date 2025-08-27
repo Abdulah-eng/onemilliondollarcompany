@@ -1,4 +1,3 @@
-// src/components/layout/SideNav.tsx
 import { Link, useLocation } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import {
@@ -14,6 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { NavItem } from '@/lib/navItems';
+import { cn } from '@/lib/utils';
 
 interface SideNavProps {
   navItems: NavItem[];
@@ -41,11 +41,16 @@ const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
 
   return (
     <Sidebar
-      className={`transition-all duration-300 ${collapsed && !isMobile ? 'w-16' : 'w-64'}`}
+      // ✅ APPLIED THEME-AWARE SIDEBAR COLORS
+      className={cn(
+        "bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border transition-all duration-300",
+        collapsed && !isMobile ? 'w-16' : 'w-64'
+      )}
       collapsible="icon"
     >
       <SidebarContent className="px-3">
-        <div className={`border-b py-4 ${collapsed && !isMobile ? 'flex items-center justify-center' : ''}`}>
+        {/* Border color now uses the theme variable */}
+        <div className={cn("border-b border-sidebar-border py-4", collapsed && !isMobile ? 'flex items-center justify-center' : '')}>
           <div className="flex items-center gap-2">
             <div className="h-10 w-10 min-h-10 min-w-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
               <span className="text-white font-bold text-sm leading-none">TW</span>
