@@ -136,6 +136,9 @@ export default function HorizontalCalendar({
     if (closestWeek !== visibleWeek) setVisibleWeek(closestWeek);
   };
 
+  // Detect mobile
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
   return (
     <div className="w-full space-y-4">
       <div className="text-center font-semibold text-gray-800 px-2">
@@ -145,12 +148,18 @@ export default function HorizontalCalendar({
       <div
         ref={scrollRef}
         onScroll={onScroll}
-        className="flex overflow-x-auto gap-2 py-2 scrollbar-hide scroll-smooth snap-x snap-mandatory -mx-4 px-4"
+        className={cn(
+          "flex overflow-x-auto gap-2 py-2 scrollbar-hide scroll-smooth -mx-4 px-4",
+          !isMobile && "snap-x snap-mandatory"
+        )}
       >
         {Object.entries(groupedDates).map(([weekNumber, dates]) => (
           <div
             key={`week-${weekNumber}`}
-            className="flex gap-2 snap-start min-w-full justify-center"
+            className={cn(
+              "flex gap-2 justify-center",
+              !isMobile ? "snap-start min-w-full" : ""
+            )}
           >
             {dates.map((date) => (
               <CalendarDay
