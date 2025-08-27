@@ -28,13 +28,13 @@ const groupDatesByWeek = (dates: Date[], programStartDate: Date) => {
 
 // Calendar day component
 const CalendarDay = memo(function CalendarDay({
-  id, // ✅ ID prop added
+  id,
   date,
   tasks,
   selectedDate,
   setSelectedDate,
 }: {
-  id: string; // ✅ ID prop type added
+  id: string;
   date: Date;
   tasks: ScheduledTask[];
   selectedDate: Date;
@@ -48,15 +48,16 @@ const CalendarDay = memo(function CalendarDay({
 
   return (
     <button
-      id={id} // ✅ ID applied to the button element
+      id={id}
       onClick={() => setSelectedDate(date)}
+      // ✅ REPLACED HARDCODED COLORS WITH THEME VARIABLES
       className={cn(
         "p-2 rounded-xl min-w-[60px] text-center flex-shrink-0 flex flex-col items-center justify-center h-24 border-2 transition-transform duration-200",
         isSameDay(date, selectedDate)
-          ? "bg-emerald-500 text-white border-emerald-500 shadow-md scale-105"
-          : "bg-white hover:bg-gray-100 border-transparent",
-        isToday(date) && !isSameDay(date, selectedDate) ? "border-emerald-500" : "",
-        hasMissedTasks && !isSameDay(date, selectedDate) ? "bg-gray-100 text-gray-400 border-gray-200" : ""
+          ? "bg-primary text-primary-foreground border-primary shadow-md scale-105" // Use primary theme color
+          : "bg-card hover:bg-muted border-transparent text-card-foreground", // Use card/muted theme colors
+        isToday(date) && !isSameDay(date, selectedDate) ? "border-primary" : "", // Use primary theme color for border
+        hasMissedTasks && !isSameDay(date, selectedDate) ? "bg-muted text-muted-foreground border-border" : "" // Use muted theme colors
       )}
     >
       <div className="text-xs font-medium uppercase opacity-70">{format(date, "EEE")}</div>
@@ -97,6 +98,7 @@ export default function HorizontalCalendar({
   );
 
   const groupedDates = useMemo(() => {
+    if (!programStartDate || !programEndDate) return {};
     const allDates = eachDayOfInterval({ start: programStartDate, end: programEndDate });
     return groupDatesByWeek(allDates, programStartDate);
   }, [programStartDate, programEndDate]);
@@ -110,10 +112,9 @@ export default function HorizontalCalendar({
     });
     return map;
   }, [schedule]);
-
+  
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-  // ✅ EFFECT TO SCROLL TO TODAY ON MOUNT
   useEffect(() => {
     const scrollToToday = () => {
       const todayEl = document.getElementById(`date-${format(new Date(), "yyyy-MM-dd")}`);
@@ -122,40 +123,42 @@ export default function HorizontalCalendar({
         scrollRef.current.scrollTo({ left: scrollLeft, behavior: "smooth" });
       }
     };
-
-    // Use a short timeout to ensure the DOM is fully rendered before scrolling
     const timer = setTimeout(scrollToToday, 100);
-    return () => clearTimeout(timer); // Cleanup timeout on unmount
-  }, []); // Empty dependency array ensures this runs only once on mount
+    return () => clearTimeout(timer);
+  }, []);
 
-  // Handle visible week on scroll
-  const onScroll = () => {
-    if (!scrollRef.current) return;
-    const scrollLeft = scrollRef.current.scrollLeft;
-    const children = Array.from(scrollRef.current.children) as HTMLElement[];
-    let closestWeek = 1;
-    let minDistance = Infinity;
+  // Updated Intersection Observer for better reliability
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+            if (entry.isIntersecting) {
+                const week = entry.target.getAttribute("data-week");
+                if (week) {
+                    setVisibleWeek(Number(week));
+                    return; // Stop after the first intersecting entry
+                }
+            }
+        }
+      },
+      { root: scrollRef.current, threshold: 0.5 }
+    );
 
-    children.forEach((weekDiv, i) => {
-      const distance = Math.abs(weekDiv.offsetLeft - scrollLeft);
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestWeek = i + 1;
-      }
-    });
-
-    if (closestWeek !== visibleWeek) setVisibleWeek(closestWeek);
-  };
+    const currentRefs = Object.values(scrollRef.current?.querySelectorAll('[data-week]') || {});
+    currentRefs.forEach((el) => el && observer.observe(el));
+    
+    return () => observer.disconnect();
+  }, [groupedDates]);
 
   return (
     <div className="w-full space-y-4">
-      <div className="text-center font-semibold text-gray-800 px-2">
-        Week {visibleWeek} of {totalWeeks}
+      {/* ✅ REPLACED HARDCODED TEXT COLOR */}
+      <div className="text-center font-semibold text-foreground px-2">
+        Week {visibleWeek || 1} of {totalWeeks || 1}
       </div>
 
       <div
         ref={scrollRef}
-        onScroll={onScroll}
         className={cn(
           "flex overflow-x-auto gap-2 py-2 scrollbar-hide scroll-smooth -mx-4 px-4",
           !isMobile && "snap-x snap-mandatory"
@@ -164,6 +167,7 @@ export default function HorizontalCalendar({
         {Object.entries(groupedDates).map(([weekNumber, dates]) => (
           <div
             key={`week-${weekNumber}`}
+            data-week={weekNumber} // Added data-week to the week container
             className={cn(
               "flex gap-2 justify-center",
               !isMobile ? "snap-start min-w-full" : ""
@@ -172,7 +176,7 @@ export default function HorizontalCalendar({
             {dates.map((date) => (
               <CalendarDay
                 key={date.toString()}
-                id={`date-${format(date, "yyyy-MM-dd")}`} // ✅ ID prop passed here
+                id={`date-${format(date, "yyyy-MM-dd")}`}
                 date={date}
                 tasks={tasksByDate[format(date, "yyyy-MM-dd")] || []}
                 selectedDate={selectedDate}
