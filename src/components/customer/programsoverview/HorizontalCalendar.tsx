@@ -1,6 +1,5 @@
 import {
   format,
-  addDays,
   isSameDay,
   isPast,
   isToday,
@@ -27,7 +26,7 @@ const groupDatesByWeek = (dates: Date[], programStartDate: Date) => {
   return grouped;
 };
 
-// Individual day component, memoized for performance
+// Individual day component
 const CalendarDay = memo(function CalendarDay({
   date,
   tasks,
@@ -96,6 +95,7 @@ export default function HorizontalCalendar({
   const [visibleWeek, setVisibleWeek] = useState(1);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const weekMarkerRefs = useRef<{ [week: number]: HTMLButtonElement | null }>({});
+  const lastVisibleWeek = useRef(1);
 
   const totalWeeks = useMemo(
     () => differenceInWeeks(programEndDate, programStartDate) + 1,
@@ -107,7 +107,6 @@ export default function HorizontalCalendar({
     return groupDatesByWeek(allDates, programStartDate);
   }, [programStartDate, programEndDate]);
 
-  // Precompute tasks by date
   const tasksByDate = useMemo(() => {
     const map: Record<string, ScheduledTask[]> = {};
     schedule.forEach((task) => {
@@ -118,7 +117,7 @@ export default function HorizontalCalendar({
     return map;
   }, [schedule]);
 
-  // Lazy scroll to today after render
+  // Scroll to today on mount
   useEffect(() => {
     const timer = setTimeout(() => {
       const todayEl = document.getElementById(`date-${format(new Date(), "yyyy-MM-dd")}`);
@@ -130,25 +129,37 @@ export default function HorizontalCalendar({
     return () => clearTimeout(timer);
   }, []);
 
-  // Intersection observer for visible week
+  // Intersection observer to track visible week
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        for (const entry of entries) {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const week = entry.target.getAttribute("data-week");
-            if (week && Number(week) !== visibleWeek) {
-              setVisibleWeek(Number(week));
-              return;
+            const week = Number(entry.target.getAttribute("data-week"));
+            if (week && lastVisibleWeek.current !== week) {
+              lastVisibleWeek.current = week;
+              setVisibleWeek(week);
             }
           }
-        }
+        });
       },
       { root: scrollContainerRef.current, threshold: 0.5 }
     );
+
     Object.values(weekMarkerRefs.current).forEach((el) => el && observer.observe(el));
     return () => observer.disconnect();
-  }, [groupedDates, visibleWeek]);
+  }, [groupedDates]);
+
+  // Scroll snapping
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    container.style.scrollSnapType = "x mandatory";
+    container.querySelectorAll("div[data-week]").forEach((weekDiv) => {
+      (weekDiv as HTMLElement).style.scrollSnapAlign = "start";
+    });
+  }, [groupedDates]);
 
   return (
     <div className="w-full space-y-4">
@@ -161,7 +172,11 @@ export default function HorizontalCalendar({
         className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-hide -mx-4 px-4 scroll-smooth"
       >
         {Object.entries(groupedDates).map(([weekNumber, dates]) => (
-          <div key={`week-${weekNumber}`} className="flex items-center gap-2">
+          <div
+            key={`week-${weekNumber}`}
+            className="flex items-center gap-2"
+            data-week={weekNumber}
+          >
             {dates.map((date, index) => (
               <CalendarDay
                 key={date.toString()}
@@ -170,7 +185,11 @@ export default function HorizontalCalendar({
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
                 weekNumber={Number(weekNumber)}
-                refCallback={index === 0 ? (el) => (weekMarkerRefs.current[Number(weekNumber)] = el) : undefined}
+                refCallback={
+                  index === 0
+                    ? (el) => (weekMarkerRefs.current[Number(weekNumber)] = el)
+                    : undefined
+                }
               />
             ))}
           </div>
