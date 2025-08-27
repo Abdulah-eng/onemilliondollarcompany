@@ -1,27 +1,27 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from 'react';
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import ProgramDetailView from "./ProgramDetailView";
-import { ScheduledTask } from "@/mockdata/programs/mockprograms";
-import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
+import { ScheduledTask } from '@/mockdata/programs/mockprograms';
+import { cn } from '@/lib/utils';
+import { X } from 'lucide-react';
 
-export default function SlideInDetail({
-  task,
-  isMobile,
-  onClose,
-}: {
-  task: ScheduledTask | null;
-  isMobile: boolean;
-  onClose: () => void;
+export default function SlideInDetail({ 
+  task, 
+  isMobile, 
+  onClose 
+}: { 
+  task: ScheduledTask | null, 
+  isMobile: boolean, 
+  onClose: () => void 
 }) {
-  const [mounted, setMounted] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     if (task) {
-      const timer = setTimeout(() => setMounted(true), 50);
+      const timer = setTimeout(() => setIsVisible(true), 10);
       return () => clearTimeout(timer);
     } else {
-      setMounted(false);
+      setIsVisible(false);
     }
   }, [task]);
 
@@ -38,21 +38,19 @@ export default function SlideInDetail({
   }
 
   return (
-    <div className="fixed inset-0 z-50 pointer-events-none">
-      {/* Overlay */}
+    <div className="fixed inset-0 z-50">
       <div
         onClick={onClose}
         className={cn(
-          "absolute inset-0 bg-black/40 transition-opacity duration-300 pointer-events-auto",
-          mounted ? "opacity-100" : "opacity-0"
+          "absolute inset-0 bg-black/40 transition-opacity duration-300",
+          isVisible ? "opacity-100" : "opacity-0"
         )}
       />
-
-      {/* Slide-in Panel */}
+      
       <div
         className={cn(
-          "absolute top-0 right-0 h-full w-full max-w-md bg-slate-50 shadow-2xl transition-transform duration-300 ease-in-out pointer-events-auto",
-          mounted ? "translate-x-0" : "translate-x-full"
+          "absolute top-0 right-0 h-full w-full max-w-md bg-slate-50 shadow-2xl transition-transform duration-300 ease-in-out",
+          isVisible ? "translate-x-0" : "translate-x-full"
         )}
       >
         <ProgramDetailView task={task} />
