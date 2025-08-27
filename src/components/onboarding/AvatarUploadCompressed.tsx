@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Camera, Upload, UserCircle, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import imageCompression from 'browser-image-compression';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/sonner';
 
 interface AvatarUploadCompressedProps {
   onChange: (file: File | null) => void;
@@ -13,17 +13,17 @@ interface AvatarUploadCompressedProps {
 export const AvatarUploadCompressed = ({ onChange, preview }: AvatarUploadCompressedProps) => {
   const [isCompressing, setIsCompressing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
+  
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      return toast({ title: "Invalid file type", description: "Please select an image.", variant: "destructive" });
+      return toast.error("Please select an image.");
     }
     if (file.size > 10 * 1024 * 1024) { // 10MB limit
-      return toast({ title: "File too large", description: "Please select an image under 10MB.", variant: "destructive" });
+      return toast.error("Please select an image under 10MB.");
     }
 
     setIsCompressing(true);
@@ -32,7 +32,7 @@ export const AvatarUploadCompressed = ({ onChange, preview }: AvatarUploadCompre
       const compressedFile = await imageCompression(file, options);
       onChange?.(compressedFile);
     } catch (error) {
-      toast({ title: "Upload failed", description: "Error processing your image.", variant: "destructive" });
+      toast.error("Error processing your image.");
     } finally {
       setIsCompressing(false);
     }
