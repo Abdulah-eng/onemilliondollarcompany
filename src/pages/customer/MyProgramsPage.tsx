@@ -1,60 +1,87 @@
-// src/pages/customer/MyProgramsPage.tsx
-import { useState, useMemo } from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TaskCard } from "@/components/customer/programsoverview/TaskCard";
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import HorizontalCalendar from "@/components/customer/programsoverview/HorizontalCalendar";
+import TaskCard from "@/components/customer/programsoverview/TaskCard";
 import SlideInDetail from "@/components/customer/programsoverview/SlideInDetail";
-import { mockPrograms, generateDailySchedule, ScheduledTask } from "@/mockdata/programs/mockprograms";
-import { isSameDay } from "date-fns";
-
-type TabType = "active" | "scheduled" | "purchased";
+import ProgramDetailView from "@/components/customer/programsoverview/ProgramDetailView";
+import { mockPrograms } from "@/mockdata/programs/mockPrograms";
 
 export default function MyProgramsPage() {
-  const [tab, setTab] = useState<TabType>("active");
-  const [selectedTask, setSelectedTask] = useState<ScheduledTask | null>(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const dailySchedule = useMemo(() => generateDailySchedule(mockPrograms), []);
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedTask, setSelectedTask] = useState<any>(null);
 
-  const filteredPrograms = useMemo(
-    () => mockPrograms.filter((p) => p.status === tab),
-    [tab]
-  );
-  const todayTasks = dailySchedule.filter((t) => isSameDay(t.date, selectedDate));
+  // For demo: take the first program's schedule
+  const activeProgram = mockPrograms[0];
+  const schedule = activeProgram.schedule;
+
+  // Get tasks for the selected date
+  const tasksForSelectedDay =
+    schedule[selectedDate.toDateString()] || [];
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-8 space-y-8">
-      {/* Tabs */}
-      <Tabs value={tab} onValueChange={(v) => setTab(v as TabType)}>
-        <TabsList className="grid grid-cols-3 w-full max-w-lg mx-auto rounded-xl bg-white p-1 shadow-sm">
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
-          <TabsTrigger value="purchased">Purchased</TabsTrigger>
-        </TabsList>
-      </Tabs>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6">Programs</h1>
 
-      {/* Calendar */}
-      <HorizontalCalendar
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-        schedule={dailySchedule}
-      />
+      {/* Centered container */}
+      <div className="max-w-3xl mx-auto flex flex-col items-center gap-6">
+        
+        {/* Tabs */}
+        <Tabs defaultValue="active" className="w-full">
+          <TabsList className="flex justify-center w-full">
+            <TabsTrigger value="active">Active</TabsTrigger>
+            <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
+            <TabsTrigger value="purchased">Purchased</TabsTrigger>
+          </TabsList>
 
-      {/* Tasks */}
-      <div className="space-y-4">
-        {todayTasks.length === 0 ? (
-          <div className="p-4 text-center border border-dashed rounded-2xl text-gray-500">
-            No tasks today!
-          </div>
-        ) : (
-          todayTasks.map((task) => (
-            <TaskCard key={task.id} task={task} onClick={() => setSelectedTask(task)} />
-          ))
-        )}
+          {/* Active Tab Content */}
+          <TabsContent value="active">
+            {/* Horizontal Calendar */}
+            <HorizontalCalendar
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+              schedule={schedule}
+            />
+
+            {/* Task Grid */}
+            <div className="mt-6 w-full">
+              {tasksForSelectedDay.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {tasksForSelectedDay.map((task: any) => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      onClick={() => setSelectedTask(task)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-gray-500 mt-6 border rounded-lg p-8">
+                  No tasks today!
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Placeholder for other tabs */}
+          <TabsContent value="scheduled">
+            <div className="text-center text-gray-500 mt-6">
+              No scheduled programs yet.
+            </div>
+          </TabsContent>
+          <TabsContent value="purchased">
+            <div className="text-center text-gray-500 mt-6">
+              No purchased programs yet.
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
-      {/* Slide-in detail (keeps floating outside main centered layout) */}
-      <SlideInDetail task={selectedTask} isMobile={isMobile} onClose={() => setSelectedTask(null)} />
+      {/* Slide-in Task Detail */}
+      {selectedTask && (
+        <SlideInDetail onClose={() => setSelectedTask(null)}>
+          <ProgramDetailView task={selectedTask} />
+        </SlideInDetail>
+      )}
     </div>
   );
 }
