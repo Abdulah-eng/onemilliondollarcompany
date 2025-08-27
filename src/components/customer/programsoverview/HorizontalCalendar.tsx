@@ -1,7 +1,7 @@
 import { format, addDays, isSameDay, isPast, isToday } from "date-fns";
 import { cn } from "@/lib/utils";
 // ✅ CORRECTED IMPORT: Now importing both ScheduledTask and the shared typeConfig
-import { ScheduledTask, typeConfig } from "@/mockdata/programs/mockPrograms";
+import { ScheduledTask, typeConfig } from "@/mockdata/programs/mockprograms";
 import { useMemo, useRef, useEffect } from "react";
 
 export default function HorizontalCalendar({
