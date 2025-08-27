@@ -1,5 +1,6 @@
 import { format, addDays, isSameDay, isPast, isToday } from "date-fns";
 import { cn } from "@/lib/utils";
+// ✅ CORRECTED IMPORT: Now importing both ScheduledTask and the shared typeConfig
 import { ScheduledTask, typeConfig } from "@/mockdata/programs/mockPrograms";
 import { useMemo, useRef, useEffect } from "react";
 
@@ -81,7 +82,7 @@ export default function HorizontalCalendar({
                       key={t.id}
                       className={cn(
                         "w-2 h-2 rounded-full",
-                        // Correctly color each dot based on its individual task status
+                        // ✅ CORRECTED LOGIC: Color each dot based on its individual task status
                         t.status === "missed" && isPast(t.date) && !isToday(t.date)
                           ? typeConfig[t.type].missedDot
                           : typeConfig[t.type].dot
