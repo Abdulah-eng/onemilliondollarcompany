@@ -1,4 +1,3 @@
-// src/components/layout/TopNav.tsx
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -58,7 +57,8 @@ const TopNav = ({ title }: TopNavProps) => {
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name || 'User'} />
-                  <AvatarFallback className="bg-emerald-100 text-emerald-600 font-semibold">
+                  {/* ✅ REPLACED HARDCODED COLORS WITH THEME VARIABLES */}
+                  <AvatarFallback className="bg-secondary text-secondary-foreground font-semibold">
                     {getInitials()}
                   </AvatarFallback>
                 </Avatar>
