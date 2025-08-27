@@ -2,30 +2,30 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScheduledTask, typeConfig } from "@/mockdata/programs/mockprograms";
 import { PlayCircle } from "lucide-react";
-import { memo } from "react";
 
-// Emoji helper
-const getEmojiForItem = (item: string, type: ScheduledTask["type"]) => {
+const getEmojiForItem = (item: string, type: ScheduledTask['type']) => {
   const lowerItem = item.toLowerCase();
-  if (type === "fitness") {
-    if (lowerItem.includes("squat") || lowerItem.includes("lunge")) return "🦵";
-    if (lowerItem.includes("bench") || lowerItem.includes("press")) return "💪";
-    return "🔥";
+  if (type === 'fitness') {
+    if (lowerItem.includes('squat') || lowerItem.includes('lunge')) return '🦵';
+    if (lowerItem.includes('bench') || lowerItem.includes('press')) return '💪';
+    if (lowerItem.includes('row') || lowerItem.includes('pull')) return '🏋️';
+    return '🔥';
   }
-  if (type === "nutrition") {
-    if (lowerItem.includes("breakfast")) return "🥞";
-    if (lowerItem.includes("lunch")) return "🥪";
-    return "🍲";
+  if (type === 'nutrition') {
+    if (lowerItem.includes('breakfast')) return '🥞';
+    if (lowerItem.includes('lunch')) return '🥪';
+    if (lowerItem.includes('dinner')) return '🍲';
+    return '🍴';
   }
-  if (type === "mental") {
-    if (lowerItem.includes("meditat")) return "🧘";
-    if (lowerItem.includes("journal")) return "✍️";
-    return "✨";
+  if (type === 'mental') {
+    if (lowerItem.includes('meditat')) return '🧘';
+    if (lowerItem.includes('journal')) return '✍️';
+    return '✨';
   }
-  return "✅";
+  return '✅';
 };
 
-const ProgramDetailView = memo(function ProgramDetailView({ task }: { task: ScheduledTask | null }) {
+export default function ProgramDetailView({ task }: { task: ScheduledTask | null }) {
   if (!task) return null;
 
   const config = typeConfig[task.type];
@@ -37,7 +37,6 @@ const ProgramDetailView = memo(function ProgramDetailView({ task }: { task: Sche
         <img
           src={config.imageUrl}
           alt={task.title}
-          loading="lazy"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
@@ -69,16 +68,11 @@ const ProgramDetailView = memo(function ProgramDetailView({ task }: { task: Sche
 
       {/* FOOTER */}
       <div className="p-4 border-t border-slate-200 bg-white/50 backdrop-blur-sm flex-shrink-0">
-        <Button
-          size="lg"
-          className="w-full h-12 font-bold rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center"
-        >
+        <Button size="lg" className="w-full h-12 font-bold rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center">
           <PlayCircle className="w-5 h-5 mr-2" />
           Start Task
         </Button>
       </div>
     </div>
   );
-});
-
-export default ProgramDetailView;
+}
