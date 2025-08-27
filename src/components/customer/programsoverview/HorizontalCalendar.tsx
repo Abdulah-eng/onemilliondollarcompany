@@ -17,7 +17,10 @@ const groupDatesByWeek = (dates: Date[], programStartDate: Date) => {
   const grouped: { [week: number]: Date[] } = {};
   dates.forEach((date) => {
     const weekNumber =
-      differenceInWeeks(startOfWeek(date, { weekStartsOn: 1 }), startOfWeek(programStartDate, { weekStartsOn: 1 })) + 1;
+      differenceInWeeks(
+        startOfWeek(date, { weekStartsOn: 1 }),
+        startOfWeek(programStartDate, { weekStartsOn: 1 })
+      ) + 1;
     if (!grouped[weekNumber]) grouped[weekNumber] = [];
     grouped[weekNumber].push(date);
   });
@@ -39,7 +42,6 @@ export default function HorizontalCalendar({
 }) {
   const [visibleWeek, setVisibleWeek] = useState(1);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const weekMarkerRefs = useRef<{ [week: number]: HTMLDivElement | null }>({});
 
   const totalWeeks = useMemo(
     () => differenceInWeeks(programEndDate, programStartDate) + 1,
@@ -55,24 +57,35 @@ export default function HorizontalCalendar({
   useEffect(() => {
     const todayEl = document.getElementById(`date-${format(new Date(), "yyyy-MM-dd")}`);
     if (todayEl && scrollContainerRef.current) {
-      const scrollLeft = todayEl.offsetLeft - scrollContainerRef.current.offsetWidth / 2 + todayEl.offsetWidth / 2;
+      const scrollLeft =
+        todayEl.offsetLeft - scrollContainerRef.current.offsetWidth / 2 + todayEl.offsetWidth / 2;
       scrollContainerRef.current.scrollTo({ left: scrollLeft, behavior: "smooth" });
     }
   }, []);
 
-  // Intersection observer to update visible week
+  // Scroll listener to update visible week based on center of container
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const week = entry.target.getAttribute("data-week");
-          if (entry.isIntersecting && week) setVisibleWeek(Number(week));
-        });
-      },
-      { root: scrollContainerRef.current, threshold: 0.5 }
-    );
-    Object.values(weekMarkerRefs.current).forEach((el) => el && observer.observe(el));
-    return () => observer.disconnect();
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const onScroll = () => {
+      const scrollCenter = container.scrollLeft + container.offsetWidth / 2;
+      for (const [weekNum, dates] of Object.entries(groupedDates)) {
+        const firstDateEl = document.getElementById(`date-${format(dates[0], "yyyy-MM-dd")}`);
+        const lastDateEl = document.getElementById(`date-${format(dates[dates.length - 1], "yyyy-MM-dd")}`);
+        if (!firstDateEl || !lastDateEl) continue;
+
+        const start = firstDateEl.offsetLeft;
+        const end = lastDateEl.offsetLeft + lastDateEl.offsetWidth;
+        if (scrollCenter >= start && scrollCenter <= end) {
+          setVisibleWeek(Number(weekNum));
+          break;
+        }
+      }
+    };
+
+    container.addEventListener("scroll", onScroll, { passive: true });
+    return () => container.removeEventListener("scroll", onScroll);
   }, [groupedDates]);
 
   return (
@@ -85,16 +98,10 @@ export default function HorizontalCalendar({
       {/* Horizontal Calendar */}
       <div
         ref={scrollContainerRef}
-        className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 scroll-smooth"
+        className="flex items-start gap-2 overflow-x-auto overflow-visible pb-2 scrollbar-hide -mx-4 px-4 scroll-smooth"
       >
         {Object.entries(groupedDates).map(([weekNumber, dates]) => (
-          <div key={`week-${weekNumber}`} className="flex items-center gap-2">
-            <div
-              ref={(el) => (weekMarkerRefs.current[Number(weekNumber)] = el)}
-              data-week={weekNumber}
-              className="w-px h-1"
-            ></div>
-
+          <div key={`week-${weekNumber}`} className="flex items-start gap-2">
             {dates.map((date) => {
               const tasks = schedule.filter((t) => isSameDay(t.date, date));
               const hasTasks = tasks.length > 0;
