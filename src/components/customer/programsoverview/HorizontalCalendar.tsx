@@ -6,41 +6,64 @@ import {
   isPast,
   isToday,
   startOfWeek,
-  endOfWeek,
+  differenceInWeeks,
+  isBefore,
+  isAfter,
 } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ScheduledTask, typeConfig } from "@/mockdata/programs/mockprograms";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function HorizontalCalendar({
   selectedDate,
   setSelectedDate,
   schedule,
+  programStartDate,
+  programEndDate,
 }: {
   selectedDate: Date;
   setSelectedDate: (d: Date) => void;
   schedule: ScheduledTask[];
+  programStartDate: Date;
+  programEndDate: Date;
 }) {
-  // State to manage the week being displayed. Defaults to the current date.
+  // The date that determines which week to show. Initialize to today's date.
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Calculate the start and end of the week based on the current date
-  const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
+  // Set the calendar to the program's start week if today's date is before the program starts
+  useEffect(() => {
+    if (isBefore(new Date(), programStartDate)) {
+      setCurrentDate(programStartDate);
+    }
+  }, [programStartDate]);
 
-  // Generate an array of 7 dates for the current week
-  const weekDates = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  }, [weekStart]);
+
+  // Calculate total weeks and the current week number
+  const totalWeeks = differenceInWeeks(programEndDate, programStartDate) + 1;
+  const currentWeekNumber = differenceInWeeks(startOfWeek(currentDate, { weekStartsOn: 1 }), startOfWeek(programStartDate, { weekStartsOn: 1 })) + 1;
+
+  // Determine if navigation is possible
+  const canGoBack = currentWeekNumber > 1;
+  const canGoForward = currentWeekNumber < totalWeeks;
 
   const handlePrevWeek = () => {
-    setCurrentDate(subDays(currentDate, 7));
+    if (canGoBack) {
+      setCurrentDate(subDays(currentDate, 7));
+    }
   };
 
   const handleNextWeek = () => {
-    setCurrentDate(addDays(currentDate, 7));
+    if (canGoForward) {
+      setCurrentDate(addDays(currentDate, 7));
+    }
   };
+  
+  // Generate an array of 7 dates for the current week
+  const weekDates = useMemo(() => {
+    const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+    return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  }, [currentDate]);
 
   return (
     <div className="w-full space-y-4">
@@ -48,17 +71,19 @@ export default function HorizontalCalendar({
       <div className="flex justify-between items-center px-2">
         <button
           onClick={handlePrevWeek}
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          disabled={!canGoBack}
+          className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           aria-label="Previous week"
         >
           <ChevronLeft className="w-5 h-5 text-gray-600" />
         </button>
         <div className="text-center font-semibold text-gray-800">
-          {format(weekStart, "MMMM d")} - {format(weekEnd, "d, yyyy")}
+          Week {currentWeekNumber} of {totalWeeks}
         </div>
         <button
           onClick={handleNextWeek}
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          disabled={!canGoForward}
+          className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           aria-label="Next week"
         >
           <ChevronRight className="w-5 h-5 text-gray-600" />
@@ -68,17 +93,17 @@ export default function HorizontalCalendar({
       {/* ## Days of the Week Grid ## */}
       <div className="grid grid-cols-7 gap-2">
         {weekDates.map((date) => {
-          const tasks = schedule.filter((t) => isSameDay(t.date, date));
+          // A date is out of bounds if it's before the program start or after the end
+          const isOutOfBounds = isBefore(date, programStartDate) || isAfter(date, programEndDate);
+          const tasks = isOutOfBounds ? [] : schedule.filter((t) => isSameDay(t.date, date));
           const hasTasks = tasks.length > 0;
-          const hasMissedTasks =
-            isPast(date) &&
-            !isToday(date) &&
-            tasks.some((t) => t.status === "missed");
+          const hasMissedTasks = isPast(date) && !isToday(date) && tasks.some((t) => t.status === "missed");
 
           return (
             <button
               key={date.toString()}
-              onClick={() => setSelectedDate(date)}
+              onClick={() => !isOutOfBounds && setSelectedDate(date)}
+              disabled={isOutOfBounds}
               className={cn(
                 "p-2 rounded-xl text-center flex-shrink-0 transition-all duration-200 border-2 flex flex-col items-center justify-center h-24",
                 isSameDay(date, selectedDate)
@@ -89,7 +114,8 @@ export default function HorizontalCalendar({
                   : "border-transparent",
                 hasMissedTasks && !isSameDay(date, selectedDate)
                   ? "bg-gray-100 text-gray-400 border-gray-200"
-                  : ""
+                  : "",
+                isOutOfBounds ? "bg-gray-50 text-gray-300 cursor-not-allowed" : ""
               )}
             >
               <div className="text-xs font-medium uppercase opacity-70">
@@ -101,12 +127,7 @@ export default function HorizontalCalendar({
                   tasks.map((t) => (
                     <div
                       key={t.id}
-                      className={cn(
-                        "w-2 h-2 rounded-full",
-                        t.status === "missed" && isPast(t.date) && !isToday(date)
-                          ? typeConfig[t.type].missedDot
-                          : typeConfig[t.type].dot
-                      )}
+                      className={cn("w-2 h-2 rounded-full", t.status === "missed" && isPast(t.date) && !isToday(date) ? typeConfig[t.type].missedDot : typeConfig[t.type].dot)}
                     ></div>
                   ))}
               </div>
