@@ -1,7 +1,6 @@
 import {
   format,
   addDays,
-  subDays,
   isSameDay,
   isPast,
   isToday,
@@ -9,11 +8,24 @@ import {
   differenceInWeeks,
   isBefore,
   isAfter,
+  eachDayOfInterval,
 } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ScheduledTask, typeConfig } from "@/mockdata/programs/mockprograms";
-import { useState, useMemo, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useMemo, useEffect, useRef } from "react";
+
+// Helper function to group dates by week number
+const groupDatesByWeek = (dates: Date[], programStartDate: Date) => {
+  const grouped: { [week: number]: Date[] } = {};
+  dates.forEach((date) => {
+    const weekNumber = differenceInWeeks(startOfWeek(date, { weekStartsOn: 1 }), startOfWeek(programStartDate, { weekStartsOn: 1 })) + 1;
+    if (!grouped[weekNumber]) {
+      grouped[weekNumber] = [];
+    }
+    grouped[weekNumber].push(date);
+  });
+  return grouped;
+};
 
 export default function HorizontalCalendar({
   selectedDate,
@@ -28,112 +40,114 @@ export default function HorizontalCalendar({
   programStartDate: Date;
   programEndDate: Date;
 }) {
-  // The date that determines which week to show. Initialize to today's date.
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [visibleWeek, setVisibleWeek] = useState(1);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const weekMarkerRefs = useRef<{ [week: number]: HTMLDivElement | null }>({});
 
-  // Set the calendar to the program's start week if today's date is before the program starts
-  useEffect(() => {
-    if (isBefore(new Date(), programStartDate)) {
-      setCurrentDate(programStartDate);
-    }
-  }, [programStartDate]);
-
-
-  // Calculate total weeks and the current week number
-  const totalWeeks = differenceInWeeks(programEndDate, programStartDate) + 1;
-  const currentWeekNumber = differenceInWeeks(startOfWeek(currentDate, { weekStartsOn: 1 }), startOfWeek(programStartDate, { weekStartsOn: 1 })) + 1;
-
-  // Determine if navigation is possible
-  const canGoBack = currentWeekNumber > 1;
-  const canGoForward = currentWeekNumber < totalWeeks;
-
-  const handlePrevWeek = () => {
-    if (canGoBack) {
-      setCurrentDate(subDays(currentDate, 7));
-    }
-  };
-
-  const handleNextWeek = () => {
-    if (canGoForward) {
-      setCurrentDate(addDays(currentDate, 7));
-    }
-  };
+  // Calculate total weeks for the program
+  const totalWeeks = useMemo(() => 
+    differenceInWeeks(programEndDate, programStartDate) + 1,
+    [programStartDate, programEndDate]
+  );
   
-  // Generate an array of 7 dates for the current week
-  const weekDates = useMemo(() => {
-    const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
-    return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  }, [currentDate]);
+  // Generate and group all dates for the entire program duration
+  const groupedDates = useMemo(() => {
+    const allDates = eachDayOfInterval({ start: programStartDate, end: programEndDate });
+    return groupDatesByWeek(allDates, programStartDate);
+  }, [programStartDate, programEndDate]);
+
+  // Effect to scroll to today's date on initial load
+  useEffect(() => {
+    const todayElement = document.getElementById(`date-${format(new Date(), "yyyy-MM-dd")}`);
+    if (todayElement && scrollContainerRef.current) {
+      const scrollLeft = todayElement.offsetLeft - scrollContainerRef.current.offsetWidth / 2 + todayElement.offsetWidth / 2;
+      scrollContainerRef.current.scrollTo({ left: scrollLeft, behavior: "smooth" });
+    }
+  }, []);
+
+  // Effect for Intersection Observer to update the visible week title
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const week = entry.target.getAttribute("data-week");
+            if (week) {
+              setVisibleWeek(Number(week));
+            }
+          }
+        });
+      },
+      { root: scrollContainerRef.current, threshold: 0.5 }
+    );
+
+    Object.values(weekMarkerRefs.current).forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [groupedDates]);
 
   return (
     <div className="w-full space-y-4">
-      {/* ## Week Navigation Header ## */}
-      <div className="flex justify-between items-center px-2">
-        <button
-          onClick={handlePrevWeek}
-          disabled={!canGoBack}
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          aria-label="Previous week"
-        >
-          <ChevronLeft className="w-5 h-5 text-gray-600" />
-        </button>
-        <div className="text-center font-semibold text-gray-800">
-          Week {currentWeekNumber} of {totalWeeks}
-        </div>
-        <button
-          onClick={handleNextWeek}
-          disabled={!canGoForward}
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          aria-label="Next week"
-        >
-          <ChevronRight className="w-5 h-5 text-gray-600" />
-        </button>
+      {/* ## Dynamic Week Header ## */}
+      <div className="text-center font-semibold text-gray-800 px-2">
+        Week {visibleWeek} of {totalWeeks}
       </div>
 
-      {/* ## Days of the Week Grid ## */}
-      <div className="grid grid-cols-7 gap-2">
-        {weekDates.map((date) => {
-          // A date is out of bounds if it's before the program start or after the end
-          const isOutOfBounds = isBefore(date, programStartDate) || isAfter(date, programEndDate);
-          const tasks = isOutOfBounds ? [] : schedule.filter((t) => isSameDay(t.date, date));
-          const hasTasks = tasks.length > 0;
-          const hasMissedTasks = isPast(date) && !isToday(date) && tasks.some((t) => t.status === "missed");
+      {/* ## Horizontal Scrolling Days ## */}
+      <div
+        ref={scrollContainerRef}
+        className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 scroll-smooth"
+      >
+        {Object.entries(groupedDates).map(([weekNumber, dates]) => (
+          <div key={`week-${weekNumber}`} className="flex items-center gap-2">
+            {/* Week Marker for Intersection Observer */}
+            <div
+              ref={(el) => (weekMarkerRefs.current[Number(weekNumber)] = el)}
+              data-week={weekNumber}
+              className="w-px h-1" // Invisible element to mark the start of a week
+            ></div>
 
-          return (
-            <button
-              key={date.toString()}
-              onClick={() => !isOutOfBounds && setSelectedDate(date)}
-              disabled={isOutOfBounds}
-              className={cn(
-                "p-2 rounded-xl text-center flex-shrink-0 transition-all duration-200 border-2 flex flex-col items-center justify-center h-24",
-                isSameDay(date, selectedDate)
-                  ? "bg-emerald-500 text-white border-emerald-500 shadow-md scale-105"
-                  : "bg-white hover:bg-gray-100",
-                isToday(date) && !isSameDay(date, selectedDate)
-                  ? "border-emerald-500"
-                  : "border-transparent",
-                hasMissedTasks && !isSameDay(date, selectedDate)
-                  ? "bg-gray-100 text-gray-400 border-gray-200"
-                  : "",
-                isOutOfBounds ? "bg-gray-50 text-gray-300 cursor-not-allowed" : ""
-              )}
-            >
-              <div className="text-xs font-medium uppercase opacity-70">
-                {format(date, "EEE")}
-              </div>
-              <div className="text-lg font-bold">{format(date, "d")}</div>
-              <div className="flex justify-center items-center gap-1 mt-1 h-2">
-                {hasTasks &&
-                  tasks.map((t) => (
-                    <div
-                      key={t.id}
-                      className={cn("w-2 h-2 rounded-full", t.status === "missed" && isPast(t.date) && !isToday(date) ? typeConfig[t.type].missedDot : typeConfig[t.type].dot)}
-                    ></div>
-                  ))}
-              </div>
-            </button>
-          );
-        })}
+            {dates.map((date) => {
+              const tasks = schedule.filter((t) => isSameDay(t.date, date));
+              const hasTasks = tasks.length > 0;
+              const hasMissedTasks = isPast(date) && !isToday(date) && tasks.some((t) => t.status === "missed");
+              
+              return (
+                <button
+                  key={date.toString()}
+                  id={`date-${format(date, "yyyy-MM-dd")}`}
+                  onClick={() => setSelectedDate(date)}
+                  className={cn(
+                    "p-2 rounded-xl min-w-[60px] text-center flex-shrink-0 transition-all duration-200 border-2 flex flex-col items-center justify-center h-24",
+                    isSameDay(date, selectedDate)
+                      ? "bg-emerald-500 text-white border-emerald-500 shadow-md scale-105"
+                      : "bg-white hover:bg-gray-100",
+                    isToday(date) && !isSameDay(date, selectedDate)
+                      ? "border-emerald-500"
+                      : "border-transparent",
+                    hasMissedTasks && !isSameDay(date, selectedDate)
+                      ? "bg-gray-100 text-gray-400 border-gray-200"
+                      : ""
+                  )}
+                >
+                  <div className="text-xs font-medium uppercase opacity-70">{format(date, "EEE")}</div>
+                  <div className="text-lg font-bold">{format(date, "d")}</div>
+                  <div className="flex justify-center items-center gap-1 mt-1 h-2">
+                    {hasTasks &&
+                      tasks.map((t) => (
+                        <div
+                          key={t.id}
+                          className={cn("w-2 h-2 rounded-full", t.status === "missed" && isPast(t.date) && !isToday(date) ? typeConfig[t.type].missedDot : typeConfig[t.type].dot)}
+                        ></div>
+                      ))}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </div>
     </div>
   );
