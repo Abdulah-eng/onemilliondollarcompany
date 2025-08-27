@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TaskCard } from "@/components/customer/programsoverview/TaskCard";
 import HorizontalCalendar from "@/components/customer/programsoverview/HorizontalCalendar";
@@ -15,26 +15,31 @@ type TabType = "active" | "scheduled" | "purchased";
 export default function MyProgramsPage() {
   const [tab, setTab] = useState<TabType>("active");
   const [selectedTask, setSelectedTask] = useState<ScheduledTask | null>(null);
-  const [selectedDate, setSelectedDate] = useState(new Date()); // Today's date is Aug 27, 2025
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isMobile, setIsMobile] = useState<boolean>(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
+
+  // Detect resize to update mobile/tablet mode dynamically
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const dailySchedule = useMemo(() => generateDailySchedule(mockPrograms), []);
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-  // --- ✅ START OF NEW LOGIC ---
-
-  // 1. Find the currently active program from your mock data.
+  // --- Active program & date calculations ---
   const activeProgram = useMemo(
     () => mockPrograms.find((p) => p.status === "active"),
     []
   );
 
-  // 2. Calculate the program's true start date from the string.
   const programStartDate = useMemo(
     () => (activeProgram?.startDate ? parseISO(activeProgram.startDate) : undefined),
     [activeProgram]
   );
 
-  // 3. Calculate the program's end date based on its start date and number of weeks.
   const programEndDate = useMemo(
     () =>
       programStartDate && activeProgram?.weeks
@@ -42,8 +47,6 @@ export default function MyProgramsPage() {
         : undefined,
     [programStartDate, activeProgram]
   );
-
-  // --- ✅ END OF NEW LOGIC ---
 
   const todayTasks = dailySchedule.filter((t) =>
     isSameDay(t.date, selectedDate)
@@ -60,7 +63,7 @@ export default function MyProgramsPage() {
         </TabsList>
       </Tabs>
 
-      {/* Conditionally render Calendar ONLY if an active program with valid dates exists */}
+      {/* Calendar */}
       {activeProgram && programStartDate && programEndDate ? (
         <HorizontalCalendar
           selectedDate={selectedDate}
@@ -75,7 +78,7 @@ export default function MyProgramsPage() {
         </div>
       )}
 
-      {/* Tasks for the selected day */}
+      {/* Tasks for selected day */}
       <div className="space-y-4">
         {todayTasks.length === 0 ? (
           <div className="p-8 text-center border border-dashed rounded-2xl text-gray-500">
@@ -92,7 +95,7 @@ export default function MyProgramsPage() {
         )}
       </div>
 
-      {/* Slide-in detail component */}
+      {/* Slide-in detail panel */}
       <SlideInDetail
         task={selectedTask}
         isMobile={isMobile}
