@@ -58,7 +58,7 @@ export default function ProgramDetailView({ task }: { task: ScheduledTask | null
           {task.content.map((item, i) => (
             <li
               key={i}
-              className="flex items-center p-4 bg-white rounded-xl shadow-sm border border-slate-100 transition-transform hover:scale-102"
+              className="flex items-center p-4 bg-white rounded-xl shadow-sm border border-slate-100 transition-transform hover:scale-[1.02]"
             >
               <span className="text-2xl mr-4">{getEmojiForItem(item, task.type)}</span>
               <span className="text-slate-800 font-medium">{item}</span>
