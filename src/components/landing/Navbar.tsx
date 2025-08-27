@@ -61,7 +61,12 @@ export default function Navbar() {
           </div>
 
           <div className="md:hidden">
-             <Button variant="ghost" /* ... mobile menu toggle ... */ >
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle mobile menu"
+            >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>

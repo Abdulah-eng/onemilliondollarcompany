@@ -7,8 +7,10 @@ import SlideInDetail from "@/components/customer/programsoverview/SlideInDetail"
 import { mockPrograms, generateDailySchedule, ScheduledTask } from "@/mockdata/programs/mockprograms";
 import { isSameDay } from "date-fns";
 
+type TabType = "active" | "scheduled" | "purchased";
+
 export default function MyProgramsPage() {
-  const [tab, setTab] = useState<"active"|"scheduled"|"purchased">("active");
+  const [tab, setTab] = useState<TabType>("active");
   const [selectedTask, setSelectedTask] = useState<ScheduledTask | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const dailySchedule = useMemo(() => generateDailySchedule(mockPrograms), []);
@@ -19,7 +21,7 @@ export default function MyProgramsPage() {
 
   return (
     <div className="p-4 space-y-6 min-h-screen">
-      <Tabs value={tab} onValueChange={(v)=>setTab(v as any)}>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as TabType)}>
         <TabsList className="grid grid-cols-3 w-full max-w-lg mx-auto rounded-xl bg-white p-1 shadow-sm">
           <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
