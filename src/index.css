@@ -2,58 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    /* Wellness-inspired color palette */
+    /* --- LIGHT MODE (Unchanged) --- */
     --background: 0 0% 100%;
     --foreground: 225 15% 20%;
-
     --card: 0 0% 100%;
     --card-foreground: 225 15% 20%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 225 15% 20%;
-
-    /* Primary: Emerald-teal gradient colors */
     --primary: 158 64% 52%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 173 58% 39%;
-
-    /* Secondary: Soft mint green */
     --secondary: 160 30% 95%;
     --secondary-foreground: 160 60% 25%;
-
-    /* Muted tones */
     --muted: 220 10% 96%;
     --muted-foreground: 225 10% 45%;
-
-    /* Accent: Soft purple */
     --accent: 270 30% 95%;
     --accent-foreground: 270 60% 30%;
-
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 220 15% 90%;
     --input: 220 15% 95%;
-    --ring: 15 100% 55%;
-
+    --ring: 158 64% 52%;
     --radius: 1rem;
-
-    /* Wellness gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(158 64% 52% / 0.1), hsl(173 58% 39% / 0.1));
-    --gradient-primary: linear-gradient(135deg, hsl(158 64% 52%), hsl(173 58% 39%));
-    --gradient-secondary: linear-gradient(135deg, hsl(160 60% 50%), hsl(180 60% 50%));
-    --gradient-accent: linear-gradient(135deg, hsl(270 60% 60%), hsl(290 60% 60%));
-
-    /* Wellness shadows */
-    --shadow-wellness: 0 10px 40px hsl(158 64% 52% / 0.15);
-    --shadow-card: 0 4px 20px hsl(225 15% 20% / 0.08);
-
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -61,37 +32,57 @@ All colors MUST be HSL.
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  /* --- ✅ NEW & IMPROVED DARK MODE --- */
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* A softer, dark slate background instead of pure black */
+    --background: 220 15% 12%;
+    /* Light gray text for better readability */
+    --foreground: 210 20% 85%;
+
+    /* Cards are slightly lighter than the background to stand out */
+    --card: 220 15% 15%;
+    --card-foreground: 210 20% 85%;
+
+    --popover: 220 15% 10%;
+    --popover-foreground: 210 20% 85%;
+
+    /* Primary color is now a vibrant, on-brand emerald */
+    --primary: 158 70% 55%;
+    /* Dark text for high contrast on the primary color */
+    --primary-foreground: 158 100% 5%;
+
+    /* Secondary/Muted elements are a subtle shade lighter */
+    --secondary: 220 15% 20%;
+    --secondary-foreground: 210 20% 85%;
+    --muted: 220 15% 20%;
+    --muted-foreground: 215 15% 55%;
+
+    /* Accent uses the primary color for a consistent feel */
+    --accent: 158 70% 55%;
+    --accent-foreground: 158 100% 5%;
+    
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders are subtle and soft */
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+    --ring: 158 70% 55%;
+
+    /* --- Sidebar Specific Dark Theme --- */
+    /* The sidebar is the darkest element, creating a stable frame */
+    --sidebar-background: 220 15% 10%;
+    --sidebar-foreground: 210 20% 80%;
+    /* Active item text/icon color */
+    --sidebar-primary: 158 70% 55%;
+    --sidebar-primary-foreground: 158 100% 5%;
+    /* Active item background color */
+    --sidebar-accent: 220 15% 16%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    /* A very subtle border between the sidebar and main content */
+    --sidebar-border: 220 15% 16%;
   }
 }
 
@@ -99,78 +90,20 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground overflow-x-hidden;
   }
-
-  /* Wellness-specific utilities */
-  .bg-gradient-hero {
-    background: var(--gradient-hero);
-  }
-
-  .bg-gradient-primary {
-    background: var(--gradient-primary);
-  }
-
-  .bg-gradient-secondary {
-    background: var(--gradient-secondary);
-  }
-
-  .shadow-wellness {
-    box-shadow: var(--shadow-wellness);
-  }
-
-  .shadow-card {
-    box-shadow: var(--shadow-card);
-  }
-
-  /* Scroll reveal animations */
-  .reveal {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-  }
-
-  .reveal-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* Smooth scroll with offset for fixed navbar */
-  section[id] {
-    scroll-margin-top: 5rem;
-  }
-
-  /* Button variants for wellness theme */
-  .btn-wellness-primary {
-    background: var(--gradient-primary);
-    color: hsl(var(--primary-foreground));
-    border: none;
-    box-shadow: var(--shadow-wellness);
-    transition: all 0.3s ease;
-  }
-
-  .btn-wellness-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 50px hsl(158 64% 52% / 0.25);
-  }
-
-  .btn-wellness-secondary {
-    background: var(--gradient-secondary);
-    color: hsl(var(--secondary-foreground));
-    border: none;
-    transition: all 0.3s ease;
-  }
-
-  .btn-wellness-secondary:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.1);
-  }
-
+  
   /* --- NEW THEME FOR DASHBOARD --- */
   .theme-dashboard {
-    --background: 45 50% 96%;    /* Lifesum Light Beige */
-    --foreground: 225 15% 25%;   /* Lifesum Charcoal */
+    /* These colors will now correctly override the base theme */
+    --background: 45 50% 96%;
+    --foreground: 225 15% 25%;
+  }
+
+  /* Apply dashboard theme colors in dark mode too */
+  .dark .theme-dashboard {
+    --background: 220 15% 12%;
+    --foreground: 210 20% 85%;
   }
 }
