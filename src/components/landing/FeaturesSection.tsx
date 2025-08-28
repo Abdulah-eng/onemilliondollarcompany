@@ -15,15 +15,12 @@ export default function FeaturesSection() {
           </p>
         </div>
 
-        {/* ✅ This container handles the layout shift and the new fade effect */}
-        <div className="relative lg:grid lg:grid-cols-3 lg:gap-8">
+        {/* This container handles the layout shift from scroll to grid */}
+        <div className="lg:grid lg:grid-cols-3 lg:gap-8">
           
-          {/* FADE EFFECT: These divs create the soft edges for the scroll container on mobile/tablet */}
-          <div className="absolute top-0 bottom-0 left-0 w-16 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none lg:hidden" />
-          <div className="absolute top-0 bottom-0 right-0 w-16 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none lg:hidden" />
-
           {/* On mobile, this div scrolls. On desktop, it becomes a grid item container */}
-          <div className="flex gap-6 overflow-x-auto pb-8 -mx-4 px-4 scroll-px-4 snap-x snap-mandatory lg:contents" data-reveal>
+          {/* ✅ Increased bottom padding (pb-12) to prevent shadow clipping */}
+          <div className="flex gap-6 overflow-x-auto pb-12 -mx-4 px-4 scroll-px-4 snap-x snap-mandatory lg:contents" data-reveal>
             {FEATURE_CARDS.map((feature, index) => (
               <div 
                 key={feature.title} 
