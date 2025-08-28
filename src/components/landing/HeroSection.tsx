@@ -41,12 +41,12 @@ export default function HeroSection() {
             }`}
           />
         ))}
-        <div className="absolute inset-0 bg-black/60" />
+        {/* Removed the dark overlay as requested */}
       </div>
 
-      {/* ✅ CONTENT CONTAINER (Right-aligned on desktop, centered on mobile) */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center md:justify-end">
-        <div className="max-w-xl text-center md:text-right">
+      {/* ✅ CONTENT CONTAINER (Left-aligned on desktop, centered on mobile) */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center md:justify-start">
+        <div className="max-w-xl text-center md:text-left">
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tighter text-white drop-shadow-xl">
             Your Personal Path to Wellness Starts Here
           </h1>
@@ -54,7 +54,7 @@ export default function HeroSection() {
             Get expert-led plans for fitness, nutrition, and mental clarity, all tailored to you.
           </p>
           
-          <div className="mt-10 flex flex-col items-center md:items-end">
+          <div className="mt-10 flex flex-col items-center md:items-start">
             <Button
               size="lg"
               className="h-14 px-8 text-lg font-bold rounded-full bg-gradient-primary text-primary-foreground transition-transform transform hover:scale-105 shadow-2xl shadow-primary/30"
@@ -67,8 +67,8 @@ export default function HeroSection() {
             </p>
           </div>
 
-          {/* ✅ CUSTOMER RATING / SOCIAL PROOF */}
-          <div className="mt-8 flex items-center justify-center md:justify-end gap-4">
+          {/* CUSTOMER RATING / SOCIAL PROOF */}
+          <div className="mt-8 flex items-center justify-center md:justify-start gap-4">
               <div className="flex items-center text-yellow-400">
                 <Star className="w-5 h-5 fill-current" />
                 <Star className="w-5 h-5 fill-current" />
