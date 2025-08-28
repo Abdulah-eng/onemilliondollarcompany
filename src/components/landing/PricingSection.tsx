@@ -46,7 +46,9 @@ const PricingSection = () => {
             <div
               key={plan.name}
               className={`wellness-card p-8 relative rounded-3xl shadow-xl min-w-[300px] flex-shrink-0 ${
-                plan.featured ? 'ring-2 ring-primary bg-gradient-primary/5' : 'bg-card'
+                plan.featured
+                  ? 'ring-2 ring-primary bg-gradient-primary/5'
+                  : 'bg-card'
               } hover:scale-105 transition-all duration-300`}
               style={{ animationDelay: `${index * 0.2}s` }}
             >
@@ -60,26 +62,41 @@ const PricingSection = () => {
                   {plan.name}
                 </h3>
                 <div className="mb-2">
-                  <span className="text-3xl font-bold text-primary">{plan.price}</span>
+                  <span className="text-3xl font-bold text-primary">
+                    {plan.price}
+                  </span>
                   <span className="text-muted-foreground">{plan.period}</span>
                 </div>
                 {plan.description && (
-                  <p className="text-sm text-muted-foreground">{plan.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {plan.description}
+                  </p>
                 )}
               </div>
               <div className="space-y-3 mb-8">
                 {plan.features.map(
-                  (feature: { text: string | string[]; included: boolean }, i: number) => (
+                  (
+                    feature: { text: string | string[]; included: boolean },
+                    i: number
+                  ) => (
                     <div key={i} className="flex items-start space-x-3">
                       {feature.included ? (
                         <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       ) : (
                         <X className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                       )}
-                      <div className={`text-sm ${feature.included ? 'text-foreground' : 'text-muted-foreground line-through'}`}>
+                      <div
+                        className={`text-sm ${
+                          feature.included
+                            ? 'text-foreground'
+                            : 'text-muted-foreground line-through'
+                        }`}
+                      >
                         {Array.isArray(feature.text) ? (
                           feature.text.map((line, lineIndex) => (
-                            <span key={lineIndex} className="block">{line}</span>
+                            <span key={lineIndex} className="block">
+                              {line}
+                            </span>
                           ))
                         ) : (
                           feature.text
@@ -89,20 +106,25 @@ const PricingSection = () => {
                   )
                 )}
               </div>
-              
-              {/* THE FIX IS HERE: The Button is now correctly wrapped in a Link */}
-              <Link to="/get-started">
-                <Button className={`w-full ${plan.featured ? 'btn-wellness-primary' : 'btn-wellness-secondary'}`}>
-                  {plan.cta}
-                </Button>
-              </Link>
 
+              {/* FIXED: Use Button with asChild instead of nesting Link */}
+              <Button
+                asChild
+                className={`w-full ${
+                  plan.featured
+                    ? 'btn-wellness-primary'
+                    : 'btn-wellness-secondary'
+                }`}
+              >
+                <Link to="/get-started">{plan.cta}</Link>
+              </Button>
             </div>
           ))}
         </div>
         <div className="text-center mt-12 space-y-2">
           <p className="text-sm text-muted-foreground">
-            ✨ 14-day free trial on Standard · 🔒 Secure payment · ❌ Cancel anytime
+            ✨ 14-day free trial on Standard · 🔒 Secure payment · ❌ Cancel
+            anytime
           </p>
         </div>
       </div>
