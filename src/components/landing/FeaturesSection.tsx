@@ -4,7 +4,8 @@ import { Badge } from '@/components/ui/badge';
 
 export default function FeaturesSection() {
   return (
-    <section className="py-20 bg-background">
+    // ✅ The section itself is now 'relative' to position the bottom fade effect
+    <section className="relative py-20 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16" data-reveal>
           <h2 className="mb-4 text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
@@ -15,13 +16,7 @@ export default function FeaturesSection() {
           </p>
         </div>
 
-        {/* ✅ This container is now 'relative' to position the fade effects */}
-        <div className="relative lg:grid lg:grid-cols-3 lg:gap-8">
-          
-          {/* ✅ FADE EFFECT: These divs create the soft edges on mobile/tablet */}
-          <div className="pointer-events-none absolute top-0 bottom-0 left-0 w-16 bg-gradient-to-r from-background to-transparent z-10 lg:hidden" />
-          <div className="pointer-events-none absolute top-0 bottom-0 right-0 w-16 bg-gradient-to-l from-background to-transparent z-10 lg:hidden" />
-
+        <div className="lg:grid lg:grid-cols-3 lg:gap-8">
           <div className="flex gap-6 overflow-x-auto pb-12 -mx-4 px-4 scroll-px-4 snap-x snap-mandatory lg:contents" data-reveal>
             {FEATURE_CARDS.map((feature, index) => (
               <div 
@@ -63,6 +58,9 @@ export default function FeaturesSection() {
           </div>
         </div>
       </div>
+      
+      {/* ✅ FADE EFFECT: This div creates the smooth blend at the bottom of the section */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
     </section>
   );
 }
