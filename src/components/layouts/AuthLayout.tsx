@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import backgroundImage from '@/assets/backgroundImage.jpg'; // adjust path if different
+import backgroundImage from '@/assets/backgroundImage.webp'; // adjust path if different
 
 const testimonials = [
   { text: '"Clear plans, zero guesswork. Love the guidance."', author: 'Jonas' },
