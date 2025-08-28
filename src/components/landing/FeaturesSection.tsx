@@ -14,39 +14,30 @@ export default function FeaturesSection() {
           </p>
         </div>
 
-        {/* ✅ This container handles the layout shift from scroll to grid */}
+        {/* This container handles the layout shift from scroll to grid */}
         <div className="lg:grid lg:grid-cols-3 lg:gap-8">
           {/* On mobile, this div scrolls. On desktop, it becomes a grid item container */}
-          <div className="flex gap-6 overflow-x-auto pb-8 lg:contents" data-reveal>
+          <div className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scroll-px-6 lg:contents" data-reveal>
             
             {FEATURE_CARDS.map((feature, index) => (
               <div 
                 key={feature.title} 
-                // ✅ Applying the themed gradient background and text color
                 className={cn(
-                  "reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto bg-gradient-to-br rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl",
+                  "reveal flex flex-col text-center items-center justify-center p-8 flex-shrink-0 w-[90%] sm:w-80 lg:w-auto bg-gradient-to-br rounded-3xl shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl snap-center",
                   feature.themeClass
                 )}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                <div className="flex flex-col h-full">
-                  {/* Image Container */}
-                  <div className="w-full h-56">
-                    <img 
-                      src={feature.image} 
-                      alt={feature.title}
-                      className="w-full h-full object-cover" 
-                    />
-                  </div>
-
-                  {/* Content Container */}
-                  <div className="p-8 flex flex-col flex-grow">
-                    <h3 className="text-2xl font-bold">{feature.title}</h3>
-                    <p className="mt-3 text-base text-current opacity-80 flex-grow">
-                      {feature.description}
-                    </p>
-                  </div>
+                {/* ✅ Large Emoji instead of Image */}
+                <div className="text-6xl mb-6">
+                  {feature.emoji}
                 </div>
+
+                {/* Content */}
+                <h3 className="text-2xl font-bold">{feature.title}</h3>
+                <p className="mt-3 text-base text-current opacity-80 flex-grow">
+                  {feature.description}
+                </p>
               </div>
             ))}
 
