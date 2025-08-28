@@ -32,15 +32,14 @@ export default function LandingPage() {
   useRevealOnScroll();
 
   return (
-    <div className="theme-landing min-h-screen bg-background text-foreground overflow-x-hidden">
-      <header className="absolute top-0 z-50 w-full">
-        <Navbar />
-      </header>
+    // The main container for the entire landing page
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      {/* ✅ Navbar is now sticky and part of the main layout flow */}
+      <Navbar />
       
       <main>
         <HeroSection />
         
-        {/* Container for subsequent sections with consistent spacing */}
         <div className="flex flex-col gap-20 md:gap-28 lg:gap-32">
           <section id="features" aria-label="Core Features" data-reveal className="reveal">
             <FeaturesSection />
