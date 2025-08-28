@@ -67,8 +67,7 @@ export default function HeroSection() {
             }`}
           />
         ))}
-        {/* Dark overlay for contrast */}
-        <div className="absolute inset-0 bg-black/60" />
+        {/* Dark overlay has been removed */}
       </div>
 
       {/* Content */}
