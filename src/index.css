@@ -1,11 +1,14 @@
+/* ✅ 1. Import the "Figtree" font for a modern, clean look */
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   /* ==========================================================================
-     NEW "IGNITE" THEME 
-     Inspired by the provided images for a vibrant, energetic, and premium feel.
+     "IGNITE" THEME 
+     Based on your inspiration images for a vibrant and premium feel.
      ========================================================================== */
 
   /* ## LIGHT THEME ## */
@@ -31,7 +34,7 @@
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary-light)), hsl(var(--primary-dark)));
 
     /* Secondary Elements (for hover states, secondary buttons) */
-    --secondary: 40 20% 95%; /* Very light, warm gray */
+    --secondary: 40 20% 95%;
     --secondary-foreground: 240 5% 25%;
 
     /* Muted Elements (for descriptions, inactive states) */
@@ -44,62 +47,46 @@
     --ring: 33 97% 50%;
 
     /* Active States in Navs/Lists */
-    --accent: 33 97% 50% / 0.1; /* Orange with low opacity */
+    --accent: 33 97% 50% / 0.1;
     --accent-foreground: 33 97% 45%;
 
     /* Sidebar Specifics */
-    --sidebar-accent: 40 20% 94%; /* Active item background */
-    --sidebar-accent-foreground: 240 5% 15%; /* Active item text/icon */
+    --sidebar-accent: 40 20% 94%;
+    --sidebar-accent-foreground: 240 5% 15%;
     --sidebar-primary: 33 97% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-border: 40 20% 90%;
     
-    /* General */
-    --radius: 1.25rem; /* Slightly larger radius for a modern look */
+    --radius: 1.25rem;
   }
 
   /* ## DARK THEME ## */
   /* Based on image 2: Deep charcoal with the same high-energy gold-to-orange gradient. */
   .dark {
-    /* Base & Foreground */
-    --background: 0 0% 9%; /* Near-black charcoal (#181818) */
-    --foreground: 0 0% 90%; /* Soft off-white for text */
-
-    /* Containers (Cards, Sidebars, Popovers) */
-    --card: 240 1% 20%; /* Dark Gray (#323233) */
+    --background: 0 0% 9%;
+    --foreground: 0 0% 90%;
+    --card: 240 1% 20%;
     --card-foreground: 0 0% 90%;
     --popover: 0 0% 9%;
     --popover-foreground: 0 0% 90%;
     --sidebar-background: 0 0% 11%;
     --sidebar-foreground: 0 0% 90%;
-    
-    /* Primary Colors & Gradient (Gold -> Fiery Orange) */
-    --primary-light: 48 98% 52%; /* Vibrant Yellow (#FDD00E) */
-    --primary: 33 97% 50%; /* Main Orange (#FC8B05) */
-    --primary-dark: 26 98% 49%; /* Deeper Orange (#FA6602) */
-    --primary-foreground: 0 0% 10%; /* Dark text for high contrast */
+    --primary-light: 48 98% 52%;
+    --primary: 33 97% 50%;
+    --primary-dark: 26 98% 49%;
+    --primary-foreground: 0 0% 10%;
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary-light)), hsl(var(--primary-dark)));
-
-    /* Secondary Elements */
     --secondary: 240 1% 25%;
     --secondary-foreground: 0 0% 90%;
-
-    /* Muted Elements */
     --muted: 240 1% 25%;
     --muted-foreground: 0 0% 60%;
-
-    /* Borders & Rings (Subtle highlights) */
     --border: 240 1% 25%;
     --input: 240 1% 25%;
     --ring: 48 98% 52%;
-
-    /* Active States in Navs/Lists */
-    --accent: 48 98% 52% / 0.1; /* Yellow with low opacity */
+    --accent: 48 98% 52% / 0.1;
     --accent-foreground: 48 98% 60%;
-
-    /* Sidebar Specifics */
-    --sidebar-accent: 240 1% 22%; /* Active item background */
-    --sidebar-accent-foreground: 48 98% 60%; /* Active item text/icon */
+    --sidebar-accent: 240 1% 22%;
+    --sidebar-accent-foreground: 48 98% 60%;
     --sidebar-primary: 48 98% 52%;
     --sidebar-primary-foreground: 0 0% 10%;
     --sidebar-border: 240 1% 22%;
@@ -115,7 +102,7 @@
     -webkit-font-smoothing: antialiased;
   }
   
-  /* Helper class to easily apply the primary gradient to buttons and other elements */
+  /* Helper class to easily apply the primary gradient */
   .bg-gradient-primary {
     background: var(--gradient-primary);
   }
