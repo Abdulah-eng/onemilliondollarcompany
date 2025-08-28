@@ -1,31 +1,34 @@
 export const MORE_THAN_PLAN = [
-  { 
-    emoji: '📚',
+  {
     title: 'Knowledge Library',
-    description: 'Step-by-step exercise guides, recipe inspiration, and mental health practices—all in one place.',
+    description:
+      'Explore how-to guides, recipe collections, and mental health exercises—all in one place to level up your wellness journey.',
     category: 'Library',
-    // ✅ NEW: Vibrant, high-contrast gradients
-    gradient: 'from-orange-500 to-yellow-400',
+    image: '/src/assets/more-than-plan-knowledge.webp',
+    gradient: 'from-teal-100/40 via-green-100/30 to-teal-200/20',
   },
-  { 
-    emoji: '🧑‍🤝‍🧑',
+  {
     title: 'Personal Follow-Up',
-    description: 'Stay on track with tailored programs and close coach support to keep you motivated and progressing.',
+    description:
+      'Stay on track with tailored programs and direct coach support to ensure you achieve your goals without getting off course.',
     category: 'Coaching',
-    gradient: 'from-indigo-500 to-purple-600',
+    image: '/src/assets/more-than-plan-coachfeedback.webp',
+    gradient: 'from-indigo-100/40 via-purple-100/30 to-indigo-200/20',
   },
-  { 
-    emoji: '📰',
+  {
     title: 'Insights & Blog',
-    description: 'Tips, tricks, and expert knowledge on fitness, nutrition, and mental health delivered weekly.',
+    description:
+      'Read tips, tricks, and insights on fitness, nutrition, and mental health to stay informed and inspired every day.',
     category: 'Blog',
-    gradient: 'from-rose-500 to-pink-500',
+    image: '/src/assets/more-than-plan-blogaccess.webp',
+    gradient: 'from-yellow-100/40 via-orange-100/30 to-yellow-200/20',
   },
-  { 
-    emoji: '📊',
+  {
     title: 'Reflect & Track',
-    description: 'Log your journey, track progress, and celebrate wins with simple program history and insights.',
+    description:
+      'Log your progress and reflect on your journey, keeping track of your history to measure growth and success.',
     category: 'Tracking',
-    gradient: 'from-teal-500 to-cyan-500',
+    image: '/src/assets/more-than-plan-reflectandtrack.webp',
+    gradient: 'from-pink-100/40 via-rose-100/30 to-pink-200/20',
   },
 ];
