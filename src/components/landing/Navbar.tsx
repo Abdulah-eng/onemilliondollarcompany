@@ -38,13 +38,10 @@ export default function Navbar() {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // --- Dynamic styles ---
-  // Base color for nav text. White on hero, muted-foreground when scrolled.
+  // --- Dynamic styles for desktop ---
   const navTextColor = hasScrolled ? "text-muted-foreground" : "text-white/80";
-  // Hover color for nav text. Foreground color when scrolled, white when on hero.
   const navTextHoverColor = hasScrolled ? "hover:text-foreground" : "hover:text-white";
-  // Base color for the main part of the logo.
-  const logoBaseColor = hasScrolled ? "text-foreground" : "text-white";
+  const iconColor = hasScrolled ? "text-foreground" : "text-white";
 
   return (
     <nav 
@@ -60,13 +57,13 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           
-          {/* ✅ UPDATED LOGO with two-tone color */}
+          {/* ✅ UPDATED LOGO with permanent two-tone color */}
           <Link
             to="/"
             onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
             className="text-2xl font-bold"
           >
-            <span className={cn("transition-colors", "md:text-white", logoBaseColor)}>TrainWise</span>
+            <span className="text-foreground">TrainWise</span>
             <span className="text-primary">Studio</span>
           </Link>
 
@@ -93,7 +90,7 @@ export default function Navbar() {
 
           {/* --- Mobile Menu Button --- */}
           <div className="md:hidden">
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle mobile menu">
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle mobile menu" className="text-foreground">
               {isOpen ? <X className="h-7 w-7" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
