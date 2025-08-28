@@ -3,13 +3,9 @@ import { cn } from '@/lib/utils';
 
 export default function MoreThanPlanSection() {
   return (
-    <section className="relative pt-12 pb-20 bg-background overflow-hidden">
-      
-      {/* ✅ INCREASED OPACITY: The background glows are now more prominent */}
-      <div className="absolute bottom-0 left-0 h-[500px] w-[500px] -translate-x-1/2 translate-y-1/2 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
-      <div className="absolute top-0 right-0 h-[300px] w-[300px] translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    // ✅ NEW: Subtle corner-to-corner gradient background.
+    <section className="py-20 bg-gradient-to-tr from-primary/10 via-background to-background">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 mb-16 items-center" data-reveal>
           <div>
@@ -25,12 +21,19 @@ export default function MoreThanPlanSection() {
           </div>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {/* ✅ UPDATED: This container now scrolls horizontally on mobile and becomes a grid on larger screens. */}
+        <div 
+          className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scroll-px-4
+                     sm:grid sm:grid-cols-2 sm:overflow-visible
+                     lg:grid-cols-4"
+          data-reveal
+        >
           {MORE_THAN_PLAN.map((feature, index) => (
             <div
               key={feature.title}
-              className="reveal p-8 bg-card/80 backdrop-blur-sm rounded-3xl shadow-lg text-center transition-transform duration-300 hover:-translate-y-2"
-              data-reveal
+              className="reveal p-8 bg-card/80 backdrop-blur-sm rounded-3xl shadow-lg text-center 
+                         transition-transform duration-300 hover:-translate-y-2
+                         flex-shrink-0 w-[90%] snap-center sm:w-auto" // Added classes for mobile scroll
               style={{ transitionDelay: `${index * 100}ms` }}
             >
               <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-5xl">
