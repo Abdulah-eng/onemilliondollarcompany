@@ -15,11 +15,13 @@ export default function FeaturesSection() {
           </p>
         </div>
 
-        {/* This container handles the layout shift from scroll to grid */}
-        <div className="lg:grid lg:grid-cols-3 lg:gap-8">
+        {/* ✅ This container is now 'relative' to position the fade effects */}
+        <div className="relative lg:grid lg:grid-cols-3 lg:gap-8">
           
-          {/* On mobile, this div scrolls. On desktop, it becomes a grid item container */}
-          {/* ✅ Increased bottom padding (pb-12) to prevent shadow clipping */}
+          {/* ✅ FADE EFFECT: These divs create the soft edges on mobile/tablet */}
+          <div className="pointer-events-none absolute top-0 bottom-0 left-0 w-16 bg-gradient-to-r from-background to-transparent z-10 lg:hidden" />
+          <div className="pointer-events-none absolute top-0 bottom-0 right-0 w-16 bg-gradient-to-l from-background to-transparent z-10 lg:hidden" />
+
           <div className="flex gap-6 overflow-x-auto pb-12 -mx-4 px-4 scroll-px-4 snap-x snap-mandatory lg:contents" data-reveal>
             {FEATURE_CARDS.map((feature, index) => (
               <div 
@@ -30,7 +32,6 @@ export default function FeaturesSection() {
                 )}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                {/* Image as full background */}
                 <div className="absolute inset-0 rounded-3xl overflow-hidden">
                   <img 
                     src={feature.image} 
@@ -42,7 +43,6 @@ export default function FeaturesSection() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/10"></div>
                 </div>
 
-                {/* Content Container */}
                 <div className="relative z-10 p-8 flex flex-col h-full justify-between text-left text-white">
                   <Badge
                     variant="secondary"
