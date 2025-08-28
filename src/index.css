@@ -3,44 +3,43 @@
 @tailwind utilities;
 
 @layer base {
-  /* --- ✅ NEW LIGHT MODE (Lifesum-Inspired & Energetic) --- */
+  /* --- ✅ NEW LIGHT MODE (Vibrant & Professional) --- */
   :root {
-    /* Backgrounds: Clean, warm, and inviting off-white */
-    --background: 30 50% 98%;   /* #fcfaf8 */
-    --foreground: 20 25% 15%;   /* #312a26 */
+    /* Backgrounds: Brighter, cleaner, and more inviting off-white */
+    --background: 40 33% 97%;   /* #f9f8f7 */
+    --foreground: 20 25% 15%;   /* #312a26 - A deep, warm black */
 
-    /* Cards & Popovers: Crisp white for clarity */
+    /* Cards & Popovers */
     --card: 0 0% 100%;
     --card-foreground: 20 25% 15%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 20 25% 15%;
 
-    /* Primary CTA: A vibrant, confident orange that demands attention */
-    --primary: 24 95% 58%;   /* #fa8128 */
+    /* Primary CTA: A more vibrant orange with a defined hover state */
+    --primary: 24 95% 58%;        /* #fa8128 */
+    --primary-hover: 24 95% 62%;  /* A slightly brighter orange for hover */
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Used for subtle backgrounds and accents */
+    /* Secondary & Muted Tones */
     --secondary: 30 40% 95%;
     --secondary-foreground: 20 25% 25%;
-
-    /* Muted: Soft, warm grays for secondary text and borders */
     --muted: 30 25% 92%;
     --muted-foreground: 25 15% 45%;
-
+    
     --accent: 30 40% 95%;
     --accent-foreground: 20 25% 25%;
     
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders: Subtle, not pure black */
+    /* Borders & Inputs: Soft and subtle */
     --border: 30 25% 88%;
-    --input: 30 30% 97%;
+    --input: 0 0% 100%; /* White input for better contrast */
     --ring: 24 95% 60%;
 
     --radius: 1rem;
-    
+
     /* --- Sidebar for Light Mode --- */
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 20 25% 25%;
@@ -51,42 +50,29 @@
     --sidebar-border: 30 25% 92%;
   }
 
-  /* --- ✅ NEW DARK MODE (Calm, Focused & Premium) --- */
+  /* --- ✅ NEW DARK MODE (Calm & Premium) --- */
   .dark {
-    /* Backgrounds: A deep, calming charcoal-blue, not pure black */
-    --background: 220 20% 12%;   /* #191c23 */
-    --foreground: 210 30% 90%;   /* #d9e1ea */
-
-    /* Cards & Popovers: A slightly lighter shade to create depth */
-    --card: 220 20% 15%;   /* #1f222b */
+    --background: 220 20% 12%;
+    --foreground: 210 30% 90%;
+    --card: 220 20% 15%;
     --card-foreground: 210 30% 90%;
-
     --popover: 220 20% 12%;
     --popover-foreground: 210 30% 90%;
-
-    /* Primary CTA: The orange remains vibrant for a strong focal point */
-    --primary: 24 95% 58%;   /* #fa8128 */
-    --primary-foreground: 0 0% 100%; /* White text on orange is more accessible */
-
-    /* Secondary & Muted: Subtle, cool grays */
+    --primary: 24 95% 58%;
+    --primary-hover: 24 95% 62%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 220 20% 20%;
     --secondary-foreground: 210 30% 90%;
     --muted: 220 20% 20%;
     --muted-foreground: 215 20% 65%;
-
     --accent: 220 20% 20%;
     --accent-foreground: 210 30% 90%;
-
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
-
-    /* Borders: Soft, glowing effect instead of harsh lines */
     --border: 220 20% 25%;
-    --input: 220 20% 20%;
+    --input: 220 20% 18%; /* Slightly different input for depth */
     --ring: 24 95% 60%;
-
-    /* --- Sidebar for Dark Mode --- */
-    --sidebar-background: 220 20% 10%; /* Darkest element for a stable frame */
+    --sidebar-background: 220 20% 10%;
     --sidebar-foreground: 210 30% 80%;
     --sidebar-primary: 24 95% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
@@ -105,13 +91,11 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-
-  /* --- DASHBOARD THEME VARIANT (For the logged-in area) --- */
+  
   .theme-dashboard {
-    --background: 220 20% 97%;   /* A cooler, more neutral light gray for focus */
+    --background: 220 20% 97%;
     --foreground: 225 15% 25%;
   }
-
   .dark .theme-dashboard {
     --background: 220 15% 12%;
     --foreground: 210 20% 85%;
