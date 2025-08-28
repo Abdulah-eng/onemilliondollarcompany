@@ -10,11 +10,6 @@ const anchorLinks = [
   { name: 'Pricing', href: '#pricing' },
 ];
 
-const routeButtons = [
-  { name: 'Login', href: '/login' },
-  { name: 'Get Started', href: '/get-started' },
-];
-
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -71,11 +66,11 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center space-x-2">
-            {/* ✅ UPDATED LOGIN BUTTON with conditional styling */}
-            <Button asChild key="Login" variant={hasScrolled ? "ghost" : "outline"} size="sm" className={cn(!hasScrolled && "text-white border-white/50 hover:bg-white/10 hover:text-white")}>
+            {/* ✅ UPDATED LOGIN BUTTON LOGIC */}
+            <Button asChild key="Login" variant="ghost" size="sm" className={cn("transition-colors", navTextColor, navTextHoverColor)}>
               <Link to="/login">Login</Link>
             </Button>
-            <Button asChild key="Get Started" variant="default" size="sm">
+            <Button asChild key="Get Started" variant="default" size="sm" className={cn(!hasScrolled && "shadow-lg")}>
               <Link to="/get-started">Get Started</Link>
             </Button>
           </div>
@@ -88,6 +83,7 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Mobile Menu Panel */}
       {isOpen && (
         <div className={cn("md:hidden border-t", hasScrolled ? "bg-background border-border" : "bg-black/80 backdrop-blur-lg border-white/20")}>
           <div className="space-y-1 px-2 pt-2 pb-3">
@@ -100,7 +96,7 @@ export default function Navbar() {
             ))}
           </div>
           <div className={cn("px-2 pt-3 pb-4 space-y-2 border-t", hasScrolled ? "border-border" : "border-white/20")}>
-            <Button variant={hasScrolled ? "ghost" : "outline"} className="w-full" asChild>
+            <Button variant="ghost" className={cn("w-full", navTextColor, navTextHoverColor)} asChild>
               <Link to="/login" onClick={() => setIsOpen(false)}>Login</Link>
             </Button>
             <Button variant="default" className="w-full" asChild>
