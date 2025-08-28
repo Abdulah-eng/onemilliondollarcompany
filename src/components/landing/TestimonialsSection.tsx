@@ -39,7 +39,9 @@ export default function TestimonialsSection() {
         if (!pauseRef.current) stepOnce();
       }, 3500);
     };
-    const stop = () => { if (timer) window.clearInterval(timer); };
+    const stop = () => {
+      if (timer) window.clearInterval(timer);
+    };
 
     const pause = () => (pauseRef.current = true);
     const resume = () => (pauseRef.current = false);
@@ -51,7 +53,10 @@ export default function TestimonialsSection() {
     el.addEventListener('focusin', pause);
     el.addEventListener('focusout', resume);
 
-    const onResize = () => { pause(); setTimeout(resume, 200); };
+    const onResize = () => {
+      pause();
+      setTimeout(resume, 200);
+    };
     window.addEventListener('resize', onResize, { passive: true });
 
     start();
@@ -76,7 +81,7 @@ export default function TestimonialsSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-10">
-          <h2 className="mb-3 text-3xl sm:text-4xl lg:text-5xl font-bold">
+          <h2 className="mb-3 text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
             What Clients Are Saying
           </h2>
           <p className="text-lg sm:text-xl text-muted-foreground">
@@ -104,14 +109,10 @@ export default function TestimonialsSection() {
               tabIndex={0}
               className="
                 snap-center shrink-0
-                /* HARD STOP: card width never exceeds viewport */
-                w-[calc(100vw-2rem)]          /* mobile: screen - 32px */
-                xs:w-[calc(100vw-2rem)]
-                sm:w-[calc(100vw-3rem)]      /* small tablets: screen - 48px */
-                md:w-[calc(100vw-4rem)]      /* iPad: screen - 64px */
-                lg:w-[min(560px,calc(100vw-6rem))] /* large: cap width */
-                xl:w-[640px]                  /* desktop nice width */
-                bg-background rounded-2xl shadow
+                w-[calc(100vw-2rem)] xs:w-[calc(100vw-2rem)]
+                sm:w-[calc(100vw-3rem)] md:w-[calc(100vw-4rem)]
+                lg:w-[min(560px,calc(100vw-6rem))] xl:w-[640px]
+                bg-card rounded-2xl shadow
                 p-6 sm:p-7 md:p-8
                 flex flex-col justify-between
                 transition-transform duration-300 hover:scale-[1.02]
@@ -121,8 +122,8 @@ export default function TestimonialsSection() {
               <header className="mb-4 flex items-center">
                 <div className="mr-3 text-3xl">{t.avatar}</div>
                 <div>
-                  <h3 className="font-semibold">{t.name}, {t.age}</h3>
-                  <div role="img" aria-label={`${t.rating} out of 5 stars`} className="text-sm">
+                  <h3 className="font-semibold text-foreground">{t.name}, {t.age}</h3>
+                  <div role="img" aria-label={`${t.rating} out of 5 stars`} className="text-sm text-primary">
                     {'⭐'.repeat(t.rating || 5)}
                   </div>
                 </div>
