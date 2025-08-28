@@ -9,6 +9,7 @@ import PricingSection from '@/components/landing/PricingSection';
 import CTASection from '@/components/landing/CTASection';
 import Footer from '@/components/landing/Footer';
 
+// A helper hook for scroll animations
 function useRevealOnScroll() {
   useEffect(() => {
     const els = document.querySelectorAll<HTMLElement>('[data-reveal]');
@@ -32,13 +33,11 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* ✅ HEADER IS POSITIONED ABSOLUTELY OVER THE HERO */}
-      <header className="absolute top-0 z-50 w-full">
-        <Navbar />
-      </header>
+      {/* ✅ Navbar is now a direct child, controlling its own 'fixed' position */}
+      <Navbar />
       
       <main>
-        {/* The Hero Section is now the first element, taking up the full screen */}
+        {/* The Hero Section is the first element, taking up the full screen */}
         <HeroSection />
         
         {/* All other sections will appear below the hero */}
