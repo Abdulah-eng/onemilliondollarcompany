@@ -1,9 +1,10 @@
-import Image from 'next/image';
 import { MORE_THAN_PLAN } from '@/mockdata/landingpage/morethanplan';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 export default function MoreThanPlanSection() {
   return (
+    // Dark-mode aware background, content pulled up
     <section className="relative pt-12 pb-20 bg-background dark:bg-slate-900/20 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -24,7 +25,7 @@ export default function MoreThanPlanSection() {
           </div>
         </div>
 
-        {/* Gradient Cards with Images */}
+        {/* Image Cards (same import style as FeaturesSection) */}
         <div
           className={cn(
             'flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory -mx-4 px-4 scroll-px-4',
@@ -36,33 +37,41 @@ export default function MoreThanPlanSection() {
             <div
               key={feature.title}
               className={cn(
-                'reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto relative rounded-3xl shadow-xl min-h-[400px] snap-center transition-transform duration-300 hover:-translate-y-2',
-                'p-8 flex flex-col text-center items-center',
-                `bg-gradient-to-br ${feature.gradient}`
+                'reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto',
+                'relative rounded-3xl shadow-2xl min-h-[420px] snap-center'
               )}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              <div className="flex-grow flex flex-col items-center justify-center text-white">
-                {/* ✅ Using Next.js Image instead of emoji */}
-                <div className="w-28 h-28 mb-4 relative drop-shadow-lg">
-                  <Image
-                    src={feature.image}
-                    alt={feature.title}
-                    fill
-                    className="object-contain rounded-xl"
-                  />
-                </div>
-
-                <h3 className="text-3xl font-bold tracking-tight drop-shadow-md">
-                  {feature.title}
-                </h3>
-                <p className="mt-2 text-white/90 max-w-xs drop-shadow-sm">
-                  {feature.description}
-                </p>
+              <div className="absolute inset-0 rounded-3xl overflow-hidden">
+                <img
+                  src={feature.image}
+                  alt={feature.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/45 to-black/10" />
               </div>
-              <p className="text-sm font-semibold text-white/70 mt-auto">
-                {feature.category}
-              </p>
+
+              <div className="relative z-10 p-8 flex flex-col h-full justify-between text-left text-white">
+                {feature.category && (
+                  <Badge
+                    variant="secondary"
+                    className="bg-white/10 backdrop-blur-sm border-0 text-white font-semibold w-fit"
+                  >
+                    {feature.category}
+                  </Badge>
+                )}
+
+                <div className="space-y-3">
+                  <h3 className="text-2xl sm:text-3xl font-bold tracking-tight drop-shadow-lg">
+                    {feature.title}
+                  </h3>
+                  <p className="text-base leading-relaxed opacity-90 drop-shadow-md">
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
             </div>
           ))}
         </div>
