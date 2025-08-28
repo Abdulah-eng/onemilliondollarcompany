@@ -33,7 +33,10 @@ export default function HeroSection() {
               Fitness, Nutrition & Mental Clarity — Personalized by a Real Coach.
             </p>
 
-            <form onSubmit={handleSubmit} className="mx-auto mb-6 flex max-w-md flex-col gap-3 sm:flex-row lg:mx-0">
+            <form
+              onSubmit={handleSubmit}
+              className="mx-auto mb-6 flex max-w-md flex-col gap-3 sm:flex-row lg:mx-0"
+            >
               <Input
                 type="email"
                 placeholder="Enter your email"
@@ -43,16 +46,18 @@ export default function HeroSection() {
                 aria-label="Email address"
                 className="rounded-2xl"
               />
-              <Button 
-                type="submit" 
-                className="btn-wellness-primary text-base px-8 py-3 whitespace-nowrap rounded-2xl" 
+              <Button
+                type="submit"
+                className="btn-wellness-primary text-base px-8 py-3 whitespace-nowrap rounded-2xl"
                 disabled={submitting}
               >
                 {submitting ? 'Please wait…' : 'Start Free Trial'}
               </Button>
             </form>
 
-            <p className="text-sm text-muted-foreground">✨ 14-day free trial · 🔒 No credit card required · ❌ Cancel anytime</p>
+            <p className="text-sm text-muted-foreground">
+              ✨ 14-day free trial · 🔒 No credit card required · ❌ Cancel anytime
+            </p>
           </div>
 
           <div className="relative">
