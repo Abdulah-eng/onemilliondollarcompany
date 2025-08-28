@@ -2,26 +2,24 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
 export default function HeroSection() {
-
-  // A dynamic, full-width and height image for the hero section
+  // ✅ New, high-quality, and reliable image URL
   const heroImageUrl = "https://images.unsplash.com/photo-1548690312-e3b511d48c04?q=80&w=2070&auto=format&fit=crop";
 
   return (
-    // ✅ SECTION IS NOW FULL SCREEN HEIGHT (h-screen)
     <section id="hero" className="relative h-screen flex items-center justify-center">
       
-      {/* ✅ BACKGROUND IMAGE (Full width & height) */}
+      {/* Background Image Container */}
       <div className="absolute inset-0 z-0">
         <img
           src={heroImageUrl}
           alt="A person engaged in a wellness activity"
           className="w-full h-full object-cover"
         />
-        {/* ✅ DARK OVERLAY for better text contrast */}
+        {/* Dark Overlay */}
         <div className="absolute inset-0 bg-black/60" />
       </div>
 
-      {/* ✅ CONTENT (Centered on top of the image) */}
+      {/* Content Container */}
       <div className="relative z-10 flex flex-col items-center text-center text-white px-4">
         <div className="max-w-3xl" data-reveal>
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tighter drop-shadow-xl">
