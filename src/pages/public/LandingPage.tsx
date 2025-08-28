@@ -9,7 +9,7 @@ import PricingSection from '@/components/landing/PricingSection';
 import CTASection from '@/components/landing/CTASection';
 import Footer from '@/components/landing/Footer';
 
-// A helper hook for scroll animations (can be kept as is)
+// A helper hook for scroll animations
 function useRevealOnScroll() {
   useEffect(() => {
     const els = document.querySelectorAll<HTMLElement>('[data-reveal]');
@@ -32,32 +32,45 @@ export default function LandingPage() {
   useRevealOnScroll();
 
   return (
-    // ✅ Apply the new landing page theme here
     <div className="theme-landing min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* Navbar is positioned absolutely over the HeroSection */}
       <header className="absolute top-0 z-50 w-full">
         <Navbar />
       </header>
       
       <main>
-        {/* HeroSection is now the primary visual element */}
         <HeroSection />
         
-        {/* Container for the rest of the page content */}
-        <div className="flex flex-col gap-16 md:gap-24">
-          {/* Each subsequent section would go here */}
-          {/* <section id="features" aria-label="Core Features" data-reveal className="reveal">
+        {/* Container for subsequent sections with consistent spacing */}
+        <div className="flex flex-col gap-20 md:gap-28 lg:gap-32">
+          <section id="features" aria-label="Core Features" data-reveal className="reveal">
             <FeaturesSection />
           </section>
-          ...etc
-          */}
+          
+          <section id="more-than-plan" aria-label="More Than a Plan" data-reveal className="reveal">
+            <MoreThanPlanSection />
+          </section>
+          
+          <section id="how-it-works" aria-label="How It Works" data-reveal className="reveal">
+            <HowItWorksSection />
+          </section>
+
+          <section id="testimonials" aria-label="Testimonials" data-reveal className="reveal">
+            <TestimonialsSection />
+          </section>
+          
+          <section id="pricing" aria-label="Pricing Plans" data-reveal className="reveal">
+            <PricingSection />
+          </section>
+          
+          <section id="cta" aria-label="Call to Action" data-reveal className="reveal">
+            <CTASection />
+          </section>
         </div>
       </main>
       
-      {/* <footer className="mt-16 bg-card text-card-foreground border-t">
+      <footer className="mt-20 md:mt-28 bg-card text-card-foreground border-t">
         <Footer />
       </footer> 
-      */}
     </div>
   );
 }
