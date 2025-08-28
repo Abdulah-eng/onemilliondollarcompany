@@ -3,9 +3,17 @@ import { cn } from '@/lib/utils';
 
 export default function MoreThanPlanSection() {
   return (
-    // ✅ Reduced top padding from py-20 to pt-12 for a tighter layout
-    <section className="pt-12 pb-20 bg-gradient-to-tr from-primary/5 via-background to-background">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    // ✅ Section is now relative and overflow-hidden to contain the background glows
+    <section className="relative pt-12 pb-20 bg-background overflow-hidden">
+      
+      {/* ✅ NEW: Background "Sun" Glow Effect */}
+      {/* This div creates the large, soft orange glow from the bottom-left corner */}
+      <div className="absolute bottom-0 left-0 h-[500px] w-[500px] -translate-x-1/2 translate-y-1/2 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+      {/* This div adds a complementary, subtle glow to the top-right */}
+      <div className="absolute top-0 right-0 h-[300px] w-[300px] translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+
+      {/* Content is now relative to sit on top of the background glows */}
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 mb-16 items-center" data-reveal>
           {/* Left Column: Title */}
@@ -27,7 +35,7 @@ export default function MoreThanPlanSection() {
           {MORE_THAN_PLAN.map((feature, index) => (
             <div
               key={feature.title}
-              className="reveal p-8 bg-card rounded-3xl shadow-lg text-center transition-transform duration-300 hover:-translate-y-2"
+              className="reveal p-8 bg-card/80 backdrop-blur-sm rounded-3xl shadow-lg text-center transition-transform duration-300 hover:-translate-y-2"
               data-reveal
               style={{ transitionDelay: `${index * 100}ms` }}
             >
