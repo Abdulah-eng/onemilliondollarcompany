@@ -1,3 +1,4 @@
+// src/components/landing/Navbar.tsx
 import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,11 +21,8 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
 
-  // Effect to detect scroll and apply glass background
   useEffect(() => {
-    const handleScroll = () => {
-      setHasScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setHasScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -35,34 +33,39 @@ export default function Navbar() {
   };
 
   return (
-    <nav 
+    <nav
       className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300",
-        hasScrolled 
-          ? "bg-background/80 backdrop-blur-lg border-b border-border" 
-          : "bg-transparent"
+        'sticky top-0 z-50 w-full transition-all duration-300',
+        hasScrolled
+          ? 'bg-white/20 backdrop-blur-md border-b border-white/30 text-white'
+          : 'bg-transparent text-white'
       )}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
-          {/* Logo */}
           <Link
             to="/"
-            onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className="text-2xl font-bold text-foreground hover:text-foreground/80 transition-colors"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="text-2xl font-bold hover:text-white/80 transition-colors"
           >
             TrainWise
           </Link>
 
-          {/* Desktop Menu Links (Center) */}
+          {/* Desktop Menu Links */}
           <div className="hidden md:flex flex-1 items-center justify-center">
             <div className="flex items-baseline space-x-6">
               {anchorLinks.map((item) => (
                 <a
                   key={item.name}
                   href={item.href}
-                  onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavClick(item.href);
+                  }}
+                  className="text-sm font-medium hover:text-white/80 transition-colors"
                 >
                   {item.name}
                 </a>
@@ -70,7 +73,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Desktop Action Buttons (Right) */}
+          {/* Desktop Buttons */}
           <div className="hidden md:flex items-center space-x-2">
             {routeButtons.map((btn) => (
               <Button key={btn.name} variant={btn.variant} size="sm" asChild>
@@ -95,23 +98,28 @@ export default function Navbar() {
 
       {/* Mobile Menu Panel */}
       {isOpen && (
-        <div id="mobile-menu" className="md:hidden border-t border-border bg-background">
+        <div className="md:hidden border-t border-white/30 bg-white/20 backdrop-blur-md text-white">
           <div className="space-y-1 px-2 pt-2 pb-3">
             {anchorLinks.map((item) => (
               <a
                 key={item.name}
                 href={item.href}
-                onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
-                className="block px-3 py-2 rounded-md text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick(item.href);
+                }}
+                className="block px-3 py-2 rounded-md text-base font-medium hover:text-white/80"
               >
                 {item.name}
               </a>
             ))}
           </div>
-          <div className="border-t border-border px-2 pt-3 pb-4 space-y-2">
+          <div className="border-t border-white/30 px-2 pt-3 pb-4 space-y-2">
             {routeButtons.map((btn) => (
               <Button key={btn.name} variant={btn.variant} className="w-full" asChild>
-                <Link to={btn.href} onClick={() => setIsOpen(false)}>{btn.name}</Link>
+                <Link to={btn.href} onClick={() => setIsOpen(false)}>
+                  {btn.name}
+                </Link>
               </Button>
             ))}
           </div>
