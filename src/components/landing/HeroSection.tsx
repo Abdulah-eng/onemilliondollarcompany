@@ -1,50 +1,48 @@
+// src/components/landing/HeroSection.tsx
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-// ✅ 1. IMPORT YOUR IMAGES HERE
-// Make sure you have images in your 'src/assets/' folder.
-// For example: import heroImage1 from '@/assets/hero-1.jpg';
-// Then, use the imported variables in the array below.
-// I'm using placeholder URLs so the component works visually.
-const carouselImages = [
-  "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1517836357463-d257692634c2?q=80&w=2070&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=2120&auto=format&fit=crop",
-];
+// ✅ Import optimized .webp images (make sure they’re ~150–250kb each)
+import heroImage1 from '@/assets/hero-image1.webp';
+import heroImage2 from '@/assets/hero-image2.webp';
+import heroImage3 from '@/assets/hero-image3.webp';
+
+const carouselImages = [heroImage1, heroImage2, heroImage3];
 
 export default function HeroSection() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Effect for the automatic image carousel
+  // Auto-play image carousel
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentImageIndex((prevIndex) =>
         prevIndex === carouselImages.length - 1 ? 0 : prevIndex + 1
       );
-    }, 5000); // Change image every 5 seconds
+    }, 5000); // 5s per slide
     return () => clearInterval(timer);
   }, []);
 
   return (
     <section id="hero" className="relative h-screen flex items-center">
-      
       {/* BACKGROUND IMAGE CAROUSEL */}
       <div className="absolute inset-0 z-0">
         {carouselImages.map((src, index) => (
           <img
             key={src}
             src={src}
-            alt="Person engaged in a wellness activity"
+            alt="Wellness lifestyle"
+            loading={index === 0 ? 'eager' : 'lazy'}
             className={`w-full h-full object-cover absolute transition-opacity duration-1000 ease-in-out ${
               index === currentImageIndex ? 'opacity-100' : 'opacity-0'
             }`}
           />
         ))}
-        {/* Removed the dark overlay as requested */}
+        {/* Overlay for text contrast */}
+        <div className="absolute inset-0 bg-black/60" />
       </div>
 
-      {/* ✅ CONTENT CONTAINER (Left-aligned on desktop, centered on mobile) */}
+      {/* CONTENT */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center md:justify-start">
         <div className="max-w-xl text-center md:text-left">
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tighter text-white drop-shadow-xl">
@@ -67,18 +65,18 @@ export default function HeroSection() {
             </p>
           </div>
 
-          {/* CUSTOMER RATING / SOCIAL PROOF */}
+          {/* CUSTOMER RATING */}
           <div className="mt-8 flex items-center justify-center md:justify-start gap-4">
-              <div className="flex items-center text-yellow-400">
-                <Star className="w-5 h-5 fill-current" />
-                <Star className="w-5 h-5 fill-current" />
-                <Star className="w-5 h-5 fill-current" />
-                <Star className="w-5 h-5 fill-current" />
-                <Star className="w-5 h-5 fill-current" />
-              </div>
-              <p className="text-sm font-medium text-white/90">
-                  Rated <span className="font-bold text-white">4.9/5</span> by 1,000+ users
-              </p>
+            <div className="flex items-center text-yellow-400">
+              <Star className="w-5 h-5 fill-current" />
+              <Star className="w-5 h-5 fill-current" />
+              <Star className="w-5 h-5 fill-current" />
+              <Star className="w-5 h-5 fill-current" />
+              <Star className="w-5 h-5 fill-current" />
+            </div>
+            <p className="text-sm font-medium text-white/90">
+              Rated <span className="font-bold text-white">4.9/5</span> by 1,000+ users
+            </p>
           </div>
         </div>
       </div>
