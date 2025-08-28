@@ -1,34 +1,44 @@
 import { MORE_THAN_PLAN } from '@/mockdata/landingpage/morethanplan';
+import { cn } from '@/lib/utils';
 
 export default function MoreThanPlanSection() {
   return (
-    // ✅ Added a subtle background gradient for depth
-    <section className="py-20 bg-gradient-to-b from-background to-muted/30">
+    // ✅ NEW: Subtle 45-degree gradient background for the section
+    <section className="py-20 bg-gradient-to-tr from-primary/5 via-background to-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16" data-reveal>
-          <h2 className="mb-4 text-3xl sm:text-4xl lg:text-5xl font-bold">
-            More Than Just a <span className="text-primary">Plan</span>
-          </h2>
-          <p className="max-w-2xl mx-auto text-lg text-muted-foreground">
-            We provide a holistic ecosystem to support every aspect of your wellness journey.
-          </p>
+        
+        {/* ✅ NEW: Two-column header layout inspired by your image */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 mb-16 items-center" data-reveal>
+          {/* Left Column: Title */}
+          <div>
+            <p className="mb-2 font-semibold text-primary">Everything You Need</p>
+            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tighter text-foreground">
+              More Than Just a Plan
+            </h2>
+          </div>
+          {/* Right Column: Description */}
+          <div>
+            <p className="text-lg text-muted-foreground">
+              We provide a holistic ecosystem to support every aspect of your wellness journey. From tracking your progress to connecting with your coach, all the tools you need are right at your fingertips.
+            </p>
+          </div>
         </div>
 
+        {/* ✅ UPDATED: Refined card design with white background */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {MORE_THAN_PLAN.map((feature, index) => (
             <div
               key={feature.title}
-              // ✅ Added staggered animation delay
-              className="reveal p-6 bg-card rounded-3xl shadow-card text-center transition-transform duration-300 hover:-translate-y-2"
+              className="reveal p-8 bg-card rounded-3xl shadow-lg text-center transition-transform duration-300 hover:-translate-y-2"
               data-reveal
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              {/* ✅ Emoji is now wrapped in a styled circle for better visual hierarchy */}
-              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-4xl">
+              {/* Emoji is now wrapped in a subtle secondary-colored circle */}
+              <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-5xl">
                 {feature.emoji}
               </div>
-              <h3 className="mb-2 text-xl font-semibold text-foreground">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground">{feature.description}</p>
+              <h3 className="mb-2 text-xl font-bold text-foreground">{feature.title}</h3>
+              <p className="text-base text-muted-foreground">{feature.description}</p>
             </div>
           ))}
         </div>
