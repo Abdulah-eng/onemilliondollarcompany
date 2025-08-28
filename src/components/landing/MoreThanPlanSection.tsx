@@ -3,11 +3,10 @@ import { cn } from '@/lib/utils';
 
 export default function MoreThanPlanSection() {
   return (
-    // ✅ NEW: Subtle 45-degree gradient background for the section
-    <section className="py-20 bg-gradient-to-tr from-primary/5 via-background to-background">
+    // ✅ Reduced top padding from py-20 to pt-12 for a tighter layout
+    <section className="pt-12 pb-20 bg-gradient-to-tr from-primary/5 via-background to-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {/* ✅ NEW: Two-column header layout inspired by your image */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 mb-16 items-center" data-reveal>
           {/* Left Column: Title */}
           <div>
@@ -24,7 +23,6 @@ export default function MoreThanPlanSection() {
           </div>
         </div>
 
-        {/* ✅ UPDATED: Refined card design with white background */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {MORE_THAN_PLAN.map((feature, index) => (
             <div
@@ -33,7 +31,6 @@ export default function MoreThanPlanSection() {
               data-reveal
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              {/* Emoji is now wrapped in a subtle secondary-colored circle */}
               <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-5xl">
                 {feature.emoji}
               </div>
