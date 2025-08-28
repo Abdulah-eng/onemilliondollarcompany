@@ -1,57 +1,95 @@
-// src/components/landing/HeroSection.tsx
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
-// ✅ Import optimized .webp images (make sure they’re ~150–250kb each)
+// ✅ Use optimized .webp versions (convert your JPGs with Squoosh)
 import heroImage1 from '@/assets/hero-image1.webp';
 import heroImage2 from '@/assets/hero-image2.webp';
 import heroImage3 from '@/assets/hero-image3.webp';
 
-const carouselImages = [heroImage1, heroImage2, heroImage3];
+// ✅ Carousel Content
+const carouselData = [
+  {
+    image: heroImage1,
+    title: "Eat Better. Live Better.",
+    description:
+      "Food should fuel joy, not stress. Discover how to eat smarter without dieting—so you feel amazing, have more energy, and still enjoy every bite.",
+  },
+  {
+    image: heroImage2,
+    title: "Strong Starts Here",
+    description:
+      "Fitness isn’t about size—it’s about unlocking your energy, confidence, and power. Step into movement that feels good and finally see results that stick.",
+  },
+  {
+    image: heroImage3,
+    title: "Your Calm, Your Power",
+    description:
+      "A clear, focused mind changes everything. Learn simple tools to release stress, boost resilience, and build the inner strength that fuels success.",
+  },
+];
 
 export default function HeroSection() {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTextVisible, setIsTextVisible] = useState(true);
 
-  // Auto-play image carousel
+  // Auto-rotate slides
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentImageIndex((prevIndex) =>
-        prevIndex === carouselImages.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 5000); // 5s per slide
+      setIsTextVisible(false); // fade-out text
+
+      setTimeout(() => {
+        setCurrentIndex((prev) =>
+          prev === carouselData.length - 1 ? 0 : prev + 1
+        );
+        setIsTextVisible(true); // fade-in text
+      }, 700);
+    }, 5000);
+
     return () => clearInterval(timer);
   }, []);
 
+  const currentSlide = carouselData[currentIndex];
+
   return (
     <section id="hero" className="relative h-screen flex items-center">
-      {/* BACKGROUND IMAGE CAROUSEL */}
+      {/* Background Image Carousel */}
       <div className="absolute inset-0 z-0">
-        {carouselImages.map((src, index) => (
+        {carouselData.map((slide, index) => (
           <img
-            key={src}
-            src={src}
-            alt="Wellness lifestyle"
-            loading={index === 0 ? 'eager' : 'lazy'}
+            key={slide.title}
+            src={slide.image}
+            alt={slide.title}
+            loading="lazy"
             className={`w-full h-full object-cover absolute transition-opacity duration-1000 ease-in-out ${
-              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+              index === currentIndex ? "opacity-100" : "opacity-0"
             }`}
           />
         ))}
-        {/* Overlay for text contrast */}
+        {/* Dark overlay for contrast */}
         <div className="absolute inset-0 bg-black/60" />
       </div>
 
-      {/* CONTENT */}
+      {/* Content */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center md:justify-start">
         <div className="max-w-xl text-center md:text-left">
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tighter text-white drop-shadow-xl">
-            Your Personal Path to Wellness Starts Here
-          </h1>
-          <p className="mt-6 text-lg sm:text-xl text-white/90 drop-shadow-lg">
-            Get expert-led plans for fitness, nutrition, and mental clarity, all tailored to you.
-          </p>
-          
+          {/* Text with fade animation */}
+          <div
+            className={cn(
+              "transition-opacity duration-700 ease-in-out",
+              isTextVisible ? "opacity-100" : "opacity-0"
+            )}
+          >
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tighter text-white drop-shadow-xl">
+              {currentSlide.title}
+            </h1>
+            <p className="mt-6 text-lg sm:text-xl text-white/90 drop-shadow-lg">
+              {currentSlide.description}
+            </p>
+          </div>
+
+          {/* CTA */}
           <div className="mt-10 flex flex-col items-center md:items-start">
             <Button
               size="lg"
@@ -65,7 +103,7 @@ export default function HeroSection() {
             </p>
           </div>
 
-          {/* CUSTOMER RATING */}
+          {/* Rating */}
           <div className="mt-8 flex items-center justify-center md:justify-start gap-4">
             <div className="flex items-center text-yellow-400">
               <Star className="w-5 h-5 fill-current" />
@@ -75,7 +113,8 @@ export default function HeroSection() {
               <Star className="w-5 h-5 fill-current" />
             </div>
             <p className="text-sm font-medium text-white/90">
-              Rated <span className="font-bold text-white">4.9/5</span> by 1,000+ users
+              Rated <span className="font-bold text-white">4.9/5</span> by
+              1,000+ users
             </p>
           </div>
         </div>
