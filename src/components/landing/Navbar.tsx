@@ -11,8 +11,8 @@ const anchorLinks = [
 ];
 
 const routeButtons = [
-  { name: 'Login', href: '/login', variant: 'ghost' as const },
-  { name: 'Get Started', href: '/get-started', variant: 'default' as const },
+  { name: 'Login', href: '/login' },
+  { name: 'Get Started', href: '/get-started' },
 ];
 
 export default function Navbar() {
@@ -21,7 +21,6 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Set state to true if user has scrolled more than 10px
       setHasScrolled(window.scrollY > 10);
     };
     window.addEventListener('scroll', handleScroll);
@@ -33,14 +32,11 @@ export default function Navbar() {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Dynamically change colors based on whether the user has scrolled
   const navTextColor = hasScrolled ? "text-muted-foreground" : "text-white/80";
   const navTextHoverColor = hasScrolled ? "hover:text-foreground" : "hover:text-white";
   const logoColor = hasScrolled ? "text-foreground" : "text-white";
-  const loginButtonVariant = hasScrolled ? "ghost" : "outline";
 
   return (
-    // ✅ Navbar is now 'fixed' to stick to the top of the viewport
     <nav 
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
@@ -56,7 +52,7 @@ export default function Navbar() {
             onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
             className={cn("text-2xl font-bold transition-colors", logoColor)}
           >
-            TrainWise
+            TrainWiseStudio
           </Link>
 
           <div className="hidden md:flex flex-1 items-center justify-center">
@@ -75,7 +71,8 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center space-x-2">
-            <Button asChild key="Login" variant={loginButtonVariant} size="sm" className={cn(!hasScrolled && "text-white border-white/50 hover:bg-white/10 hover:text-white")}>
+            {/* ✅ UPDATED LOGIN BUTTON with conditional styling */}
+            <Button asChild key="Login" variant={hasScrolled ? "ghost" : "outline"} size="sm" className={cn(!hasScrolled && "text-white border-white/50 hover:bg-white/10 hover:text-white")}>
               <Link to="/login">Login</Link>
             </Button>
             <Button asChild key="Get Started" variant="default" size="sm">
@@ -91,7 +88,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu Panel */}
       {isOpen && (
         <div className={cn("md:hidden border-t", hasScrolled ? "bg-background border-border" : "bg-black/80 backdrop-blur-lg border-white/20")}>
           <div className="space-y-1 px-2 pt-2 pb-3">
@@ -104,7 +100,7 @@ export default function Navbar() {
             ))}
           </div>
           <div className={cn("px-2 pt-3 pb-4 space-y-2 border-t", hasScrolled ? "border-border" : "border-white/20")}>
-            <Button variant={loginButtonVariant} className="w-full" asChild>
+            <Button variant={hasScrolled ? "ghost" : "outline"} className="w-full" asChild>
               <Link to="/login" onClick={() => setIsOpen(false)}>Login</Link>
             </Button>
             <Button variant="default" className="w-full" asChild>
