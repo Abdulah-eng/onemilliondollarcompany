@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import Navbar from '@/components/landing/Navbar';
 import HeroSection from '@/components/landing/HeroSection';
@@ -37,41 +36,75 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      <header>
+      <header className="bg-background/80 backdrop-blur-sm border-b border-border">
         <Navbar />
       </header>
       
       <main id="content" className="flex flex-col gap-16 md:gap-24 pt-16">
-        <section id="hero" aria-label="Hero" data-reveal className="reveal">
+        <section
+          id="hero"
+          aria-label="Hero"
+          data-reveal
+          className="reveal bg-background text-foreground"
+        >
           <HeroSection />
         </section>
         
-        <section id="features" aria-label="Core Features" data-reveal className="reveal">
+        <section
+          id="features"
+          aria-label="Core Features"
+          data-reveal
+          className="reveal bg-container text-foreground"
+        >
           <FeaturesSection />
         </section>
         
-        <section aria-label="More Than a Plan" data-reveal className="reveal">
+        <section
+          aria-label="More Than a Plan"
+          data-reveal
+          className="reveal bg-card shadow-md text-foreground"
+        >
           <MoreThanPlanSection />
         </section>
         
-        <section id="how-it-works" aria-label="How it Works" data-reveal className="reveal">
+        <section
+          id="how-it-works"
+          aria-label="How it Works"
+          data-reveal
+          className="reveal bg-background text-foreground"
+        >
           <HowItWorksSection />
         </section>
         
-        <section id="testimonials" aria-label="Testimonials" data-reveal className="reveal">
+        <section
+          id="testimonials"
+          aria-label="Testimonials"
+          data-reveal
+          className="reveal bg-muted text-muted-foreground"
+        >
           <TestimonialsSection />
         </section>
         
-        <section id="pricing" aria-label="Pricing" data-reveal className="reveal">
+        <section
+          id="pricing"
+          aria-label="Pricing"
+          data-reveal
+          className="reveal bg-background text-foreground"
+        >
           <PricingSection />
         </section>
         
-        <section id="get-started" aria-label="Get Started" data-reveal className="reveal">
+        <section
+          id="get-started"
+          aria-label="Get Started"
+          data-reveal
+          className="reveal bg-primary text-primary-foreground rounded-2xl shadow-lg"
+        >
           <CTASection />
         </section>
       </main>
       
-      <footer className="mt-16">
+      <footer className="mt-16 bg-sidebar-background text-sidebar-foreground border-t border-sidebar-border">
         <Footer />
       </footer>
     </div>
