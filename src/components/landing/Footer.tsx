@@ -21,7 +21,7 @@ export default function Footer() {
                 <span className="text-2xl">📱</span>
                 <a 
                   href="https://instagram.com/trainwisestudio" 
-                  className="transition-colors text-background/70 hover:text-primary" 
+                  className="transition-colors text-muted-foreground hover:text-primary" 
                   target="_blank" 
                   rel="noopener noreferrer"
                 >
@@ -32,7 +32,7 @@ export default function Footer() {
                 <span className="text-2xl">✉️</span>
                 <a 
                   href="mailto:hello@trainwisestudio.com" 
-                  className="transition-colors text-background/70 hover:text-primary"
+                  className="transition-colors text-muted-foreground hover:text-primary"
                 >
                   hello@trainwisestudio.com
                 </a>
@@ -41,13 +41,13 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-4 font-semibold">Quick Links</h3>
+            <h3 className="mb-4 font-semibold text-foreground">Quick Links</h3>
             <div className="space-y-2">
               {footerLinks.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
-                  className="block transition-colors text-background/70 hover:text-primary"
+                  className="block transition-colors text-muted-foreground hover:text-primary"
                   onClick={(e) => {
                     if (link.href.startsWith('#')) {
                       e.preventDefault();
@@ -63,20 +63,20 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-4 font-semibold">Legal</h3>
+            <h3 className="mb-4 font-semibold text-foreground">Legal</h3>
             <div className="space-y-2">
-              <a href="/terms" className="block transition-colors text-background/70 hover:text-primary">
+              <a href="/terms" className="block transition-colors text-muted-foreground hover:text-primary">
                 Terms of Service
               </a>
-              <a href="/privacy" className="block transition-colors text-background/70 hover:text-primary">
+              <a href="/privacy" className="block transition-colors text-muted-foreground hover:text-primary">
                 Privacy Policy
               </a>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 border-t border-background/20 pt-8 text-center">
-          <p className="text-background/60">© TrainWiseStudio 2025. All rights reserved.</p>
+        <div className="mt-8 border-t border-muted/30 pt-8 text-center">
+          <p className="text-muted-foreground">© TrainWiseStudio 2025. All rights reserved.</p>
         </div>
       </div>
     </footer>
