@@ -5,7 +5,7 @@ export default function FeaturesSection() {
     <section className="py-20 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="reveal text-center mb-16" data-reveal>
-          <h2 className="mb-4 text-3xl sm:text-4xl lg:text-5xl font-bold">
+          <h2 className="mb-4 text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
             Fitness. Nutrition. Mental Health.
           </h2>
           <p className="mx-auto max-w-2xl text-lg sm:text-xl text-muted-foreground">
@@ -17,11 +17,14 @@ export default function FeaturesSection() {
           {FEATURE_CARDS.map((f) => (
             <div 
               key={f.title} 
-              className={`reveal p-8 text-center transition-transform duration-300 hover:scale-105 ${f.bgClass}`} 
+              className={`
+                reveal p-8 text-center transition-transform duration-300 hover:scale-105
+                ${f.bgClass || 'bg-card'}
+              `} 
               data-reveal
             >
               <div className="mb-6 text-6xl">{f.emoji}</div>
-              <h3 className="mb-4 text-xl font-semibold">{f.title}</h3>
+              <h3 className="mb-4 text-xl font-semibold text-foreground">{f.title}</h3>
               <p className="leading-relaxed text-muted-foreground">{f.description}</p>
             </div>
           ))}
