@@ -29,8 +29,11 @@ export default function MoreThanPlanSection() {
           </div>
         </div>
 
-        {/* Interactive Tab Buttons */}
-        <div className="mb-12 grid grid-cols-2 lg:grid-cols-4 gap-4" data-reveal>
+        {/* Interactive Tab Buttons - Now horizontally scrollable on mobile/tablet */}
+        <div
+          className="mb-12 flex gap-3 lg:grid lg:grid-cols-4 lg:gap-4 overflow-x-auto snap-x snap-mandatory lg:overflow-visible -mx-4 px-4 scroll-px-4 lg:mx-0 lg:px-0"
+          data-reveal
+        >
           {MORE_THAN_PLAN_FEATURES.map((feature) => {
             const IconComponent = feature.icon; // Assign component to a capitalized variable
             return (
@@ -38,15 +41,16 @@ export default function MoreThanPlanSection() {
                 key={feature.id}
                 onClick={() => setActiveTab(feature.id)}
                 className={cn(
-                  'flex flex-col sm:flex-row items-center justify-center text-center gap-3 p-4 rounded-xl border transition-all duration-300',
+                  'flex flex-row flex-shrink-0 items-center justify-center text-center gap-2.5 px-5 py-3 rounded-xl border transition-all duration-300 snap-start',
                   activeTab === feature.id
                     ? 'bg-primary text-primary-foreground shadow-lg scale-105'
                     : 'bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground'
                 )}
               >
-                {/* Render the component and pass props here */}
-                <IconComponent className="w-6 h-6" />
-                <span className="font-semibold">{feature.tabName}</span>
+                <IconComponent className="w-5 h-5" />
+                <span className="font-semibold text-sm whitespace-nowrap">
+                  {feature.tabName}
+                </span>
               </button>
             );
           })}
