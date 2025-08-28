@@ -11,7 +11,6 @@ const anchorLinks = [
   { name: 'Pricing', href: '#pricing' },
 ];
 
-// This data structure was correct, we just need to use it properly
 const routeButtons = [
   { name: 'Login', href: '/login', variant: 'outline' as const },
   { name: 'Get Started', href: '/get-started', variant: 'default' as const },
@@ -20,8 +19,6 @@ const routeButtons = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
-
-  // useEffects for scroll and keyboard listeners remain the same...
 
   const handleNavClick = (href: string) => {
     setIsOpen(false);
@@ -44,13 +41,17 @@ export default function Navbar() {
           <div className="hidden md:flex flex-1 items-center justify-between ml-10">
             <div className="flex items-baseline space-x-6">
               {anchorLinks.map((item) => (
-                <a key={item.name} href={item.href} /* ... anchor link ... */ >
+                <a
+                  key={item.name}
+                  href={item.href}
+                  onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
+                  className="text-foreground/70 hover:text-primary transition-colors font-medium"
+                >
                   {item.name}
                 </a>
               ))}
             </div>
 
-            {/* THE FIX IS HERE: We map over routeButtons and use the href for each Link */}
             <div className="flex items-center space-x-3">
               {routeButtons.map((btn) => (
                 <Button key={btn.name} variant={btn.variant} size="sm" asChild>
@@ -61,13 +62,13 @@ export default function Navbar() {
           </div>
 
           <div className="md:hidden">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle mobile menu"
             >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isOpen ? <X className="h-6 w-6 text-primary" /> : <Menu className="h-6 w-6 text-primary" />}
             </Button>
           </div>
         </div>
@@ -77,12 +78,16 @@ export default function Navbar() {
         <div id="mobile-menu" role="dialog" aria-modal="true" className="md:hidden">
           <div className="space-y-1 border-b border-border bg-background px-2 pt-2 pb-3">
             {anchorLinks.map((item) => (
-              <a key={item.name} href={item.href} /* ... mobile anchor link ... */ >
+              <a
+                key={item.name}
+                href={item.href}
+                onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
+                className="block px-3 py-2 rounded-md text-base font-medium text-foreground/70 hover:text-primary hover:bg-muted transition-colors"
+              >
                 {item.name}
               </a>
             ))}
             <div className="pt-2 space-y-2">
-              {/* THE FIX IS ALSO HERE for the mobile menu */}
               {routeButtons.map((btn) => (
                 <Button key={btn.name} variant={btn.variant} size="sm" className="w-full" asChild>
                   <Link to={btn.href} onClick={() => setIsOpen(false)}>{btn.name}</Link>
