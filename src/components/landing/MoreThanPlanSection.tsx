@@ -3,27 +3,21 @@ import { cn } from '@/lib/utils';
 
 export default function MoreThanPlanSection() {
   return (
-    // ✅ Section is now relative and overflow-hidden to contain the background glows
     <section className="relative pt-12 pb-20 bg-background overflow-hidden">
       
-      {/* ✅ NEW: Background "Sun" Glow Effect */}
-      {/* This div creates the large, soft orange glow from the bottom-left corner */}
-      <div className="absolute bottom-0 left-0 h-[500px] w-[500px] -translate-x-1/2 translate-y-1/2 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-      {/* This div adds a complementary, subtle glow to the top-right */}
-      <div className="absolute top-0 right-0 h-[300px] w-[300px] translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+      {/* ✅ INCREASED OPACITY: The background glows are now more prominent */}
+      <div className="absolute bottom-0 left-0 h-[500px] w-[500px] -translate-x-1/2 translate-y-1/2 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 h-[300px] w-[300px] translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
 
-      {/* Content is now relative to sit on top of the background glows */}
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 mb-16 items-center" data-reveal>
-          {/* Left Column: Title */}
           <div>
             <p className="mb-2 font-semibold text-primary">Everything You Need</p>
             <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tighter text-foreground">
               More Than Just a Plan
             </h2>
           </div>
-          {/* Right Column: Description */}
           <div>
             <p className="text-lg text-muted-foreground">
               We provide a holistic ecosystem to support every aspect of your wellness journey. From tracking your progress to connecting with your coach, all the tools you need are right at your fingertips.
