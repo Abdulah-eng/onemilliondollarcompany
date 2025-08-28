@@ -3,96 +3,96 @@
 @tailwind utilities;
 
 @layer base {
+  /* --- ✅ NEW LIGHT MODE (Lifesum-Inspired & Energetic) --- */
   :root {
-    /* --- LIGHT MODE (Lifesum-inspired with orange CTA) --- */
-    --background: 32 54% 94%; /* #F5EBE1 */
-    --foreground: 0 0% 5%;   /* #0E0E0E */
+    /* Backgrounds: Clean, warm, and inviting off-white */
+    --background: 30 50% 98%;   /* #fcfaf8 */
+    --foreground: 20 25% 15%;   /* #312a26 */
 
-    --card: 0 0% 100%;       /* #FFFFFF */
-    --card-foreground: 0 0% 5%;
+    /* Cards & Popovers: Crisp white for clarity */
+    --card: 0 0% 100%;
+    --card-foreground: 20 25% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 5%;
+    --popover-foreground: 20 25% 15%;
 
-    --primary: 24 94% 55%;   /* #F97316 (orange CTA) */
+    /* Primary CTA: A vibrant, confident orange that demands attention */
+    --primary: 24 95% 58%;   /* #fa8128 */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 30% 95%; /* soft beige */
+    /* Secondary: Used for subtle backgrounds and accents */
+    --secondary: 30 40% 95%;
     --secondary-foreground: 20 25% 25%;
 
-    --muted: 25 20% 92%;
-    --muted-foreground: 25 15% 40%;
+    /* Muted: Soft, warm grays for secondary text and borders */
+    --muted: 30 25% 92%;
+    --muted-foreground: 25 15% 45%;
 
-    --accent: 24 94% 55%;    /* reuse orange for accents */
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 75% 55%; /* red */
+    --accent: 30 40% 95%;
+    --accent-foreground: 20 25% 25%;
+    
+    --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 5%;
-    --input: 25 20% 90%;
-    --ring: 24 94% 55%;
+    /* Borders: Subtle, not pure black */
+    --border: 30 25% 88%;
+    --input: 30 30% 97%;
+    --ring: 24 95% 60%;
 
     --radius: 1rem;
-
-    /* Shadows: soft & airy for light mode */
-    --shadow-sm: 0 1px 2px rgba(14,14,14,0.06);
-    --shadow-md: 0 4px 6px rgba(14,14,14,0.08);
-    --shadow-lg: 0 10px 15px rgba(14,14,14,0.12);
-
-    /* Sidebar */
-    --sidebar-background: 30 30% 97%;
+    
+    /* --- Sidebar for Light Mode --- */
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 20 25% 25%;
-    --sidebar-primary: 24 94% 55%;          /* orange CTA */
+    --sidebar-primary: 24 95% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 32 54% 94%;           /* #F5EBE1 */
-    --sidebar-accent-foreground: 20 25% 25%;
-    --sidebar-border: 25 20% 88%;
+    --sidebar-accent: 30 50% 96%;
+    --sidebar-accent-foreground: 20 25% 15%;
+    --sidebar-border: 30 25% 92%;
   }
 
-  /* --- DARK MODE (Deep teal with orange CTA) --- */
+  /* --- ✅ NEW DARK MODE (Calm, Focused & Premium) --- */
   .dark {
-    --background: 187 90% 9%;   /* #023030 */
-    --foreground: 0 0% 100%;
+    /* Backgrounds: A deep, calming charcoal-blue, not pure black */
+    --background: 220 20% 12%;   /* #191c23 */
+    --foreground: 210 30% 90%;   /* #d9e1ea */
 
-    --card: 187 60% 14%;        /* #0D3A3A */
-    --card-foreground: 0 0% 100%;
+    /* Cards & Popovers: A slightly lighter shade to create depth */
+    --card: 220 20% 15%;   /* #1f222b */
+    --card-foreground: 210 30% 90%;
 
-    --popover: 187 60% 12%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 220 20% 12%;
+    --popover-foreground: 210 30% 90%;
 
-    --primary: 24 94% 55%;      /* #F97316 */
-    --primary-foreground: 0 0% 5%; /* dark text on orange */
+    /* Primary CTA: The orange remains vibrant for a strong focal point */
+    --primary: 24 95% 58%;   /* #fa8128 */
+    --primary-foreground: 0 0% 100%; /* White text on orange is more accessible */
 
-    --secondary: 187 30% 20%;
-    --secondary-foreground: 0 0% 95%;
+    /* Secondary & Muted: Subtle, cool grays */
+    --secondary: 220 20% 20%;
+    --secondary-foreground: 210 30% 90%;
+    --muted: 220 20% 20%;
+    --muted-foreground: 215 20% 65%;
 
-    --muted: 187 30% 20%;
-    --muted-foreground: 180 15% 70%;
-
-    --accent: 24 94% 55%;
-    --accent-foreground: 0 0% 5%;
+    --accent: 220 20% 20%;
+    --accent-foreground: 210 30% 90%;
 
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 100% / 15%;
-    --input: 187 25% 20%;
-    --ring: 24 94% 55%;
+    /* Borders: Soft, glowing effect instead of harsh lines */
+    --border: 220 20% 25%;
+    --input: 220 20% 20%;
+    --ring: 24 95% 60%;
 
-    /* No shadows in dark mode → flat/stable look */
-    --shadow-sm: none;
-    --shadow-md: none;
-    --shadow-lg: none;
-
-    /* Sidebar */
-    --sidebar-background: 187 90% 7%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 24 94% 55%;
-    --sidebar-primary-foreground: 0 0% 5%;
-    --sidebar-accent: 187 60% 14%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 100% / 10%;
+    /* --- Sidebar for Dark Mode --- */
+    --sidebar-background: 220 20% 10%; /* Darkest element for a stable frame */
+    --sidebar-foreground: 210 30% 80%;
+    --sidebar-primary: 24 95% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 20% 15%;
+    --sidebar-accent-foreground: 210 30% 95%;
+    --sidebar-border: 220 20% 20%;
   }
 }
 
@@ -102,11 +102,13 @@
   }
   body {
     @apply bg-background text-foreground overflow-x-hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* --- DASHBOARD THEME VARIANT --- */
+  /* --- DASHBOARD THEME VARIANT (For the logged-in area) --- */
   .theme-dashboard {
-    --background: 45 50% 96%;  /* soft beige */
+    --background: 220 20% 97%;   /* A cooler, more neutral light gray for focus */
     --foreground: 225 15% 25%;
   }
 
