@@ -1,4 +1,3 @@
-// src/components/landing/Navbar.tsx
 import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,6 @@ const anchorLinks = [
   { name: 'Features', href: '#features' },
   { name: 'How It Works', href: '#how-it-works' },
   { name: 'Pricing', href: '#pricing' },
-  { name: 'Testimonials', href: '#testimonials' },
 ];
 
 const routeButtons = [
@@ -22,7 +20,10 @@ export default function Navbar() {
   const [hasScrolled, setHasScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setHasScrolled(window.scrollY > 10);
+    const handleScroll = () => {
+      // ✅ TRIGGER BACKGROUND WHEN SCROLLING PAST 100% of the viewport height
+      setHasScrolled(window.scrollY > window.innerHeight * 0.95);
+    };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -32,40 +33,40 @@ export default function Navbar() {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // ✅ DYNAMICALLY CHANGE TEXT AND BUTTON COLORS BASED ON SCROLL
+  const navTextColor = hasScrolled ? "text-muted-foreground" : "text-white/80";
+  const navTextHoverColor = hasScrolled ? "hover:text-foreground" : "hover:text-white";
+  const logoColor = hasScrolled ? "text-foreground" : "text-white";
+  const loginButtonVariant = hasScrolled ? "ghost" : "outline";
+
   return (
-    <nav
+    <nav 
       className={cn(
-        'sticky top-0 z-50 w-full transition-all duration-300',
-        hasScrolled
-          ? 'bg-white/20 backdrop-blur-md border-b border-white/30 text-white'
-          : 'bg-transparent text-white'
+        "fixed top-0 z-50 w-full transition-all duration-300",
+        hasScrolled 
+          ? "bg-background/80 backdrop-blur-lg border-b border-border shadow-sm" 
+          // Initially transparent with no border
+          : "bg-transparent border-b border-transparent"
       )}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <Link
             to="/"
-            onClick={(e) => {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className="text-2xl font-bold hover:text-white/80 transition-colors"
+            onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className={cn("text-2xl font-bold transition-colors", logoColor)}
           >
             TrainWise
           </Link>
 
-          {/* Desktop Menu Links */}
           <div className="hidden md:flex flex-1 items-center justify-center">
             <div className="flex items-baseline space-x-6">
               {anchorLinks.map((item) => (
                 <a
                   key={item.name}
                   href={item.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavClick(item.href);
-                  }}
-                  className="text-sm font-medium hover:text-white/80 transition-colors"
+                  onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
+                  className={cn("text-sm font-medium transition-colors", navTextColor, navTextHoverColor)}
                 >
                   {item.name}
                 </a>
@@ -73,23 +74,17 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Desktop Buttons */}
           <div className="hidden md:flex items-center space-x-2">
-            {routeButtons.map((btn) => (
-              <Button key={btn.name} variant={btn.variant} size="sm" asChild>
-                <Link to={btn.href}>{btn.name}</Link>
-              </Button>
-            ))}
+            <Button key="Login" variant={loginButtonVariant} size="sm" asChild className={cn(!hasScrolled && "text-white border-white/50 hover:bg-white/10 hover:text-white")}>
+              <Link to="/login">Login</Link>
+            </Button>
+            <Button key="Get Started" variant="default" size="sm" asChild>
+              <Link to="/get-started">Get Started</Link>
+            </Button>
           </div>
 
-          {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(!isOpen)}
-              aria-label="Toggle mobile menu"
-            >
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle mobile menu" className={cn(logoColor, "hover:bg-white/10")}>
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
@@ -98,30 +93,23 @@ export default function Navbar() {
 
       {/* Mobile Menu Panel */}
       {isOpen && (
-        <div className="md:hidden border-t border-white/30 bg-white/20 backdrop-blur-md text-white">
+        <div className={cn("md:hidden border-t", hasScrolled ? "bg-background border-border" : "bg-black/80 backdrop-blur-lg border-white/20")}>
           <div className="space-y-1 px-2 pt-2 pb-3">
             {anchorLinks.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavClick(item.href);
-                }}
-                className="block px-3 py-2 rounded-md text-base font-medium hover:text-white/80"
+              <a key={item.name} href={item.href} onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
+                 className={cn("block px-3 py-2 rounded-md text-base font-medium transition-colors", navTextColor, navTextHoverColor, !hasScrolled && "hover:bg-white/10")}
               >
                 {item.name}
               </a>
             ))}
           </div>
-          <div className="border-t border-white/30 px-2 pt-3 pb-4 space-y-2">
-            {routeButtons.map((btn) => (
-              <Button key={btn.name} variant={btn.variant} className="w-full" asChild>
-                <Link to={btn.href} onClick={() => setIsOpen(false)}>
-                  {btn.name}
-                </Link>
-              </Button>
-            ))}
+          <div className={cn("px-2 pt-3 pb-4 space-y-2 border-t", hasScrolled ? "border-border" : "border-white/20")}>
+            <Button variant={loginButtonVariant} className="w-full" asChild>
+              <Link to="/login" onClick={() => setIsOpen(false)}>Login</Link>
+            </Button>
+            <Button variant="default" className="w-full" asChild>
+              <Link to="/get-started" onClick={() => setIsOpen(false)}>Get Started</Link>
+            </Button>
           </div>
         </div>
       )}
