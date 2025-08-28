@@ -1,5 +1,6 @@
 import { FEATURE_CARDS } from '@/mockdata/landingpage/features';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 export default function FeaturesSection() {
   return (
@@ -15,21 +16,18 @@ export default function FeaturesSection() {
         </div>
 
         <div className="lg:grid lg:grid-cols-3 lg:gap-8">
-          {/* Ensure horizontal scroll on mobile/tablet and proper grid on desktop */}
-          <div className="flex gap-6 overflow-x-auto pb-8 px-2 -mx-2 lg:px-0 lg:-mx-0 lg:contents" data-reveal>
+          <div className="flex gap-6 overflow-x-auto pb-8 -mx-4 px-4 scroll-px-4 snap-x snap-mandatory lg:contents" data-reveal>
             
             {FEATURE_CARDS.map((feature, index) => (
               <div 
                 key={feature.title} 
-                // Removed hover effect classes.
-                // Adjusted overflow-visible on the outer container to prevent shadow clipping.
                 className={cn(
-                  "reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto relative rounded-3xl shadow-xl overflow-visible", // Changed from overflow-hidden
-                  // Themed background is now applied to the inner text container if needed, not the outer card.
+                  "reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto",
+                  "relative rounded-3xl shadow-2xl min-h-[450px] snap-center" // ✅ Taller cards
                 )}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                {/* Image as full background with dark overlay */}
+                {/* Image as full background */}
                 <div className="absolute inset-0 rounded-3xl overflow-hidden">
                   <img 
                     src={feature.image} 
@@ -38,16 +36,27 @@ export default function FeaturesSection() {
                     loading="lazy"
                     decoding="async"
                   />
-                  {/* Subtle dark gradient overlay for text contrast */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
+                  {/* ✅ Enhanced gradient for better contrast */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/10"></div>
                 </div>
 
-                {/* Content Container - centered and high contrast */}
-                <div className="relative z-10 p-8 flex flex-col h-full justify-end items-center text-center text-white">
-                  <h3 className="text-2xl font-bold drop-shadow-lg">{feature.title}</h3>
-                  <p className="mt-3 text-base opacity-90 drop-shadow-md">
-                    {feature.description}
-                  </p>
+                {/* ✅ NEW CONTENT CONTAINER with professional layout */}
+                <div className="relative z-10 p-8 flex flex-col h-full justify-between text-left text-white">
+                  {/* Top: Category Badge */}
+                  <Badge
+                    variant="secondary"
+                    className="bg-white/10 backdrop-blur-sm border-0 text-white font-semibold w-fit"
+                  >
+                    {feature.category}
+                  </Badge>
+
+                  {/* Bottom: Title & Description */}
+                  <div className="space-y-3">
+                    <h3 className="text-3xl font-bold tracking-tight drop-shadow-lg">{feature.title}</h3>
+                    <p className="text-base opacity-90 leading-relaxed drop-shadow-md">
+                      {feature.description}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
