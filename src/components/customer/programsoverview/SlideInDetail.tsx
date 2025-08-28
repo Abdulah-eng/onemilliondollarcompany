@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom'; // ✅ 1. Import createPortal
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import ProgramDetailView from "./ProgramDetailView";
 import { ScheduledTask } from '@/mockdata/programs/mockprograms';
@@ -27,18 +28,10 @@ export default function SlideInDetail({
 
   if (!task) return null;
 
-  if (isMobile) {
-    return (
-      <Drawer open={!!task} onOpenChange={(open) => !open && onClose()}>
-        <DrawerContent className="h-[90%] rounded-t-3xl">
-          <ProgramDetailView task={task} />
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  return (
+  // The content of our slide-in panel and drawer
+  const slideInContent = (
     <div className="fixed inset-0 z-50">
+      {/* Backdrop */}
       <div
         onClick={onClose}
         className={cn(
@@ -47,6 +40,7 @@ export default function SlideInDetail({
         )}
       />
       
+      {/* Sliding Panel */}
       <div
         className={cn(
           "absolute top-0 right-0 h-full w-full max-w-md bg-slate-50 shadow-2xl transition-transform duration-300 ease-in-out",
@@ -63,4 +57,18 @@ export default function SlideInDetail({
       </div>
     </div>
   );
+
+  // For mobile, we still use the Drawer but portal its content to avoid stacking issues
+  if (isMobile) {
+    return (
+      <Drawer open={!!task} onOpenChange={(open) => !open && onClose()}>
+        <DrawerContent className="h-[90%] rounded-t-3xl">
+          <ProgramDetailView task={task} />
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  // ✅ 2. Use the portal to render the desktop panel directly into the document body
+  return createPortal(slideInContent, document.body);
 }
