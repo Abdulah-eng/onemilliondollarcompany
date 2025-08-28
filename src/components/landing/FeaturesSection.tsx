@@ -15,35 +15,39 @@ export default function FeaturesSection() {
         </div>
 
         <div className="lg:grid lg:grid-cols-3 lg:gap-8">
-          <div className="flex gap-6 overflow-x-auto pb-8 lg:contents" data-reveal>
+          {/* Ensure horizontal scroll on mobile/tablet and proper grid on desktop */}
+          <div className="flex gap-6 overflow-x-auto pb-8 px-2 -mx-2 lg:px-0 lg:-mx-0 lg:contents" data-reveal>
             
             {FEATURE_CARDS.map((feature, index) => (
               <div 
                 key={feature.title} 
+                // Removed hover effect classes.
+                // Adjusted overflow-visible on the outer container to prevent shadow clipping.
                 className={cn(
-                  "reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto bg-gradient-to-br rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl",
-                  feature.themeClass
+                  "reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto relative rounded-3xl shadow-xl overflow-visible", // Changed from overflow-hidden
+                  // Themed background is now applied to the inner text container if needed, not the outer card.
                 )}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                <div className="flex flex-col h-full">
-                  <div className="w-full h-56">
-                    {/* ✅ IMAGE IS NOW OPTIMIZED FOR PERFORMANCE */}
-                    <img 
-                      src={feature.image} 
-                      alt={feature.title}
-                      className="w-full h-full object-cover" 
-                      loading="lazy"   // Prevents images from loading until they are close to the viewport
-                      decoding="async" // Helps prevent rendering lag
-                    />
-                  </div>
+                {/* Image as full background with dark overlay */}
+                <div className="absolute inset-0 rounded-3xl overflow-hidden">
+                  <img 
+                    src={feature.image} 
+                    alt={feature.title}
+                    className="w-full h-full object-cover" 
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  {/* Subtle dark gradient overlay for text contrast */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
+                </div>
 
-                  <div className="p-8 flex flex-col flex-grow">
-                    <h3 className="text-2xl font-bold">{feature.title}</h3>
-                    <p className="mt-3 text-base text-current opacity-80 flex-grow">
-                      {feature.description}
-                    </p>
-                  </div>
+                {/* Content Container - centered and high contrast */}
+                <div className="relative z-10 p-8 flex flex-col h-full justify-end items-center text-center text-white">
+                  <h3 className="text-2xl font-bold drop-shadow-lg">{feature.title}</h3>
+                  <p className="mt-3 text-base opacity-90 drop-shadow-md">
+                    {feature.description}
+                  </p>
                 </div>
               </div>
             ))}
