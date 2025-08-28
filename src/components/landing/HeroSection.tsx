@@ -3,30 +3,25 @@ import { ArrowRight, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
-// ✅ Use optimized .webp versions (convert your JPGs with Squoosh)
 import heroImage1 from '@/assets/hero-image1.webp';
 import heroImage2 from '@/assets/hero-image2.webp';
 import heroImage3 from '@/assets/hero-image3.webp';
 
-// ✅ Carousel Content
 const carouselData = [
   {
     image: heroImage1,
     title: "Eat Better. Live Better.",
-    description:
-      "Food should fuel joy, not stress. Discover how to eat smarter without dieting—so you feel amazing, have more energy, and still enjoy every bite.",
+    description: "Food should fuel joy, not stress. Discover how to eat smarter without dieting—so you feel amazing, have more energy, and still enjoy every bite.",
   },
   {
     image: heroImage2,
     title: "Strong Starts Here",
-    description:
-      "Fitness isn’t about size—it’s about unlocking your energy, confidence, and power. Step into movement that feels good and finally see results that stick.",
+    description: "Fitness isn’t about size—it’s about unlocking your energy, confidence, and power. Step into movement that feels good and finally see results that stick.",
   },
   {
     image: heroImage3,
     title: "Your Calm, Your Power",
-    description:
-      "A clear, focused mind changes everything. Learn simple tools to release stress, boost resilience, and build the inner strength that fuels success.",
+    description: "A clear, focused mind changes everything. Learn simple tools to release stress, boost resilience, and build the inner strength that fuels success.",
   },
 ];
 
@@ -34,27 +29,26 @@ export default function HeroSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTextVisible, setIsTextVisible] = useState(true);
 
-  // Auto-rotate slides
   useEffect(() => {
     const timer = setInterval(() => {
-      setIsTextVisible(false); // fade-out text
-
+      setIsTextVisible(false);
       setTimeout(() => {
-        setCurrentIndex((prev) =>
-          prev === carouselData.length - 1 ? 0 : prev + 1
-        );
-        setIsTextVisible(true); // fade-in text
+        setCurrentIndex((prev) => (prev + 1) % carouselData.length);
+        setIsTextVisible(true);
       }, 700);
     }, 5000);
-
     return () => clearInterval(timer);
   }, []);
 
   const currentSlide = carouselData[currentIndex];
 
+  // ✅ DEFINED A SUBTLE TEXT GLOW/SHADOW FOR BETTER READABILITY
+  const textGlow = {
+    textShadow: '0 2px 20px rgba(0, 0, 0, 0.5)',
+  };
+
   return (
     <section id="hero" className="relative h-screen flex items-center">
-      {/* Background Image Carousel */}
       <div className="absolute inset-0 z-0">
         {carouselData.map((slide, index) => (
           <img
@@ -67,28 +61,31 @@ export default function HeroSection() {
             }`}
           />
         ))}
-        {/* Dark overlay has been removed */}
       </div>
 
-      {/* Content */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center md:justify-start">
         <div className="max-w-xl text-center md:text-left">
-          {/* Text with fade animation */}
           <div
             className={cn(
               "transition-opacity duration-700 ease-in-out",
               isTextVisible ? "opacity-100" : "opacity-0"
             )}
           >
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tighter text-white drop-shadow-xl">
+            {/* ✅ UPDATED FONT WEIGHT AND APPLIED THE NEW TEXT SHADOW */}
+            <h1
+              className="text-4xl sm:text-6xl lg:text-7xl font-black leading-tight tracking-tighter text-white"
+              style={textGlow}
+            >
               {currentSlide.title}
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-white/90 drop-shadow-lg">
+            <p
+              className="mt-6 text-lg sm:text-xl text-white/90"
+              style={textGlow}
+            >
               {currentSlide.description}
             </p>
           </div>
 
-          {/* CTA */}
           <div className="mt-10 flex flex-col items-center md:items-start">
             <Button
               size="lg"
@@ -97,12 +94,11 @@ export default function HeroSection() {
               Start Your Free Trial
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
-            <p className="mt-4 text-sm text-white/80">
+            <p className="mt-4 text-sm text-white/80" style={textGlow}>
               14-day free trial · No credit card required
             </p>
           </div>
 
-          {/* Rating */}
           <div className="mt-8 flex items-center justify-center md:justify-start gap-4">
             <div className="flex items-center text-yellow-400">
               <Star className="w-5 h-5 fill-current" />
@@ -111,7 +107,7 @@ export default function HeroSection() {
               <Star className="w-5 h-5 fill-current" />
               <Star className="w-5 h-5 fill-current" />
             </div>
-            <p className="text-sm font-medium text-white/90">
+            <p className="text-sm font-medium text-white/90" style={textGlow}>
               Rated <span className="font-bold text-white">4.9/5</span> by
               1,000+ users
             </p>
