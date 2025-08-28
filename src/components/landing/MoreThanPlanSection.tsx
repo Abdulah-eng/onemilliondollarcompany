@@ -1,9 +1,9 @@
+import Image from 'next/image';
 import { MORE_THAN_PLAN } from '@/mockdata/landingpage/morethanplan';
 import { cn } from '@/lib/utils';
 
 export default function MoreThanPlanSection() {
   return (
-    // ✅ Section background now correctly adapts to dark mode with a deep teal color
     <section className="relative pt-12 pb-20 bg-background dark:bg-slate-900/20 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -24,7 +24,7 @@ export default function MoreThanPlanSection() {
           </div>
         </div>
 
-        {/* ✅ REDESIGNED GRADIENT CARDS */}
+        {/* Gradient Cards with Images */}
         <div
           className={cn(
             'flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory -mx-4 px-4 scroll-px-4',
@@ -38,15 +38,21 @@ export default function MoreThanPlanSection() {
               className={cn(
                 'reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto relative rounded-3xl shadow-xl min-h-[400px] snap-center transition-transform duration-300 hover:-translate-y-2',
                 'p-8 flex flex-col text-center items-center',
-                `bg-gradient-to-br ${feature.gradient}` // Applying the new vibrant gradients
+                `bg-gradient-to-br ${feature.gradient}`
               )}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              {/* Content now uses white text with shadows for contrast */}
               <div className="flex-grow flex flex-col items-center justify-center text-white">
-                <div className="text-6xl mb-4 drop-shadow-lg">
-                  {feature.emoji}
+                {/* ✅ Using Next.js Image instead of emoji */}
+                <div className="w-28 h-28 mb-4 relative drop-shadow-lg">
+                  <Image
+                    src={feature.image}
+                    alt={feature.title}
+                    fill
+                    className="object-contain rounded-xl"
+                  />
                 </div>
+
                 <h3 className="text-3xl font-bold tracking-tight drop-shadow-md">
                   {feature.title}
                 </h3>
@@ -54,7 +60,9 @@ export default function MoreThanPlanSection() {
                   {feature.description}
                 </p>
               </div>
-              <p className="text-sm font-semibold text-white/60 mt-auto">{feature.category}</p>
+              <p className="text-sm font-semibold text-white/70 mt-auto">
+                {feature.category}
+              </p>
             </div>
           ))}
         </div>
