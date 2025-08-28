@@ -14,7 +14,6 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
 
-  // Effect for desktop scroll detection
   useEffect(() => {
     const handleScroll = () => {
       setHasScrolled(window.scrollY > 10);
@@ -23,7 +22,6 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Effect to lock body scroll when mobile menu is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -31,7 +29,7 @@ export default function Navbar() {
       document.body.style.overflow = 'auto';
     }
     return () => {
-      document.body.style.overflow = 'auto'; // Cleanup on unmount
+      document.body.style.overflow = 'auto';
     };
   }, [isOpen]);
 
@@ -40,32 +38,36 @@ export default function Navbar() {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // --- Dynamic styles for desktop ---
+  // --- Dynamic styles ---
+  // Base color for nav text. White on hero, muted-foreground when scrolled.
   const navTextColor = hasScrolled ? "text-muted-foreground" : "text-white/80";
+  // Hover color for nav text. Foreground color when scrolled, white when on hero.
   const navTextHoverColor = hasScrolled ? "hover:text-foreground" : "hover:text-white";
-  const logoColor = hasScrolled ? "text-foreground" : "text-white";
+  // Base color for the main part of the logo.
+  const logoBaseColor = hasScrolled ? "text-foreground" : "text-white";
 
   return (
-    // ✅ Navbar now has different styles for mobile vs desktop
     <nav 
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        // Mobile: Always has a solid background
+        // Mobile always has a solid background.
         "bg-background border-b border-border",
-        // Desktop: Transparent/glass effect on scroll
+        // Desktop is transparent initially, gets glass effect on scroll.
         "md:bg-transparent md:border-transparent",
         hasScrolled && "md:bg-background/80 md:backdrop-blur-lg md:border-border md:shadow-sm"
       )}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
-          {/* ✅ Logo color now adapts correctly on mobile and desktop */}
+          
+          {/* ✅ UPDATED LOGO with two-tone color */}
           <Link
             to="/"
             onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className={cn("text-2xl font-bold transition-colors md:text-white", logoColor)}
+            className="text-2xl font-bold"
           >
-            TrainWiseStudio
+            <span className={cn("transition-colors", "md:text-white", logoBaseColor)}>TrainWise</span>
+            <span className="text-primary">Studio</span>
           </Link>
 
           {/* --- Desktop Menu (hidden on mobile) --- */}
@@ -92,19 +94,17 @@ export default function Navbar() {
           {/* --- Mobile Menu Button --- */}
           <div className="md:hidden">
             <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle mobile menu">
-              {/* ✅ The close button (X) is now styled to be more prominent */}
               {isOpen ? <X className="h-7 w-7" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* --- ✅ NEW MOBILE MENU PANEL --- */}
-      {/* This is a full-screen overlay for a clean, modern feel */}
+      {/* --- Mobile Menu Panel --- */}
       {isOpen && (
         <div 
             className="md:hidden fixed inset-0 top-20 z-40 bg-background"
-            onClick={() => setIsOpen(false)} // Close menu when clicking the background
+            onClick={() => setIsOpen(false)}
         >
           <div className="space-y-2 px-4 pt-6 pb-3">
             {anchorLinks.map((item) => (
