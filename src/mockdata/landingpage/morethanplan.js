@@ -1,30 +1,60 @@
-export const MORE_THAN_PLAN = [
+import { BookOpen, MessageSquareText, BarChart3, Library } from 'lucide-react';
+
+export const MORE_THAN_PLAN_FEATURES = [
   {
-    title: 'Knowledge Library',
-    category: 'Library',
+    id: 'blog',
+    tabName: 'Blog & Insights',
+    icon: <BookOpen className="w-6 h-6" />,
+    title: 'Deepen Your Understanding',
     description:
-      'Detailed exercise how-tos, recipe ideas, and mental practices in one searchable hub.',
-    image: '/src/assets/more-than-plan-knowledge.webp',
-  },
-  {
-    title: 'Personal Follow-Up',
-    category: 'Coaching',
-    description:
-      'Stay on track with tailored programs and close coach support so you actually hit your goals.',
-    image: '/src/assets/more-than-plan-coachfeedback.webp',
-  },
-  {
-    title: 'Insights & Blog',
-    category: 'Blog',
-    description:
-      'Actionable tips and deeper guides on fitness, nutrition, and mental health—updated regularly.',
+      'Go beyond the basics with our regularly updated blog. Find actionable tips and in-depth guides on fitness, nutrition, and mental wellness, all curated by your coach to support your journey.',
+    points: [
+      'Evidence-based articles and guides',
+      'Practical tips you can implement immediately',
+      'Categorized for easy browsing',
+    ],
     image: '/src/assets/more-than-plan-blogaccess.webp',
   },
   {
-    title: 'Reflect & Track',
-    category: 'Tracking',
+    id: 'feedback',
+    tabName: 'Coach Feedback',
+    icon: <MessageSquareText className="w-6 h-6" />,
+    title: 'Your Personal Guide',
     description:
-      'Log sessions, review history, and see progress trends to keep momentum week after week.',
+      'Never feel lost or unmotivated. Our premium plan includes direct, consistent feedback from your coach to keep you accountable, refine your technique, and celebrate your wins.',
+    points: [
+      'Personalized check-ins on your progress',
+      'Answers to your questions and adjustments',
+      'Motivation when you need it most',
+    ],
+    image: '/src/assets/more-than-plan-coachfeedback.webp',
+  },
+  {
+    id: 'tracking',
+    tabName: 'Insightful Tracking',
+    icon: <BarChart3 className="w-6 h-6" />,
+    title: 'Visualize Your Success',
+    description:
+      'Log your workouts, meals, and reflections with ease. Our intuitive tracking tools help you see how far you’ve come, identify patterns, and stay focused on your long-term goals.',
+    points: [
+      'Log reps, sets, weights, and meal portions',
+      'Review your history and trends over time',
+      'Track mental health journaling and exercises',
+    ],
     image: '/src/assets/more-than-plan-reflectandtrack.webp',
+  },
+  {
+    id: 'library',
+    tabName: 'Resource Library',
+    icon: <Library className="w-6 h-6" />,
+    title: 'An Entire Library at Your Fingertips',
+    description:
+      'Access a comprehensive, searchable library of exercises, recipes, and mental wellness practices. Each entry includes detailed instructions to ensure you perform every action correctly and effectively.',
+    points: [
+      'Searchable exercise database with demos',
+      'Healthy and delicious recipes for any diet',
+      'Guided mental wellness practices',
+    ],
+    image: '/src/assets/more-than-plan-knowledge.webp',
   },
 ];
