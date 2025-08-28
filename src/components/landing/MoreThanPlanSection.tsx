@@ -1,15 +1,19 @@
-import { MORE_THAN_PLAN } from '@/mockdata/landingpage/morethanplan';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
+import { MORE_THAN_PLAN_FEATURES } from '@/mockdata/landingpage/morethanplan';
 
 export default function MoreThanPlanSection() {
+  const [activeTab, setActiveTab] = useState(MORE_THAN_PLAN_FEATURES[0].id);
+  const activeFeature = MORE_THAN_PLAN_FEATURES.find(
+    (feature) => feature.id === activeTab
+  );
+
   return (
-    // Dark-mode aware background, content pulled up
-    <section className="relative pt-12 pb-20 bg-background dark:bg-slate-900/20 overflow-hidden">
+    <section className="relative py-20 bg-background dark:bg-slate-900/20 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-16 items-center"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-12 items-center"
           data-reveal
         >
           <div>
@@ -25,59 +29,79 @@ export default function MoreThanPlanSection() {
           </div>
         </div>
 
-        {/* Image Cards (same import style as FeaturesSection) */}
-        <div
-          className={cn(
-            'flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory -mx-4 px-4 scroll-px-4',
-            'lg:grid lg:grid-cols-4 lg:gap-8 lg:overflow-visible lg:mx-0 lg:px-0'
-          )}
-          data-reveal
-        >
-          {MORE_THAN_PLAN.map((feature, index) => (
-            <div
-              key={feature.title}
+        {/* Interactive Tab Buttons */}
+        <div className="mb-12 grid grid-cols-2 lg:grid-cols-4 gap-4" data-reveal>
+          {MORE_THAN_PLAN_FEATURES.map((feature) => (
+            <button
+              key={feature.id}
+              onClick={() => setActiveTab(feature.id)}
               className={cn(
-                'reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto',
-                'relative rounded-3xl shadow-2xl min-h-[420px] snap-center'
+                'flex flex-col sm:flex-row items-center justify-center text-center gap-3 p-4 rounded-xl border transition-all duration-300',
+                activeTab === feature.id
+                  ? 'bg-primary text-primary-foreground shadow-lg scale-105'
+                  : 'bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground'
               )}
-              style={{ transitionDelay: `${index * 100}ms` }}
             >
-              <div className="absolute inset-0 rounded-3xl overflow-hidden">
-                <img
-                  src={feature.image}
-                  alt={feature.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/45 to-black/10" />
-              </div>
-
-              <div className="relative z-10 p-8 flex flex-col h-full justify-between text-left text-white">
-                {feature.category && (
-                  <Badge
-                    variant="secondary"
-                    className="bg-white/10 backdrop-blur-sm border-0 text-white font-semibold w-fit"
-                  >
-                    {feature.category}
-                  </Badge>
-                )}
-
-                <div className="space-y-3">
-                  <h3 className="text-2xl sm:text-3xl font-bold tracking-tight drop-shadow-lg">
-                    {feature.title}
-                  </h3>
-                  <p className="text-base leading-relaxed opacity-90 drop-shadow-md">
-                    {feature.description}
-                  </p>
-                </div>
-              </div>
-            </div>
+              {feature.icon}
+              <span className="font-semibold">{feature.tabName}</span>
+            </button>
           ))}
         </div>
 
-        <p className="mt-8 text-center text-sm text-muted-foreground" data-reveal>
-          *Access to certain features may vary based on your selected plan.
+        {/* Content Display based on Active Tab */}
+        {activeFeature && (
+          <div
+            className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center"
+            data-reveal
+            key={activeFeature.id} // Re-triggers animation on change
+          >
+            {/* Text Content */}
+            <div className="space-y-6">
+              <h3 className="text-3xl font-bold tracking-tight text-foreground">
+                {activeFeature.title}
+              </h3>
+              <p className="text-lg text-muted-foreground">
+                {activeFeature.description}
+              </p>
+              <ul className="space-y-3">
+                {activeFeature.points.map((point, index) => (
+                  <li key={index} className="flex items-start">
+                    <svg
+                      className="w-6 h-6 text-primary flex-shrink-0 mr-3 mt-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 13l4 4L19 7"
+                      ></path>
+                    </svg>
+                    <span className="text-muted-foreground">{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Image Content */}
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl min-h-[400px]">
+              <img
+                src={activeFeature.image}
+                alt={activeFeature.title}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            </div>
+          </div>
+        )}
+
+        <p className="mt-12 text-center text-sm text-muted-foreground" data-reveal>
+          *Access to features like Coach Feedback and advanced tracking is available on our Premium plan.
         </p>
       </div>
     </section>
