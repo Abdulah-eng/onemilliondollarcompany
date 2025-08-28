@@ -21,8 +21,8 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      // ✅ TRIGGER BACKGROUND WHEN SCROLLING PAST 100% of the viewport height
-      setHasScrolled(window.scrollY > window.innerHeight * 0.95);
+      // Set state to true if user has scrolled more than 10px
+      setHasScrolled(window.scrollY > 10);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -33,19 +33,19 @@ export default function Navbar() {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // ✅ DYNAMICALLY CHANGE TEXT AND BUTTON COLORS BASED ON SCROLL
+  // Dynamically change colors based on whether the user has scrolled
   const navTextColor = hasScrolled ? "text-muted-foreground" : "text-white/80";
   const navTextHoverColor = hasScrolled ? "hover:text-foreground" : "hover:text-white";
   const logoColor = hasScrolled ? "text-foreground" : "text-white";
   const loginButtonVariant = hasScrolled ? "ghost" : "outline";
 
   return (
+    // ✅ Navbar is now 'fixed' to stick to the top of the viewport
     <nav 
       className={cn(
-        "fixed top-0 z-50 w-full transition-all duration-300",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         hasScrolled 
           ? "bg-background/80 backdrop-blur-lg border-b border-border shadow-sm" 
-          // Initially transparent with no border
           : "bg-transparent border-b border-transparent"
       )}
     >
@@ -75,10 +75,10 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center space-x-2">
-            <Button key="Login" variant={loginButtonVariant} size="sm" asChild className={cn(!hasScrolled && "text-white border-white/50 hover:bg-white/10 hover:text-white")}>
+            <Button asChild key="Login" variant={loginButtonVariant} size="sm" className={cn(!hasScrolled && "text-white border-white/50 hover:bg-white/10 hover:text-white")}>
               <Link to="/login">Login</Link>
             </Button>
-            <Button key="Get Started" variant="default" size="sm" asChild>
+            <Button asChild key="Get Started" variant="default" size="sm">
               <Link to="/get-started">Get Started</Link>
             </Button>
           </div>
