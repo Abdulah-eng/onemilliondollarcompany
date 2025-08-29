@@ -1,3 +1,10 @@
+// src/mockdata/landingpage/morethanplan.js
+
+import BlogAccessImage from '@/assets/more-than-plan-blogaccess.webp';
+import CoachFeedbackImage from '@/assets/more-than-plan-coachfeedback.webp';
+import ReflectTrackImage from '@/assets/more-than-plan-reflectandtrack.webp';
+import KnowledgeImage from '@/assets/more-than-plan-knowledge.webp';
+
 export const MORE_THAN_PLAN_CARDS = [
   {
     title: 'Deepen Your Understanding',
@@ -8,7 +15,7 @@ export const MORE_THAN_PLAN_CARDS = [
       'Practical tips you can implement immediately',
       'Categorized for easy browsing',
     ],
-    image: '/src/assets/more-than-plan-blogaccess.webp',
+    image: BlogAccessImage,
   },
   {
     title: 'Your Personal Guide',
@@ -19,7 +26,7 @@ export const MORE_THAN_PLAN_CARDS = [
       'Answers to your questions and adjustments',
       'Motivation when you need it most',
     ],
-    image: '/src/assets/more-than-plan-coachfeedback.webp',
+    image: CoachFeedbackImage,
   },
   {
     title: 'Visualize Your Success',
@@ -30,7 +37,7 @@ export const MORE_THAN_PLAN_CARDS = [
       'Review your history and trends over time',
       'Track mental health journaling and exercises',
     ],
-    image: '/src/assets/more-than-plan-reflectandtrack.webp',
+    image: ReflectTrackImage,
   },
   {
     title: 'An Entire Library at Your Fingertips',
@@ -41,6 +48,6 @@ export const MORE_THAN_PLAN_CARDS = [
       'Healthy and delicious recipes for any diet',
       'Guided mental wellness practices',
     ],
-    image: '/src/assets/more-than-plan-knowledge.webp',
+    image: KnowledgeImage,
   },
 ];
