@@ -13,7 +13,7 @@ interface ExerciseSetLoggerProps {
 
 export function ExerciseSetLogger({ exerciseData, setExerciseData }: ExerciseSetLoggerProps) {
   const sets = exerciseData.sets || [];
-  
+
   const handleSetChange = (setId: number, field: "reps" | "weight", value: string) => {
     const updatedSets = sets.map((set) =>
       set.id === setId ? { ...set, [field]: value === "" ? null : Number(value) } : set
@@ -44,9 +44,9 @@ export function ExerciseSetLogger({ exerciseData, setExerciseData }: ExerciseSet
   };
 
   return (
-    // ✅ 1. ADDED A MAX-WIDTH WRAPPER TO CENTER AND CONSTRAIN THE LOGGER
-    <div className="max-w-xl mx-auto">
-      <div className="space-y-3">
+    <div className="max-w-xl mx-auto relative">
+      <div className="space-y-3 pb-24"> {/* pb-24 to allow sticky button space */}
+        {/* Header Row */}
         <div className="grid grid-cols-12 gap-2 items-center px-2 font-medium text-xs text-slate-400 uppercase tracking-wider">
           <div className="col-span-2 text-center">Set</div>
           <div className="col-span-4 text-center">Weight (kg)</div>
@@ -54,6 +54,7 @@ export function ExerciseSetLogger({ exerciseData, setExerciseData }: ExerciseSet
           <div className="col-span-2 text-center">Done</div>
         </div>
 
+        {/* Sets */}
         {sets.map((set, index) => (
           <div
             key={set.id}
@@ -70,7 +71,6 @@ export function ExerciseSetLogger({ exerciseData, setExerciseData }: ExerciseSet
             <Input
               type="number"
               placeholder="-"
-              // ✅ 2. MADE INPUTS SMALLER AND MORE COMPACT
               className="col-span-4 text-center h-10 bg-slate-100 border-transparent focus-visible:ring-primary"
               value={set.weight ?? ""}
               onChange={(e) => handleSetChange(set.id, "weight", e.target.value)}
@@ -100,9 +100,21 @@ export function ExerciseSetLogger({ exerciseData, setExerciseData }: ExerciseSet
           </div>
         ))}
 
-        <Button onClick={addSet} variant="outline" className="w-full h-10 mt-2 rounded-lg text-slate-600 hover:text-primary hover:border-primary/50 text-sm">
+        {/* Add Set Button */}
+        <Button
+          onClick={addSet}
+          variant="outline"
+          className="w-full h-10 mt-2 rounded-lg text-slate-600 hover:text-primary hover:border-primary/50 text-sm"
+        >
           <Plus className="w-4 h-4 mr-2" />
           Add Set
+        </Button>
+      </div>
+
+      {/* Complete Workout Button fixed inside logger */}
+      <div className="sticky bottom-0 pt-4 bg-white/90 backdrop-blur-sm">
+        <Button size="lg" className="w-full rounded-xl font-bold shadow-lg">
+          Complete Workout
         </Button>
       </div>
     </div>
