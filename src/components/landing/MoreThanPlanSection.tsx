@@ -1,19 +1,13 @@
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { MORE_THAN_PLAN_FEATURES } from '@/mockdata/landingpage/morethanplan';
+import { MORE_THAN_PLAN_CARDS } from '@/mockdata/landingpage/morethanplan';
 
 export default function MoreThanPlanSection() {
-  const [activeTab, setActiveTab] = useState(MORE_THAN_PLAN_FEATURES[0].id);
-  const activeFeature = MORE_THAN_PLAN_FEATURES.find(
-    (feature) => feature.id === activeTab
-  );
-
   return (
     <section className="relative py-20 bg-background dark:bg-slate-900/20 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-12 items-center"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-16 items-center"
           data-reveal
         >
           <div>
@@ -29,86 +23,71 @@ export default function MoreThanPlanSection() {
           </div>
         </div>
 
-        {/* Interactive Tab Buttons - Now horizontally scrollable on mobile/tablet */}
+        {/* Horizontally Scrolling Cards */}
         <div
-          className="mb-12 flex gap-3 lg:grid lg:grid-cols-4 lg:gap-4 overflow-x-auto snap-x snap-mandatory lg:overflow-visible -mx-4 px-4 scroll-px-4 lg:mx-0 lg:px-0"
+          className={cn(
+            'flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory -mx-4 px-4 scroll-px-4',
+            'lg:grid lg:grid-cols-4 lg:gap-8 lg:overflow-visible lg:mx-0 lg:px-0'
+          )}
           data-reveal
         >
-          {MORE_THAN_PLAN_FEATURES.map((feature) => {
-            const IconComponent = feature.icon; // Assign component to a capitalized variable
-            return (
-              <button
-                key={feature.id}
-                onClick={() => setActiveTab(feature.id)}
-                className={cn(
-                  'flex flex-row flex-shrink-0 items-center justify-center text-center gap-2.5 px-5 py-3 rounded-xl border transition-all duration-300 snap-start',
-                  activeTab === feature.id
-                    ? 'bg-primary text-primary-foreground shadow-lg scale-105'
-                    : 'bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground'
-                )}
-              >
-                <IconComponent className="w-5 h-5" />
-                <span className="font-semibold text-sm whitespace-nowrap">
-                  {feature.tabName}
-                </span>
-              </button>
-            );
-          })}
+          {MORE_THAN_PLAN_CARDS.map((card, index) => (
+            <div
+              key={card.title}
+              className={cn(
+                'reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto',
+                'relative rounded-3xl shadow-2xl min-h-[500px] snap-center overflow-hidden',
+                'flex flex-col justify-end p-8 text-white'
+              )}
+              style={{ transitionDelay: `${index * 100}ms` }}
+            >
+              {/* Background Image & Gradient */}
+              <div className="absolute inset-0">
+                <img
+                  src={card.image}
+                  alt={card.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+              </div>
+
+              {/* Text Content */}
+              <div className="relative z-10 space-y-4">
+                <h3 className="text-2xl sm:text-3xl font-bold tracking-tight drop-shadow-lg">
+                  {card.title}
+                </h3>
+                <p className="text-base leading-relaxed opacity-90 drop-shadow-md">
+                  {card.description}
+                </p>
+                <ul className="space-y-2 border-t border-white/20 pt-4">
+                  {card.points.map((point, pointIndex) => (
+                    <li key={pointIndex} className="flex items-start gap-3 text-sm">
+                      <svg
+                        className="w-4 h-4 text-primary flex-shrink-0 mt-1"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 13l4 4L19 7"
+                        ></path>
+                      </svg>
+                      <span className="opacity-80">{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Content Display based on Active Tab */}
-        {activeFeature && (
-          <div
-            className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center"
-            data-reveal
-            key={activeFeature.id} // Re-triggers animation on change
-          >
-            {/* Text Content */}
-            <div className="space-y-6">
-              <h3 className="text-3xl font-bold tracking-tight text-foreground">
-                {activeFeature.title}
-              </h3>
-              <p className="text-lg text-muted-foreground">
-                {activeFeature.description}
-              </p>
-              <ul className="space-y-3">
-                {activeFeature.points.map((point, index) => (
-                  <li key={index} className="flex items-start">
-                    <svg
-                      className="w-6 h-6 text-primary flex-shrink-0 mr-3 mt-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M5 13l4 4L19 7"
-                      ></path>
-                    </svg>
-                    <span className="text-muted-foreground">{point}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Image Content */}
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl min-h-[400px]">
-              <img
-                src={activeFeature.image}
-                alt={activeFeature.title}
-                className="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-            </div>
-          </div>
-        )}
-
-        <p className="mt-12 text-center text-sm text-muted-foreground" data-reveal>
+        <p className="mt-8 text-center text-sm text-muted-foreground" data-reveal>
           *Access to features like Coach Feedback and advanced tracking is available on our Premium plan.
         </p>
       </div>
