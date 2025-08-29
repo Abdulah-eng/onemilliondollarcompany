@@ -1,5 +1,6 @@
-// src/components/customer/viewprogram/WorkoutHeader.tsx
-import { ScheduledTask, FitnessExercise, typeConfig } from "@/mockdata/programs/mockprograms";
+// src/components/customer/viewprogram/exercise/WorkoutHeader.tsx
+import { typeConfig } from "@/mockdata/programs/mockprograms";
+import { DetailedFitnessTask } from "@/mockdata/viewprograms/mockexerciseprograms";
 import { Clock, Dumbbell, ListChecks } from "lucide-react";
 
 const Stat = ({ icon: Icon, label, value }) => (
@@ -12,7 +13,8 @@ const Stat = ({ icon: Icon, label, value }) => (
   </div>
 );
 
-export default function WorkoutHeader({ task }: { task: ScheduledTask }) {
+// The `task` prop is now expected to be the combined, detailed type
+export default function WorkoutHeader({ task }: { task: any }) {
   const config = typeConfig[task.type];
   const exerciseCount = Array.isArray(task.content) ? task.content.length : 0;
 
