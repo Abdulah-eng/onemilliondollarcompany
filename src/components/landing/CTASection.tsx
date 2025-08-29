@@ -2,22 +2,11 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-
-// ✅ Import images properly
 import ctaImage1 from '@/assets/cta-image1.webp';
 import ctaImage2 from '@/assets/cta-image2.webp';
 
-function BlurImage({
-  src,
-  alt,
-  className,
-}: {
-  src: string;
-  alt: string;
-  className?: string;
-}) {
+function BlurImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
   const [loaded, setLoaded] = useState(false);
-
   return (
     <div className={cn('relative w-full h-full overflow-hidden', className)}>
       <img
@@ -112,21 +101,12 @@ export default function CTASection() {
             className="relative flex justify-center lg:justify-end h-[400px] sm:h-[500px]"
             data-reveal
           >
-            {/* Large background image */}
             <div className="absolute w-[80%] sm:w-[60%] h-[90%] sm:h-full rounded-3xl shadow-2xl overflow-hidden">
-              <BlurImage
-                src={ctaImage1}
-                alt="Athlete looking focused"
-              />
+              <BlurImage src={ctaImage1} alt="Athlete looking focused" />
             </div>
 
-            {/* Overlapping image */}
             <div className="absolute bottom-0 left-0 sm:left-auto sm:right-0 w-[60%] sm:w-[50%] h-[70%] sm:h-[80%] rounded-3xl shadow-2xl -translate-x-4 sm:translate-x-4 translate-y-4 sm:translate-y-8 lg:translate-y-12 bg-primary p-2 overflow-hidden">
-              <BlurImage
-                src={ctaImage2}
-                alt="Athlete in action"
-                className="rounded-2xl"
-              />
+              <BlurImage src={ctaImage2} alt="Athlete in action" className="rounded-2xl" />
             </div>
           </div>
         </div>
