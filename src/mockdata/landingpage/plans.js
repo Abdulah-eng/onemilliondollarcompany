@@ -3,6 +3,7 @@ export const PLANS = [
   {
     name: 'Premium',
     price: '$29.99',
+    oldPrice: '$59.99', // Added for discount effect
     period: 'month',
     summary: 'Everything you need to transform',
     ctaText: 'Choose Premium',
@@ -19,6 +20,7 @@ export const PLANS = [
   {
     name: 'Standard',
     price: '$14.99',
+    oldPrice: '$29.99', // Added for discount effect
     period: 'month',
     summary: 'Perfect for focused goals',
     ctaText: 'Try 14 Days Free',
@@ -35,6 +37,7 @@ export const PLANS = [
   {
     name: 'Basic (One-Time)',
     price: '$17.99',
+    oldPrice: '$24.99', // Added for discount effect
     period: 'One-Time',
     summary: 'A single program purchase',
     ctaText: 'Buy Now',
