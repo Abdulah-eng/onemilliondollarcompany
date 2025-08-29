@@ -1,21 +1,17 @@
 // src/components/customer/viewprogram/ExerciseSetLogger.tsx
-
 import { FitnessExercise, ExerciseSet } from "@/mockdata/programs/mockprograms";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ExerciseSetLoggerProps {
   exerciseData: FitnessExercise;
   setExerciseData: React.Dispatch<React.SetStateAction<FitnessExercise>>;
 }
 
-export function ExerciseSetLogger({
-  exerciseData,
-  setExerciseData,
-}: ExerciseSetLoggerProps) {
-
+export function ExerciseSetLogger({ exerciseData, setExerciseData }: ExerciseSetLoggerProps) {
   const handleSetChange = (setId: number, field: "reps" | "weight", value: string) => {
     const updatedSets = exerciseData.sets.map((set) =>
       set.id === setId ? { ...set, [field]: value === "" ? null : Number(value) } : set
@@ -47,57 +43,59 @@ export function ExerciseSetLogger({
 
   return (
     <div className="space-y-3">
-      {/* Table Header */}
-      <div className="grid grid-cols-12 gap-2 items-center px-2 font-semibold text-sm text-gray-500">
-        <div className="col-span-2 text-center">SET</div>
-        <div className="col-span-4 text-center">WEIGHT (KG)</div>
-        <div className="col-span-4 text-center">REPS</div>
-        <div className="col-span-2"></div>
+      <div className="grid grid-cols-12 gap-2 items-center px-2 font-medium text-xs text-slate-400 uppercase tracking-wider">
+        <div className="col-span-2 text-center">Set</div>
+        <div className="col-span-4 text-center">Weight (kg)</div>
+        <div className="col-span-4 text-center">Reps</div>
+        <div className="col-span-2 text-center">Done</div>
       </div>
 
-      {/* Set Rows */}
       {exerciseData.sets.map((set, index) => (
         <div
           key={set.id}
-          className="grid grid-cols-12 gap-2 items-center"
+          className={cn(
+            "grid grid-cols-12 gap-2 items-center p-2 rounded-lg transition-colors",
+            set.isCompleted ? "bg-green-50" : "bg-transparent"
+          )}
         >
           <div className="col-span-2 flex justify-center items-center">
-            <span className="font-bold text-gray-800 bg-gray-100 w-8 h-8 flex items-center justify-center rounded-full">
+            <span className="font-bold text-slate-600 bg-slate-100 h-9 w-9 flex items-center justify-center rounded-full">
               {index + 1}
             </span>
           </div>
           <Input
             type="number"
-            placeholder="0"
-            className="col-span-4 text-center"
+            placeholder="-"
+            className="col-span-4 text-center h-11 bg-slate-100 border-transparent focus-visible:ring-primary"
             value={set.weight ?? ""}
             onChange={(e) => handleSetChange(set.id, "weight", e.target.value)}
           />
           <Input
             type="number"
-            placeholder="0"
-            className="col-span-4 text-center"
+            placeholder="-"
+            className="col-span-4 text-center h-11 bg-slate-100 border-transparent focus-visible:ring-primary"
             value={set.reps ?? ""}
             onChange={(e) => handleSetChange(set.id, "reps", e.target.value)}
           />
-          <div className="col-span-2 flex items-center justify-end space-x-2">
+          <div className="col-span-2 flex items-center justify-center">
             <Checkbox
               checked={set.isCompleted}
               onCheckedChange={() => toggleSetCompletion(set.id)}
+              className="h-6 w-6 rounded-md"
             />
-            {exerciseData.sets.length > 1 && (
-              <button
-                onClick={() => removeSet(set.id)}
-                className="text-gray-400 hover:text-red-500"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+             {exerciseData.sets.length > 1 && (
+               <button
+                 onClick={() => removeSet(set.id)}
+                 className="ml-2 text-slate-400 hover:text-red-500 transition-colors"
+               >
+                 <Trash2 className="w-4 h-4" />
+               </button>
             )}
           </div>
         </div>
       ))}
 
-      <Button onClick={addSet} variant="outline" className="w-full mt-2">
+      <Button onClick={addSet} variant="outline" className="w-full h-11 mt-2 rounded-lg text-slate-600 hover:text-primary hover:border-primary/50">
         <Plus className="w-4 h-4 mr-2" />
         Add Set
       </Button>
