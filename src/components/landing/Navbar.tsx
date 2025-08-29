@@ -15,22 +15,14 @@ export default function Navbar() {
   const [hasScrolled, setHasScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setHasScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setHasScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
+    document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+    return () => { document.body.style.overflow = 'auto'; };
   }, [isOpen]);
 
   const handleNavClick = (href: string) => {
@@ -38,80 +30,82 @@ export default function Navbar() {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // --- Dynamic styles for desktop ---
-  const navTextColor = hasScrolled ? "text-muted-foreground" : "text-white/80";
-  const navTextHoverColor = hasScrolled ? "hover:text-foreground" : "hover:text-white";
-  const iconColor = hasScrolled ? "text-foreground" : "text-white";
+  // Text colors
+  const navTextColor = hasScrolled ? "text-white/80" : "text-white/80";
+  const navTextHoverColor = hasScrolled ? "hover:text-white" : "hover:text-white";
+  const iconColor = "text-white";
 
   return (
     <nav 
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        // Mobile always has a solid background.
-        "bg-background border-b border-border",
-        // Desktop is transparent initially, gets glass effect on scroll.
-        "md:bg-transparent md:border-transparent",
-        hasScrolled && "md:bg-background/80 md:backdrop-blur-lg md:border-border md:shadow-sm"
+        "bg-black/0 md:bg-transparent md:border-transparent",
+        hasScrolled && "md:bg-black/80 md:backdrop-blur-lg md:border-gray-700 md:shadow-sm"
       )}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           
-          {/* ✅ UPDATED LOGO with permanent two-tone color */}
+          {/* Logo */}
           <Link
             to="/"
             onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
             className="text-2xl font-bold"
           >
-            <span className="text-foreground">TrainWise</span>
+            <span className="text-white">TrainWise</span>
             <span className="text-primary">Studio</span>
           </Link>
 
-          {/* --- Desktop Menu (hidden on mobile) --- */}
+          {/* Desktop Menu */}
           <div className="hidden md:flex flex-1 items-center justify-center">
             <div className="flex items-baseline space-x-6">
               {anchorLinks.map((item) => (
-                <a key={item.name} href={item.href} onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
-                   className={cn("text-sm font-medium transition-colors", navTextColor, navTextHoverColor)}>
+                <a
+                  key={item.name}
+                  href={item.href}
+                  onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
+                  className={cn("text-sm font-medium transition-colors", navTextColor, navTextHoverColor)}
+                >
                   {item.name}
                 </a>
               ))}
             </div>
           </div>
+
           <div className="hidden md:flex items-center space-x-2">
-            <Button asChild key="Login" variant="ghost" size="sm" className={cn("transition-colors", navTextColor, navTextHoverColor)}>
+            <Button asChild variant="ghost" size="sm" className={cn("transition-colors", navTextColor, navTextHoverColor)}>
               <Link to="/login">Login</Link>
             </Button>
-            <Button asChild key="Get Started" variant="default" size="sm" className={cn(!hasScrolled && "shadow-lg")}>
+            <Button asChild variant="default" size="sm" className={cn(!hasScrolled && "shadow-lg")}>
               <Link to="/get-started">Get Started</Link>
             </Button>
           </div>
-          {/* --- End Desktop Menu --- */}
 
-          {/* --- Mobile Menu Button --- */}
+          {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle mobile menu" className="text-foreground">
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle mobile menu" className={iconColor}>
               {isOpen ? <X className="h-7 w-7" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* --- Mobile Menu Panel --- */}
+      {/* Mobile Menu Panel */}
       {isOpen && (
-        <div 
-            className="md:hidden fixed inset-0 top-20 z-40 bg-background"
-            onClick={() => setIsOpen(false)}
-        >
+        <div className="md:hidden fixed inset-0 top-20 z-40 bg-black/95" onClick={() => setIsOpen(false)}>
           <div className="space-y-2 px-4 pt-6 pb-3">
             {anchorLinks.map((item) => (
-              <a key={item.name} href={item.href} onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
-                 className="block px-3 py-3 rounded-lg text-xl font-semibold text-foreground hover:text-primary hover:bg-accent">
+              <a
+                key={item.name}
+                href={item.href}
+                onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
+                className="block px-3 py-3 rounded-lg text-xl font-semibold text-white hover:text-primary hover:bg-gray-800/50"
+              >
                 {item.name}
               </a>
             ))}
           </div>
-          <div className="px-4 pt-4 pb-4 space-y-3 border-t border-border">
+          <div className="px-4 pt-4 pb-4 space-y-3 border-t border-gray-700">
             <Button variant="ghost" className="w-full justify-center text-lg font-semibold h-12" asChild>
               <Link to="/login" onClick={() => setIsOpen(false)}>Login</Link>
             </Button>
