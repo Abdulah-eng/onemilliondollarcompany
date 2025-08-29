@@ -8,21 +8,17 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
 
   return (
     <div className="absolute inset-0">
-      {/* Blur placeholder */}
-      <div
-        className={cn(
-          'w-full h-full bg-gray-700 animate-pulse',
-          'absolute inset-0 transition-opacity duration-500',
-          loaded ? 'opacity-0' : 'opacity-100'
-        )}
-      />
+      {/* Static placeholder (no flicker) */}
+      {!loaded && (
+        <div className="w-full h-full bg-gray-800 absolute inset-0" />
+      )}
 
       {/* Actual image */}
       <img
         src={src}
         alt={alt}
         className={cn(
-          'w-full h-full object-cover transition-opacity duration-700',
+          'w-full h-full object-cover transition-opacity duration-500',
           loaded ? 'opacity-100' : 'opacity-0'
         )}
         loading="lazy"
@@ -76,7 +72,7 @@ export default function MoreThanPlanSection() {
               )}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              {/* Optimized Background Image with Blur-up */}
+              {/* Optimized Background Image */}
               <BlurImage src={card.image} alt={card.title} />
 
               {/* Text Content */}
