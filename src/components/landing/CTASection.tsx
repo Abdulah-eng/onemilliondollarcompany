@@ -17,26 +17,19 @@ function BlurImage({
 
   return (
     <div className={cn('relative w-full h-full overflow-hidden', className)}>
-      {/* Blur Placeholder */}
-      <div
-        className={cn(
-          'absolute inset-0 bg-gray-700 animate-pulse',
-          'transition-opacity duration-500',
-          loaded ? 'opacity-0' : 'opacity-100'
-        )}
-      />
-      {/* Actual Image */}
       <img
         src={src}
         alt={alt}
         className={cn(
-          'absolute inset-0 w-full h-full object-cover transition-opacity duration-700',
+          'w-full h-full object-cover transition-opacity duration-500 ease-in-out',
           loaded ? 'opacity-100' : 'opacity-0'
         )}
+        onLoad={() => setLoaded(true)}
         loading="lazy"
         decoding="async"
-        onLoad={() => setLoaded(true)}
       />
+      {/* Subtle overlay placeholder while loading */}
+      {!loaded && <div className="absolute inset-0 bg-gray-200/10" />}
     </div>
   );
 }
