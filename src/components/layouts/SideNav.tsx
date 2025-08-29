@@ -42,14 +42,14 @@ const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
   return (
     <Sidebar
       className={cn(
-        "bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border transition-all duration-300",
+        // ✅ UPDATED: Changed to a semi-transparent "glass" background
+        "border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 text-foreground transition-all duration-300",
         collapsed && !isMobile ? 'w-16' : 'w-64'
       )}
       collapsible="icon"
     >
       <SidebarContent className="px-3">
-        {/* ✅ MODIFIED: Matched height with TopNav and centered content */}
-        <div className={cn("flex items-center h-16 border-b border-sidebar-border", collapsed && !isMobile ? 'justify-center' : '')}>
+        <div className={cn("flex items-center h-16 border-b border-border", collapsed && !isMobile ? 'justify-center' : '')}>
           <div className="flex items-center gap-2">
             <div className="h-10 w-10 min-h-10 min-w-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
               <span className="text-white font-bold text-sm leading-none">TW</span>
