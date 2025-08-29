@@ -1,6 +1,7 @@
-// src/components/customer/viewprogram/ExerciseCard.tsx
+// src/components/customer/viewprogram/exercise/ExerciseCard.tsx
 import { useState } from "react";
-import { FitnessExercise } from "@/mockdata/programs/mockprograms";
+import { FitnessExercise } from "@/mockdata/viewprograms/mockexerciseprograms";
+// ✅ Corrected import path
 import { ExerciseSetLogger } from "./ExerciseSetLogger";
 
 interface ExerciseCardProps {
