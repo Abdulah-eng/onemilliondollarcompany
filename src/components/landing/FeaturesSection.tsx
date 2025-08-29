@@ -29,25 +29,25 @@ export default function FeaturesSection() {
         data-reveal
       >
         {FEATURE_CARDS.map((feature, index) => (
-          <div 
-            key={feature.title} 
+          <div
+            key={feature.title}
             className={cn(
               "reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto",
               "relative rounded-3xl min-h-[450px] snap-center",
-              // Custom soft shadow to blend better with gradient background
-              "shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)]"
+              // Subtle soft shadow for natural blending
+              "shadow-[0_20px_40px_-12px_rgba(0,0,0,0.08)]"
             )}
             style={{ transitionDelay: `${index * 100}ms` }}
           >
             <div className="absolute inset-0 rounded-3xl overflow-hidden">
-              <img 
-                src={feature.image} 
+              <img
+                src={feature.image}
                 alt={feature.title}
-                className="w-full h-full object-cover" 
+                className="w-full h-full object-cover"
                 loading="lazy"
                 decoding="async"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/10"></div>
+              {/* Removed overlay — card image is now fully visible */}
             </div>
 
             <div className="relative z-10 p-8 flex flex-col h-full justify-between text-left text-white">
@@ -69,8 +69,8 @@ export default function FeaturesSection() {
         ))}
       </div>
 
-      {/* Soft bottom fade buffer to help shadows blend */}
-      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#DDF5F0]/50 via-[#DDF5F0]/20 to-white pointer-events-none" />
+      {/* Soft bottom fade for smooth blend with next section */}
+      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#DDF5F0]/40 via-white/80 to-white pointer-events-none" />
     </section>
   );
 }
