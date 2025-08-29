@@ -24,7 +24,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-gray-900 text-background">
+    <footer className="bg-gray-900 text-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           {/* Logo and Description */}
@@ -33,7 +33,7 @@ export default function Footer() {
               <Sparkles className="h-8 w-8 text-primary" />
               <span className="text-2xl font-bold text-white">TrainWiseStudio</span>
             </div>
-            <p className="max-w-xs text-sm text-background/70">
+            <p className="max-w-xs text-sm text-white/70">
               Transform your life through personalized fitness, nutrition, and mental wellness coaching.
             </p>
           </div>
@@ -51,7 +51,7 @@ export default function Footer() {
                       <a
                         href={link.href}
                         onClick={(e) => handleScroll(e, link.href)}
-                        className="text-sm text-background/60 transition-colors hover:text-primary"
+                        className="text-sm text-white/60 transition-colors hover:text-primary"
                       >
                         {link.name}
                       </a>
@@ -68,7 +68,7 @@ export default function Footer() {
                     <li key={link.name}>
                       <Link
                         to={link.href}
-                        className="text-sm text-background/60 transition-colors hover:text-primary"
+                        className="text-sm text-white/60 transition-colors hover:text-primary"
                       >
                         {link.name}
                       </Link>
@@ -78,17 +78,20 @@ export default function Footer() {
               </div>
             </div>
             <div className="md:grid md:grid-cols-1 md:gap-8">
-               <div>
+              <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-white/80">
                   Contact
                 </h3>
-                 <ul className="mt-4 space-y-3">
-                    <li>
-                       <a href="mailto:hello@trainwisestudio.com" className="text-sm text-background/60 transition-colors hover:text-primary">
-                        hello@trainwisestudio.com
-                      </a>
-                    </li>
-                 </ul>
+                <ul className="mt-4 space-y-3">
+                  <li>
+                    <a
+                      href="mailto:hello@trainwisestudio.com"
+                      className="text-sm text-white/60 transition-colors hover:text-primary"
+                    >
+                      hello@trainwisestudio.com
+                    </a>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
@@ -99,22 +102,22 @@ export default function Footer() {
           <div className="flex space-x-6">
             <a
               href="https://instagram.com/trainwisestudio"
-              className="text-background/60 transition-colors hover:text-primary"
+              className="text-white/60 transition-colors hover:text-primary"
               target="_blank"
               rel="noopener noreferrer"
             >
               <span className="sr-only">Instagram</span>
               <Instagram className="h-6 w-6" />
             </a>
-             <a
+            <a
               href="mailto:hello@trainwisestudio.com"
-              className="text-background/60 transition-colors hover:text-primary"
+              className="text-white/60 transition-colors hover:text-primary"
             >
               <span className="sr-only">Email</span>
               <Mail className="h-6 w-6" />
             </a>
           </div>
-          <p className="mt-8 text-sm text-background/60 sm:mt-0">
+          <p className="mt-8 text-sm text-white/60 sm:mt-0">
             &copy; {new Date().getFullYear()} TrainWiseStudio. All rights reserved.
           </p>
         </div>
