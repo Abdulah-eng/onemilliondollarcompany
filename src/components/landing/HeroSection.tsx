@@ -70,8 +70,8 @@ export default function HeroSection() {
             )}
           />
         ))}
-        {/* Overlay for better contrast */}
-        <div className="absolute inset-0 bg-black/40" />
+        {/* Softer overlay for better contrast */}
+        <div className="absolute inset-0 bg-black/25" />
       </div>
 
       {/* Content */}
