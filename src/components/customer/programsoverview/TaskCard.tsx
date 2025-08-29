@@ -1,3 +1,5 @@
+// ✅ 1. IMPORT useNavigate
+import { useNavigate } from "react-router-dom";
 import { ScheduledTask, typeConfig } from "@/mockdata/programs/mockprograms";
 import { CheckCircle2, PlayCircle, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -5,14 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export function TaskCard({ task, onClick }: { task: ScheduledTask; onClick: () => void }) {
+  // ✅ 2. INITIALIZE useNavigate
+  const navigate = useNavigate();
   const config = typeConfig[task.type];
   const isCompleted = task.status === "completed";
   const isPending = task.status === "pending" || task.status === "in-progress";
 
   const handleButtonClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log(`Navigating to start task: ${task.title}`);
-    // Navigation logic (e.g., using a router) would go here.
+    e.stopPropagation(); // Prevents the card's onClick from firing
+    // ✅ 3. NAVIGATE TO THE PROGRAM VIEW PAGE
+    // This will navigate to a URL like "/program/t9"
+    navigate(`/program/${task.id}`);
   };
 
   return (
