@@ -1,36 +1,33 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { generateDailySchedule, ScheduledTask, mockPrograms } from "@/mockdata/programs/mockprograms";
 import { findExerciseProgramById, DetailedFitnessTask } from "@/mockdata/viewprograms/mockexerciseprograms";
-
 import FitnessWorkoutView from "@/components/customer/viewprogram/exercise/FitnessWorkoutView";
 import WorkoutHeader from "@/components/customer/viewprogram/exercise/WorkoutHeader";
 import CoachMessage from "@/components/customer/viewprogram/CoachMessage";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-type CombinedWorkoutTask = Omit<ScheduledTask, 'content'> & DetailedFitnessTask;
+type CombinedWorkoutTask = DetailedFitnessTask & { type: "fitness"; programTitle?: string };
 
 export default function ViewProgramPage() {
-  const { taskId } = useParams<{ taskId: string }>();
+  const { id } = useParams<{ id: string }>();
   const [workoutData, setWorkoutData] = useState<CombinedWorkoutTask | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!taskId) {
+    if (!id) {
       setLoading(false);
       return;
     }
-    const schedule = generateDailySchedule(mockPrograms);
-    const basicTaskInfo = schedule.find((t) => t.id === taskId);
-    const detailedTaskInfo = findExerciseProgramById(taskId);
-    
-    if (basicTaskInfo && detailedTaskInfo) {
-      setWorkoutData({ ...basicTaskInfo, ...detailedTaskInfo });
+
+    const detailedTaskInfo = findExerciseProgramById(id);
+    if (detailedTaskInfo) {
+      setWorkoutData({ ...detailedTaskInfo, type: "fitness", programTitle: "" });
     }
+
     setLoading(false);
-  }, [taskId]);
+  }, [id]);
 
   if (loading) {
     return (
@@ -43,33 +40,27 @@ export default function ViewProgramPage() {
   if (!workoutData) {
     return <div className="text-center p-8">Workout not found.</div>;
   }
-  
+
   return (
-    // ✅ 1. THE LAYOUT IS NOW CONTROLLED HERE.
-    // This container fills the space provided by AppShell's <main> tag.
-    <div className="relative h-full">
-      
-      {/* 2. All content is now in a scrollable div. */}
-      {/* We add bottom padding (pb-24) to prevent the last card from being hidden by the button. */}
-      <div className="h-full overflow-y-auto pb-24">
-        <div className="mx-auto max-w-5xl space-y-8">
-            <WorkoutHeader task={workoutData} />
-            <CoachMessage />
-            <main>
-              <FitnessWorkoutView task={workoutData} />
-            </main>
-        </div>
+    <div className="flex flex-col min-h-screen w-full max-w-5xl mx-auto px-4">
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-auto space-y-8 py-8">
+        <WorkoutHeader task={workoutData} />
+        <CoachMessage />
+        <main className="space-y-8 pb-20"> {/* padding-bottom for button */}
+          {workoutData.type === "fitness" ? (
+            <FitnessWorkoutView task={workoutData} />
+          ) : (
+            <div className="p-8 text-center">This workout type is not yet supported.</div>
+          )}
+        </main>
       </div>
 
-      {/* 3. THIS IS THE NEW BUTTON CONTAINER */}
-      {/* It's positioned 'absolute' to the parent div, NOT 'fixed' to the window. */}
-      {/* This ensures it stays within the main content area and NEVER overlaps the sidebar. */}
-      <div className="absolute bottom-0 left-0 right-0 z-10">
-        <div className="mx-auto max-w-5xl border-t bg-white/80 px-4 py-3 backdrop-blur-sm">
-          <Button size="lg" className="h-12 w-full rounded-xl font-bold shadow-lg">
-            Complete Workout
-          </Button>
-        </div>
+      {/* Complete Workout button without background container */}
+      <div className="sticky bottom-4 w-full px-0 flex justify-center z-50">
+        <Button size="lg" className="w-full max-w-md h-12 font-bold rounded-xl shadow-lg">
+          Complete Workout
+        </Button>
       </div>
     </div>
   );
