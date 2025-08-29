@@ -20,7 +20,6 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
         decoding="async"
         onLoad={() => setLoaded(true)}
       />
-
       {/* Removed gradient overlay from image */}
     </div>
   );
@@ -29,9 +28,9 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
 export default function MoreThanPlanSection() {
   return (
     <section
-      className="relative py-20 overflow-hidden bg-gradient-to-b from-[#DDF5F0]/40 via-[#B2E0D9]/50 to-white"
+      className="relative overflow-hidden bg-gradient-to-b from-[#DDF5F0]/50 via-[#B2E0D9]/50 to-white"
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
         {/* Header */}
         <div
           className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-16 items-center"
@@ -71,15 +70,11 @@ export default function MoreThanPlanSection() {
               <BlurImage src={card.image} alt={card.title} />
 
               <div className="relative z-10 space-y-4">
-                <h3 className="text-2xl sm:text-3xl font-bold tracking-tight drop-shadow-lg">
-                  {card.title}
-                </h3>
-                <p className="text-base leading-relaxed opacity-90 drop-shadow-md">
-                  {card.description}
-                </p>
+                <h3 className="text-2xl sm:text-3xl font-bold tracking-tight drop-shadow-lg">{card.title}</h3>
+                <p className="text-base leading-relaxed opacity-90 drop-shadow-md">{card.description}</p>
                 <ul className="space-y-2 border-t border-white/20 pt-4">
-                  {card.points.map((point, pointIndex) => (
-                    <li key={pointIndex} className="flex items-start gap-3 text-sm">
+                  {card.points.map((point, idx) => (
+                    <li key={idx} className="flex items-start gap-3 text-sm">
                       <svg
                         className="w-4 h-4 text-primary flex-shrink-0 mt-1"
                         fill="none"
@@ -88,11 +83,7 @@ export default function MoreThanPlanSection() {
                         viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 13l4 4L19 7"
-                        ></path>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"></path>
                       </svg>
                       <span className="opacity-80">{point}</span>
                     </li>
