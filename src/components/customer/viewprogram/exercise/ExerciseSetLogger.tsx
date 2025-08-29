@@ -1,5 +1,5 @@
-// src/components/customer/viewprogram/ExerciseSetLogger.tsx
-import { FitnessExercise, ExerciseSet } from "@/mockdata/programs/mockprograms";
+// src/components/customer/viewprogram/exercise/ExerciseSetLogger.tsx
+import { FitnessExercise, ExerciseSet } from "@/mockdata/viewprograms/mockexerciseprograms";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -83,13 +83,13 @@ export function ExerciseSetLogger({ exerciseData, setExerciseData }: ExerciseSet
               onCheckedChange={() => toggleSetCompletion(set.id)}
               className="h-6 w-6 rounded-md"
             />
-             {exerciseData.sets.length > 1 && (
-               <button
-                 onClick={() => removeSet(set.id)}
-                 className="ml-2 text-slate-400 hover:text-red-500 transition-colors"
-               >
-                 <Trash2 className="w-4 h-4" />
-               </button>
+            {exerciseData.sets.length > 1 && (
+              <button
+                onClick={() => removeSet(set.id)}
+                className="ml-2 text-slate-400 hover:text-red-500 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             )}
           </div>
         </div>
