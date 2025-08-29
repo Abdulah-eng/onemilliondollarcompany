@@ -2,13 +2,15 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { MORE_THAN_PLAN_CARDS } from '@/mockdata/landingpage/morethanplan';
 
-// This is a great self-contained component for lazy-loading images!
 function BlurImage({ src, alt }: { src: string; alt: string }) {
   const [loaded, setLoaded] = useState(false);
 
   return (
     <div className="absolute inset-0">
-      {!loaded && <div className="w-full h-full bg-gray-800 absolute inset-0" />}
+      {!loaded && (
+        <div className="w-full h-full bg-gray-800 absolute inset-0" />
+      )}
+
       <img
         src={src}
         alt={alt}
@@ -20,6 +22,7 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
         decoding="async"
         onLoad={() => setLoaded(true)}
       />
+
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
     </div>
   );
@@ -27,11 +30,11 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
 
 export default function MoreThanPlanSection() {
   return (
-    <section className="relative py-20 bg-white dark:bg-black overflow-hidden">
-      {/* Top Gradient Blend */}
-      <div className="pointer-events-none absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-orange-50 to-transparent dark:from-orange-900/30" />
-      
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="relative py-20 bg-white overflow-hidden">
+      {/* Top fade connecting from previous section */}
+      <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-[#DDF5F0] via-[#B2E0D9]/50 to-white pointer-events-none" />
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div
           className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-16 items-center"
@@ -50,7 +53,7 @@ export default function MoreThanPlanSection() {
           </div>
         </div>
 
-        {/* Horizontally Scrolling Cards */}
+        {/* Cards */}
         <div
           className={cn(
             'flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory -mx-4 px-4 scroll-px-4',
@@ -69,6 +72,7 @@ export default function MoreThanPlanSection() {
               style={{ transitionDelay: `${index * 100}ms` }}
             >
               <BlurImage src={card.image} alt={card.title} />
+
               <div className="relative z-10 space-y-4">
                 <h3 className="text-2xl sm:text-3xl font-bold tracking-tight drop-shadow-lg">
                   {card.title}
@@ -107,8 +111,8 @@ export default function MoreThanPlanSection() {
         </p>
       </div>
 
-      {/* Bottom Gradient Blend */}
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-rose-50 to-transparent dark:from-rose-900/30" />
+      {/* Bottom fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#DDF5F0]/20 via-[#B2E0D9]/50 to-white pointer-events-none" />
     </section>
   );
 }
