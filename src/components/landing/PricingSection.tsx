@@ -28,7 +28,7 @@ const PricingSection = () => {
   return (
     <section
       id="pricing"
-      className="relative py-20 bg-gradient-to-b from-[#DDF5F0] via-[#B2E0D9]/50 to-white overflow-hidden"
+      className="relative py-20 bg-gradient-to-t from-[#DDF5F0] via-[#B2E0D9]/50 to-white overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
