@@ -1,19 +1,59 @@
+// src/components/landing/CTASection.tsx
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+
+function BlurImage({
+  src,
+  alt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <div className={cn('relative w-full h-full overflow-hidden', className)}>
+      {/* Blur Placeholder */}
+      <div
+        className={cn(
+          'absolute inset-0 bg-gray-700 animate-pulse',
+          'transition-opacity duration-500',
+          loaded ? 'opacity-0' : 'opacity-100'
+        )}
+      />
+      {/* Actual Image */}
+      <img
+        src={src}
+        alt={alt}
+        className={cn(
+          'absolute inset-0 w-full h-full object-cover transition-opacity duration-700',
+          loaded ? 'opacity-100' : 'opacity-0'
+        )}
+        loading="lazy"
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+      />
+    </div>
+  );
+}
 
 export default function CTASection() {
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
-      setSubmitting(true);
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setEmail('');
-      alert("Thank you for your interest! We'll be in touch soon.");
+      setSubmitted(true);
     } finally {
       setSubmitting(false);
     }
@@ -23,7 +63,7 @@ export default function CTASection() {
     <section className="relative py-20 bg-background dark:bg-black overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left Text & Form Content */}
+          {/* Left Text & Form */}
           <div className="text-center lg:text-left" data-reveal>
             <p className="mb-3 font-semibold text-primary text-sm sm:text-base">
               Start Your Journey Today
@@ -36,27 +76,34 @@ export default function CTASection() {
               focused on real, sustainable results.
             </p>
 
-            <form
-              onSubmit={handleSubmit}
-              className="flex max-w-md flex-col gap-4 sm:flex-row mx-auto lg:mx-0"
-            >
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                aria-label="Email address"
-                className="rounded-xl bg-card text-foreground placeholder:text-muted-foreground h-12"
-              />
-              <Button
-                type="submit"
-                className="btn-wellness-primary text-base px-8 py-3 whitespace-nowrap rounded-xl h-12"
-                disabled={submitting}
+            {!submitted ? (
+              <form
+                onSubmit={handleSubmit}
+                className="flex max-w-md flex-col gap-4 sm:flex-row mx-auto lg:mx-0"
               >
-                {submitting ? 'Submitting…' : 'Get Started'}
-              </Button>
-            </form>
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  aria-label="Email address"
+                  className="rounded-xl bg-card text-foreground placeholder:text-muted-foreground h-12"
+                />
+                <Button
+                  type="submit"
+                  className="btn-wellness-primary text-base px-8 py-3 whitespace-nowrap rounded-xl h-12"
+                  disabled={submitting}
+                >
+                  {submitting ? 'Submitting…' : 'Get Started'}
+                </Button>
+              </form>
+            ) : (
+              <p className="mt-4 text-green-600 font-medium" role="status">
+                🎉 Thank you! We'll be in touch soon.
+              </p>
+            )}
+
             <p className="mt-3 text-xs text-muted-foreground max-w-md mx-auto lg:mx-0">
               By submitting, you agree to our{' '}
               <a href="/privacy" className="underline text-primary">
@@ -67,26 +114,24 @@ export default function CTASection() {
           </div>
 
           {/* Right Image Stack */}
-          <div className="relative flex justify-center lg:justify-end h-[400px] sm:h-[500px]" data-reveal>
-            {/* Larger background image */}
-            <div className="absolute w-[80%] sm:w-[60%] h-[90%] sm:h-full rounded-3xl overflow-hidden shadow-2xl">
-              <img
-                src="/src/assets/cta-image1.webp" // Replace with your main image
+          <div
+            className="relative flex justify-center lg:justify-end h-[400px] sm:h-[500px]"
+            data-reveal
+          >
+            {/* Large background image */}
+            <div className="absolute w-[80%] sm:w-[60%] h-[90%] sm:h-full rounded-3xl shadow-2xl overflow-hidden">
+              <BlurImage
+                src="/src/assets/cta-image1.webp"
                 alt="Athlete looking focused"
-                className="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
               />
             </div>
 
-            {/* Smaller overlapping image */}
-            <div className="absolute bottom-0 left-0 sm:left-auto sm:right-0 w-[60%] sm:w-[50%] h-[70%] sm:h-[80%] rounded-3xl overflow-hidden shadow-2xl -translate-x-4 sm:translate-x-4 translate-y-4 sm:translate-y-8 lg:translate-y-12 bg-primary p-2">
-              <img
-                src="/src/assets/cta-image2.webp" // Replace with your overlapping image
+            {/* Overlapping image */}
+            <div className="absolute bottom-0 left-0 sm:left-auto sm:right-0 w-[60%] sm:w-[50%] h-[70%] sm:h-[80%] rounded-3xl shadow-2xl -translate-x-4 sm:translate-x-4 translate-y-4 sm:translate-y-8 lg:translate-y-12 bg-primary p-2 overflow-hidden">
+              <BlurImage
+                src="/src/assets/cta-image2.webp"
                 alt="Athlete in action"
-                className="w-full h-full object-cover rounded-2xl"
-                loading="lazy"
-                decoding="async"
+                className="rounded-2xl"
               />
             </div>
           </div>
