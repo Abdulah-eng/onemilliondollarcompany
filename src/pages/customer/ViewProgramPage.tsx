@@ -42,22 +42,28 @@ export default function ViewProgramPage() {
   }
 
   return (
-    <div className="relative w-full max-w-5xl mx-auto px-4 py-8 space-y-8">
-      <WorkoutHeader task={workoutData} />
-      <CoachMessage />
-      <main>
-        {workoutData.type === "fitness" ? (
-          <FitnessWorkoutView task={workoutData} />
-        ) : (
-          <div className="p-8 text-center">This workout type is not yet supported.</div>
-        )}
-      </main>
+    <div className="relative w-full max-w-5xl mx-auto px-4">
+      {/* Use flex-col + min-h-screen to allow content + fixed button */}
+      <div className="flex flex-col min-h-screen">
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-auto space-y-8 py-8">
+          <WorkoutHeader task={workoutData} />
+          <CoachMessage />
+          <main className="space-y-8 pb-28"> {/* pb = fixed button height + spacing */}
+            {workoutData.type === "fitness" ? (
+              <FitnessWorkoutView task={workoutData} />
+            ) : (
+              <div className="p-8 text-center">This workout type is not yet supported.</div>
+            )}
+          </main>
+        </div>
 
-      {/* ✅ SINGLE FIXED BUTTON */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-5xl px-4 py-3 bg-white/90 backdrop-blur-sm border-t z-10">
-        <Button size="lg" className="w-full h-12 font-bold rounded-xl shadow-lg">
-          Complete Workout
-        </Button>
+        {/* Fixed Complete Workout button */}
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-5xl px-4 py-3 bg-white/90 backdrop-blur-sm border-t z-50">
+          <Button size="lg" className="w-full h-12 font-bold rounded-xl shadow-lg">
+            Complete Workout
+          </Button>
+        </div>
       </div>
     </div>
   );
