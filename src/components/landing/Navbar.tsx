@@ -30,13 +30,14 @@ export default function Navbar() {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const textColor = hasScrolled ? "text-gray-900" : "text-white";
+  const textShadow = hasScrolled ? "drop-shadow-sm" : "";
+
   return (
     <nav
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        // Transparent initially
         "bg-transparent border-transparent",
-        // White glass effect on scroll
         hasScrolled && "bg-white/30 backdrop-blur-md"
       )}
     >
@@ -46,7 +47,7 @@ export default function Navbar() {
           <Link
             to="/"
             onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className="text-2xl font-bold text-white"
+            className={cn("text-2xl font-bold transition-colors", textColor, textShadow)}
           >
             <span>TrainWise</span>
             <span className="text-primary">Studio</span>
@@ -60,7 +61,7 @@ export default function Navbar() {
                   key={item.name}
                   href={item.href}
                   onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
-                  className="text-white text-sm font-medium transition-colors hover:text-primary"
+                  className={cn("text-sm font-medium transition-colors", textColor, textShadow, "hover:text-primary")}
                 >
                   {item.name}
                 </a>
@@ -70,16 +71,16 @@ export default function Navbar() {
 
           <div className="hidden md:flex items-center space-x-2">
             <Button asChild variant="ghost" size="sm">
-              <Link to="/login" className="text-white hover:text-primary">Login</Link>
+              <Link to="/login" className={cn(textColor, textShadow, "hover:text-primary")}>Login</Link>
             </Button>
             <Button asChild variant="default" size="sm">
-              <Link to="/get-started">Get Started</Link>
+              <Link to="/get-started" className={cn(textColor, textShadow)}>Get Started</Link>
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle mobile menu" className="text-white">
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle mobile menu" className={cn(textColor, textShadow)}>
               {isOpen ? <X className="h-7 w-7" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
@@ -95,7 +96,7 @@ export default function Navbar() {
                 key={item.name}
                 href={item.href}
                 onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
-                className="block px-3 py-3 rounded-lg text-xl font-semibold text-white hover:text-primary hover:bg-white/20"
+                className="block px-3 py-3 rounded-lg text-xl font-semibold text-gray-900 hover:text-primary hover:bg-white/20"
               >
                 {item.name}
               </a>
