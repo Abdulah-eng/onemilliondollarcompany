@@ -8,21 +8,16 @@ export default function TestimonialsSection() {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const pauseRef = useRef(false);
 
-  // The auto-scroll logic remains the same, as it's robust enough
-  // to handle the new grid layout.
+  // Auto-scroll logic remains unchanged
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
-
     el.style.overflowY = 'hidden';
-
     const reduceMotion =
       typeof window !== 'undefined' &&
       window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     if (reduceMotion) return;
-
     let timer: number | undefined;
-
     const stepOnce = () => {
       const card = el.querySelector<HTMLElement>('[data-card]');
       if (!card) return;
@@ -33,7 +28,6 @@ export default function TestimonialsSection() {
       if (atEnd) el.scrollTo({ left: 0, behavior: 'smooth' });
       else el.scrollBy({ left: cardWidth + gap, behavior: 'smooth' });
     };
-
     const start = () => {
       stop();
       timer = window.setInterval(() => {
@@ -43,23 +37,19 @@ export default function TestimonialsSection() {
     const stop = () => {
       if (timer) window.clearInterval(timer);
     };
-
     const pause = () => (pauseRef.current = true);
     const resume = () => (pauseRef.current = false);
-
     el.addEventListener('mouseenter', pause);
     el.addEventListener('mouseleave', resume);
     el.addEventListener('touchstart', pause, { passive: true });
     el.addEventListener('touchend', resume, { passive: true });
     el.addEventListener('focusin', pause);
     el.addEventListener('focusout', resume);
-
     const onResize = () => {
       pause();
       setTimeout(resume, 200);
     };
     window.addEventListener('resize', onResize, { passive: true });
-
     start();
     return () => {
       stop();
@@ -91,15 +81,16 @@ export default function TestimonialsSection() {
           </p>
         </div>
 
-        {/* Masonry-style auto-scrolling grid */}
+        {/* Single-row auto-scrolling flex container */}
         <div
           ref={trackRef}
           role="list"
           className="
-            h-[500px] grid grid-rows-2 grid-flow-col gap-6
-            auto-cols-[calc(100%-2rem)] sm:auto-cols-[380px] md:auto-cols-[420px]
-            overflow-x-auto overflow-y-hidden snap-x snap-mandatory
-            [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-px-4
+            flex items-stretch gap-6
+            overflow-x-auto overflow-y-hidden
+            snap-x snap-mandatory
+            [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
+            scroll-px-4
           "
         >
           {TESTIMONIALS.map((t, idx) => (
@@ -109,8 +100,8 @@ export default function TestimonialsSection() {
               role="listitem"
               tabIndex={0}
               className={cn(
-                'snap-center shrink-0 p-8 rounded-3xl shadow-lg flex flex-col',
-                t.size === 'large' ? 'row-span-2' : 'row-span-1',
+                'snap-center flex-shrink-0 p-8 rounded-3xl shadow-lg flex flex-col',
+                'w-[calc(100%-2rem)] sm:w-[540px] lg:w-[600px]', // Card sizing
                 t.dark
                   ? 'bg-foreground text-background'
                   : 'bg-card text-foreground border'
