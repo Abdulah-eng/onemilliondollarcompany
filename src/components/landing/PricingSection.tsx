@@ -1,131 +1,102 @@
-// src/components/landing/PricingSection.tsx
-
-import { Check, X } from 'lucide-react';
+import { Check, Sparkles, ShieldCheck, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PLANS } from '@/mockdata/landingpage/plans'; // Assuming your mock data is here
+import { PLANS } from '@/mockdata/landingpage/plans';
 import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 const PricingSection = () => {
-  // This mapping logic is now included to prevent breaking the component
+  // Logic to process your existing mock data and add icons for the new design
   const plans = PLANS.map((p: any) => {
-    const featured = p.featured ?? p.popular ?? false;
-    const description = p.description ?? p.summary ?? '';
-    const cta = p.cta ?? p.ctaText ?? 'Get Started';
-    const badge = p.badge ?? (featured ? '⭐' : null);
-    const period =
-      p.period === 'One-Time' || p.period?.startsWith('/')
-        ? p.period
-        : `/${p.period}`;
+    let icon;
+    if (p.name === 'Premium') icon = Sparkles;
+    else if (p.name === 'Standard') icon = User;
+    else icon = ShieldCheck;
 
     return {
       name: p.name,
       price: p.price,
-      period,
-      description,
-      featured,
-      features: p.features || [],
-      cta,
-      badge,
+      period: p.period === 'One-Time' ? 'one-time' : `/${p.period}`,
+      description: p.summary,
+      features: p.features.filter((f: any) => f.included), // Only show included features
+      cta: p.ctaText,
+      featured: p.popular,
+      badge: p.popular ? 'Most Popular' : null,
+      icon: icon,
     };
   });
 
   return (
     <section id="pricing" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+        <div className="text-center mb-16" data-reveal>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tighter text-foreground mb-4">
             Choose Your Transformation Plan
           </h2>
-          <p className="text-lg sm:text-xl text-muted-foreground">
-            🚀 Start your journey with the perfect plan for your goals.
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+            Start your journey with the perfect plan for your goals. No hidden fees, just pure value.
           </p>
+          <div className="mt-6 flex justify-center items-center gap-x-4 sm:gap-x-6 text-sm text-muted-foreground">
+            <span>✓ 14-day free trial on Standard</span>
+            <span className="text-primary">•</span>
+            <span>✓ Cancel anytime</span>
+          </div>
         </div>
 
-        <div className="flex gap-8 overflow-x-auto py-8 -mx-4 px-4 lg:grid lg:grid-cols-3 lg:mx-auto lg:px-0">
-          {plans.map((plan: any, index: number) => (
+        <div className="grid gap-8 lg:grid-cols-3 items-center" data-reveal>
+          {plans.map((plan: any) => (
             <div
               key={plan.name}
-              className={`wellness-card p-8 relative rounded-3xl shadow-xl min-w-[300px] flex-shrink-0 ${
+              className={cn(
+                'relative p-8 rounded-3xl border flex flex-col h-full',
                 plan.featured
-                  ? 'ring-2 ring-primary bg-gradient-primary/5'
-                  : 'bg-card'
-              } hover:scale-105 transition-all duration-300`}
-              style={{ animationDelay: `${index * 0.2}s` }}
+                  ? 'bg-foreground text-background border-primary/50 lg:scale-105'
+                  : 'bg-card border-border'
+              )}
             >
               {plan.badge && (
-                <div className="absolute -top-3 -right-3 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-lg">
+                <div className="absolute top-0 -translate-y-1/2 bg-primary text-primary-foreground text-xs font-semibold px-4 py-1 rounded-full uppercase tracking-wider">
                   {plan.badge}
                 </div>
               )}
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-foreground mb-2">
-                  {plan.name}
-                </h3>
-                <div className="mb-2">
-                  <span className="text-3xl font-bold text-primary">
-                    {plan.price}
+
+              <div className="flex-grow">
+                {plan.icon && <plan.icon className="w-8 h-8 mb-4 text-primary" />}
+                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                <p className={cn('text-sm h-10', plan.featured ? 'text-background/70' : 'text-muted-foreground')}>
+                  {plan.description}
+                </p>
+
+                <div className="my-8 flex items-end gap-2">
+                  <span className="text-4xl font-extrabold tracking-tight">{plan.price}</span>
+                  <span className={cn('text-sm', plan.featured ? 'text-background/70' : 'text-muted-foreground')}>
+                    {plan.period}
                   </span>
-                  <span className="text-muted-foreground">{plan.period}</span>
                 </div>
-                {plan.description && (
-                  <p className="text-sm text-muted-foreground">
-                    {plan.description}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-3 mb-8">
-                {plan.features.map(
-                  (
-                    feature: { text: string | string[]; included: boolean },
-                    i: number
-                  ) => (
-                    <div key={i} className="flex items-start space-x-3">
-                      {feature.included ? (
-                        <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                      ) : (
-                        <X className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                      )}
-                      <div
-                        className={`text-sm ${
-                          feature.included
-                            ? 'text-foreground'
-                            : 'text-muted-foreground line-through'
-                        }`}
-                      >
-                        {Array.isArray(feature.text) ? (
-                          feature.text.map((line, lineIndex) => (
-                            <span key={lineIndex} className="block">
-                              {line}
-                            </span>
-                          ))
-                        ) : (
-                          feature.text
-                        )}
-                      </div>
-                    </div>
-                  )
-                )}
+
+                <ul className="space-y-4 text-left">
+                  {plan.features.map((feature: any, i: number) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                      <span className="text-sm">{Array.isArray(feature.text) ? feature.text.join(' ') : feature.text}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
-              {/* FIXED: Use Button with asChild instead of nesting Link */}
               <Button
                 asChild
-                className={`w-full ${
+                className={cn(
+                  'w-full mt-8',
                   plan.featured
-                    ? 'btn-wellness-primary'
-                    : 'btn-wellness-secondary'
-                }`}
+                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                    : 'bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20'
+                )}
+                size="lg"
               >
                 <Link to="/get-started">{plan.cta}</Link>
               </Button>
             </div>
           ))}
-        </div>
-        <div className="text-center mt-12 space-y-2">
-          <p className="text-sm text-muted-foreground">
-            ✨ 14-day free trial on Standard · 🔒 Secure payment · ❌ Cancel
-            anytime
-          </p>
         </div>
       </div>
     </section>
