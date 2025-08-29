@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 export default function FeaturesSection() {
   return (
     <section
-      className="relative py-20 overflow-hidden bg-gradient-to-b from-white via-white to-[#DDF5F0]/30"
+      className="relative py-20 overflow-hidden bg-gradient-to-b from-white via-[#DDF5F0]/50 to-[#DDF5F0]/70"
     >
       {/* Header */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
