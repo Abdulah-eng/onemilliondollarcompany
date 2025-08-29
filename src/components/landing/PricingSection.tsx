@@ -14,6 +14,7 @@ const PricingSection = () => {
     return {
       name: p.name,
       price: p.price,
+      oldPrice: p.oldPrice, // Reading the new property
       period: p.period === 'One-Time' ? 'one-time' : `/${p.period}`,
       description: p.summary,
       features: p.features.filter((f: any) => f.included),
@@ -42,28 +43,28 @@ const PricingSection = () => {
           </div>
         </div>
 
-        {/* Scrollable Cards */}
+        {/* Responsive Grid for Cards with top margin for the badge */}
         <div
-          className="flex gap-6 overflow-x-auto px-2 scroll-px-2 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="relative mt-8 grid grid-flow-col auto-cols-[90%] sm:auto-cols-[380px] lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-3 gap-8 overflow-x-auto lg:overflow-visible pb-8 lg:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           data-reveal
         >
           {plans.map((plan: any) => (
             <div
               key={plan.name}
               className={cn(
-                'relative flex-shrink-0 snap-center p-6 sm:p-8 rounded-3xl border flex flex-col h-full w-[280px] sm:w-[320px] md:w-[360px]',
+                'relative p-8 rounded-3xl border flex flex-col',
                 plan.featured
-                  ? 'bg-foreground text-background border-primary/50'
+                  ? 'bg-foreground text-background border-primary/50 lg:scale-105'
                   : 'bg-card border-border'
               )}
             >
               {plan.badge && (
-                <div className="absolute top-0 -translate-y-1/2 bg-primary text-primary-foreground text-xs font-semibold px-4 py-1 rounded-full uppercase tracking-wider">
+                <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-4 py-1 rounded-full uppercase tracking-wider">
                   {plan.badge}
                 </div>
               )}
 
-              <div className="flex-grow">
+              <div className="flex-grow pt-4">
                 {plan.icon && <plan.icon className="w-8 h-8 mb-4 text-primary" />}
                 <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
                 <p
@@ -75,8 +76,12 @@ const PricingSection = () => {
                   {plan.description}
                 </p>
 
-                <div className="my-6 flex items-end gap-2">
-                  <span className="text-3xl sm:text-4xl font-extrabold tracking-tight">{plan.price}</span>
+                {/* Updated Price Display with strikethrough */}
+                <div className="my-8 flex items-end gap-2">
+                  <span className="text-4xl font-extrabold tracking-tight">{plan.price}</span>
+                  {plan.oldPrice && (
+                    <span className="text-xl line-through text-muted-foreground/80">{plan.oldPrice}</span>
+                  )}
                   <span
                     className={cn('text-sm', plan.featured ? 'text-background/70' : 'text-muted-foreground')}
                   >
@@ -84,7 +89,7 @@ const PricingSection = () => {
                   </span>
                 </div>
 
-                <ul className="space-y-3 text-left">
+                <ul className="space-y-4 text-left">
                   {plan.features.map((feature: any, i: number) => (
                     <li key={i} className="flex items-start gap-3">
                       <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
@@ -99,7 +104,7 @@ const PricingSection = () => {
               <Button
                 asChild
                 className={cn(
-                  'w-full mt-6',
+                  'w-full mt-8',
                   plan.featured
                     ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
                     : 'bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20'
