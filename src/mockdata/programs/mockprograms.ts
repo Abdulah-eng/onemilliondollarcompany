@@ -1,16 +1,44 @@
 import { format, addDays, parseISO, startOfWeek } from "date-fns";
 
+// ==================================================================
+// 1. ADD NEW TYPES FOR DETAILED FITNESS EXERCISES
+// ==================================================================
+export interface ExerciseSet {
+  id: number;
+  reps: number | null;
+  weight: number | null;
+  isCompleted: boolean;
+}
+
+export interface FitnessExercise {
+  id: string;
+  name: string;
+  targetSets: number;
+  targetReps: string;
+  videoUrl?: string;
+  sets: ExerciseSet[];
+}
+
+// ==================================================================
+// 2. UPDATE THE ProgramTask INTERFACE
+//    The `content` property is now a union type.
+// ==================================================================
 export type ProgramTaskType = "fitness" | "nutrition" | "mental";
 
 export interface ProgramTask {
   id: string;
   type: ProgramTaskType;
   title: string;
-  content: string[];
+  // ✅ This is the key change: content can be a simple string array
+  // OR our new detailed fitness exercise array.
+  content: string[] | FitnessExercise[];
   status: "pending" | "completed" | "missed" | "in-progress";
   progress: number;
 }
 
+// ==================================================================
+// NO CHANGES NEEDED FOR THE REST OF THE INTERFACES
+// ==================================================================
 export interface ProgramDay {
   dayOfWeek:
     | "Monday"
@@ -44,7 +72,9 @@ export interface ScheduledTask extends ProgramTask {
   weekNumber: number;
 }
 
-// ✅ COMPLETE SHARED CONFIGURATION
+// ==================================================================
+// NO CHANGES NEEDED FOR THE CONFIG
+// ==================================================================
 export const typeConfig = {
   fitness: {
     dot: "bg-emerald-500",
@@ -66,37 +96,62 @@ export const typeConfig = {
   },
 };
 
-// ✅ MOCK PROGRAMS - UPDATED WITH MULTIPLE TASKS FOR TODAY
+// ==================================================================
+// 3. UPDATE THE MOCK DATA FOR A SINGLE FITNESS TASK
+// ==================================================================
 export const mockPrograms: Program[] = [
   {
     id: "prog1",
     title: "4-Week Wellness Plan",
     description: "A holistic 4-week plan for body and mind.",
     status: "active",
-    startDate: "2025-08-11", // Starts on Monday, August 11, 2025
+    startDate: "2025-08-11",
     weeks: [
       {
-        weekNumber: 1, // Aug 11 - Aug 17
+        weekNumber: 1,
         days: [
           { dayOfWeek: "Monday", tasks: [{ id: "t1", type: "fitness", title: "Leg Day", content: ["Squats 4x10", "Leg Press 3x12"], status: "completed", progress: 100 }] },
           { dayOfWeek: "Wednesday", tasks: [{ id: "t3", type: "fitness", title: "Chest & Triceps", content: ["Bench Press 3x8", "Tricep Dips 4x10"], status: "missed", progress: 0 }] },
         ]
       },
       {
-        weekNumber: 2, // Aug 18 - Aug 24
+        weekNumber: 2,
         days: [
           { dayOfWeek: "Monday", tasks: [{ id: "t5", type: "fitness", title: "Leg Day Vol. 2", content: ["Leg Press 4x12", "Calf Raises 5x15"], status: "completed", progress: 100 }] },
         ]
       },
       {
-        weekNumber: 3, // Aug 25 - Aug 31 (Current Week)
+        weekNumber: 3,
         days: [
           { dayOfWeek: "Monday", tasks: [{ id: "t8", type: "fitness", title: "Heavy Legs", content: ["Squats 5x5", "Romanian Deadlifts 3x8"], status: "completed", progress: 100 }] },
           {
-            dayOfWeek: "Wednesday", // Today, Aug 27
+            dayOfWeek: "Wednesday",
             tasks: [
-              // THREE tasks scheduled for today
-              { id: "t9", type: "fitness", title: "Push Day", content: ["Incline Press 3x8", "Dumbbell Flyes 3x12"], status: "in-progress", progress: 50 },
+              // ✅ THIS TASK IS NOW UPDATED to the new detailed format.
+              {
+                id: "t9",
+                type: "fitness",
+                title: "Push Day",
+                status: "in-progress",
+                progress: 50,
+                content: [
+                  {
+                    id: "ex1",
+                    name: "Incline Press",
+                    targetSets: 3,
+                    targetReps: "8-10",
+                    sets: [{ id: 1, reps: null, weight: null, isCompleted: false }],
+                  },
+                  {
+                    id: "ex2",
+                    name: "Dumbbell Flyes",
+                    targetSets: 3,
+                    targetReps: "12-15",
+                    sets: [{ id: 1, reps: null, weight: null, isCompleted: false }],
+                  },
+                ] as FitnessExercise[], // Use type assertion here
+              },
+              // ✅ ALL OTHER TASKS REMAIN UNCHANGED.
               { id: "t13", type: "nutrition", title: "Healthy Eating", content: ["Breakfast: Oatmeal & Berries", "Lunch: Quinoa Salad", "Dinner: Baked Salmon"], status: "pending", progress: 0 },
               { id: "t14", type: "mental", title: "Afternoon Reset", content: ["10-minute mindfulness meditation", "Evening gratitude journal"], status: "pending", progress: 0 }
             ],
@@ -105,7 +160,7 @@ export const mockPrograms: Program[] = [
         ]
       },
       {
-        weekNumber: 4, // Sep 1 - Sep 7
+        weekNumber: 4,
         days: [
           { dayOfWeek: "Tuesday", tasks: [{ id: "t11", type: "fitness", title: "Final Chest Day", content: ["Dumbbell Press 4x12", "Cable Crossovers 3x15"], status: "pending", progress: 0 }] },
         ]
@@ -114,10 +169,12 @@ export const mockPrograms: Program[] = [
   },
 ];
 
-// GENERATE DAILY SCHEDULE
+// ==================================================================
+// NO CHANGES NEEDED FOR THE SCHEDULE GENERATOR
+// ==================================================================
 export const generateDailySchedule = (programs: Program[]): ScheduledTask[] => {
   const dailySchedule: ScheduledTask[] = [];
-  const daysOfWeek = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   programs.filter(p => p.status === "active" || p.status === "scheduled").forEach(program => {
     if (!program.startDate) return;
     const programStartDate = parseISO(program.startDate);
