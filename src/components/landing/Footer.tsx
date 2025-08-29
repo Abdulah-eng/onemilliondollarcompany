@@ -1,82 +1,122 @@
+import { Instagram, Mail, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
 export default function Footer() {
   const footerLinks = [
     { name: 'Features', href: '#features' },
     { name: 'Pricing', href: '#pricing' },
-    { name: 'Get Started', href: '#get-started' },
-    { name: 'Support', href: 'mailto:hello@trainwisestudio.com' },
+    { name: 'Testimonials', href: '#testimonials' },
   ];
 
+  const legalLinks = [
+    { name: 'Terms of Service', href: '/terms' },
+    { name: 'Privacy Policy', href: '/privacy' },
+  ];
+
+  const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      const el = document.querySelector(href);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
   return (
-    <footer className="bg-foreground text-background py-12">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-8 md:grid-cols-3">
-          <div>
-            <div className="mb-4 text-2xl font-bold text-primary">TrainWiseStudio</div>
-            <p className="mb-6 text-background/70">
+    <footer className="bg-gray-900 text-background">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+        <div className="xl:grid xl:grid-cols-3 xl:gap-8">
+          {/* Logo and Description */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-8 w-8 text-primary" />
+              <span className="text-2xl font-bold text-white">TrainWiseStudio</span>
+            </div>
+            <p className="max-w-xs text-sm text-background/70">
               Transform your life through personalized fitness, nutrition, and mental wellness coaching.
             </p>
-
-            <div className="space-y-2">
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">📱</span>
-                <a 
-                  href="https://instagram.com/trainwisestudio" 
-                  className="transition-colors text-muted-foreground hover:text-primary" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  @trainwisestudio
-                </a>
-              </div>
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">✉️</span>
-                <a 
-                  href="mailto:hello@trainwisestudio.com" 
-                  className="transition-colors text-muted-foreground hover:text-primary"
-                >
-                  hello@trainwisestudio.com
-                </a>
-              </div>
-            </div>
           </div>
 
-          <div>
-            <h3 className="mb-4 font-semibold text-foreground">Quick Links</h3>
-            <div className="space-y-2">
-              {footerLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="block transition-colors text-muted-foreground hover:text-primary"
-                  onClick={(e) => {
-                    if (link.href.startsWith('#')) {
-                      e.preventDefault();
-                      const el = document.querySelector(link.href);
-                      if (el) el.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
-                >
-                  {link.name}
-                </a>
-              ))}
+          {/* Link Columns */}
+          <div className="mt-12 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
+            <div className="md:grid md:grid-cols-2 md:gap-8">
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-white/80">
+                  Quick Links
+                </h3>
+                <ul className="mt-4 space-y-3">
+                  {footerLinks.map((link) => (
+                    <li key={link.name}>
+                      <a
+                        href={link.href}
+                        onClick={(e) => handleScroll(e, link.href)}
+                        className="text-sm text-background/60 transition-colors hover:text-primary"
+                      >
+                        {link.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="mt-12 md:mt-0">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-white/80">
+                  Legal
+                </h3>
+                <ul className="mt-4 space-y-3">
+                  {legalLinks.map((link) => (
+                    <li key={link.name}>
+                      <Link
+                        to={link.href}
+                        className="text-sm text-background/60 transition-colors hover:text-primary"
+                      >
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          </div>
-
-          <div>
-            <h3 className="mb-4 font-semibold text-foreground">Legal</h3>
-            <div className="space-y-2">
-              <a href="/terms" className="block transition-colors text-muted-foreground hover:text-primary">
-                Terms of Service
-              </a>
-              <a href="/privacy" className="block transition-colors text-muted-foreground hover:text-primary">
-                Privacy Policy
-              </a>
+            <div className="md:grid md:grid-cols-1 md:gap-8">
+               <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-white/80">
+                  Contact
+                </h3>
+                 <ul className="mt-4 space-y-3">
+                    <li>
+                       <a href="mailto:hello@trainwisestudio.com" className="text-sm text-background/60 transition-colors hover:text-primary">
+                        hello@trainwisestudio.com
+                      </a>
+                    </li>
+                 </ul>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 border-t border-muted/30 pt-8 text-center">
-          <p className="text-muted-foreground">© TrainWiseStudio 2025. All rights reserved.</p>
+        {/* Bottom Bar */}
+        <div className="mt-12 border-t border-white/10 pt-8 sm:flex sm:items-center sm:justify-between">
+          <div className="flex space-x-6">
+            <a
+              href="https://instagram.com/trainwisestudio"
+              className="text-background/60 transition-colors hover:text-primary"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className="sr-only">Instagram</span>
+              <Instagram className="h-6 w-6" />
+            </a>
+             <a
+              href="mailto:hello@trainwisestudio.com"
+              className="text-background/60 transition-colors hover:text-primary"
+            >
+              <span className="sr-only">Email</span>
+              <Mail className="h-6 w-6" />
+            </a>
+          </div>
+          <p className="mt-8 text-sm text-background/60 sm:mt-0">
+            &copy; {new Date().getFullYear()} TrainWiseStudio. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
