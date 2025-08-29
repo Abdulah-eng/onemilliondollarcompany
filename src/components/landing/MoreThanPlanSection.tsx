@@ -1,5 +1,40 @@
+// src/components/landing/MoreThanPlanSection.tsx
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { MORE_THAN_PLAN_CARDS } from '@/mockdata/landingpage/morethanplan';
+
+function BlurImage({ src, alt }: { src: string; alt: string }) {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <div className="absolute inset-0">
+      {/* Blur placeholder */}
+      <div
+        className={cn(
+          'w-full h-full bg-gray-700 animate-pulse',
+          'absolute inset-0 transition-opacity duration-500',
+          loaded ? 'opacity-0' : 'opacity-100'
+        )}
+      />
+
+      {/* Actual image */}
+      <img
+        src={src}
+        alt={alt}
+        className={cn(
+          'w-full h-full object-cover transition-opacity duration-700',
+          loaded ? 'opacity-100' : 'opacity-0'
+        )}
+        loading="lazy"
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+      />
+
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+    </div>
+  );
+}
 
 export default function MoreThanPlanSection() {
   return (
@@ -41,17 +76,8 @@ export default function MoreThanPlanSection() {
               )}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              {/* Background Image & Gradient */}
-              <div className="absolute inset-0">
-                <img
-                  src={card.image}
-                  alt={card.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
-              </div>
+              {/* Optimized Background Image with Blur-up */}
+              <BlurImage src={card.image} alt={card.title} />
 
               {/* Text Content */}
               <div className="relative z-10 space-y-4">
