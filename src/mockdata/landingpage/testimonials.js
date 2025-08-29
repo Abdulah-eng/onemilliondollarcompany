@@ -6,7 +6,7 @@ export const TESTIMONIALS = [
     name: 'Jessica M.',
     title: 'Premium Member',
     avatar: '/src/assets/avatars/avatar-1.webp',
-    size: 'large', // This card will be taller
+    dark: false,
   },
   {
     quote:
@@ -14,7 +14,7 @@ export const TESTIMONIALS = [
     name: 'David C.',
     title: 'Standard Member',
     avatar: '/src/assets/avatars/avatar-2.webp',
-    size: 'small',
+    dark: true,
   },
   {
     quote:
@@ -22,8 +22,7 @@ export const TESTIMONIALS = [
     name: 'Sarah L.',
     title: 'Premium Member',
     avatar: '/src/assets/avatars/avatar-3.webp',
-    size: 'small',
-    dark: true, // This card will be dark
+    dark: false,
   },
   {
     highlight: 'Lost 15 lbs in 2 Months',
@@ -32,7 +31,7 @@ export const TESTIMONIALS = [
     name: 'Michael B.',
     title: 'Premium Member',
     avatar: '/src/assets/avatars/avatar-4.webp',
-    size: 'large',
+    dark: false,
   },
   {
     quote:
@@ -40,6 +39,6 @@ export const TESTIMONIALS = [
     name: 'Emily R.',
     title: 'Standard Member',
     avatar: '/src/assets/avatars/avatar-5.webp',
-    size: 'small',
+    dark: true,
   },
 ];
