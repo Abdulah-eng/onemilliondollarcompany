@@ -1,4 +1,3 @@
-// ✅ 1. IMPORT useNavigate
 import { useNavigate } from "react-router-dom";
 import { ScheduledTask, typeConfig } from "@/mockdata/programs/mockprograms";
 import { CheckCircle2, PlayCircle, Clock } from "lucide-react";
@@ -7,20 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export function TaskCard({ task, onClick }: { task: ScheduledTask; onClick: () => void }) {
-  // ✅ 2. INITIALIZE useNavigate
   const navigate = useNavigate();
   const config = typeConfig[task.type];
   const isCompleted = task.status === "completed";
   const isPending = task.status === "pending" || task.status === "in-progress";
 
   const handleButtonClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevents the card's onClick from firing
-    
+    e.stopPropagation();
+
     if (task.type === 'fitness') {
-      // Navigate to program view for fitness tasks
-      navigate(`/program/${task.id}`);
+      // ✅ THIS IS THE FIX: The path now correctly matches your route in App.tsx
+      navigate(`/customer/program/${task.id}`);
     } else {
-      // Open SlideInDetail for other task types (nutrition, mental)
+      // For other types, we still open the detail slide-in
       onClick();
     }
   };
