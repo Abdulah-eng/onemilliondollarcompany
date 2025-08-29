@@ -7,9 +7,7 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
 
   return (
     <div className="absolute inset-0">
-      {!loaded && (
-        <div className="w-full h-full bg-gray-800 absolute inset-0" />
-      )}
+      {!loaded && <div className="w-full h-full bg-gray-800 absolute inset-0" />}
 
       <img
         src={src}
@@ -23,17 +21,16 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
         onLoad={() => setLoaded(true)}
       />
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+      {/* Removed gradient overlay from image */}
     </div>
   );
 }
 
 export default function MoreThanPlanSection() {
   return (
-    <section className="relative py-20 bg-white overflow-hidden">
-      {/* Top fade connecting from previous section */}
-      <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-[#DDF5F0] via-[#B2E0D9]/50 to-white pointer-events-none" />
-
+    <section
+      className="relative py-20 overflow-hidden bg-gradient-to-b from-[#DDF5F0]/40 via-[#B2E0D9]/50 to-white"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div
@@ -66,7 +63,7 @@ export default function MoreThanPlanSection() {
               key={card.title}
               className={cn(
                 'reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto',
-                'relative rounded-3xl shadow-2xl min-h-[500px] snap-center overflow-hidden',
+                'relative rounded-3xl shadow-[0_20px_40px_-12px_rgba(0,0,0,0.08)] min-h-[500px] snap-center overflow-hidden',
                 'flex flex-col justify-end p-8 text-white'
               )}
               style={{ transitionDelay: `${index * 100}ms` }}
@@ -110,9 +107,6 @@ export default function MoreThanPlanSection() {
           *Access to features like Coach Feedback and advanced tracking is available on our Premium plan.
         </p>
       </div>
-
-      {/* Bottom fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#DDF5F0]/20 via-[#B2E0D9]/50 to-white pointer-events-none" />
     </section>
   );
 }
