@@ -15,8 +15,8 @@ export function TaskCard({ task, onClick }: { task: ScheduledTask; onClick: () =
     e.stopPropagation();
 
     if (task.type === 'fitness') {
-      // ✅ THIS IS THE FIX: The path now correctly matches your route in App.tsx
-      navigate(`/customer/program/${task.id}`);
+      // Navigate to program view for fitness tasks
+      navigate(`/program/${task.id}`);
     } else {
       // For other types, we still open the detail slide-in
       onClick();

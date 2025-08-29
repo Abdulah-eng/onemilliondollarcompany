@@ -12,15 +12,17 @@ interface ExerciseSetLoggerProps {
 }
 
 export function ExerciseSetLogger({ exerciseData, setExerciseData }: ExerciseSetLoggerProps) {
+  const sets = exerciseData.sets || [];
+  
   const handleSetChange = (setId: number, field: "reps" | "weight", value: string) => {
-    const updatedSets = exerciseData.sets.map((set) =>
+    const updatedSets = sets.map((set) =>
       set.id === setId ? { ...set, [field]: value === "" ? null : Number(value) } : set
     );
     setExerciseData({ ...exerciseData, sets: updatedSets });
   };
 
   const toggleSetCompletion = (setId: number) => {
-    const updatedSets = exerciseData.sets.map((set) =>
+    const updatedSets = sets.map((set) =>
       set.id === setId ? { ...set, isCompleted: !set.isCompleted } : set
     );
     setExerciseData({ ...exerciseData, sets: updatedSets });
@@ -28,16 +30,16 @@ export function ExerciseSetLogger({ exerciseData, setExerciseData }: ExerciseSet
 
   const addSet = () => {
     const newSet: ExerciseSet = {
-      id: (exerciseData.sets.at(-1)?.id || 0) + 1,
+      id: (sets.at(-1)?.id || 0) + 1,
       reps: null,
       weight: null,
       isCompleted: false,
     };
-    setExerciseData({ ...exerciseData, sets: [...exerciseData.sets, newSet] });
+    setExerciseData({ ...exerciseData, sets: [...sets, newSet] });
   };
 
   const removeSet = (setId: number) => {
-    const updatedSets = exerciseData.sets.filter((set) => set.id !== setId);
+    const updatedSets = sets.filter((set) => set.id !== setId);
     setExerciseData({ ...exerciseData, sets: updatedSets });
   };
 
@@ -50,7 +52,7 @@ export function ExerciseSetLogger({ exerciseData, setExerciseData }: ExerciseSet
         <div className="col-span-2 text-center">Done</div>
       </div>
 
-      {exerciseData.sets.map((set, index) => (
+      {sets.map((set, index) => (
         <div
           key={set.id}
           className={cn(
@@ -83,7 +85,7 @@ export function ExerciseSetLogger({ exerciseData, setExerciseData }: ExerciseSet
               onCheckedChange={() => toggleSetCompletion(set.id)}
               className="h-6 w-6 rounded-md"
             />
-            {exerciseData.sets.length > 1 && (
+            {sets.length > 1 && (
               <button
                 onClick={() => removeSet(set.id)}
                 className="ml-2 text-slate-400 hover:text-red-500 transition-colors"

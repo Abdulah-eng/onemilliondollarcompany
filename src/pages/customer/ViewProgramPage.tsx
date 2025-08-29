@@ -14,30 +14,34 @@ import { Loader2 } from "lucide-react";
 type CombinedWorkoutTask = Omit<ScheduledTask, 'content'> & DetailedFitnessTask;
 
 export default function ViewProgramPage() {
-  const { taskId } = useParams<{ taskId: string }>();
+  const { id } = useParams<{ id: string }>();
   const [workoutData, setWorkoutData] = useState<CombinedWorkoutTask | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!taskId) {
+    if (!id) {
       setLoading(false);
       return;
     }
 
-    const schedule = generateDailySchedule(mockPrograms);
-    const basicTaskInfo = schedule.find((t) => t.id === taskId);
-    const detailedTaskInfo = findExerciseProgramById(taskId);
+    const detailedTaskInfo = findExerciseProgramById(id);
     
-    if (basicTaskInfo && detailedTaskInfo) {
+    if (detailedTaskInfo) {
       const combinedData: CombinedWorkoutTask = {
-        ...basicTaskInfo,
         ...detailedTaskInfo,
+        type: 'fitness',
+        programTitle: '',
+        status: 'pending',
+        progress: 0,
+        date: new Date(),
+        programId: '',
+        weekNumber: 1,
       };
       setWorkoutData(combinedData);
     }
     
     setLoading(false);
-  }, [taskId]);
+  }, [id]);
 
   if (loading) {
     return (
