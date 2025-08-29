@@ -26,7 +26,7 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
 export default function MoreThanPlanSection() {
   return (
     <section
-      className="relative pt-20 pb-32 overflow-visible bg-gradient-to-b from-white via-[#DDF5F0]/50 to-[#B2E0D9]/50"
+      className="relative pt-20 pb-32 overflow-visible bg-gradient-to-b from-[#DDF5F0]/70 via-[#B2E0D9]/50 to-white"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
