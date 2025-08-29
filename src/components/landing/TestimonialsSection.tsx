@@ -75,7 +75,7 @@ export default function TestimonialsSection() {
     <section
       id="testimonials"
       aria-label="Client testimonials"
-      className="bg-background dark:bg-black py-20 lg:pb-32 overflow-visible"
+      className="bg-white py-24 lg:pb-36 overflow-visible"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -99,7 +99,7 @@ export default function TestimonialsSection() {
             snap-x snap-mandatory
             [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
             scroll-px-4
-            pb-8 lg:pb-16
+            pb-12 lg:pb-16
           "
         >
           {TESTIMONIALS.map((t, idx) => (
@@ -112,8 +112,8 @@ export default function TestimonialsSection() {
                 'relative snap-center flex-shrink-0 p-8 rounded-3xl shadow-lg flex flex-col',
                 'w-[calc(100%-2rem)] sm:w-[540px] lg:w-[600px]',
                 t.dark
-                  ? 'bg-foreground text-background'
-                  : 'bg-card text-foreground border'
+                  ? 'bg-foreground text-white'
+                  : 'bg-white text-foreground border'
               )}
             >
               {/* Plan Badge */}
@@ -140,7 +140,7 @@ export default function TestimonialsSection() {
                 <p
                   className={cn(
                     'text-5xl leading-none',
-                    t.dark ? 'text-background/50' : 'text-muted-foreground/50'
+                    t.dark ? 'text-white/50' : 'text-muted-foreground/50'
                   )}
                 >
                   “
@@ -148,7 +148,7 @@ export default function TestimonialsSection() {
                 <p
                   className={cn(
                     'text-base leading-relaxed',
-                    t.dark ? 'text-background/80' : 'text-muted-foreground'
+                    t.dark ? 'text-white/80' : 'text-muted-foreground'
                   )}
                 >
                   {t.quote}
@@ -168,7 +168,7 @@ export default function TestimonialsSection() {
                   <p
                     className={cn(
                       'text-sm',
-                      t.dark ? 'text-background/60' : 'text-muted-foreground'
+                      t.dark ? 'text-white/60' : 'text-muted-foreground'
                     )}
                   >
                     {t.title}
