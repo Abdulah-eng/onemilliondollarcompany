@@ -1,4 +1,3 @@
-// src/components/landing/MoreThanPlanSection.tsx
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { MORE_THAN_PLAN_CARDS } from '@/mockdata/landingpage/morethanplan';
@@ -8,12 +7,10 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
 
   return (
     <div className="absolute inset-0">
-      {/* Static placeholder (no flicker) */}
       {!loaded && (
         <div className="w-full h-full bg-gray-800 absolute inset-0" />
       )}
 
-      {/* Actual image */}
       <img
         src={src}
         alt={alt}
@@ -26,7 +23,6 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
         onLoad={() => setLoaded(true)}
       />
 
-      {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
     </div>
   );
@@ -34,7 +30,7 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
 
 export default function MoreThanPlanSection() {
   return (
-    <section className="relative py-20 bg-background dark:bg-slate-900/20 overflow-hidden">
+    <section className="relative py-20 bg-gradient-to-b from-[#14B8A6]/5 via-[#DFF7F3]/20 to-[#FAF5F0] overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div
@@ -54,7 +50,7 @@ export default function MoreThanPlanSection() {
           </div>
         </div>
 
-        {/* Horizontally Scrolling Cards */}
+        {/* Cards */}
         <div
           className={cn(
             'flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory -mx-4 px-4 scroll-px-4',
@@ -72,10 +68,8 @@ export default function MoreThanPlanSection() {
               )}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              {/* Optimized Background Image */}
               <BlurImage src={card.image} alt={card.title} />
 
-              {/* Text Content */}
               <div className="relative z-10 space-y-4">
                 <h3 className="text-2xl sm:text-3xl font-bold tracking-tight drop-shadow-lg">
                   {card.title}
