@@ -14,7 +14,7 @@ const PricingSection = () => {
     return {
       name: p.name,
       price: p.price,
-      oldPrice: p.oldPrice, // Reading the new property
+      oldPrice: p.oldPrice,
       period: p.period === 'One-Time' ? 'one-time' : `/${p.period}`,
       description: p.summary,
       features: p.features.filter((f: any) => f.included),
@@ -29,7 +29,7 @@ const PricingSection = () => {
     <section id="pricing" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-16" data-reveal>
+        <div className="text-center mb-12" data-reveal>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tighter text-foreground mb-4">
             Choose Your Transformation Plan
           </h2>
@@ -43,9 +43,9 @@ const PricingSection = () => {
           </div>
         </div>
 
-        {/* Responsive Grid for Cards with top margin for the badge */}
+        {/* Responsive Grid for Cards */}
         <div
-          className="relative mt-8 grid grid-flow-col auto-cols-[90%] sm:auto-cols-[380px] lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-3 gap-8 overflow-x-auto lg:overflow-visible pb-8 lg:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="relative pt-8 grid grid-flow-col auto-cols-[90%] sm:auto-cols-[380px] lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-3 gap-8 overflow-x-auto lg:overflow-visible pb-8 lg:py-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           data-reveal
         >
           {plans.map((plan: any) => (
@@ -54,37 +54,29 @@ const PricingSection = () => {
               className={cn(
                 'relative p-8 rounded-3xl border flex flex-col',
                 plan.featured
-                  ? 'bg-foreground text-background border-primary/50 lg:scale-105'
+                  ? 'bg-gradient-to-b from-gray-900 to-black text-white border-primary/50 lg:scale-105'
                   : 'bg-card border-border'
               )}
             >
               {plan.badge && (
-                <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-4 py-1 rounded-full uppercase tracking-wider">
+                <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-orange-400 text-white shadow-lg text-xs font-semibold px-4 py-1 rounded-full uppercase tracking-wider">
                   {plan.badge}
                 </div>
               )}
 
               <div className="flex-grow pt-4">
-                {plan.icon && <plan.icon className="w-8 h-8 mb-4 text-primary" />}
+                {plan.icon && <plan.icon className="w-8 h-8 mb-4 text-primary drop-shadow-[0_2px_4px_rgba(251,146,60,0.5)]" />}
                 <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                <p
-                  className={cn(
-                    'text-sm h-10',
-                    plan.featured ? 'text-background/70' : 'text-muted-foreground'
-                  )}
-                >
+                <p className={cn('text-sm h-10', plan.featured ? 'text-white/70' : 'text-muted-foreground')}>
                   {plan.description}
                 </p>
 
-                {/* Updated Price Display with strikethrough */}
                 <div className="my-8 flex items-end gap-2">
                   <span className="text-4xl font-extrabold tracking-tight">{plan.price}</span>
                   {plan.oldPrice && (
-                    <span className="text-xl line-through text-muted-foreground/80">{plan.oldPrice}</span>
+                    <span className={cn('text-xl line-through', plan.featured ? 'text-white/50' : 'text-muted-foreground/80')}>{plan.oldPrice}</span>
                   )}
-                  <span
-                    className={cn('text-sm', plan.featured ? 'text-background/70' : 'text-muted-foreground')}
-                  >
+                  <span className={cn('text-sm', plan.featured ? 'text-white/70' : 'text-muted-foreground')}>
                     {plan.period}
                   </span>
                 </div>
@@ -93,9 +85,7 @@ const PricingSection = () => {
                   {plan.features.map((feature: any, i: number) => (
                     <li key={i} className="flex items-start gap-3">
                       <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">
-                        {Array.isArray(feature.text) ? feature.text.join(' ') : feature.text}
-                      </span>
+                      <span className="text-sm">{Array.isArray(feature.text) ? feature.text.join(' ') : feature.text}</span>
                     </li>
                   ))}
                 </ul>
@@ -106,7 +96,7 @@ const PricingSection = () => {
                 className={cn(
                   'w-full mt-8',
                   plan.featured
-                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                    ? 'text-white bg-gradient-to-r from-primary to-orange-400 hover:opacity-90 border-0'
                     : 'bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20'
                 )}
                 size="lg"
