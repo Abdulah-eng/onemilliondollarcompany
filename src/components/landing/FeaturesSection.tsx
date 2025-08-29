@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 export default function FeaturesSection() {
   return (
     <section
-      className="relative py-20 overflow-hidden bg-gradient-to-t from-[#DDF5F0]/30 via-white to-white"
+      className="relative py-20 overflow-hidden bg-gradient-to-b from-white via-white to-[#DDF5F0]/30"
     >
       {/* Header */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -34,7 +34,7 @@ export default function FeaturesSection() {
             className={cn(
               "reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto",
               "relative rounded-3xl min-h-[450px] snap-center",
-              // Subtle soft shadow for natural blending
+              // Soft shadow blends naturally with gradient background
               "shadow-[0_20px_40px_-12px_rgba(0,0,0,0.08)]"
             )}
             style={{ transitionDelay: `${index * 100}ms` }}
@@ -47,7 +47,7 @@ export default function FeaturesSection() {
                 loading="lazy"
                 decoding="async"
               />
-              {/* Removed overlay — card image is now fully visible */}
+              {/* No overlay — image fully visible */}
             </div>
 
             <div className="relative z-10 p-8 flex flex-col h-full justify-between text-left text-white">
@@ -68,9 +68,6 @@ export default function FeaturesSection() {
           </div>
         ))}
       </div>
-
-      {/* Soft bottom fade for smooth blend with next section */}
-      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#DDF5F0]/40 via-white/80 to-white pointer-events-none" />
     </section>
   );
 }
