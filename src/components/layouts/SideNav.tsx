@@ -42,14 +42,19 @@ const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
   return (
     <Sidebar
       className={cn(
-        // ✅ UPDATED: Changed to a semi-transparent "glass" background
+        // ✅ Now identical to TopNav background
         "border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 text-foreground transition-all duration-300",
         collapsed && !isMobile ? 'w-16' : 'w-64'
       )}
       collapsible="icon"
     >
       <SidebarContent className="px-3">
-        <div className={cn("flex items-center h-16 border-b border-border", collapsed && !isMobile ? 'justify-center' : '')}>
+        <div
+          className={cn(
+            "flex items-center h-16 border-b border-border",
+            collapsed && !isMobile ? 'justify-center' : ''
+          )}
+        >
           <div className="flex items-center gap-2">
             <div className="h-10 w-10 min-h-10 min-w-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
               <span className="text-white font-bold text-sm leading-none">TW</span>
@@ -63,10 +68,16 @@ const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
             <SidebarMenu className={collapsed && !isMobile ? 'items-center' : ''}>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={isActive(item.href)} className={btnClass}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    className={btnClass}
+                  >
                     <Link to={item.href} className="flex items-center gap-3">
                       <item.icon className="h-5 w-5 shrink-0" />
-                      {showText && <span className="text-sm font-medium">{item.name}</span>}
+                      {showText && (
+                        <span className="text-sm font-medium">{item.name}</span>
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -82,10 +93,16 @@ const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
             <SidebarMenu className={collapsed && !isMobile ? 'items-center' : ''}>
               {bottomNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={isActive(item.href)} className={btnClass}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    className={btnClass}
+                  >
                     <Link to={item.href} className="flex items-center gap-3">
                       <item.icon className="h-5 w-5 shrink-0" />
-                      {showText && <span className="text-sm font-medium">{item.name}</span>}
+                      {showText && (
+                        <span className="text-sm font-medium">{item.name}</span>
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -93,7 +110,9 @@ const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={handleSignOut} className={btnClass}>
                   <LogOut className="h-5 w-5 shrink-0" />
-                  {showText && <span className="text-sm font-medium">Sign out</span>}
+                  {showText && (
+                    <span className="text-sm font-medium">Sign out</span>
+                  )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
