@@ -30,29 +30,25 @@ export default function Navbar() {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Text colors
-  const navTextColor = hasScrolled ? "text-white/80" : "text-white/80";
-  const navTextHoverColor = hasScrolled ? "hover:text-white" : "hover:text-white";
-  const iconColor = "text-white";
-
   return (
-    <nav 
+    <nav
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        "bg-black/0 md:bg-transparent md:border-transparent",
-        hasScrolled && "md:bg-black/80 md:backdrop-blur-lg md:border-gray-700 md:shadow-sm"
+        // Transparent initially
+        "bg-transparent border-transparent",
+        // Glass effect on scroll
+        hasScrolled && "bg-black/40 backdrop-blur-md border-b border-gray-700 shadow-sm"
       )}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
-          
           {/* Logo */}
           <Link
             to="/"
             onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className="text-2xl font-bold"
+            className="text-2xl font-bold text-white"
           >
-            <span className="text-white">TrainWise</span>
+            <span>TrainWise</span>
             <span className="text-primary">Studio</span>
           </Link>
 
@@ -64,7 +60,7 @@ export default function Navbar() {
                   key={item.name}
                   href={item.href}
                   onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
-                  className={cn("text-sm font-medium transition-colors", navTextColor, navTextHoverColor)}
+                  className="text-white text-sm font-medium transition-colors hover:text-primary"
                 >
                   {item.name}
                 </a>
@@ -73,17 +69,17 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center space-x-2">
-            <Button asChild variant="ghost" size="sm" className={cn("transition-colors", navTextColor, navTextHoverColor)}>
-              <Link to="/login">Login</Link>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/login" className="text-white hover:text-primary">Login</Link>
             </Button>
-            <Button asChild variant="default" size="sm" className={cn(!hasScrolled && "shadow-lg")}>
+            <Button asChild variant="default" size="sm">
               <Link to="/get-started">Get Started</Link>
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle mobile menu" className={iconColor}>
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle mobile menu" className="text-white">
               {isOpen ? <X className="h-7 w-7" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
