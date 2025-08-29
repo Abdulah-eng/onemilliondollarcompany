@@ -1,3 +1,9 @@
+import avatar1 from '@/assets/avatars/avatar-1.webp';
+import avatar2 from '@/assets/avatars/avatar-2.webp';
+import avatar3 from '@/assets/avatars/avatar-3.webp';
+import avatar4 from '@/assets/avatars/avatar-4.webp';
+import avatar5 from '@/assets/avatars/avatar-5.webp';
+
 export const TESTIMONIALS = [
   {
     highlight: 'Felt 10x More Energy',
@@ -5,7 +11,7 @@ export const TESTIMONIALS = [
       'The personalized nutrition plan was a game-changer. I have more energy than ever before, and the recipes are delicious and easy to follow!',
     name: 'Jessica M.',
     title: 'Premium Member',
-    avatar: '/src/assets/avatars/avatar-1.webp',
+    avatar: avatar1,
     dark: false,
   },
   {
@@ -13,7 +19,7 @@ export const TESTIMONIALS = [
       "Finally found a routine I can stick to. The coach's feedback keeps me motivated and on track. Highly recommend!",
     name: 'David C.',
     title: 'Standard Member',
-    avatar: '/src/assets/avatars/avatar-2.webp',
+    avatar: avatar2,
     dark: true,
   },
   {
@@ -21,7 +27,7 @@ export const TESTIMONIALS = [
       'The mental health exercises have been invaluable for reducing my stress levels. It’s more than just a fitness app.',
     name: 'Sarah L.',
     title: 'Premium Member',
-    avatar: '/src/assets/avatars/avatar-3.webp',
+    avatar: avatar3,
     dark: false,
   },
   {
@@ -30,7 +36,7 @@ export const TESTIMONIALS = [
       'I was skeptical at first, but the results speak for themselves. The combination of fitness, nutrition, and accountability is unbeatable.',
     name: 'Michael B.',
     title: 'Premium Member',
-    avatar: '/src/assets/avatars/avatar-4.webp',
+    avatar: avatar4,
     dark: false,
   },
   {
@@ -38,7 +44,7 @@ export const TESTIMONIALS = [
       'The exercise library is amazing. I can always find a new workout to try, and the instructions are crystal clear.',
     name: 'Emily R.',
     title: 'Standard Member',
-    avatar: '/src/assets/avatars/avatar-5.webp',
+    avatar: avatar5,
     dark: true,
   },
 ];
