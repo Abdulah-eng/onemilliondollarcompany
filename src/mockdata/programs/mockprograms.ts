@@ -156,7 +156,31 @@ export const mockPrograms: Program[] = [
               { id: "t14", type: "mental", title: "Afternoon Reset", content: ["10-minute mindfulness meditation", "Evening gratitude journal"], status: "pending", progress: 0 }
             ],
           },
-          { dayOfWeek: "Friday", tasks: [{ id: "t10", type: "fitness", title: "Pull Day", content: ["T-Bar Rows 4x8", "Lat Pulldowns 4x10"], status: "pending", progress: 0 }] },
+          { dayOfWeek: "Friday", tasks: [
+            {
+              id: "t10",
+              type: "fitness",
+              title: "Pull Day",
+              status: "pending",
+              progress: 0,
+              content: [
+                {
+                  id: "ex3",
+                  name: "T-Bar Rows",
+                  targetSets: 4,
+                  targetReps: "8",
+                  sets: [{ id: 1, reps: null, weight: null, isCompleted: false }],
+                },
+                {
+                  id: "ex4", 
+                  name: "Lat Pulldowns",
+                  targetSets: 4,
+                  targetReps: "10",
+                  sets: [{ id: 1, reps: null, weight: null, isCompleted: false }],
+                },
+              ] as FitnessExercise[],
+            }
+          ] },
         ]
       },
       {
