@@ -20,7 +20,6 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
         decoding="async"
         onLoad={() => setLoaded(true)}
       />
-      {/* Removed gradient overlay from image */}
     </div>
   );
 }
@@ -28,14 +27,11 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
 export default function MoreThanPlanSection() {
   return (
     <section
-      className="relative overflow-hidden bg-gradient-to-b from-[#DDF5F0]/50 via-[#B2E0D9]/50 to-white"
+      className="relative pt-20 overflow-hidden bg-gradient-to-b from-[#DDF5F0]/50 via-[#B2E0D9]/50 to-white"
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-16 items-center"
-          data-reveal
-        >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-16 items-center" data-reveal>
           <div>
             <p className="mb-2 font-semibold text-primary">Everything You Need</p>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tighter text-foreground">
@@ -52,7 +48,7 @@ export default function MoreThanPlanSection() {
         {/* Cards */}
         <div
           className={cn(
-            'flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory -mx-4 px-4 scroll-px-4',
+            'flex gap-6 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 scroll-px-4',
             'lg:grid lg:grid-cols-4 lg:gap-8 lg:overflow-visible lg:mx-0 lg:px-0'
           )}
           data-reveal
