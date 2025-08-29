@@ -57,7 +57,7 @@ export default function MoreThanPlanSection() {
               key={card.title}
               className={cn(
                 'reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto',
-                'relative rounded-3xl shadow-[0_20px_40px_-12px_rgba(0,0,0,0.08)] min-h-[500px] snap-center overflow-hidden',
+                'relative rounded-3xl shadow-[0_20px_40px_-12px_rgba(0,0,0,0.08)] min-h-[500px] snap-center overflow-visible',
                 'flex flex-col justify-end p-8 text-white'
               )}
               style={{ transitionDelay: `${index * 100}ms` }}
@@ -96,4 +96,3 @@ export default function MoreThanPlanSection() {
     </section>
   );
 }
-
