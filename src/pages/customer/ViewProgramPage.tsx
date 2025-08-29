@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { generateDailySchedule, ScheduledTask } from "@/mockdata/programs/mockprograms";
+import { generateDailySchedule, ScheduledTask, mockPrograms } from "@/mockdata/programs/mockprograms";
 import { findExerciseProgramById, DetailedFitnessTask } from "@/mockdata/viewprograms/mockexerciseprograms";
 
 // ✅ CORRECTED IMPORT PATHS for the moved components
@@ -11,7 +11,7 @@ import WorkoutHeader from "@/components/customer/viewprogram/exercise/WorkoutHea
 import CoachMessage from "@/components/customer/viewprogram/CoachMessage";
 import { Loader2 } from "lucide-react";
 
-type CombinedWorkoutTask = ScheduledTask & DetailedFitnessTask;
+type CombinedWorkoutTask = Omit<ScheduledTask, 'content'> & DetailedFitnessTask;
 
 export default function ViewProgramPage() {
   const { taskId } = useParams<{ taskId: string }>();

@@ -7,6 +7,7 @@ import { PlayCircle } from "lucide-react";
 
 const getEmojiForItem = (item: any, type: ScheduledTask['type']) => {
   // Check if item is an object (new format) or string (old format)
+  if (!item) return '✅';
   const itemName = typeof item === 'object' && item.name ? item.name : String(item);
   const lowerItem = itemName.toLowerCase();
 
@@ -69,22 +70,22 @@ export default function ProgramDetailView({ task }: { task: ScheduledTask | null
       {/* CONTENT */}
       <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-4">
         <h3 className="font-semibold text-lg text-slate-700">Today's Plan:</h3>
-        <ul className="space-y-3">
-          {task.content.map((item, i) => {
-            // ✅ 4. HANDLE BOTH STRING AND OBJECT CONTENT
-            const isObject = typeof item === 'object' && item !== null && 'name' in item;
-            const contentText = isObject ? (item as any).name : item;
-            
-            return (
-              <li
-                key={i}
-                className="flex items-center p-4 bg-white rounded-xl shadow-sm border border-slate-100 transition-transform hover:scale-[1.02]"
-              >
-                <span className="text-2xl mr-4">{getEmojiForItem(item, task.type)}</span>
-                <span className="text-slate-800 font-medium">{contentText}</span>
-              </li>
-            );
-          })}
+         <ul className="space-y-3">
+           {task.content.filter(item => item !== null).map((item, i) => {
+             // ✅ 4. HANDLE BOTH STRING AND OBJECT CONTENT
+             const isObject = typeof item === 'object' && item !== null && 'name' in item;
+             const contentText = isObject ? (item as any).name : String(item);
+             
+             return (
+               <li
+                 key={i}
+                 className="flex items-center p-4 bg-white rounded-xl shadow-sm border border-slate-100 transition-transform hover:scale-[1.02]"
+               >
+                 <span className="text-2xl mr-4">{getEmojiForItem(item, task.type)}</span>
+                 <span className="text-slate-800 font-medium">{contentText}</span>
+               </li>
+             );
+           })}
         </ul>
       </div>
 
