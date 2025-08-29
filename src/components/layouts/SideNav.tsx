@@ -41,7 +41,6 @@ const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
 
   return (
     <Sidebar
-      // ✅ APPLIED THEME-AWARE SIDEBAR COLORS
       className={cn(
         "bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border transition-all duration-300",
         collapsed && !isMobile ? 'w-16' : 'w-64'
@@ -49,8 +48,8 @@ const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
       collapsible="icon"
     >
       <SidebarContent className="px-3">
-        {/* Border color now uses the theme variable */}
-        <div className={cn("border-b border-sidebar-border py-4", collapsed && !isMobile ? 'flex items-center justify-center' : '')}>
+        {/* ✅ MODIFIED: Matched height with TopNav and centered content */}
+        <div className={cn("flex items-center h-16 border-b border-sidebar-border", collapsed && !isMobile ? 'justify-center' : '')}>
           <div className="flex items-center gap-2">
             <div className="h-10 w-10 min-h-10 min-w-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
               <span className="text-white font-bold text-sm leading-none">TW</span>
