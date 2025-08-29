@@ -1,26 +1,45 @@
 export const TESTIMONIALS = [
-  { 
-    name: 'Maria', 
-    age: 34, 
-    avatar: '👩🏼', 
-    rating: 5, 
-    text: "I never thought I'd stick to a routine again. This gave me structure, motivation, and a coach who actually cares.", 
-    result: 'Lost 12kg in 3 months' 
+  {
+    highlight: 'Felt 10x More Energy',
+    quote:
+      'The personalized nutrition plan was a game-changer. I have more energy than ever before, and the recipes are delicious and easy to follow!',
+    name: 'Jessica M.',
+    title: 'Premium Member',
+    avatar: '/src/assets/avatars/avatar-1.webp',
+    size: 'large', // This card will be taller
   },
-  { 
-    name: 'James', 
-    age: 28, 
-    avatar: '👨🏻', 
-    rating: 5, 
-    text: 'The nutrition plans changed everything. My productivity skyrocketed.', 
-    result: 'Gained 8kg muscle' 
+  {
+    quote:
+      "Finally found a routine I can stick to. The coach's feedback keeps me motivated and on track. Highly recommend!",
+    name: 'David C.',
+    title: 'Standard Member',
+    avatar: '/src/assets/avatars/avatar-2.webp',
+    size: 'small',
   },
-  { 
-    name: 'Sofia', 
-    age: 29, 
-    avatar: '👩🏽', 
-    rating: 5, 
-    text: 'The mental wellness program was a game-changer.', 
-    result: 'Reduced stress by 70%' 
+  {
+    quote:
+      'The mental health exercises have been invaluable for reducing my stress levels. It’s more than just a fitness app.',
+    name: 'Sarah L.',
+    title: 'Premium Member',
+    avatar: '/src/assets/avatars/avatar-3.webp',
+    size: 'small',
+    dark: true, // This card will be dark
+  },
+  {
+    highlight: 'Lost 15 lbs in 2 Months',
+    quote:
+      'I was skeptical at first, but the results speak for themselves. The combination of fitness, nutrition, and accountability is unbeatable.',
+    name: 'Michael B.',
+    title: 'Premium Member',
+    avatar: '/src/assets/avatars/avatar-4.webp',
+    size: 'large',
+  },
+  {
+    quote:
+      'The exercise library is amazing. I can always find a new workout to try, and the instructions are crystal clear.',
+    name: 'Emily R.',
+    title: 'Standard Member',
+    avatar: '/src/assets/avatars/avatar-5.webp',
+    size: 'small',
   },
 ];
