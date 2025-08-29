@@ -36,8 +36,8 @@ export default function Navbar() {
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         // Transparent initially
         "bg-transparent border-transparent",
-        // Glass effect on scroll
-        hasScrolled && "bg-black/40 backdrop-blur-md border-b border-gray-700 shadow-sm"
+        // White glass effect on scroll
+        hasScrolled && "bg-white/30 backdrop-blur-md"
       )}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -88,20 +88,20 @@ export default function Navbar() {
 
       {/* Mobile Menu Panel */}
       {isOpen && (
-        <div className="md:hidden fixed inset-0 top-20 z-40 bg-black/95" onClick={() => setIsOpen(false)}>
+        <div className="md:hidden fixed inset-0 top-20 z-40 bg-white/30 backdrop-blur-md" onClick={() => setIsOpen(false)}>
           <div className="space-y-2 px-4 pt-6 pb-3">
             {anchorLinks.map((item) => (
               <a
                 key={item.name}
                 href={item.href}
                 onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
-                className="block px-3 py-3 rounded-lg text-xl font-semibold text-white hover:text-primary hover:bg-gray-800/50"
+                className="block px-3 py-3 rounded-lg text-xl font-semibold text-white hover:text-primary hover:bg-white/20"
               >
                 {item.name}
               </a>
             ))}
           </div>
-          <div className="px-4 pt-4 pb-4 space-y-3 border-t border-gray-700">
+          <div className="px-4 pt-4 pb-4 space-y-3">
             <Button variant="ghost" className="w-full justify-center text-lg font-semibold h-12" asChild>
               <Link to="/login" onClick={() => setIsOpen(false)}>Login</Link>
             </Button>
