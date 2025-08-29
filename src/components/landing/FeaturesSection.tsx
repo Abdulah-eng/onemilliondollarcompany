@@ -33,7 +33,9 @@ export default function FeaturesSection() {
             key={feature.title} 
             className={cn(
               "reveal flex-shrink-0 w-[90%] sm:w-80 lg:w-auto",
-              "relative rounded-3xl shadow-2xl min-h-[450px] snap-center"
+              "relative rounded-3xl min-h-[450px] snap-center",
+              // Custom soft shadow to blend better with gradient background
+              "shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)]"
             )}
             style={{ transitionDelay: `${index * 100}ms` }}
           >
@@ -66,6 +68,9 @@ export default function FeaturesSection() {
           </div>
         ))}
       </div>
+
+      {/* Soft bottom fade buffer to help shadows blend */}
+      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#DDF5F0]/50 via-[#DDF5F0]/20 to-white pointer-events-none" />
     </section>
   );
 }
