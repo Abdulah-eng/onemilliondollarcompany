@@ -8,7 +8,6 @@ export default function TestimonialsSection() {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const pauseRef = useRef(false);
 
-  // Auto-scroll logic remains unchanged
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
@@ -17,7 +16,9 @@ export default function TestimonialsSection() {
       typeof window !== 'undefined' &&
       window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     if (reduceMotion) return;
+
     let timer: number | undefined;
+
     const stepOnce = () => {
       const card = el.querySelector<HTMLElement>('[data-card]');
       if (!card) return;
@@ -28,29 +29,36 @@ export default function TestimonialsSection() {
       if (atEnd) el.scrollTo({ left: 0, behavior: 'smooth' });
       else el.scrollBy({ left: cardWidth + gap, behavior: 'smooth' });
     };
+
     const start = () => {
       stop();
       timer = window.setInterval(() => {
         if (!pauseRef.current) stepOnce();
       }, 3500);
     };
+
     const stop = () => {
       if (timer) window.clearInterval(timer);
     };
+
     const pause = () => (pauseRef.current = true);
     const resume = () => (pauseRef.current = false);
+
     el.addEventListener('mouseenter', pause);
     el.addEventListener('mouseleave', resume);
     el.addEventListener('touchstart', pause, { passive: true });
     el.addEventListener('touchend', resume, { passive: true });
     el.addEventListener('focusin', pause);
     el.addEventListener('focusout', resume);
+
     const onResize = () => {
       pause();
       setTimeout(resume, 200);
     };
     window.addEventListener('resize', onResize, { passive: true });
+
     start();
+
     return () => {
       stop();
       el.removeEventListener('mouseenter', pause);
@@ -67,7 +75,7 @@ export default function TestimonialsSection() {
     <section
       id="testimonials"
       aria-label="Client testimonials"
-      className="bg-background dark:bg-black py-20 overflow-hidden"
+      className="bg-background dark:bg-black py-20 lg:pb-32 overflow-visible"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -81,7 +89,7 @@ export default function TestimonialsSection() {
           </p>
         </div>
 
-        {/* Single-row auto-scrolling flex container */}
+        {/* Scrolling testimonial cards */}
         <div
           ref={trackRef}
           role="list"
@@ -91,6 +99,7 @@ export default function TestimonialsSection() {
             snap-x snap-mandatory
             [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
             scroll-px-4
+            pb-8 lg:pb-16
           "
         >
           {TESTIMONIALS.map((t, idx) => (
@@ -101,7 +110,7 @@ export default function TestimonialsSection() {
               tabIndex={0}
               className={cn(
                 'snap-center flex-shrink-0 p-8 rounded-3xl shadow-lg flex flex-col',
-                'w-[calc(100%-2rem)] sm:w-[540px] lg:w-[600px]', // Card sizing
+                'w-[calc(100%-2rem)] sm:w-[540px] lg:w-[600px]',
                 t.dark
                   ? 'bg-foreground text-background'
                   : 'bg-card text-foreground border'
@@ -139,6 +148,8 @@ export default function TestimonialsSection() {
                   src={t.avatar}
                   alt={t.name}
                   className="w-12 h-12 rounded-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div>
                   <h4 className="font-semibold">{t.name}</h4>
