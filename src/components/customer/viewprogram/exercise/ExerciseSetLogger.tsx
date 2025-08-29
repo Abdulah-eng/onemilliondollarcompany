@@ -1,4 +1,3 @@
-// src/components/customer/viewprogram/exercise/ExerciseSetLogger.tsx
 import { FitnessExercise, ExerciseSet } from "@/mockdata/viewprograms/mockexerciseprograms";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,79 +43,67 @@ export function ExerciseSetLogger({ exerciseData, setExerciseData }: ExerciseSet
   };
 
   return (
-    <div className="max-w-xl mx-auto relative">
-      <div className="space-y-3 pb-24"> {/* pb-24 to allow sticky button space */}
-        {/* Header Row */}
-        <div className="grid grid-cols-12 gap-2 items-center px-2 font-medium text-xs text-slate-400 uppercase tracking-wider">
-          <div className="col-span-2 text-center">Set</div>
-          <div className="col-span-4 text-center">Weight (kg)</div>
-          <div className="col-span-4 text-center">Reps</div>
-          <div className="col-span-2 text-center">Done</div>
-        </div>
+    <div className="space-y-3">
+      <div className="grid grid-cols-12 gap-2 items-center px-2 font-medium text-xs text-slate-400 uppercase tracking-wider">
+        <div className="col-span-2 text-center">Set</div>
+        <div className="col-span-4 text-center">Weight (kg)</div>
+        <div className="col-span-4 text-center">Reps</div>
+        <div className="col-span-2 text-center">Done</div>
+      </div>
 
-        {/* Sets */}
-        {sets.map((set, index) => (
-          <div
-            key={set.id}
-            className={cn(
-              "grid grid-cols-12 gap-2 items-center p-1 rounded-lg transition-colors",
-              set.isCompleted ? "bg-green-50" : "bg-transparent"
-            )}
-          >
-            <div className="col-span-2 flex justify-center items-center">
-              <span className="font-bold text-slate-600 bg-slate-100 h-8 w-8 flex items-center justify-center rounded-full text-sm">
-                {index + 1}
-              </span>
-            </div>
-            <Input
-              type="number"
-              placeholder="-"
-              className="col-span-4 text-center h-10 bg-slate-100 border-transparent focus-visible:ring-primary"
-              value={set.weight ?? ""}
-              onChange={(e) => handleSetChange(set.id, "weight", e.target.value)}
-            />
-            <Input
-              type="number"
-              placeholder="-"
-              className="col-span-4 text-center h-10 bg-slate-100 border-transparent focus-visible:ring-primary"
-              value={set.reps ?? ""}
-              onChange={(e) => handleSetChange(set.id, "reps", e.target.value)}
-            />
-            <div className="col-span-2 flex items-center justify-center">
-              <Checkbox
-                checked={set.isCompleted}
-                onCheckedChange={() => toggleSetCompletion(set.id)}
-                className="h-5 w-5 rounded-md"
-              />
-              {sets.length > 1 && (
-                <button
-                  onClick={() => removeSet(set.id)}
-                  className="ml-2 text-slate-400 hover:text-red-500 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
-
-        {/* Add Set Button */}
-        <Button
-          onClick={addSet}
-          variant="outline"
-          className="w-full h-10 mt-2 rounded-lg text-slate-600 hover:text-primary hover:border-primary/50 text-sm"
+      {sets.map((set, index) => (
+        <div
+          key={set.id}
+          className={cn(
+            "grid grid-cols-12 gap-2 items-center p-2 rounded-lg transition-colors",
+            set.isCompleted ? "bg-green-50" : "bg-transparent"
+          )}
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Set
-        </Button>
-      </div>
+          <div className="col-span-2 flex justify-center items-center">
+            <span className="font-bold text-slate-600 bg-slate-100 h-9 w-9 flex items-center justify-center rounded-full">
+              {index + 1}
+            </span>
+          </div>
+          <Input
+            type="number"
+            placeholder="-"
+            className="col-span-4 text-center h-11 bg-slate-100 border-transparent focus-visible:ring-primary"
+            value={set.weight ?? ""}
+            onChange={(e) => handleSetChange(set.id, "weight", e.target.value)}
+          />
+          <Input
+            type="number"
+            placeholder="-"
+            className="col-span-4 text-center h-11 bg-slate-100 border-transparent focus-visible:ring-primary"
+            value={set.reps ?? ""}
+            onChange={(e) => handleSetChange(set.id, "reps", e.target.value)}
+          />
+          <div className="col-span-2 flex items-center justify-center">
+            <Checkbox
+              checked={set.isCompleted}
+              onCheckedChange={() => toggleSetCompletion(set.id)}
+              className="h-6 w-6 rounded-md"
+            />
+            {sets.length > 1 && (
+              <button
+                onClick={() => removeSet(set.id)}
+                className="ml-2 text-slate-400 hover:text-red-500 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+      ))}
 
-      {/* Complete Workout Button fixed inside logger */}
-      <div className="sticky bottom-0 pt-4 bg-white/90 backdrop-blur-sm">
-        <Button size="lg" className="w-full rounded-xl font-bold shadow-lg">
-          Complete Workout
-        </Button>
-      </div>
+      <Button
+        onClick={addSet}
+        variant="outline"
+        className="w-full h-11 mt-2 rounded-lg text-slate-600 hover:text-primary hover:border-primary/50"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Add Set
+      </Button>
     </div>
   );
 }
