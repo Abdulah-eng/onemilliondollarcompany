@@ -25,8 +25,9 @@ import ContactStep from "./pages/onboarding/ContactStep";
 import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess";
 import CustomerDashboardPage from "./pages/customer/CustomerDashboard";
 import CoachDashboardPage from "./pages/coach/CoachDashboard";
-// --- 1. IMPORT THE NEW PAGE ---
 import MyProgramsPage from "./pages/customer/MyProgramsPage";
+// ✅ 1. IMPORT YOUR NEW VIEW PROGRAM PAGE
+import ViewProgramPage from "./pages/customer/ViewProgramPage";
 
 
 // --- LOADING COMPONENT ---
@@ -99,6 +100,10 @@ const App = () => (
               <Route element={<RoleGate allowedRole="customer"><AppShell /></RoleGate>}>
                 <Route path="/customer/dashboard" element={<CustomerDashboardPage />} />
                 <Route path="/customer/programs" element={<MyProgramsPage />} />
+                
+                {/* ✅ 2. ADD THE NEW ROUTE FOR VIEWING A SPECIFIC PROGRAM */}
+                <Route path="/customer/program/:taskId" element={<ViewProgramPage />} />
+                
                 {/* Add other customer routes here */}
               </Route>
               
