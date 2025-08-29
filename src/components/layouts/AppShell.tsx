@@ -1,5 +1,4 @@
-// src/components/layouts/AppShell.tsx
-import { Outlet } from 'react-router-dom';
+ import { Outlet } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import TopNav from './TopNav';
 import SideNav from './SideNav';
@@ -16,7 +15,7 @@ const AppShell = () => {
   const { profile, loading } = useAuth();
 
   if (loading) return <div>Loading...</div>;
-  if (!profile) return null; // This should never render; public pages handled elsewhere
+  if (!profile) return null;
 
   const navByRole = {
     coach: { main: coachNavItems, bottom: coachBottomNavItems },
@@ -29,11 +28,12 @@ const AppShell = () => {
 
   return (
     <SidebarProvider>
-      <div className="theme-dashboard min-h-screen flex w-full bg-background">
+      {/* ✅ UPDATED: Replaced solid background with a subtle gradient */}
+      <div className="theme-dashboard min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-stone-100 dark:from-black dark:to-gray-900">
         <SideNav navItems={navItems} bottomNavItems={bottomNavItems} />
         <div className="flex-1 flex flex-col min-w-0">
           <TopNav />
-          <main className="flex-1 p-4 sm:p-6 lg:p-8">
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
             <Outlet />
           </main>
         </div>
