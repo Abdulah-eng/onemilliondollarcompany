@@ -1,17 +1,14 @@
-// src/pages/customer/ViewProgramPage.tsx
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { generateDailySchedule, ScheduledTask, mockPrograms } from "@/mockdata/programs/mockprograms";
 import { findExerciseProgramById, DetailedFitnessTask } from "@/mockdata/viewprograms/mockexerciseprograms";
-
-// ✅ CORRECTED IMPORT PATHS for the moved components
 import FitnessWorkoutView from "@/components/customer/viewprogram/exercise/FitnessWorkoutView";
 import WorkoutHeader from "@/components/customer/viewprogram/exercise/WorkoutHeader";
 import CoachMessage from "@/components/customer/viewprogram/CoachMessage";
 import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-type CombinedWorkoutTask = Omit<ScheduledTask, 'content'> & DetailedFitnessTask;
+type CombinedWorkoutTask = DetailedFitnessTask & { type: "fitness"; programTitle?: string };
 
 export default function ViewProgramPage() {
   const { id } = useParams<{ id: string }>();
@@ -25,21 +22,10 @@ export default function ViewProgramPage() {
     }
 
     const detailedTaskInfo = findExerciseProgramById(id);
-    
     if (detailedTaskInfo) {
-      const combinedData: CombinedWorkoutTask = {
-        ...detailedTaskInfo,
-        type: 'fitness',
-        programTitle: '',
-        status: 'pending',
-        progress: 0,
-        date: new Date(),
-        programId: '',
-        weekNumber: 1,
-      };
-      setWorkoutData(combinedData);
+      setWorkoutData({ ...detailedTaskInfo, type: "fitness", programTitle: "" });
     }
-    
+
     setLoading(false);
   }, [id]);
 
@@ -54,9 +40,9 @@ export default function ViewProgramPage() {
   if (!workoutData) {
     return <div className="text-center p-8">Workout not found.</div>;
   }
-  
+
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-8 space-y-8">
+    <div className="relative w-full max-w-5xl mx-auto px-4 py-8 space-y-8">
       <WorkoutHeader task={workoutData} />
       <CoachMessage />
       <main>
@@ -66,6 +52,13 @@ export default function ViewProgramPage() {
           <div className="p-8 text-center">This workout type is not yet supported.</div>
         )}
       </main>
+
+      {/* ✅ SINGLE FIXED BUTTON */}
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-5xl px-4 py-3 bg-white/90 backdrop-blur-sm border-t z-10">
+        <Button size="lg" className="w-full h-12 font-bold rounded-xl shadow-lg">
+          Complete Workout
+        </Button>
+      </div>
     </div>
   );
 }
