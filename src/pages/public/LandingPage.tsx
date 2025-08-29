@@ -56,7 +56,7 @@ export default function LandingPage() {
           <CTASection />
         </section>
       </main>
-      <footer className="mt-20 md:mt-28 bg-card text-card-foreground border-t">
+      <footer className="bg-card text-card-foreground border-t">
         <Footer />
       </footer>
     </div>
