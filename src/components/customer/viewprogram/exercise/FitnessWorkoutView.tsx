@@ -1,4 +1,3 @@
-// src/components/customer/viewprogram/exercise/FitnessWorkoutView.tsx
 import { DetailedFitnessTask, FitnessExercise } from "@/mockdata/viewprograms/mockexerciseprograms";
 import { ExerciseCard } from "./ExerciseCard";
 
