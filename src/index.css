@@ -7,89 +7,103 @@
 
 @layer base {
   /* ==========================================================================
-     "IGNITE" THEME 
-     Based on your inspiration images for a vibrant and premium feel.
+     "TrainWiseStudio" THEME 
+     Light theme: beige & organic teal
+     Dark theme: deep blue & teal
      ========================================================================== */
 
   /* ## LIGHT THEME ## */
-  /* Based on image 1: Clean off-white with a vibrant gold-to-orange gradient. */
   :root {
     /* Base & Foreground */
-    --background: 0 0% 99%; /* Clean off-white (#FDFDFD) */
-    --foreground: 240 5% 20%; /* Strong, dark charcoal for text */
+    --background: 37 88% 97%; /* Warm beige (#FAF5F0) */
+    --foreground: 210 14% 12%; /* Dark charcoal for text (#1F2937) */
     
     /* Containers (Cards, Sidebars, Popovers) */
-    --card: 0 0% 100%; /* Pure white to create subtle depth */
-    --card-foreground: 240 5% 20%;
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 210 14% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 5% 20%;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5% 20%;
+    --popover-foreground: 210 14% 12%;
+    --sidebar-background: 37 88% 95%; /* Slightly darker beige */
+    --sidebar-foreground: 210 14% 12%;
 
-    /* Primary Colors & Gradient (Gold -> Fiery Orange) */
-    --primary-light: 48 97% 72%; /* Lighter Yellow (#FDD972) */
-    --primary: 33 97% 50%; /* Main Orange (#FC8B05) */
-    --primary-dark: 26 98% 49%; /* Deeper Orange (#FA6602) */
-    --primary-foreground: 0 0% 100%; /* White text on gradients */
+    /* Primary Colors & Gradient (Organic Teal) */
+    --primary-light: 173 72% 55%; /* Lighter teal (#3DD9C1) */
+    --primary: 173 72% 45%; /* Main teal (#14B8A6) */
+    --primary-dark: 173 72% 35%; /* Darker teal (#0E7D71) */
+    --primary-foreground: 0 0% 100%; /* White text on teal */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary-light)), hsl(var(--primary-dark)));
 
-    /* Secondary Elements (for hover states, secondary buttons) */
-    --secondary: 40 20% 95%;
-    --secondary-foreground: 240 5% 25%;
+    /* Secondary Elements */
+    --secondary: 210 50% 70%; /* Soft blue for secondary buttons/links (#3B82F6) */
+    --secondary-foreground: 0 0% 100%;
 
-    /* Muted Elements (for descriptions, inactive states) */
-    --muted: 40 20% 95%;
-    --muted-foreground: 240 5% 50%;
+    /* Muted Elements */
+    --muted: 37 88% 95%;
+    --muted-foreground: 210 14% 50%;
     
-    /* Borders & Rings (Subtle and warm) */
-    --border: 40 20% 90%;
-    --input: 40 20% 95%;
-    --ring: 33 97% 50%;
+    /* Borders & Rings */
+    --border: 37 88% 90%;
+    --input: 37 88% 95%;
+    --ring: 173 72% 45%;
 
-    /* Active States in Navs/Lists */
-    --accent: 33 97% 50% / 0.1;
-    --accent-foreground: 33 97% 45%;
+    /* Active / Accent */
+    --accent: 173 72% 45% / 0.1;
+    --accent-foreground: 173 72% 40%;
 
     /* Sidebar Specifics */
-    --sidebar-accent: 40 20% 94%;
-    --sidebar-accent-foreground: 240 5% 15%;
-    --sidebar-primary: 33 97% 50%;
+    --sidebar-accent: 37 88% 94%;
+    --sidebar-accent-foreground: 210 14% 15%;
+    --sidebar-primary: 173 72% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-border: 40 20% 90%;
+    --sidebar-border: 37 88% 90%;
     
     --radius: 1.25rem;
   }
 
   /* ## DARK THEME ## */
-  /* Based on image 2: Deep charcoal with the same high-energy gold-to-orange gradient. */
   .dark {
-    --background: 0 0% 9%;
-    --foreground: 0 0% 90%;
-    --card: 240 1% 20%;
-    --card-foreground: 0 0% 90%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 90%;
-    --sidebar-background: 0 0% 11%;
-    --sidebar-foreground: 0 0% 90%;
-    --primary-light: 48 98% 52%;
-    --primary: 33 97% 50%;
-    --primary-dark: 26 98% 49%;
-    --primary-foreground: 0 0% 10%;
+    /* Base & Foreground */
+    --background: 210 30% 7%; /* Deep navy (#0F172A) */
+    --foreground: 0 0% 98%; /* Soft white (#F9FAFB) */
+    
+    /* Containers (Cards, Popovers, Sidebars) */
+    --card: 210 20% 15%; /* Slightly lighter navy (#1E293B) */
+    --card-foreground: 0 0% 98%;
+    --popover: 210 30% 7%;
+    --popover-foreground: 0 0% 98%;
+    --sidebar-background: 210 30% 9%;
+    --sidebar-foreground: 0 0% 98%;
+
+    /* Primary Colors & Gradient (Teal) */
+    --primary-light: 173 72% 55%; /* Lighter teal (#3DD9C1) */
+    --primary: 173 72% 45%;       /* Main teal (#14B8A6) */
+    --primary-dark: 173 72% 35%;  /* Darker teal (#0E7D71) */
+    --primary-foreground: 0 0% 100%;
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary-light)), hsl(var(--primary-dark)));
-    --secondary: 240 1% 25%;
-    --secondary-foreground: 0 0% 90%;
-    --muted: 240 1% 25%;
+
+    /* Secondary Elements */
+    --secondary: 210 50% 70%; /* Blue for links/buttons (#3B82F6) */
+    --secondary-foreground: 0 0% 98%;
+
+    /* Muted Elements */
+    --muted: 210 20% 25%;
     --muted-foreground: 0 0% 60%;
-    --border: 240 1% 25%;
-    --input: 240 1% 25%;
-    --ring: 48 98% 52%;
-    --accent: 48 98% 52% / 0.1;
-    --accent-foreground: 48 98% 60%;
-    --sidebar-accent: 240 1% 22%;
-    --sidebar-accent-foreground: 48 98% 60%;
-    --sidebar-primary: 48 98% 52%;
-    --sidebar-primary-foreground: 0 0% 10%;
-    --sidebar-border: 240 1% 22%;
+    
+    /* Borders & Rings */
+    --border: 210 20% 25%;
+    --input: 210 20% 25%;
+    --ring: 173 72% 45%;
+
+    /* Active / Accent */
+    --accent: 173 72% 45% / 0.1;
+    --accent-foreground: 173 72% 50%;
+
+    /* Sidebar Specifics */
+    --sidebar-accent: 210 20% 22%;
+    --sidebar-accent-foreground: 173 72% 50%;
+    --sidebar-primary: 173 72% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-border: 210 20% 22%;
   }
 }
 
@@ -101,7 +115,7 @@
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
   }
-  
+
   /* Helper class to easily apply the primary gradient */
   .bg-gradient-primary {
     background: var(--gradient-primary);
