@@ -109,13 +109,25 @@ export default function TestimonialsSection() {
               role="listitem"
               tabIndex={0}
               className={cn(
-                'snap-center flex-shrink-0 p-8 rounded-3xl shadow-lg flex flex-col',
+                'relative snap-center flex-shrink-0 p-8 rounded-3xl shadow-lg flex flex-col',
                 'w-[calc(100%-2rem)] sm:w-[540px] lg:w-[600px]',
                 t.dark
                   ? 'bg-foreground text-background'
                   : 'bg-card text-foreground border'
               )}
             >
+              {/* Plan Badge */}
+              <span
+                className={cn(
+                  'absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-semibold',
+                  t.title.includes('Premium')
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-green-500 text-white'
+                )}
+              >
+                {t.title.split(' ')[0]}
+              </span>
+
               {t.highlight && (
                 <div className="mb-4">
                   <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary">
