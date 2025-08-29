@@ -1,4 +1,3 @@
-// src/components/landing/CTASection.tsx
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,7 +54,7 @@ export default function CTASection() {
   };
 
   return (
-    <section className="relative py-20 bg-background dark:bg-black overflow-hidden">
+    <section className="relative py-20 bg-gradient-to-b from-[#DDF5F0] via-[#B2E0D9]/50 to-white overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left Text & Form */}
