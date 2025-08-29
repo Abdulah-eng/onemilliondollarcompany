@@ -102,7 +102,7 @@ const App = () => (
                 <Route path="/customer/programs" element={<MyProgramsPage />} />
                 
                 {/* ✅ 2. ADD THE NEW ROUTE FOR VIEWING A SPECIFIC PROGRAM */}
-                <Route path="/customer/program/:taskId" element={<ViewProgramPage />} />
+                <Route path="/program/:id" element={<ViewProgramPage />} />
                 
                 {/* Add other customer routes here */}
               </Route>

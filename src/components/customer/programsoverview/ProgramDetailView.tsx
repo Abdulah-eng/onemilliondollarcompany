@@ -39,8 +39,11 @@ export default function ProgramDetailView({ task }: { task: ScheduledTask | null
   const config = typeConfig[task.type];
 
   const handleStartClick = () => {
-    // ✅ 3. NAVIGATE TO THE PROGRAM VIEW PAGE
-    navigate(`/program/${task.id}`);
+    if (task.type === 'fitness') {
+      // Navigate to program view for fitness tasks
+      navigate(`/program/${task.id}`);
+    }
+    // For other task types, do nothing (keeps SlideInDetail open)
   };
 
   return (

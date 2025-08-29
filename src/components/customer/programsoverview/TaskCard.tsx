@@ -15,9 +15,14 @@ export function TaskCard({ task, onClick }: { task: ScheduledTask; onClick: () =
 
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevents the card's onClick from firing
-    // ✅ 3. NAVIGATE TO THE PROGRAM VIEW PAGE
-    // This will navigate to a URL like "/program/t9"
-    navigate(`/program/${task.id}`);
+    
+    if (task.type === 'fitness') {
+      // Navigate to program view for fitness tasks
+      navigate(`/program/${task.id}`);
+    } else {
+      // Open SlideInDetail for other task types (nutrition, mental)
+      onClick();
+    }
   };
 
   return (

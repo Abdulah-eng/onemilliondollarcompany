@@ -1,35 +1,26 @@
 // src/pages/customer/ViewProgramPage.tsx
 
 import { useEffect, useState } from "react";
-// We'll use a library like 'react-router-dom' in a real app to get the ID.
-// For now, we'll simulate it.
-// import { useParams } from "react-router-dom";
-import { mockPrograms, ScheduledTask } from "@/mockdata/programs/mockprograms";
+import { useParams } from "react-router-dom";
+import { mockPrograms, generateDailySchedule, ScheduledTask } from "@/mockdata/programs/mockprograms";
 import FitnessWorkoutView from "@/components/customer/viewprogram/FitnessWorkoutView";
 import { ArrowLeft } from "lucide-react";
 
-// In a real app, you would use React Router. For this example, we hardcode the ID.
-const FAKE_TASK_ID = "prog1_w1_d1_t1";
-
 export default function ViewProgramPage() {
   const [task, setTask] = useState<ScheduledTask | null>(null);
-
-  // In a real app, you'd use useParams() to get the task ID from the URL.
-  // const { taskId } = useParams();
-  const taskId = FAKE_TASK_ID;
+  const { id } = useParams<{ id: string }>();
 
   useEffect(() => {
-    // Find the task from the mock data array.
-    const currentTask = mockPrograms
-      .flatMap((p) =>
-        p.weeks.flatMap((w) => w.days.flatMap((d) => d.tasks))
-      )
-      .find((t) => t.id === taskId);
+    if (!id) return;
+    
+    // Generate the daily schedule to get ScheduledTask objects
+    const dailySchedule = generateDailySchedule(mockPrograms);
+    const currentTask = dailySchedule.find((t) => t.id === id);
 
     if (currentTask) {
       setTask(currentTask);
     }
-  }, [taskId]);
+  }, [id]);
 
   const renderProgramView = () => {
     if (!task) {
