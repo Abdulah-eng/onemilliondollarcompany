@@ -71,9 +71,9 @@ export default function ProgramDetailView({ task }: { task: ScheduledTask | null
       <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-4">
         <h3 className="font-semibold text-lg text-slate-700">Today's Plan:</h3>
          <ul className="space-y-3">
-           {task.content.filter(item => item !== null).map((item, i) => {
+           {task.content.filter((item): item is NonNullable<typeof item> => item != null).map((item, i) => {
              // ✅ 4. HANDLE BOTH STRING AND OBJECT CONTENT
-             const isObject = typeof item === 'object' && item !== null && 'name' in item;
+             const isObject = typeof item === 'object' && item !== null && item && 'name' in item;
              const contentText = isObject ? (item as any).name : String(item);
              
              return (
@@ -86,7 +86,7 @@ export default function ProgramDetailView({ task }: { task: ScheduledTask | null
                </li>
              );
            })}
-        </ul>
+         </ul>
       </div>
 
       {/* FOOTER */}
