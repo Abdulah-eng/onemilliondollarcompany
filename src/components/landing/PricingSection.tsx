@@ -62,7 +62,14 @@ const PricingSection = () => {
               )}
             >
               {plan.badge && (
-                <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-orange-400 text-white shadow-lg text-xs font-semibold px-4 py-1 rounded-full uppercase tracking-wider">
+                <div
+                  className={cn(
+                    "absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 text-xs font-semibold px-4 py-1 rounded-full uppercase tracking-wider shadow-lg",
+                    plan.featured
+                      ? "bg-primary text-white" // Solid badge color for Premium
+                      : "bg-gradient-to-r from-primary to-orange-400 text-white"
+                  )}
+                >
                   {plan.badge}
                 </div>
               )}
@@ -118,7 +125,7 @@ const PricingSection = () => {
                 className={cn(
                   'w-full mt-8',
                   plan.featured
-                    ? 'text-white bg-gradient-to-r from-primary to-orange-400 hover:opacity-90 border-0 shadow-lg shadow-primary/30'
+                    ? 'text-white bg-primary hover:bg-primary/90 border-0 shadow-lg shadow-primary/30' // Solid color button
                     : 'bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20'
                 )}
                 size="lg"
