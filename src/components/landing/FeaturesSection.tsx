@@ -4,8 +4,9 @@ import { Badge } from '@/components/ui/badge';
 
 export default function FeaturesSection() {
   return (
-    <section className="relative py-20 bg-white overflow-hidden">
-      
+    <section
+      className="relative py-20 overflow-hidden bg-gradient-to-t from-[#DDF5F0]/30 via-white to-white"
+    >
       {/* Header */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16" data-reveal>
@@ -65,9 +66,6 @@ export default function FeaturesSection() {
           </div>
         ))}
       </div>
-      
-      {/* Bottom fade with organic wellness gradient */}
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#DDF5F0] via-[#B2E0D9]/70 to-white" />
     </section>
   );
 }
