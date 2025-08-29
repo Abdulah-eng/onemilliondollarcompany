@@ -4,6 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
+// ✅ Import images properly
+import ctaImage1 from '@/assets/cta-image1.webp';
+import ctaImage2 from '@/assets/cta-image2.webp';
+
 function BlurImage({
   src,
   alt,
@@ -28,7 +32,6 @@ function BlurImage({
         loading="lazy"
         decoding="async"
       />
-      {/* Subtle overlay placeholder while loading */}
       {!loaded && <div className="absolute inset-0 bg-gray-200/10" />}
     </div>
   );
@@ -43,7 +46,6 @@ export default function CTASection() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setEmail('');
       setSubmitted(true);
@@ -114,7 +116,7 @@ export default function CTASection() {
             {/* Large background image */}
             <div className="absolute w-[80%] sm:w-[60%] h-[90%] sm:h-full rounded-3xl shadow-2xl overflow-hidden">
               <BlurImage
-                src="/src/assets/cta-image1.webp"
+                src={ctaImage1}
                 alt="Athlete looking focused"
               />
             </div>
@@ -122,7 +124,7 @@ export default function CTASection() {
             {/* Overlapping image */}
             <div className="absolute bottom-0 left-0 sm:left-auto sm:right-0 w-[60%] sm:w-[50%] h-[70%] sm:h-[80%] rounded-3xl shadow-2xl -translate-x-4 sm:translate-x-4 translate-y-4 sm:translate-y-8 lg:translate-y-12 bg-primary p-2 overflow-hidden">
               <BlurImage
-                src="/src/assets/cta-image2.webp"
+                src={ctaImage2}
                 alt="Athlete in action"
                 className="rounded-2xl"
               />
