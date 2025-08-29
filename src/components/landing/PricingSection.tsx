@@ -45,17 +45,17 @@ const PricingSection = () => {
 
         {/* Responsive Grid for Cards */}
         <div
-          className="relative pt-8 grid grid-flow-col auto-cols-[90%] sm:auto-cols-[380px] lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-3 gap-8 overflow-x-auto lg:overflow-visible pb-8 lg:py-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="relative mt-8 grid grid-flow-col auto-cols-[90%] sm:auto-cols-[380px] lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-3 gap-8 overflow-x-auto lg:overflow-visible pb-8 pt-10 lg:py-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           data-reveal
         >
           {plans.map((plan: any) => (
             <div
               key={plan.name}
               className={cn(
-                'relative p-8 rounded-3xl border flex flex-col',
+                'relative p-8 rounded-3xl border flex flex-col transition-all duration-300',
                 plan.featured
-                  ? 'bg-gradient-to-b from-gray-900 to-black text-white border-primary/50 lg:scale-105'
-                  : 'bg-card border-border'
+                  ? 'text-white border-primary/30 lg:scale-105 shadow-2xl shadow-primary/20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-700 via-gray-900 to-black'
+                  : 'bg-card border-border shadow-lg hover:shadow-xl'
               )}
             >
               {plan.badge && (
@@ -67,16 +67,33 @@ const PricingSection = () => {
               <div className="flex-grow pt-4">
                 {plan.icon && <plan.icon className="w-8 h-8 mb-4 text-primary drop-shadow-[0_2px_4px_rgba(251,146,60,0.5)]" />}
                 <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                <p className={cn('text-sm h-10', plan.featured ? 'text-white/70' : 'text-muted-foreground')}>
+                <p
+                  className={cn(
+                    'text-sm h-10',
+                    plan.featured ? 'text-white/70' : 'text-muted-foreground'
+                  )}
+                >
                   {plan.description}
                 </p>
 
                 <div className="my-8 flex items-end gap-2">
                   <span className="text-4xl font-extrabold tracking-tight">{plan.price}</span>
                   {plan.oldPrice && (
-                    <span className={cn('text-xl line-through', plan.featured ? 'text-white/50' : 'text-muted-foreground/80')}>{plan.oldPrice}</span>
+                    <span
+                      className={cn(
+                        'text-xl line-through',
+                        plan.featured ? 'text-white/50' : 'text-muted-foreground/80'
+                      )}
+                    >
+                      {plan.oldPrice}
+                    </span>
                   )}
-                  <span className={cn('text-sm', plan.featured ? 'text-white/70' : 'text-muted-foreground')}>
+                  <span
+                    className={cn(
+                      'text-sm',
+                      plan.featured ? 'text-white/70' : 'text-muted-foreground'
+                    )}
+                  >
                     {plan.period}
                   </span>
                 </div>
@@ -85,7 +102,9 @@ const PricingSection = () => {
                   {plan.features.map((feature: any, i: number) => (
                     <li key={i} className="flex items-start gap-3">
                       <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">{Array.isArray(feature.text) ? feature.text.join(' ') : feature.text}</span>
+                      <span className="text-sm">
+                        {Array.isArray(feature.text) ? feature.text.join(' ') : feature.text}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -96,7 +115,7 @@ const PricingSection = () => {
                 className={cn(
                   'w-full mt-8',
                   plan.featured
-                    ? 'text-white bg-gradient-to-r from-primary to-orange-400 hover:opacity-90 border-0'
+                    ? 'text-white bg-gradient-to-r from-primary to-orange-400 hover:opacity-90 border-0 shadow-lg shadow-primary/30'
                     : 'bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20'
                 )}
                 size="lg"
