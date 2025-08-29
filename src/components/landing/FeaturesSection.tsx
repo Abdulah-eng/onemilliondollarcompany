@@ -4,10 +4,9 @@ import { Badge } from '@/components/ui/badge';
 
 export default function FeaturesSection() {
   return (
-    // ✅ Section is now relative and has overflow-hidden to contain the full-width scroll
-    <section className="relative py-20 bg-background overflow-hidden">
+    <section className="relative py-20 bg-gradient-to-b from-[#FAF5F0] via-[#DFF7F3] to-[#14B8A6]/10 overflow-hidden">
       
-      {/* This container keeps the header text centered and constrained */}
+      {/* Header */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16" data-reveal>
           <h2 className="mb-4 text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
@@ -19,14 +18,11 @@ export default function FeaturesSection() {
         </div>
       </div>
 
-      {/* This container handles the card layout */}
+      {/* Cards */}
       <div
         className={cn(
-          // Mobile & Tablet: Flexbox for horizontal scrolling edge-to-edge
           "flex gap-6 overflow-x-auto pb-12 px-4 sm:px-6 lg:px-8",
-          // Desktop: Resets to a centered grid
           "lg:grid lg:grid-cols-3 lg:gap-8 lg:max-w-7xl lg:mx-auto lg:overflow-visible",
-          // Scroll utilities
           "scrollbar-hide scroll-px-4 snap-x snap-mandatory"
         )}
         data-reveal
@@ -70,8 +66,8 @@ export default function FeaturesSection() {
         ))}
       </div>
       
-      {/* ✅ TALLER FADE EFFECT for a smoother, more natural blend */}
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background to-transparent" />
+      {/* Bottom fade */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#14B8A6]/20 via-[#DFF7F3]/50 to-transparent" />
     </section>
   );
 }
