@@ -1,10 +1,11 @@
-// src/components/customer/viewprogram/FitnessWorkoutView.tsx
-import { ScheduledTask, FitnessExercise } from "@/mockdata/programs/mockprograms";
+// src/components/customer/viewprogram/exercise/FitnessWorkoutView.tsx
+import { DetailedFitnessTask, FitnessExercise } from "@/mockdata/viewprograms/mockexerciseprograms";
+// ✅ Corrected import path
 import { ExerciseCard } from "./ExerciseCard";
 import { Button } from "@/components/ui/button";
 
 interface FitnessWorkoutViewProps {
-  task: ScheduledTask;
+  task: DetailedFitnessTask;
 }
 
 export default function FitnessWorkoutView({ task }: FitnessWorkoutViewProps) {
