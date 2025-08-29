@@ -9,7 +9,7 @@ import {
 } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ScheduledTask, typeConfig } from "@/mockdata/programs/mockprograms";
-import { useState, useMemo, useEffect, useRef, memo } from "react";
+import { useState, useMemo, useLayoutEffect, useRef, memo } from "react";
 
 // Helper: group dates by week number
 const groupDatesByWeek = (dates: Date[], programStartDate: Date) => {
@@ -50,23 +50,22 @@ const CalendarDay = memo(function CalendarDay({
     <button
       id={id}
       onClick={() => setSelectedDate(date)}
-      // ✅ REPLACED HARDCODED COLORS WITH THEME VARIABLES
       className={cn(
         "p-2 rounded-xl min-w-[60px] text-center flex-shrink-0 flex flex-col items-center justify-center h-24 border-2 transition-transform duration-200",
         isSameDay(date, selectedDate)
-          ? "bg-primary text-primary-foreground border-primary shadow-md scale-105" // Use primary theme color
-          : "bg-card hover:bg-muted border-transparent text-card-foreground", // Use card/muted theme colors
-        isToday(date) && !isSameDay(date, selectedDate) ? "border-primary" : "", // Use primary theme color for border
-        hasMissedTasks && !isSameDay(date, selectedDate) ? "bg-muted text-muted-foreground border-border" : "" // Use muted theme colors
+          ? "bg-primary text-primary-foreground border-primary shadow-md scale-105"
+          : "bg-card hover:bg-muted border-transparent text-card-foreground",
+        isToday(date) && !isSameDay(date, selectedDate) ? "border-primary" : "",
+        hasMissedTasks && !isSameDay(date, selectedDate) ? "bg-muted text-muted-foreground border-border" : ""
       )}
     >
       <div className="text-xs font-medium uppercase opacity-70">{format(date, "EEE")}</div>
       <div className="text-lg font-bold">{format(date, "d")}</div>
       <div className="flex justify-center items-center gap-1.5 mt-1 h-4">
         {distinctTasks.map((task) => {
-          const isTaskMissed = isPast(task.date) && !isToday(task.date) && task.status === 'missed';
+          const isTaskMissed = isPast(task.date) && !isToday(task.date) && task.status === "missed";
           return (
-            <span key={task.id} className={cn('text-sm', isTaskMissed && 'opacity-40 grayscale')}>
+            <span key={task.id} className={cn("text-sm", isTaskMissed && "opacity-40 grayscale")}>
               {typeConfig[task.type].emoji}
             </span>
           );
@@ -112,47 +111,57 @@ export default function HorizontalCalendar({
     });
     return map;
   }, [schedule]);
-  
+
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-  useEffect(() => {
-    const scrollToToday = () => {
-      const todayEl = document.getElementById(`date-${format(new Date(), "yyyy-MM-dd")}`);
-      if (todayEl && scrollRef.current) {
-        const scrollLeft = todayEl.offsetLeft - scrollRef.current.offsetWidth / 2 + todayEl.offsetWidth / 2;
-        scrollRef.current.scrollTo({ left: scrollLeft, behavior: "smooth" });
-      }
-    };
-    const timer = setTimeout(scrollToToday, 100);
-    return () => clearTimeout(timer);
-  }, []);
+  // Scroll to today's date
+  useLayoutEffect(() => {
+    if (!scrollRef.current) return;
+    const todayId = `date-${format(new Date(), "yyyy-MM-dd")}`;
+    const todayEl = document.getElementById(todayId);
+    if (!todayEl) return;
 
-  // Updated Intersection Observer for better reliability
-  useEffect(() => {
+    const container = scrollRef.current;
+    const containerRect = container.getBoundingClientRect();
+    const elementRect = todayEl.getBoundingClientRect();
+
+    const scrollLeft =
+      container.scrollLeft +
+      elementRect.left -
+      containerRect.left -
+      container.offsetWidth / 2 +
+      elementRect.width / 2;
+
+    container.scrollTo({ left: scrollLeft, behavior: "smooth" });
+  }, [groupedDates]);
+
+  // IntersectionObserver to detect visible week
+  useLayoutEffect(() => {
+    if (!scrollRef.current) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-            if (entry.isIntersecting) {
-                const week = entry.target.getAttribute("data-week");
-                if (week) {
-                    setVisibleWeek(Number(week));
-                    return; // Stop after the first intersecting entry
-                }
+          if (entry.isIntersecting) {
+            const week = entry.target.getAttribute("data-week");
+            if (week) {
+              setVisibleWeek(Number(week));
+              break;
             }
+          }
         }
       },
       { root: scrollRef.current, threshold: 0.5 }
     );
 
-    const currentRefs = Object.values(scrollRef.current?.querySelectorAll('[data-week]') || {});
-    currentRefs.forEach((el) => el && observer.observe(el));
-    
+    const weekElements = scrollRef.current.querySelectorAll("[data-week]");
+    weekElements.forEach((el) => observer.observe(el));
+
     return () => observer.disconnect();
   }, [groupedDates]);
 
   return (
     <div className="w-full space-y-4">
-      {/* ✅ REPLACED HARDCODED TEXT COLOR */}
       <div className="text-center font-semibold text-foreground px-2">
         Week {visibleWeek || 1} of {totalWeeks || 1}
       </div>
@@ -167,11 +176,8 @@ export default function HorizontalCalendar({
         {Object.entries(groupedDates).map(([weekNumber, dates]) => (
           <div
             key={`week-${weekNumber}`}
-            data-week={weekNumber} // Added data-week to the week container
-            className={cn(
-              "flex gap-2 justify-center",
-              !isMobile ? "snap-start min-w-full" : ""
-            )}
+            data-week={weekNumber}
+            className={cn("flex gap-2 justify-center", !isMobile ? "snap-start min-w-full" : "")}
           >
             {dates.map((date) => (
               <CalendarDay
