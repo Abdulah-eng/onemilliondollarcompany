@@ -4,7 +4,17 @@ import howItWorksBg from '@/assets/how-it-works-bg.webp';
 
 export default function HowItWorksSection() {
   return (
-    <section className="relative py-12 bg-background overflow-hidden">
+    <section className="relative py-12 overflow-hidden bg-[#DDF5F0]">
+      {/* Background animated blobs */}
+      <div className="absolute inset-0 -z-10">
+        {/* Blob 1 */}
+        <div className="absolute top-[-10%] left-[-10%] w-[400px] h-[400px] bg-[#B2E0D9]/40 rounded-full filter blur-3xl animate-blob"></div>
+        {/* Blob 2 */}
+        <div className="absolute top-[20%] right-[-5%] w-[300px] h-[300px] bg-[#DDF5F0]/30 rounded-full filter blur-2xl animate-blob animation-delay-2000"></div>
+        {/* Blob 3 */}
+        <div className="absolute bottom-[10%] left-[10%] w-[500px] h-[500px] bg-[#B2E0D9]/30 rounded-full filter blur-3xl animate-blob animation-delay-4000"></div>
+      </div>
+
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* DESKTOP LAYOUT */}
         <div className="hidden lg:block">
@@ -76,7 +86,6 @@ export default function HowItWorksSection() {
                 key={step.title}
                 className="relative flex-shrink-0 w-[85%] sm:w-72 snap-center p-6 bg-card rounded-3xl shadow-lg text-center"
               >
-                {/* Step Badge instead of emoji */}
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground text-xl font-bold">
                   {step.badge}
                 </div>
@@ -87,6 +96,24 @@ export default function HowItWorksSection() {
           </div>
         </div>
       </div>
+
+      {/* Animations */}
+      <style jsx>{`
+        @keyframes blob {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        .animate-blob {
+          animation: blob 20s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </section>
   );
 }
