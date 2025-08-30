@@ -115,7 +115,7 @@ export const mockPrograms: Program[] = [
               // ✅ ADDED: `detailedProgramId` for navigation.
               { id: "t13", detailedProgramId: "n-1", type: "nutrition", title: "Lean Gain Meal Plan", content: ["Breakfast", "Lunch", "Dinner"], status: "completed", progress: 100 },
               // ✅ UPDATED: Status changed from "pending" to "missed" for this past task.
-              { id: "t14", type: "mental", title: "Afternoon Reset", content: ["Meditation", "Journaling"], status: "missed", progress: 0 }
+              { id: "t14", detailedProgramId: "t14", type: "mental", title: "Afternoon Reset", content: ["Meditation", "Journaling"], status: "missed", progress: 0 }
             ],
           },
           // ✅ UPDATED: Status changed from "pending" to "missed" as this task was for yesterday.

@@ -46,8 +46,8 @@ export default function ProgramDetailView({
   const config = typeConfig[task.type];
 
   const handleStartClick = () => {
-    if (task.type === "fitness") {
-      navigate(`/program/${task.id}`);
+    if (task.detailedProgramId) {
+      navigate(`/program/${task.type}/${task.detailedProgramId}`);
     }
   };
 
