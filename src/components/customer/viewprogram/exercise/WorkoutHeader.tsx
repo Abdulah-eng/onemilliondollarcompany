@@ -1,9 +1,10 @@
 // src/components/customer/viewprogram/exercise/WorkoutHeader.tsx
+
 import { typeConfig } from "@/mockdata/programs/mockprograms";
 import { DetailedFitnessTask } from "@/mockdata/viewprograms/mockexerciseprograms";
 import { Clock, Dumbbell, ListChecks } from "lucide-react";
 
-const Stat = ({ icon: Icon, label, value }) => (
+const Stat = ({ icon: Icon, label, value }: { icon: any, label: string, value: string | number }) => (
   <div className="flex flex-col items-center text-center">
     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
       <Icon className="h-6 w-6" />
@@ -13,10 +14,9 @@ const Stat = ({ icon: Icon, label, value }) => (
   </div>
 );
 
-// The `task` prop is now expected to be the combined, detailed type
-export default function WorkoutHeader({ task }: { task: any }) {
+export default function WorkoutHeader({ task }: { task: DetailedFitnessTask }) {
   const config = typeConfig[task.type];
-  const exerciseCount = Array.isArray(task.content) ? task.content.length : 0;
+  const exerciseCount = task.exercises.length;
 
   return (
     <div className="relative w-full h-80 overflow-hidden rounded-3xl shadow-xl">
@@ -28,7 +28,7 @@ export default function WorkoutHeader({ task }: { task: any }) {
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
       <div className="relative flex h-full flex-col justify-end p-8 text-white">
         <div>
-          <span className="text-sm font-semibold uppercase tracking-widest opacity-80">{task.programTitle}</span>
+          <span className="text-sm font-semibold uppercase tracking-widest opacity-80">Your Program</span>
           <h1 className="mt-1 text-4xl font-bold tracking-tight drop-shadow-lg">{task.title}</h1>
         </div>
         <div className="mt-6 grid grid-cols-3 gap-4 border-t border-white/20 pt-6">
