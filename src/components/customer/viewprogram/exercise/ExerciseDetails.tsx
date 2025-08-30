@@ -83,6 +83,12 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
     return parts?.trim().split(' ')[0] || "";
   };
 
+  const getPreviousReps = (previousString: string) => {
+    if (!previousString || !previousString.includes('@')) return "";
+    const parts = previousString.split('@')[0];
+    return parts?.trim() || "";
+  };
+
   return (
     // ✅ Main container is now full-width with padding
     <div className="w-full space-y-4 rounded-2xl bg-card border p-4">
@@ -111,49 +117,57 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
         {exercise.sets.map((set, index) => (
           <div 
             key={index} 
-            // ✅ A simpler, more robust grid that works on all screen sizes
-            className="grid grid-cols-10 gap-2 items-center rounded-xl p-2 transition-colors group bg-background"
+            className="grid grid-cols-1 sm:grid-cols-10 gap-3 items-center rounded-xl p-3 transition-colors group bg-background"
           >
             {/* Set Number */}
-            <div className="col-span-1 text-center font-bold text-lg text-primary">{index + 1}</div>
+            <div className="sm:col-span-1 text-left sm:text-center font-bold text-lg text-primary">Set {index + 1}</div>
             
             {/* KG Input */}
-            <div className="col-span-4">
-              <label className="text-xs font-medium text-muted-foreground sm:hidden mb-1.5 block">KG</label>
+            <div className="sm:col-span-4">
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">KG</label>
               <Input
                 type="number"
+                inputMode="decimal"
+                min={0}
                 placeholder={getPreviousKg(set.previous)}
                 value={set.performedKg ?? ""}
                 onChange={(e) => onSetChange(index, { performedKg: parseFloat(e.target.value) || null })}
-                className="w-full h-11 text-center font-semibold text-base"
+                className="no-spinner w-full h-12 sm:h-11 text-center font-semibold text-base"
               />
+              {getPreviousKg(set.previous) && (
+                <div className="mt-1 text-[11px] text-muted-foreground">Prev: {getPreviousKg(set.previous)} kg</div>
+              )}
             </div>
 
             {/* Reps Input */}
-            <div className="col-span-3">
-              <label className="text-xs font-medium text-muted-foreground sm:hidden mb-1.5 block">Reps</label>
+            <div className="sm:col-span-3">
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Reps</label>
               <Input
                 type="number"
+                inputMode="numeric"
+                min={0}
                 placeholder={set.targetReps}
                 value={set.performedReps ?? ""}
                 onChange={(e) => onSetChange(index, { performedReps: parseFloat(e.target.value) || null })}
-                className="w-full h-11 text-center font-semibold text-base"
+                className="no-spinner w-full h-12 sm:h-11 text-center font-semibold text-base"
               />
+              <div className="mt-1 text-[11px] text-muted-foreground">
+                {getPreviousReps(set.previous) ? `Prev: ${getPreviousReps(set.previous)}` : `Target: ${set.targetReps}`}
+              </div>
             </div>
 
             {/* Actions (Checkbox & Remove) */}
-            <div className="col-span-2 flex items-center justify-center h-full gap-1">
+            <div className="sm:col-span-2 flex items-center justify-end sm:justify-center gap-2 pt-1 sm:pt-0">
               <Checkbox
                 checked={set.completed}
                 onCheckedChange={(checked) => onSetChange(index, { completed: !!checked })}
-                // ✅ Balanced button sizes
-                className="h-9 w-9 data-[state=checked]:bg-primary"
+                className="h-10 w-10 sm:h-9 sm:w-9 data-[state=checked]:bg-primary"
               />
               {exercise.sets.length > 1 && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-500"
+                  className="h-10 w-10 sm:h-9 sm:w-9 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-500"
                   onClick={() => onRemoveSet(index)}
                 >
                   <Trash2 className="h-4 w-4" />
