@@ -1,4 +1,3 @@
-// MoreThanPlanSection.tsx
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { MORE_THAN_PLAN_CARDS } from '@/mockdata/landingpage/morethanplan';
@@ -26,8 +25,10 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
 
 export default function MoreThanPlanSection() {
   return (
-    <section className="relative pt-20 pb-32 bg-gradient-to-b from-[#DDF5F0]/70 via-[#B2E0D9]/50 to-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    // ✅ 3. GRADIENT ADJUSTED to fade out higher up
+    <section className="relative pt-20 pb-32 bg-white">
+      <div className="absolute inset-x-0 top-0 h-[500px] bg-gradient-to-b from-[#DDF5F0]/70 via-[#B2E0D9]/30 to-transparent" />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div
           className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-16 items-center"
@@ -51,7 +52,8 @@ export default function MoreThanPlanSection() {
         <div
           className={cn(
             'flex gap-6 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 scroll-px-4',
-            'lg:grid lg:grid-cols-4 lg:gap-8 lg:overflow-visible lg:mx-0 lg:px-0'
+            'lg:grid lg:grid-cols-4 lg:gap-8 lg:overflow-visible lg:mx-0 lg:px-0',
+            'pb-8' // ✅ 2. PADDING ADDED to prevent shadow clipping
           )}
           data-reveal
         >
@@ -60,42 +62,48 @@ export default function MoreThanPlanSection() {
               key={card.title}
               className={cn(
                 'relative flex-shrink-0 w-[90%] sm:w-80 lg:w-auto',
-                'rounded-2xl shadow-lg snap-center overflow-hidden',
-                'text-foreground bg-white/70 backdrop-blur'
+                // ✅ 2. SHADOW ENHANCED
+                'rounded-2xl shadow-2xl shadow-black/20 snap-center overflow-hidden'
               )}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
               {/* Background image */}
               <BlurImage src={card.image} alt={card.title} />
 
+              {/* ✅ 1. GRADIENT OVERLAY ADDED for text contrast */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent rounded-2xl" />
+
               {/* Content */}
-              <div className="relative z-10 p-6 sm:p-8">
-                <h3 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
-                  {card.title}
-                </h3>
-                <p className="text-base leading-relaxed mb-4 text-muted-foreground">
-                  {card.description}
-                </p>
-                <ul className="space-y-2 border-t border-foreground/10 pt-4">
-                  {card.points.map((point, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-sm">
-                      <svg
-                        className="w-4 h-4 text-primary flex-shrink-0 mt-1"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
+              <div className="relative z-10 flex flex-col justify-end h-full p-6 sm:p-8 min-h-[400px]">
+                <div>
+                  {/* ✅ 1. TEXT MADE WHITE */}
+                  <h3 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3 text-white">
+                    {card.title}
+                  </h3>
+                  <p className="text-base leading-relaxed mb-4 text-white/80">
+                    {card.description}
+                  </p>
+                  <ul className="space-y-2 border-t border-white/20 pt-4 text-white">
+                    {card.points.map((point, idx) => (
+                      <li key={idx} className="flex items-start gap-3 text-sm">
+                        <svg
+                          className="w-4 h-4 text-primary flex-shrink-0 mt-1"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
           ))}
