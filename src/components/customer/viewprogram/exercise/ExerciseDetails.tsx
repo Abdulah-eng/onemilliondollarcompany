@@ -4,14 +4,13 @@ import { WorkoutExercise, ExerciseSet } from "@/mockdata/viewprograms/mockexerci
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Timer, PlusCircle, Trash2 } from "lucide-react";
+import { Timer, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ExerciseDetailsProps {
   exercise: WorkoutExercise;
   onSetChange: (setIndex: number, updatedSet: Partial<ExerciseSet>) => void;
   onAddSet: () => void;
-  // onRemoveSet: (setIndex: number) => void; // Optional: Add remove set functionality if needed
 }
 
 export default function ExerciseDetails({ exercise, onSetChange, onAddSet }: ExerciseDetailsProps) {
@@ -77,7 +76,8 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet }: Exe
 
             {/* Reps Input */}
             <div className="col-span-5 sm:col-span-2">
-              <label className="text-xs font-medium text-muted-foreground sm:hidden">Reps</_label>
+              {/* ✅ FIXED: Corrected the closing tag from </_label> to </label> */}
+              <label className="text-xs font-medium text-muted-foreground sm:hidden">Reps</label>
               <Input
                 type="number"
                 placeholder="0"
