@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { WorkoutExercise, ExerciseSet } from "@/mockdata/viewprograms/mockexerciseprograms";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,9 +14,9 @@ interface ExerciseDetailsProps {
   onRemoveSet: (setIndex: number) => void;
 }
 
+// PerformanceInsight component remains the same. It's already working well.
 const PerformanceInsight = ({ sets }: { sets: ExerciseSet[] }) => {
-  // This component's logic remains the same
-  const stats = useMemo(() => {
+    const stats = useMemo(() => {
     let previousTotalKg = 0, previousSetsCount = 0, currentTotalKg = 0, currentSetsCount = 0;
     sets.forEach(set => {
       if (set.previous && set.previous.includes('@')) {
@@ -46,6 +47,74 @@ const PerformanceInsight = ({ sets }: { sets: ExerciseSet[] }) => {
   );
 };
 
+// ✅ NEW: A dedicated component for each set row with swipe-to-delete functionality.
+const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
+  set: ExerciseSet;
+  index: number;
+  onSetChange: (index: number, updatedSet: Partial<ExerciseSet>) => void;
+  onRemoveSet: (index: number) => void;
+  isOnlySet: boolean;
+}) => {
+  const getPreviousKg = (previousString: string) => {
+    if (!previousString || !previousString.includes('@')) return "";
+    return previousString.split('@')[1]?.trim().split(' ')[0] || "";
+  };
+
+  return (
+    <div className="relative rounded-xl bg-background overflow-hidden">
+      {/* --- Delete Background --- */}
+      {!isOnlySet && (
+        <div className="absolute inset-0 bg-red-500 flex justify-end items-center pr-6">
+          <Trash2 className="h-6 w-6 text-white" />
+        </div>
+      )}
+      
+      {/* --- Draggable Set Content --- */}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        onDragEnd={(event, info) => {
+          if (info.offset.x < -100 && !isOnlySet) { // Swipe threshold
+            onRemoveSet(index);
+          }
+        }}
+        className="relative flex items-center gap-3 p-3 bg-background z-10"
+      >
+        <div className="w-8 flex-shrink-0 text-center font-bold text-lg text-primary">{index + 1}</div>
+        
+        <div className="flex-1">
+          <Input
+            type="number" inputMode="decimal"
+            placeholder={getPreviousKg(set.previous)}
+            value={set.performedKg ?? ""}
+            onChange={(e) => onSetChange(index, { performedKg: parseFloat(e.target.value) || null })}
+            className="w-full h-12 text-center font-semibold text-lg"
+          />
+        </div>
+
+        <div className="flex-1">
+          <Input
+            type="number" inputMode="numeric"
+            placeholder={set.targetReps}
+            value={set.performedReps ?? ""}
+            onChange={(e) => onSetChange(index, { performedReps: parseFloat(e.target.value) || null })}
+            className="w-full h-12 text-center font-semibold text-lg"
+          />
+        </div>
+
+        <div className="w-12 flex-shrink-0 flex justify-center">
+          <Checkbox
+            checked={set.completed}
+            onCheckedChange={(checked) => onSetChange(index, { completed: !!checked })}
+            className="h-10 w-10 data-[state=checked]:bg-primary"
+          />
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+
 export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRemoveSet }: ExerciseDetailsProps) {
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -53,19 +122,8 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // ✅ Helper functions to parse previous data for placeholders
-  const getPreviousKg = (previousString: string) => {
-    if (!previousString || !previousString.includes('@')) return "";
-    return previousString.split('@')[1]?.trim().split(' ')[0] || "";
-  };
-
-  const getPreviousReps = (previousString: string) => {
-    if (!previousString || !previousString.includes('@')) return "";
-    return previousString.split('@')[0]?.trim().split(' ')[0] || "";
-  };
-
   return (
-    <div className="w-full space-y-4 rounded-2xl bg-card border p-4">
+    <div className="w-full space-y-5 rounded-2xl bg-card border p-4">
       <div className="flex justify-between items-start gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">{exercise.name}</h2>
@@ -78,80 +136,36 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
         </div>
       </div>
       
-      {/* --- Redesigned Table Header --- */}
-      <div className="flex items-center gap-2 sm:gap-4 px-2 text-xs font-bold uppercase text-muted-foreground">
+      {/* --- Simplified Header --- */}
+      <div className="flex items-center gap-3 px-3 text-xs font-bold uppercase text-muted-foreground">
         <div className="w-8 text-center">Set</div>
-        <div className="flex-1 text-center">Previous</div>
-        <div className="w-16 text-center">KG</div>
-        <div className="w-16 text-center">Reps</div>
-        <div className="w-10 text-center">✓</div>
-        {exercise.sets.length > 1 && <div className="w-8" />}
+        <div className="flex-1 text-center">KG</div>
+        <div className="flex-1 text-center">Reps</div>
+        <div className="w-12 text-center">✓</div>
       </div>
       
-      {/* --- Sets List --- */}
-      <div className="space-y-2">
-        {exercise.sets.map((set, index) => (
-          <div 
-            key={index} 
-            // ✅ A consistent flexbox layout for all screen sizes
-            className="flex items-center gap-2 sm:gap-4 rounded-xl p-2 transition-colors group bg-background"
-          >
-            {/* Set Number */}
-            <div className="w-8 flex-shrink-0 text-center font-bold text-lg text-primary">{index + 1}</div>
-            
-            {/* Previous Performance */}
-            <div className="flex-1 text-center font-mono text-sm text-muted-foreground truncate">
-              {set.previous === "New set" ? "-" : set.previous}
-            </div>
-
-            {/* KG Input */}
-            <div className="w-16 flex-shrink-0">
-              <Input
-                type="number"
-                inputMode="decimal"
-                placeholder={getPreviousKg(set.previous)}
-                value={set.performedKg ?? ""}
-                onChange={(e) => onSetChange(index, { performedKg: parseFloat(e.target.value) || null })}
-                className="w-full h-11 text-center font-semibold text-base"
+      {/* --- Animated Sets List --- */}
+      <div className="space-y-3">
+        <AnimatePresence>
+          {exercise.sets.map((set, index) => (
+            <motion.div
+              key={index} // It's generally better to use a unique ID if available
+              layout
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <SetRow
+                set={set}
+                index={index}
+                onSetChange={onSetChange}
+                onRemoveSet={onRemoveSet}
+                isOnlySet={exercise.sets.length <= 1}
               />
-            </div>
-
-            {/* Reps Input */}
-            <div className="w-16 flex-shrink-0">
-              <Input
-                type="number"
-                inputMode="numeric"
-                placeholder={getPreviousReps(set.previous) || set.targetReps}
-                value={set.performedReps ?? ""}
-                onChange={(e) => onSetChange(index, { performedReps: parseFloat(e.target.value) || null })}
-                className="w-full h-11 text-center font-semibold text-base"
-              />
-            </div>
-
-            {/* Checkbox */}
-            <div className="w-10 flex-shrink-0 flex justify-center">
-                <Checkbox
-                    checked={set.completed}
-                    onCheckedChange={(checked) => onSetChange(index, { completed: !!checked })}
-                    className="h-8 w-8 data-[state=checked]:bg-primary"
-                />
-            </div>
-
-            {/* Remove Button */}
-            <div className="w-8 flex-shrink-0">
-                {exercise.sets.length > 1 && (
-                    <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-500"
-                    onClick={() => onRemoveSet(index)}
-                    >
-                    <Trash2 className="h-4 w-4" />
-                    </Button>
-                )}
-            </div>
-          </div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
 
       <div className="pt-2">
