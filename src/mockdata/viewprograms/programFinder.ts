@@ -4,7 +4,6 @@ import { findExerciseProgramById, DetailedFitnessTask } from "./mockexerciseprog
 import { findNutritionProgramById, DetailedNutritionTask } from "./mocknutritionprograms";
 import { findMentalHealthProgramById, DetailedMentalHealthTask } from "./mockmentalhealthprograms";
 
-// Add DetailedMentalHealthTask to the union type
 export type ProgramData = DetailedFitnessTask | DetailedNutritionTask | DetailedMentalHealthTask;
 
 export const findProgramByIdAndType = (
@@ -16,7 +15,6 @@ export const findProgramByIdAndType = (
       return findExerciseProgramById(id);
     case "nutrition":
       return findNutritionProgramById(id);
-    // Add the new case for mental health
     case "mental":
       return findMentalHealthProgramById(id);
     default:
