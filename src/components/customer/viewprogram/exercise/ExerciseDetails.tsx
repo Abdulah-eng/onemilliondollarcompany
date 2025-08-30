@@ -85,18 +85,18 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
           }
           controls.start({ opacity: 0 });
         }}
-        className="relative grid grid-cols-12 gap-2 sm:gap-3 items-center p-1.5 sm:p-2 bg-background z-10"
+        // ✅ FIXED: Consistent grid and spacing for all screen sizes.
+        className="relative grid grid-cols-12 gap-2 items-center p-2 bg-background z-10"
       >
-        <div className="col-span-1 text-center font-bold text-lg text-primary">{index + 1}</div>
+        <div className="col-span-2 text-center font-bold text-lg text-primary">{index + 1}</div>
         
-        {/* ✅ Adjusted column spans for better proportions */}
-        <div className="col-span-4 sm:col-span-5">
+        <div className="col-span-4">
           <Input
             type="number" inputMode="decimal"
             placeholder={getPreviousKg(set.previous)}
             value={set.performedKg ?? ""}
             onChange={(e) => onSetChange(index, { performedKg: parseFloat(e.target.value) || null })}
-            // ✅ Added .no-spinner and adjusted size/font
+            // ✅ FIXED: Consistent sizing and font for all screens.
             className="no-spinner w-full h-11 text-center font-medium text-base bg-card border-2 border-transparent focus-visible:border-primary"
           />
         </div>
@@ -107,16 +107,15 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
             placeholder={set.targetReps}
             value={set.performedReps ?? ""}
             onChange={(e) => onSetChange(index, { performedReps: parseFloat(e.target.value) || null })}
-            // ✅ Added .no-spinner and adjusted size/font
+            // ✅ FIXED: Consistent sizing and font for all screens.
             className="no-spinner w-full h-11 text-center font-medium text-base bg-card border-2 border-transparent focus-visible:border-primary"
           />
         </div>
 
-        <div className="col-span-3 sm:col-span-2 flex-shrink-0 flex justify-center">
+        <div className="col-span-2 flex-shrink-0 flex justify-center">
           <Checkbox
             checked={set.completed}
             onCheckedChange={(checked) => onSetChange(index, { completed: !!checked })}
-            // ✅ Made checkbox smaller
             className="h-8 w-8 rounded-full data-[state=checked]:bg-primary"
           />
         </div>
@@ -134,7 +133,7 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
   };
 
   return (
-    // ✅ Main container is full width on mobile, with card styles on sm+ screens
+    // ✅ Main container has card styles applied from sm breakpoint and up.
     <div className="w-full space-y-4 sm:rounded-2xl sm:bg-card sm:border sm:p-4">
       <div className="flex justify-between items-start gap-4 px-2 sm:px-0">
         <div>
@@ -149,14 +148,14 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
       </div>
       
       {/* ✅ Header grid proportions adjusted */}
-      <div className="grid grid-cols-12 gap-2 sm:gap-3 px-2 sm:px-4 text-xs font-bold uppercase text-muted-foreground">
-        <div className="col-span-1 text-center">Set</div>
-        <div className="col-span-4 sm:col-span-5 text-center">KG</div>
+      <div className="grid grid-cols-12 gap-2 px-2 text-xs font-bold uppercase text-muted-foreground">
+        <div className="col-span-2 text-center">Set</div>
+        <div className="col-span-4 text-center">KG</div>
         <div className="col-span-4 text-center">Reps</div>
-        <div className="col-span-3 sm:col-span-2 text-center">✓</div>
+        <div className="col-span-2 text-center">✓</div>
       </div>
       
-      <div className="space-y-2 sm:space-y-3">
+      <div className="space-y-3">
         <AnimatePresence>
           {exercise.sets.map((set, index) => (
             <motion.div
