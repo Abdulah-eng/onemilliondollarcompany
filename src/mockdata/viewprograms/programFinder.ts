@@ -2,11 +2,10 @@
 
 import { findExerciseProgramById, DetailedFitnessTask } from "./mockexerciseprograms";
 import { findNutritionProgramById, DetailedNutritionTask } from "./mocknutritionprograms";
-// Import future program types here
-// import { findMentalHealthProgramById, DetailedMentalHealthTask } from "./mockmentalhealthprograms";
+import { findMentalHealthProgramById, DetailedMentalHealthTask } from "./mockmentalhealthprograms";
 
-// A union type that includes all possible program structures
-export type ProgramData = DetailedFitnessTask | DetailedNutritionTask; // | DetailedMentalHealthTask;
+// Add DetailedMentalHealthTask to the union type
+export type ProgramData = DetailedFitnessTask | DetailedNutritionTask | DetailedMentalHealthTask;
 
 export const findProgramByIdAndType = (
   type: string,
@@ -17,8 +16,9 @@ export const findProgramByIdAndType = (
       return findExerciseProgramById(id);
     case "nutrition":
       return findNutritionProgramById(id);
-    // case "mental-health":
-    //   return findMentalHealthProgramById(id);
+    // Add the new case for mental health
+    case "mental":
+      return findMentalHealthProgramById(id);
     default:
       return undefined;
   }
