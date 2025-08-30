@@ -113,8 +113,8 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
           <Checkbox
             checked={set.completed}
             onCheckedChange={(checked) => onSetChange(index, { completed: !!checked })}
-            // ✅ Made checkbox smaller
-            className="h-9 w-9 data-[state=checked]:bg-primary"
+            // ✅ Made checkbox smaller and circular
+            className="h-9 w-9 rounded-full data-[state=checked]:bg-primary"
           />
         </div>
       </motion.div>
@@ -131,7 +131,6 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
   };
 
   return (
-    // ✅ Main container is full width with horizontal padding removed to stretch to edges on mobile
     <div className="w-full space-y-4 sm:rounded-2xl sm:bg-card sm:border sm:p-4">
       <div className="flex justify-between items-start gap-4 px-2 sm:px-0">
         <div>
