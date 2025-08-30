@@ -25,7 +25,8 @@ export interface WorkoutExercise {
 }
 
 export interface DetailedFitnessTask {
-  id: string; 
+  id: string;
+  type: 'fitness'; // Important for dynamic rendering
   title: string;
   coachNotes: string;
   exercises: WorkoutExercise[];
@@ -37,6 +38,7 @@ export interface DetailedFitnessTask {
 const mockDetailedPrograms: DetailedFitnessTask[] = [
   {
     id: "t9",
+    type: 'fitness',
     title: "Push Day",
     duration: "75 min",
     equipment: ["Dumbbell", "Bodyweight"],

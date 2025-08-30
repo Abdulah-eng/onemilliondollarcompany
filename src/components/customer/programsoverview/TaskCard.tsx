@@ -14,9 +14,9 @@ export function TaskCard({ task, onClick }: { task: ScheduledTask; onClick: () =
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (task.type === 'fitness') {
-      // Navigate to program view for fitness tasks
-      navigate(`/program/${task.id}`);
+    if (task.detailedProgramId) {
+      // Navigate to program view for tasks with detailedProgramId
+      navigate(`/program/${task.type}/${task.detailedProgramId}`);
     } else {
       // For other types, we still open the detail slide-in
       onClick();

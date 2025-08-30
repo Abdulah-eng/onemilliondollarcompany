@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Lightbulb } from "lucide-react";
 
-export default function CoachMessage() {
+export default function CoachMessage({ message }: { message: string }) {
   const [isVisible, setIsVisible] = useState(true);
 
   if (!isVisible) return null;
@@ -23,7 +23,7 @@ export default function CoachMessage() {
           <div className="flex-1">
             <h3 className="font-semibold text-slate-800">A Tip From Your Coach</h3>
             <p className="text-sm text-slate-500">
-              Focus on your form, not the weight. Quality reps build better results. You've got this!
+              {message}
             </p>
           </div>
           <button
