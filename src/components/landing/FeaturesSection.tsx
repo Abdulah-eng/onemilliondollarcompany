@@ -44,6 +44,8 @@ export default function FeaturesSection() {
                   loading="lazy"
                   decoding="async"
                 />
+                {/* ✅ ADDED GRADIENT OVERLAY FOR TEXT LEGIBILITY */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               </div>
 
               <div className="relative z-10 p-8 flex flex-col h-full justify-between text-left text-white">
