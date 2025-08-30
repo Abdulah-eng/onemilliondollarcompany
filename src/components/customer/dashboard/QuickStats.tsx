@@ -26,7 +26,6 @@ const QuickStats = () => {
   const planLevels = { otp: 1, standard: 2, premium: 3 };
   const userPlanLevel = planLevels[plan] || 0;
 
-  // FIX: Replaced lucide-react icons with emojis
   const statItems = [
     { label: "Avg. Water", value: stats.avgWater, emoji: '💧', requiredPlan: 'otp', color: 'blue' },
     { label: "Avg. Energy", value: stats.avgEnergy, emoji: '⚡️', requiredPlan: 'otp', color: 'green' },
@@ -54,6 +53,7 @@ const QuickStats = () => {
   );
 };
 
+// Removed 'locked' theme as it's now handled directly in the component
 const statCardThemes = {
     blue: 'from-blue-50 to-blue-100 border-blue-200 text-blue-900',
     green: 'from-emerald-50 to-green-100 border-emerald-200 text-emerald-900',
@@ -61,7 +61,6 @@ const statCardThemes = {
     rose: 'from-rose-50 to-rose-100 border-rose-200 text-rose-900',
     sky: 'from-sky-50 to-sky-100 border-sky-200 text-sky-900',
     purple: 'from-purple-50 to-purple-100 border-purple-200 text-purple-900',
-    locked: 'bg-slate-100 border-slate-200 text-slate-800',
 };
 
 interface StatCardProps {
@@ -74,35 +73,46 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ emoji, label, value, isLocked, trend, color }) => {
-  const theme = isLocked ? statCardThemes.locked : statCardThemes[color];
-  
+  const theme = statCardThemes[color];
+
+  // Locked state with improved composition and dark mode support
+  if (isLocked) {
+    return (
+      <Card className="min-w-[160px] flex-1 shadow-sm border bg-slate-100/80 border-slate-200 dark:bg-slate-800/40 dark:border-slate-700">
+        <CardContent className="p-4 flex flex-col justify-center items-center h-full text-center gap-2">
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+            <span className="text-lg filter grayscale">{emoji}</span>
+            <p className="text-xs font-semibold">{label}</p>
+          </div>
+          <div className="flex flex-col items-center gap-2 mt-1">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+              <Lock size={12} />
+              <span>Premium Feature</span>
+            </div>
+            <Button size="sm" className="h-7 px-3 text-xs bg-orange-500 hover:bg-orange-600 rounded-full">Upgrade</Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Unlocked state with dark mode text fixes
   return (
     <Card className={cn("min-w-[160px] flex-1 shadow-sm hover:shadow-lg transition-all duration-300 border bg-gradient-to-br", theme)}>
         <CardContent className="p-4 flex flex-col justify-between h-full">
-            <div className="flex items-center gap-2 mb-1 text-slate-600">
-                {/* FIX: Render emoji as text in a span */}
+            <div className="flex items-center gap-2 mb-1 text-slate-600 dark:text-slate-300">
                 <span className="text-lg">{emoji}</span>
                 <p className="text-xs font-semibold">{label}</p>
             </div>
             
-            {isLocked ? (
-                <div className="flex flex-col items-start gap-1 mt-2">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-                        <Lock size={12} />
-                        <span>Premium</span>
+            <div className="flex items-baseline gap-1.5 mt-2">
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">{value}</p>
+                {trend && (
+                    <div className={cn("flex items-center font-bold text-xs", trend === 'up' ? 'text-emerald-600' : 'text-rose-600')}>
+                        {trend === 'up' ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
                     </div>
-                    <Button size="sm" className="h-6 px-2 text-xs bg-orange-500 hover:bg-orange-600">Upgrade</Button>
-                </div>
-            ) : (
-                <div className="flex items-baseline gap-1.5 mt-2">
-                    <p className="text-2xl font-bold text-slate-900">{value}</p>
-                    {trend && (
-                        <div className={cn("flex items-center font-bold text-xs", trend === 'up' ? 'text-emerald-600' : 'text-rose-600')}>
-                            {trend === 'up' ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-                        </div>
-                    )}
-                </div>
-            )}
+                )}
+            </div>
         </CardContent>
     </Card>
   );
