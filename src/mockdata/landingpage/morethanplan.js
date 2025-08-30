@@ -1,56 +1,58 @@
 // src/components/landingpage/MoreThanPlanSection.tsx
 
 import { MORE_THAN_PLAN_CARDS } from "@/mockdata/landingpage/morethanplan";
-import { Card, CardContent } from "@/components/ui/card";
 
 export default function MoreThanPlanSection() {
   return (
     <section id="more-than-plan" className="py-20 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground">
             More Than Just a Plan
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Elevate your journey with features designed to keep you inspired, informed, and on track.
+            Extra tools and guidance that go beyond workouts and meals.
           </p>
         </div>
 
-        {/* Cards */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
+        {/* Scrollable cards */}
+        <div className="flex space-x-6 overflow-x-auto pb-4 scrollbar-hide">
           {MORE_THAN_PLAN_CARDS.map((card, index) => (
-            <Card
+            <div
               key={index}
-              className="group overflow-hidden rounded-2xl shadow-lg border border-border hover:shadow-xl transition-shadow"
+              className="relative flex-none w-80 rounded-2xl shadow-md hover:shadow-xl transition-shadow overflow-hidden"
             >
-              <CardContent className="p-8 flex flex-col md:flex-row items-center gap-6">
-                {/* Image */}
-                <div className="flex-shrink-0">
-                  <img
-                    src={card.image}
-                    alt={card.title}
-                    className="w-32 h-32 object-cover rounded-xl shadow-md"
-                  />
-                </div>
+              {/* Image with overlay */}
+              <div className="relative h-48">
+                <img
+                  src={card.image}
+                  alt={card.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-background/30 to-transparent" />
+              </div>
 
-                {/* Text Content */}
-                <div>
-                  <h3 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
-                    {card.title}
-                  </h3>
-                  <p className="mt-2 text-muted-foreground">{card.description}</p>
-                  <ul className="mt-4 space-y-2 text-sm text-foreground">
-                    {card.points.map((point, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <span className="text-primary">•</span>
-                        {point}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Content */}
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-foreground">
+                  {card.title}
+                </h3>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  {card.description}
+                </p>
+
+                {/* Points */}
+                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                  {card.points.map((point, i) => (
+                    <li key={i} className="flex items-start">
+                      <span className="mr-2 text-primary">•</span>
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           ))}
         </div>
       </div>
