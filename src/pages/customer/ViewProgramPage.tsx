@@ -79,8 +79,24 @@ export default function ViewProgramPage() {
     });
   };
 
-  if (loading) { /* ... loading spinner ... */ }
-  if (!workoutData) { /* ... workout not found ... */ }
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!workoutData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Workout not found</h1>
+          <p className="text-muted-foreground">The requested workout could not be found.</p>
+        </div>
+      </div>
+    );
+  }
 
   const selectedExercise = workoutData.exercises.find(ex => ex.id === selectedExerciseId);
   const exerciseGuide = selectedExercise ? findExerciseGuideById(selectedExercise.libraryExerciseId) : null;

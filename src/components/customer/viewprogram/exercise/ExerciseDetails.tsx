@@ -18,7 +18,20 @@ interface ExerciseDetailsProps {
 }
 
 const PerformanceInsight = ({ sets }: { sets: ExerciseSet[] }) => {
-  // ... (The PerformanceInsight component code remains the same)
+  const completedSets = sets.filter(set => set.completed).length;
+  const totalSets = sets.length;
+  const progress = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
+
+  if (completedSets === 0) return null;
+
+  return (
+    <div className="flex items-center gap-2 mt-1">
+      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+        <span>{completedSets}/{totalSets} sets completed</span>
+        {progress === 100 && <span className="text-green-600 font-semibold">✓ Complete</span>}
+      </div>
+    </div>
+  );
 };
 
 

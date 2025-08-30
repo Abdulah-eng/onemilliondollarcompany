@@ -27,7 +27,6 @@ export default function OptimizedMedia({ imageUrl, videoUrl, alt }: OptimizedMed
         loop
         muted
         playsInline // Essential for autoplay on iOS
-        loading="lazy" // Defers loading until element is near the viewport
       >
         Your browser does not support the video tag.
       </video>
