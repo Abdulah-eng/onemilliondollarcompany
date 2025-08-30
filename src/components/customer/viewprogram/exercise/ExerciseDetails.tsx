@@ -16,7 +16,7 @@ interface ExerciseDetailsProps {
 
 // PerformanceInsight component remains the same.
 const PerformanceInsight = ({ sets }: { sets: ExerciseSet[] }) => {
-    const stats = useMemo(() => {
+  const stats = useMemo(() => {
     let previousTotalKg = 0, previousSetsCount = 0, currentTotalKg = 0, currentSetsCount = 0;
     sets.forEach(set => {
       if (set.previous && set.previous.includes('@')) {
@@ -64,11 +64,11 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
     <div className="relative bg-background rounded-xl overflow-hidden">
       {!isOnlySet && (
         <motion.div
-            className="absolute inset-0 bg-red-600 flex justify-end items-center pr-6 z-0"
-            initial={{ opacity: 0 }}
-            animate={controls}
+          className="absolute inset-0 bg-red-600 flex justify-end items-center pr-6 z-0"
+          initial={{ opacity: 0 }}
+          animate={controls}
         >
-            <Trash2 className="h-6 w-6 text-white" />
+          <Trash2 className="h-6 w-6 text-white" />
         </motion.div>
       )}
       
@@ -77,7 +77,7 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.2}
         onDrag={(event, info) => {
-            controls.start({ opacity: info.offset.x < -20 ? 1 : 0 });
+          controls.start({ opacity: info.offset.x < -20 ? 1 : 0 });
         }}
         onDragEnd={(event, info) => {
           if (info.offset.x < -80 && !isOnlySet) {
@@ -85,33 +85,34 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
           }
           controls.start({ opacity: 0 });
         }}
-        // ✅ FIXED: Consistent grid and spacing for all screen sizes.
         className="relative grid grid-cols-12 gap-2 items-center p-2 bg-background z-10"
       >
+        {/* Set number */}
         <div className="col-span-2 text-center font-bold text-lg text-primary">{index + 1}</div>
         
-        <div className="col-span-4">
+        {/* KG smaller */}
+        <div className="col-span-3">
           <Input
             type="number" inputMode="decimal"
             placeholder={getPreviousKg(set.previous)}
             value={set.performedKg ?? ""}
             onChange={(e) => onSetChange(index, { performedKg: parseFloat(e.target.value) || null })}
-            // ✅ FIXED: Consistent sizing and font for all screens.
             className="no-spinner w-full h-11 text-center font-medium text-base bg-card border-2 border-transparent focus-visible:border-primary"
           />
         </div>
 
-        <div className="col-span-4">
+        {/* Reps stretched */}
+        <div className="col-span-5">
           <Input
             type="number" inputMode="numeric"
             placeholder={set.targetReps}
             value={set.performedReps ?? ""}
             onChange={(e) => onSetChange(index, { performedReps: parseFloat(e.target.value) || null })}
-            // ✅ FIXED: Consistent sizing and font for all screens.
             className="no-spinner w-full h-11 text-center font-medium text-base bg-card border-2 border-transparent focus-visible:border-primary"
           />
         </div>
 
+        {/* Checkbox */}
         <div className="col-span-2 flex-shrink-0 flex justify-center">
           <Checkbox
             checked={set.completed}
@@ -133,12 +134,14 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
   };
 
   return (
-    // ✅ Main container has card styles applied from sm breakpoint and up.
     <div className="w-full space-y-4 sm:rounded-2xl sm:bg-card sm:border sm:p-4">
+      {/* Header */}
       <div className="flex justify-between items-start gap-4 px-2 sm:px-0">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">{exercise.name}</h2>
-          <p className="text-sm font-semibold text-muted-foreground">{exercise.targetSets} Sets | Target: {exercise.sets[0]?.targetReps} Reps</p>
+          <p className="text-sm font-semibold text-muted-foreground">
+            {exercise.targetSets} Sets | Target: {exercise.sets[0]?.targetReps} Reps
+          </p>
           <PerformanceInsight sets={exercise.sets} />
         </div>
         <div className="flex items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-secondary-foreground flex-shrink-0">
@@ -147,14 +150,15 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
         </div>
       </div>
       
-      {/* ✅ Header grid proportions adjusted */}
+      {/* Header grid */}
       <div className="grid grid-cols-12 gap-2 px-2 text-xs font-bold uppercase text-muted-foreground">
         <div className="col-span-2 text-center">Set</div>
-        <div className="col-span-4 text-center">KG</div>
-        <div className="col-span-4 text-center">Reps</div>
+        <div className="col-span-3 text-center">KG</div>
+        <div className="col-span-5 text-center">Reps</div>
         <div className="col-span-2 text-center">✓</div>
       </div>
       
+      {/* Sets */}
       <div className="space-y-3">
         <AnimatePresence>
           {exercise.sets.map((set, index) => (
@@ -178,6 +182,7 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
         </AnimatePresence>
       </div>
 
+      {/* Add set button */}
       <div className="pt-2 px-2 sm:px-0">
         <Button
           onClick={onAddSet}
