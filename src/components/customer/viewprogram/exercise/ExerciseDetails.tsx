@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useMemo } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { WorkoutExercise, ExerciseSet } from "@/mockdata/viewprograms/mockexerciseprograms";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -55,54 +55,66 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
   onRemoveSet: (index: number) => void;
   isOnlySet: boolean;
 }) => {
+  const controls = useAnimation();
   const getPreviousKg = (previousString: string) => {
     if (!previousString || !previousString.includes('@')) return "";
     return previousString.split('@')[1]?.trim().split(' ')[0] || "";
   };
 
   return (
-    <div className="relative rounded-xl bg-background overflow-hidden">
+    <div className="relative bg-background rounded-xl overflow-hidden">
       {/* --- Delete Background --- */}
       {!isOnlySet && (
-        <div className="absolute inset-0 bg-red-500 flex justify-end items-center pr-6">
-          <Trash2 className="h-6 w-6 text-white" />
-        </div>
+        <motion.div
+            className="absolute inset-0 bg-red-600 flex justify-end items-center pr-6 z-0"
+            initial={{ opacity: 0 }}
+            animate={controls}
+        >
+            <Trash2 className="h-6 w-6 text-white" />
+        </motion.div>
       )}
       
       {/* --- Draggable Set Content --- */}
       <motion.div
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDrag={(event, info) => {
+            // Animate background opacity based on drag
+            controls.start({ opacity: info.offset.x < -20 ? 1 : 0 });
+        }}
         onDragEnd={(event, info) => {
-          if (info.offset.x < -100 && !isOnlySet) { // Swipe threshold
+          if (info.offset.x < -80 && !isOnlySet) { // Swipe threshold
             onRemoveSet(index);
           }
+          // Reset background opacity if not deleted
+          controls.start({ opacity: 0 });
         }}
-        className="relative flex items-center gap-3 p-3 bg-background z-10"
+        className="relative grid grid-cols-12 gap-3 items-center p-2 bg-background z-10"
       >
-        <div className="w-8 flex-shrink-0 text-center font-bold text-lg text-primary">{index + 1}</div>
+        <div className="col-span-1 text-center font-bold text-lg text-primary">{index + 1}</div>
         
-        <div className="flex-1">
+        <div className="col-span-5">
           <Input
             type="number" inputMode="decimal"
             placeholder={getPreviousKg(set.previous)}
             value={set.performedKg ?? ""}
             onChange={(e) => onSetChange(index, { performedKg: parseFloat(e.target.value) || null })}
-            className="w-full h-12 text-center font-semibold text-lg"
+            className="w-full h-12 text-center font-semibold text-lg bg-card border-2 border-transparent focus-visible:border-primary"
           />
         </div>
 
-        <div className="flex-1">
+        <div className="col-span-4">
           <Input
             type="number" inputMode="numeric"
             placeholder={set.targetReps}
             value={set.performedReps ?? ""}
             onChange={(e) => onSetChange(index, { performedReps: parseFloat(e.target.value) || null })}
-            className="w-full h-12 text-center font-semibold text-lg"
+            className="w-full h-12 text-center font-semibold text-lg bg-card border-2 border-transparent focus-visible:border-primary"
           />
         </div>
 
-        <div className="w-12 flex-shrink-0 flex justify-center">
+        <div className="col-span-2 flex-shrink-0 flex justify-center">
           <Checkbox
             checked={set.completed}
             onCheckedChange={(checked) => onSetChange(index, { completed: !!checked })}
@@ -114,7 +126,6 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
   );
 };
 
-
 export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRemoveSet }: ExerciseDetailsProps) {
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -123,8 +134,9 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
   };
 
   return (
-    <div className="w-full space-y-5 rounded-2xl bg-card border p-4">
-      <div className="flex justify-between items-start gap-4">
+    // ✅ REMOVED: The outer container with border and padding is gone.
+    <div className="w-full space-y-4">
+      <div className="flex justify-between items-start gap-4 px-2">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">{exercise.name}</h2>
           <p className="text-sm font-semibold text-muted-foreground">{exercise.targetSets} Sets | Target: {exercise.sets[0]?.targetReps} Reps</p>
@@ -137,11 +149,11 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
       </div>
       
       {/* --- Simplified Header --- */}
-      <div className="flex items-center gap-3 px-3 text-xs font-bold uppercase text-muted-foreground">
-        <div className="w-8 text-center">Set</div>
-        <div className="flex-1 text-center">KG</div>
-        <div className="flex-1 text-center">Reps</div>
-        <div className="w-12 text-center">✓</div>
+      <div className="grid grid-cols-12 gap-3 px-4 text-xs font-bold uppercase text-muted-foreground">
+        <div className="col-span-1 text-center">Set</div>
+        <div className="col-span-5 text-center">KG</div>
+        <div className="col-span-4 text-center">Reps</div>
+        <div className="col-span-2 text-center">✓</div>
       </div>
       
       {/* --- Animated Sets List --- */}
@@ -149,11 +161,11 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
         <AnimatePresence>
           {exercise.sets.map((set, index) => (
             <motion.div
-              key={index} // It's generally better to use a unique ID if available
+              key={index} // It's better to use a unique ID if sets have one
               layout
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: -100 }}
+              exit={{ opacity: 0, x: -300, transition: { duration: 0.3 } }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
               <SetRow
