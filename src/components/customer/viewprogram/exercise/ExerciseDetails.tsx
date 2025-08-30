@@ -14,7 +14,7 @@ interface ExerciseDetailsProps {
   onRemoveSet: (setIndex: number) => void;
 }
 
-// PerformanceInsight component remains the same. It's already working well.
+// PerformanceInsight component remains the same.
 const PerformanceInsight = ({ sets }: { sets: ExerciseSet[] }) => {
     const stats = useMemo(() => {
     let previousTotalKg = 0, previousSetsCount = 0, currentTotalKg = 0, currentSetsCount = 0;
@@ -47,7 +47,6 @@ const PerformanceInsight = ({ sets }: { sets: ExerciseSet[] }) => {
   );
 };
 
-// ✅ NEW: A dedicated component for each set row with swipe-to-delete functionality.
 const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
   set: ExerciseSet;
   index: number;
@@ -63,7 +62,6 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
 
   return (
     <div className="relative bg-background rounded-xl overflow-hidden">
-      {/* --- Delete Background --- */}
       {!isOnlySet && (
         <motion.div
             className="absolute inset-0 bg-red-600 flex justify-end items-center pr-6 z-0"
@@ -74,20 +72,17 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
         </motion.div>
       )}
       
-      {/* --- Draggable Set Content --- */}
       <motion.div
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.2}
         onDrag={(event, info) => {
-            // Animate background opacity based on drag
             controls.start({ opacity: info.offset.x < -20 ? 1 : 0 });
         }}
         onDragEnd={(event, info) => {
-          if (info.offset.x < -80 && !isOnlySet) { // Swipe threshold
+          if (info.offset.x < -80 && !isOnlySet) {
             onRemoveSet(index);
           }
-          // Reset background opacity if not deleted
           controls.start({ opacity: 0 });
         }}
         className="relative grid grid-cols-12 gap-3 items-center p-2 bg-background z-10"
@@ -100,7 +95,7 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
             placeholder={getPreviousKg(set.previous)}
             value={set.performedKg ?? ""}
             onChange={(e) => onSetChange(index, { performedKg: parseFloat(e.target.value) || null })}
-            className="w-full h-12 text-center font-semibold text-lg bg-card border-2 border-transparent focus-visible:border-primary"
+            className="no-spinner w-full h-12 text-center font-semibold text-lg bg-card border-2 border-transparent focus-visible:border-primary"
           />
         </div>
 
@@ -110,7 +105,7 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
             placeholder={set.targetReps}
             value={set.performedReps ?? ""}
             onChange={(e) => onSetChange(index, { performedReps: parseFloat(e.target.value) || null })}
-            className="w-full h-12 text-center font-semibold text-lg bg-card border-2 border-transparent focus-visible:border-primary"
+            className="no-spinner w-full h-12 text-center font-semibold text-lg bg-card border-2 border-transparent focus-visible:border-primary"
           />
         </div>
 
@@ -118,13 +113,15 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
           <Checkbox
             checked={set.completed}
             onCheckedChange={(checked) => onSetChange(index, { completed: !!checked })}
-            className="h-10 w-10 data-[state=checked]:bg-primary"
+            // ✅ Made checkbox smaller
+            className="h-9 w-9 data-[state=checked]:bg-primary"
           />
         </div>
       </motion.div>
     </div>
   );
 };
+
 
 export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRemoveSet }: ExerciseDetailsProps) {
   const formatTime = (seconds: number) => {
@@ -134,9 +131,9 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
   };
 
   return (
-    // ✅ REMOVED: The outer container with border and padding is gone.
-    <div className="w-full space-y-4">
-      <div className="flex justify-between items-start gap-4 px-2">
+    // ✅ Main container is full width with horizontal padding removed to stretch to edges on mobile
+    <div className="w-full space-y-4 sm:rounded-2xl sm:bg-card sm:border sm:p-4">
+      <div className="flex justify-between items-start gap-4 px-2 sm:px-0">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">{exercise.name}</h2>
           <p className="text-sm font-semibold text-muted-foreground">{exercise.targetSets} Sets | Target: {exercise.sets[0]?.targetReps} Reps</p>
@@ -148,20 +145,18 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
         </div>
       </div>
       
-      {/* --- Simplified Header --- */}
-      <div className="grid grid-cols-12 gap-3 px-4 text-xs font-bold uppercase text-muted-foreground">
+      <div className="grid grid-cols-12 gap-3 px-2 sm:px-4 text-xs font-bold uppercase text-muted-foreground">
         <div className="col-span-1 text-center">Set</div>
         <div className="col-span-5 text-center">KG</div>
         <div className="col-span-4 text-center">Reps</div>
         <div className="col-span-2 text-center">✓</div>
       </div>
       
-      {/* --- Animated Sets List --- */}
       <div className="space-y-3">
         <AnimatePresence>
           {exercise.sets.map((set, index) => (
             <motion.div
-              key={index} // It's better to use a unique ID if sets have one
+              key={index}
               layout
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -180,7 +175,7 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
         </AnimatePresence>
       </div>
 
-      <div className="pt-2">
+      <div className="pt-2 px-2 sm:px-0">
         <Button
           onClick={onAddSet}
           variant="outline"
