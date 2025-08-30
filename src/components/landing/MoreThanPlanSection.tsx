@@ -1,3 +1,4 @@
+// MoreThanPlanSection.tsx
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { MORE_THAN_PLAN_CARDS } from '@/mockdata/landingpage/morethanplan';
@@ -19,8 +20,8 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
         decoding="async"
         onLoad={() => setLoaded(true)}
       />
-      {/* Light overlay */}
-      <div className="absolute inset-0 bg-black/20 rounded-2xl" />
+      {/* Dark overlay for text readability */}
+      <div className="absolute inset-0 bg-black/30 rounded-2xl" />
     </div>
   );
 }
@@ -62,31 +63,30 @@ export default function MoreThanPlanSection() {
               className={cn(
                 'relative flex-shrink-0 w-[90%] sm:w-80 lg:w-auto',
                 'rounded-2xl shadow-lg snap-center overflow-hidden',
-                'bg-white/90 backdrop-blur-sm'
+                'text-white' // text should be white on dark overlay
               )}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              {/* Background image with overlay */}
+              {/* Background image */}
               <BlurImage src={card.image} alt={card.title} />
 
               {/* Content */}
-              <div className="relative z-10 p-6 sm:p-8 text-foreground">
+              <div className="relative z-10 p-6 sm:p-8">
                 <h3 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
                   {card.title}
                 </h3>
-                <p className="text-base leading-relaxed text-muted-foreground mb-4">
+                <p className="text-base leading-relaxed mb-4 opacity-90">
                   {card.description}
                 </p>
-                <ul className="space-y-2 border-t border-border pt-4">
+                <ul className="space-y-2 border-t border-white/30 pt-4">
                   {card.points.map((point, idx) => (
                     <li key={idx} className="flex items-start gap-3 text-sm">
                       <svg
-                        className="w-4 h-4 text-primary flex-shrink-0 mt-1"
+                        className="w-4 h-4 text-teal-300 flex-shrink-0 mt-1"
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2.5"
                         viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
                           strokeLinecap="round"
