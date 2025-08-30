@@ -6,14 +6,14 @@ import { ScheduledTask } from '@/mockdata/programs/mockprograms';
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
 
-export default function SlideInDetail({ 
-  task, 
-  isMobile, 
-  onClose 
-}: { 
-  task: ScheduledTask | null, 
-  isMobile: boolean, 
-  onClose: () => void 
+export default function SlideInDetail({
+  task,
+  isMobile,
+  onClose
+}: {
+  task: ScheduledTask | null,
+  isMobile: boolean,
+  onClose: () => void
 }) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -31,8 +31,8 @@ export default function SlideInDetail({
   // For mobile, the Drawer component handles its own layout correctly.
   if (isMobile) {
     return (
-      <Drawer open={!!task} onOpenChange={(open) => !open && onClose()}>
-        <DrawerContent className="h-[90%] rounded-t-3xl">
+      <Drawer open={!!task} onOpenChange={(open) => !open && onClose()} closeThreshold={0.4}>
+        <DrawerContent className="h-[90%] rounded-t-3xl border-none bg-slate-50 dark:bg-background">
           <ProgramDetailView task={task} />
         </DrawerContent>
       </Drawer>
