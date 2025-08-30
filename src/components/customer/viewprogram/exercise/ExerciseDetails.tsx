@@ -1,11 +1,8 @@
-// src/components/customer/viewprogram/exercise/ExerciseDetails.tsx
-
 import { useMemo } from "react";
 import { WorkoutExercise, ExerciseSet } from "@/mockdata/viewprograms/mockexerciseprograms";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-// ✅ Import Trash2 icon
 import { Timer, PlusCircle, TrendingUp, TrendingDown, Minus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,29 +10,84 @@ interface ExerciseDetailsProps {
   exercise: WorkoutExercise;
   onSetChange: (setIndex: number, updatedSet: Partial<ExerciseSet>) => void;
   onAddSet: () => void;
-  // ✅ Add the new prop to the interface
   onRemoveSet: (setIndex: number) => void;
 }
 
+// ✅ FIXED: Restored the component to calculate and display the performance trend.
 const PerformanceInsight = ({ sets }: { sets: ExerciseSet[] }) => {
-  const completedSets = sets.filter(set => set.completed).length;
-  const totalSets = sets.length;
-  const progress = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
+  const stats = useMemo(() => {
+    let previousTotalKg = 0;
+    let previousSetsCount = 0;
+    let currentTotalKg = 0;
+    let currentSetsCount = 0;
 
-  if (completedSets === 0) return null;
+    sets.forEach(set => {
+      // Calculate previous performance from strings like "8 reps @ 40 kg"
+      if (set.previous && set.previous.includes('@')) {
+        const parts = set.previous.split('@')[1];
+        const kg = parseFloat(parts);
+        if (!isNaN(kg)) {
+          previousTotalKg += kg;
+          previousSetsCount++;
+        }
+      }
+      // Calculate current performance from user input
+      if (set.performedKg !== null && set.performedKg > 0) {
+        currentTotalKg += set.performedKg;
+        currentSetsCount++;
+      }
+    });
+
+    // Don't show anything if there's no past data to compare against
+    if (previousSetsCount === 0) return null;
+
+    const previousAvgKg = previousTotalKg / previousSetsCount;
+    
+    // If no sets are performed yet, just show the previous average
+    if (currentSetsCount === 0) {
+      return {
+        text: `Last time you averaged ${previousAvgKg.toFixed(1)} kg.`,
+        Icon: Minus,
+        color: "text-muted-foreground",
+      };
+    }
+
+    const currentAvgKg = currentTotalKg / currentSetsCount;
+    const trend = ((currentAvgKg - previousAvgKg) / previousAvgKg) * 100;
+
+    if (trend > 1) {
+      return {
+        text: `Up ${trend.toFixed(0)}% from last time!`,
+        Icon: TrendingUp,
+        color: "text-emerald-500",
+      };
+    } else if (trend < -1) {
+      return {
+        text: `Down ${Math.abs(trend).toFixed(0)}% from last time.`,
+        Icon: TrendingDown,
+        color: "text-red-500",
+      };
+    } else {
+      return {
+        text: "Maintaining your strength. Solid work!",
+        Icon: Minus,
+        color: "text-blue-500",
+      };
+    }
+  }, [sets]);
+
+  if (!stats) return null;
+
+  const { text, Icon, color } = stats;
 
   return (
-    <div className="flex items-center gap-2 mt-1">
-      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-        <span>{completedSets}/{totalSets} sets completed</span>
-        {progress === 100 && <span className="text-green-600 font-semibold">✓ Complete</span>}
-      </div>
+    <div className={cn("flex items-center gap-2 mt-2 text-xs font-semibold font-sans", color)}>
+      <Icon className="w-4 h-4" />
+      <span>{text}</span>
     </div>
   );
 };
 
-
-// ✅ Update the function signature to accept onRemoveSet
 export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRemoveSet }: ExerciseDetailsProps) {
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -103,14 +155,13 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
               />
             </div>
 
-            {/* ✅ Checkbox & Remove Button Container */}
+            {/* Checkbox & Remove Button Container */}
             <div className="col-span-3 flex items-center justify-center h-full gap-1 sm:gap-2">
               <Checkbox
                 checked={set.completed}
                 onCheckedChange={(checked) => onSetChange(index, { completed: !!checked })}
                 className="h-8 w-8"
               />
-              {/* ✅ Show remove button only if there's more than 1 set */}
               {exercise.sets.length > 1 && (
                 <Button
                   variant="ghost"
