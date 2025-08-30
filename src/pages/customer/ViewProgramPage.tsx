@@ -1,5 +1,3 @@
-// src/pages/customer/ViewProgramPage.tsx
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { findExerciseProgramById, DetailedFitnessTask, ExerciseSet } from "@/mockdata/viewprograms/mockexerciseprograms";
@@ -12,15 +10,9 @@ import ExerciseGuide from "@/components/customer/library/exercises/ExerciseGuide
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Note: The old FitnessWorkoutView, ExerciseCard, and ExerciseSetLogger are no longer needed and can be deleted.
-
-type CombinedWorkoutTask = DetailedFitnessTask & { type: "fitness"; programTitle?: string };
-
 export default function ViewProgramPage() {
   const { id } = useParams<{ id: string }>();
-  // State for the entire workout data, which can be modified
   const [workoutData, setWorkoutData] = useState<DetailedFitnessTask | null>(null);
-  // State to track the currently selected exercise
   const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,7 +21,6 @@ export default function ViewProgramPage() {
       const program = findExerciseProgramById(id);
       if (program) {
         setWorkoutData(program);
-        // Set the first exercise as the default selected one
         if (program.exercises.length > 0) {
           setSelectedExerciseId(program.exercises[0].id);
         }
@@ -38,21 +29,45 @@ export default function ViewProgramPage() {
     setLoading(false);
   }, [id]);
 
-  // Handler to update the state when a set is changed (e.g., kg input or checkbox)
   const handleSetChange = (exerciseId: string, setIndex: number, updatedSet: Partial<ExerciseSet>) => {
     setWorkoutData(prevData => {
       if (!prevData) return null;
       
-      const newWorkoutData = { ...prevData };
-      const exerciseIndex = newWorkoutData.exercises.findIndex(ex => ex.id === exerciseId);
+      const newWorkoutData = JSON.parse(JSON.stringify(prevData));
+      const exerciseToUpdate = newWorkoutData.exercises.find((ex: { id: string; }) => ex.id === exerciseId);
       
-      if (exerciseIndex > -1) {
-        const newSets = [...newWorkoutData.exercises[exerciseIndex].sets];
-        newSets[setIndex] = { ...newSets[setIndex], ...updatedSet };
-        newWorkoutData.exercises[exerciseIndex] = { ...newWorkoutData.exercises[exerciseIndex], sets: newSets };
-        return newWorkoutData;
+      if (exerciseToUpdate) {
+        Object.assign(exerciseToUpdate.sets[setIndex], updatedSet);
       }
-      return prevData;
+      return newWorkoutData;
+    });
+  };
+
+  /**
+   * ✅ Handles adding a new set to the currently selected exercise.
+   */
+  const handleAddSet = (exerciseId: string) => {
+    setWorkoutData(prevData => {
+      if (!prevData) return null;
+
+      const newWorkoutData = JSON.parse(JSON.stringify(prevData));
+      const exerciseToUpdate = newWorkoutData.exercises.find((ex: { id: string; }) => ex.id === exerciseId);
+
+      if (exerciseToUpdate) {
+        const lastSet = exerciseToUpdate.sets[exerciseToUpdate.sets.length - 1];
+
+        // Create a new set, copying the target from the last set or using a default.
+        const newSet: ExerciseSet = {
+          targetReps: lastSet?.targetReps || "8-12",
+          performedKg: null,
+          performedReps: null,
+          completed: false,
+          previous: "New set",
+        };
+
+        exerciseToUpdate.sets.push(newSet);
+      }
+      return newWorkoutData;
     });
   };
 
@@ -71,12 +86,11 @@ export default function ViewProgramPage() {
   const selectedExercise = workoutData.exercises.find(ex => ex.id === selectedExerciseId);
   const exerciseGuide = selectedExercise ? findExerciseGuideById(selectedExercise.libraryExerciseId) : null;
   
-  // Prepare data for the header
   const headerTask = {
     ...workoutData,
     type: "fitness",
-    programTitle: "Your Program", // Add logic to get program title if needed
-    content: workoutData.exercises, // WorkoutHeader expects a 'content' prop
+    programTitle: "Your Program",
+    content: workoutData.exercises,
   };
 
   return (
@@ -98,6 +112,8 @@ export default function ViewProgramPage() {
               onSetChange={(setIndex, updatedValues) =>
                 handleSetChange(selectedExercise.id, setIndex, updatedValues)
               }
+              // ✅ Pass the new handler to the component
+              onAddSet={() => handleAddSet(selectedExercise.id)}
             />
           )}
 
