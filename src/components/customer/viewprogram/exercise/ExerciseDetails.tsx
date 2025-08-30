@@ -85,17 +85,19 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
           }
           controls.start({ opacity: 0 });
         }}
-        className="relative grid grid-cols-12 gap-3 items-center p-2 bg-background z-10"
+        className="relative grid grid-cols-12 gap-2 sm:gap-3 items-center p-1.5 sm:p-2 bg-background z-10"
       >
         <div className="col-span-1 text-center font-bold text-lg text-primary">{index + 1}</div>
         
-        <div className="col-span-5">
+        {/* ✅ Adjusted column spans for better proportions */}
+        <div className="col-span-4 sm:col-span-5">
           <Input
             type="number" inputMode="decimal"
             placeholder={getPreviousKg(set.previous)}
             value={set.performedKg ?? ""}
             onChange={(e) => onSetChange(index, { performedKg: parseFloat(e.target.value) || null })}
-            className="no-spinner w-full h-12 text-center font-semibold text-lg bg-card border-2 border-transparent focus-visible:border-primary"
+            // ✅ Added .no-spinner and adjusted size/font
+            className="no-spinner w-full h-11 text-center font-medium text-base bg-card border-2 border-transparent focus-visible:border-primary"
           />
         </div>
 
@@ -105,16 +107,17 @@ const SetRow = ({ set, index, onSetChange, onRemoveSet, isOnlySet }: {
             placeholder={set.targetReps}
             value={set.performedReps ?? ""}
             onChange={(e) => onSetChange(index, { performedReps: parseFloat(e.target.value) || null })}
-            className="no-spinner w-full h-12 text-center font-semibold text-lg bg-card border-2 border-transparent focus-visible:border-primary"
+            // ✅ Added .no-spinner and adjusted size/font
+            className="no-spinner w-full h-11 text-center font-medium text-base bg-card border-2 border-transparent focus-visible:border-primary"
           />
         </div>
 
-        <div className="col-span-2 flex-shrink-0 flex justify-center">
+        <div className="col-span-3 sm:col-span-2 flex-shrink-0 flex justify-center">
           <Checkbox
             checked={set.completed}
             onCheckedChange={(checked) => onSetChange(index, { completed: !!checked })}
-            // ✅ Made checkbox smaller and circular
-            className="h-9 w-9 rounded-full data-[state=checked]:bg-primary"
+            // ✅ Made checkbox smaller
+            className="h-8 w-8 rounded-full data-[state=checked]:bg-primary"
           />
         </div>
       </motion.div>
@@ -131,6 +134,7 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
   };
 
   return (
+    // ✅ Main container is full width on mobile, with card styles on sm+ screens
     <div className="w-full space-y-4 sm:rounded-2xl sm:bg-card sm:border sm:p-4">
       <div className="flex justify-between items-start gap-4 px-2 sm:px-0">
         <div>
@@ -144,23 +148,24 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
         </div>
       </div>
       
-      <div className="grid grid-cols-12 gap-3 px-2 sm:px-4 text-xs font-bold uppercase text-muted-foreground">
+      {/* ✅ Header grid proportions adjusted */}
+      <div className="grid grid-cols-12 gap-2 sm:gap-3 px-2 sm:px-4 text-xs font-bold uppercase text-muted-foreground">
         <div className="col-span-1 text-center">Set</div>
-        <div className="col-span-5 text-center">KG</div>
+        <div className="col-span-4 sm:col-span-5 text-center">KG</div>
         <div className="col-span-4 text-center">Reps</div>
-        <div className="col-span-2 text-center">✓</div>
+        <div className="col-span-3 sm:col-span-2 text-center">✓</div>
       </div>
       
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         <AnimatePresence>
           {exercise.sets.map((set, index) => (
             <motion.div
               key={index}
               layout
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: -300, transition: { duration: 0.3 } }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, x: -300, transition: { duration: 0.2 } }}
+              transition={{ type: "spring", stiffness: 350, damping: 35 }}
             >
               <SetRow
                 set={set}
