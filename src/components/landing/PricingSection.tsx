@@ -122,4 +122,22 @@ const PricingSection = () => {
 
               <Button
                 asChild
-        _**[Remaining code truncated for brevity]**_
+                className={cn(
+                  'w-full mt-8',
+                  plan.featured
+                    ? 'text-white bg-primary hover:bg-primary/90 border-0 shadow-lg shadow-primary/30' // Solid color button
+                    : 'bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20'
+                )}
+                size="lg"
+              >
+                <Link to="/get-started">{plan.cta}</Link>
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default PricingSection;
