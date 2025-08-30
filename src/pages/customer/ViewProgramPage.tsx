@@ -1,3 +1,5 @@
+// src/pages/customer/ViewProgramPage.tsx
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { findExerciseProgramById, DetailedFitnessTask, ExerciseSet } from "@/mockdata/viewprograms/mockexerciseprograms";
@@ -32,10 +34,8 @@ export default function ViewProgramPage() {
   const handleSetChange = (exerciseId: string, setIndex: number, updatedSet: Partial<ExerciseSet>) => {
     setWorkoutData(prevData => {
       if (!prevData) return null;
-      
       const newWorkoutData = JSON.parse(JSON.stringify(prevData));
       const exerciseToUpdate = newWorkoutData.exercises.find((ex: { id: string; }) => ex.id === exerciseId);
-      
       if (exerciseToUpdate) {
         Object.assign(exerciseToUpdate.sets[setIndex], updatedSet);
       }
@@ -43,20 +43,13 @@ export default function ViewProgramPage() {
     });
   };
 
-  /**
-   * ✅ Handles adding a new set to the currently selected exercise.
-   */
   const handleAddSet = (exerciseId: string) => {
     setWorkoutData(prevData => {
       if (!prevData) return null;
-
       const newWorkoutData = JSON.parse(JSON.stringify(prevData));
       const exerciseToUpdate = newWorkoutData.exercises.find((ex: { id: string; }) => ex.id === exerciseId);
-
       if (exerciseToUpdate) {
         const lastSet = exerciseToUpdate.sets[exerciseToUpdate.sets.length - 1];
-
-        // Create a new set, copying the target from the last set or using a default.
         const newSet: ExerciseSet = {
           targetReps: lastSet?.targetReps || "8-12",
           performedKg: null,
@@ -64,28 +57,33 @@ export default function ViewProgramPage() {
           completed: false,
           previous: "New set",
         };
-
         exerciseToUpdate.sets.push(newSet);
       }
       return newWorkoutData;
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex h-96 w-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  // ✅ Handles removing a set from an exercise.
+  const handleRemoveSet = (exerciseId: string, setIndex: number) => {
+    setWorkoutData(prevData => {
+      if (!prevData) return null;
+      const newWorkoutData = JSON.parse(JSON.stringify(prevData));
+      const exerciseToUpdate = newWorkoutData.exercises.find((ex: { id: string; }) => ex.id === exerciseId);
 
-  if (!workoutData) {
-    return <div className="p-8 text-center">Workout not found.</div>;
-  }
+      // We only allow removal if there's more than one set
+      if (exerciseToUpdate && exerciseToUpdate.sets.length > 1) {
+        exerciseToUpdate.sets.splice(setIndex, 1);
+      }
+      
+      return newWorkoutData;
+    });
+  };
+
+  if (loading) { /* ... loading spinner ... */ }
+  if (!workoutData) { /* ... workout not found ... */ }
 
   const selectedExercise = workoutData.exercises.find(ex => ex.id === selectedExerciseId);
   const exerciseGuide = selectedExercise ? findExerciseGuideById(selectedExercise.libraryExerciseId) : null;
-  
   const headerTask = {
     ...workoutData,
     type: "fitness",
@@ -112,8 +110,9 @@ export default function ViewProgramPage() {
               onSetChange={(setIndex, updatedValues) =>
                 handleSetChange(selectedExercise.id, setIndex, updatedValues)
               }
-              // ✅ Pass the new handler to the component
               onAddSet={() => handleAddSet(selectedExercise.id)}
+              // ✅ Pass the new handler down to the component
+              onRemoveSet={(setIndex) => handleRemoveSet(selectedExercise.id, setIndex)}
             />
           )}
 
