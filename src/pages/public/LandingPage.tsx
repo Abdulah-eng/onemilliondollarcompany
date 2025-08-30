@@ -33,7 +33,7 @@ export default function LandingPage() {
   useRevealOnScroll();
 
   return (
-    // Added the "light" class here to force the light theme
+    // Added "light" class to force light theme
     <div className="light min-h-screen bg-background text-foreground overflow-x-hidden">
       <Navbar />
       <main>
@@ -57,7 +57,8 @@ export default function LandingPage() {
           <CTASection />
         </section>
       </main>
-      <footer className="bg-card text-card-foreground border-t">
+      {/* Added "light" class to footer */}
+      <footer className="light bg-card text-card-foreground border-t">
         <Footer />
       </footer>
     </div>
