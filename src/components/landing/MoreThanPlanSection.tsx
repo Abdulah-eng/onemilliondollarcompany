@@ -20,8 +20,6 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
         decoding="async"
         onLoad={() => setLoaded(true)}
       />
-      {/* Dark overlay for text readability */}
-      <div className="absolute inset-0 bg-black/30 rounded-2xl" />
     </div>
   );
 }
@@ -63,7 +61,7 @@ export default function MoreThanPlanSection() {
               className={cn(
                 'relative flex-shrink-0 w-[90%] sm:w-80 lg:w-auto',
                 'rounded-2xl shadow-lg snap-center overflow-hidden',
-                'text-white' // text should be white on dark overlay
+                'text-foreground bg-white/70 backdrop-blur'
               )}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
@@ -75,14 +73,14 @@ export default function MoreThanPlanSection() {
                 <h3 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
                   {card.title}
                 </h3>
-                <p className="text-base leading-relaxed mb-4 opacity-90">
+                <p className="text-base leading-relaxed mb-4 text-muted-foreground">
                   {card.description}
                 </p>
-                <ul className="space-y-2 border-t border-white/30 pt-4">
+                <ul className="space-y-2 border-t border-foreground/10 pt-4">
                   {card.points.map((point, idx) => (
                     <li key={idx} className="flex items-start gap-3 text-sm">
                       <svg
-                        className="w-4 h-4 text-teal-300 flex-shrink-0 mt-1"
+                        className="w-4 h-4 text-primary flex-shrink-0 mt-1"
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2.5"
