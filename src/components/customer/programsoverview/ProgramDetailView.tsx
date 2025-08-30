@@ -68,39 +68,41 @@ export default function ProgramDetailView({ task }: { task: ScheduledTask | null
         </div>
       </div>
 
-      {/* CONTENT - Added pt-4 for more space */}
-      <div className="flex-1 p-4 md:p-6 pt-4 overflow-y-auto space-y-4">
-        {/* Updated heading color for dark mode */}
-        <h3 className="font-semibold text-lg text-slate-700 dark:text-slate-200">Today's Plan:</h3>
-         <ul className="space-y-3">
-           {task.content.filter((item): item is NonNullable<typeof item> => item != null).map((item, i) => {
-             const isObject = typeof item === 'object' && item !== null;
-             const contentText = isObject ? (item as any).name : String(item);
-             const sets = isObject ? (item as any).sets : null;
-             const reps = isObject ? (item as any).reps : null;
-             
-             return (
-               <li
-                 key={i}
-                    // Updated list item styles for dark mode and layout
-                 className="flex items-center justify-between p-4 bg-white dark:bg-[#0d1218] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 transition-transform hover:scale-[1.02]"
-               >
-                <div className="flex items-center">
-                    <span className="text-2xl mr-4">{getEmojiForItem(item, task.type)}</span>
-                    <div>
-                      {/* Updated text color for dark mode */}
-                      <span className="text-slate-800 dark:text-slate-200 font-medium">{contentText}</span>
-                    </div>
-                </div>
-                 {sets && reps && (
-                   <span className="font-mono text-sm text-slate-500 dark:text-slate-400 font-semibold">
-                     {sets}x{reps}
-                   </span>
-                 )}
-               </li>
-             );
-           })}
-         </ul>
+      {/* CONTENT - Added a max-width wrapper */}
+      <div className="flex-1 p-4 md:p-6 pt-4 overflow-y-auto">
+        <div className="max-w-md mx-auto">
+            {/* Updated heading color for dark mode */}
+            <h3 className="font-semibold text-lg text-slate-700 dark:text-slate-200 mb-4">Today's Plan:</h3>
+           <ul className="space-y-3">
+             {task.content.filter((item): item is NonNullable<typeof item> => item != null).map((item, i) => {
+               const isObject = typeof item === 'object' && item !== null;
+               const contentText = isObject ? (item as any).name : String(item);
+               const sets = isObject ? (item as any).sets : null;
+               const reps = isObject ? (item as any).reps : null;
+               
+               return (
+                 <li
+                   key={i}
+                      // Updated list item styles for dark mode and layout
+                   className="flex items-center justify-between p-4 bg-white dark:bg-[#0d1218] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 transition-transform hover:scale-[1.02]"
+                 >
+                  <div className="flex items-center">
+                      <span className="text-2xl mr-4">{getEmojiForItem(item, task.type)}</span>
+                      <div>
+                        {/* Updated text color for dark mode */}
+                        <span className="text-slate-800 dark:text-slate-200 font-medium">{contentText}</span>
+                      </div>
+                  </div>
+                   {sets && reps && (
+                     <span className="font-mono text-sm text-slate-500 dark:text-slate-400 font-semibold">
+                       {sets}x{reps}
+                     </span>
+                   )}
+                 </li>
+               );
+             })}
+           </ul>
+        </div>
       </div>
 
       {/* FOOTER */}
