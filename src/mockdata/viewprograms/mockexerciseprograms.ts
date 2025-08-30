@@ -1,73 +1,87 @@
 // src/mockdata/viewprograms/mockexerciseprograms.ts
 
-// ==================================================================
-// TYPES & INTERFACES for the detailed workout view
-// ==================================================================
+// A single set within an exercise
 export interface ExerciseSet {
-  id: number;
   reps: number | null;
-  weight: number | null;
-  isCompleted: boolean;
+  kg: number | null;
+  rir?: number | null; // RIR (Reps in Reserve) is optional
+  completed: boolean;
 }
 
-export interface FitnessExercise {
-  id: string;
+// A single exercise within a workout
+export interface WorkoutExercise {
+  id: string; // Unique ID for this exercise in this specific workout
+  libraryExerciseId: string; // ID to link to the exercise guide library
   name: string;
-  targetSets: number;
-  targetReps: string;
-  videoUrl?: string;
+  imageUrl: string; // Thumbnail for the carousel
+  restTimeSeconds: number;
+  lastTimeKg: number | null;
   sets: ExerciseSet[];
 }
 
+// The main workout structure
 export interface DetailedFitnessTask {
   id: string;
   title: string;
-  duration: string;
-  equipment: string[];
-  content: FitnessExercise[];
+  coachNotes: string;
+  // Change 'content' to a strongly-typed 'exercises' array
+  exercises: WorkoutExercise[];
+  duration?: string;
+  equipment?: string[];
 }
 
-// ==================================================================
-// MOCK DATA for individual fitness tasks, keyed by their ID
-// ==================================================================
-export const mockExercisePrograms: Record<string, DetailedFitnessTask> = {
-  't9': {
-    id: "t9",
-    title: "Push Day",
-    duration: "Approx. 60 mins",
-    equipment: ["Dumbbells", "Bench"],
-    content: [
-      { id: "ex1", name: "Incline Press", targetSets: 3, targetReps: "8-10", sets: [{ id: 1, reps: 8, weight: 20, isCompleted: true }, { id: 2, reps: null, weight: null, isCompleted: false }] },
-      { id: "ex2", name: "Dumbbell Flyes", targetSets: 3, targetReps: "12-15", sets: [{ id: 1, reps: 12, weight: 10, isCompleted: true }, { id: 2, reps: null, weight: null, isCompleted: false }] },
-      { id: "ex3", name: "Tricep Dips", targetSets: 4, targetReps: "10-12", sets: [{ id: 1, reps: null, weight: null, isCompleted: false }] },
-    ]
+const mockPrograms: DetailedFitnessTask[] = [
+  {
+    id: "program1",
+    title: "Full Body Strength - Day A",
+    duration: "60-75 min",
+    equipment: ["Barbell", "Machine"],
+    coachNotes: "Focus on form and control today. Don't rush the movements. Let's build a solid foundation!",
+    exercises: [
+      {
+        id: "ex1",
+        libraryExerciseId: "lib-sr",
+        name: "Rudern enger neutraler Griff",
+        imageUrl: "/images/seated-row-thumb.png", // Replace with a real path
+        restTimeSeconds: 150,
+        lastTimeKg: 60,
+        sets: [
+          { reps: 10, kg: 62.5, rir: 2, completed: false },
+          { reps: 10, kg: 62.5, rir: 2, completed: false },
+          { reps: 11, kg: 62.5, rir: 2, completed: false },
+          { reps: 11, kg: 62.5, rir: 1, completed: false },
+        ],
+      },
+      {
+        id: "ex2",
+        libraryExerciseId: "lib-bc",
+        name: "Barbell Curl",
+        imageUrl: "/images/barbell-curl-thumb.png", // Replace with a real path
+        restTimeSeconds: 90,
+        lastTimeKg: 25,
+        sets: [
+          { reps: 12, kg: 27.5, rir: 3, completed: false },
+          { reps: 12, kg: 27.5, rir: 3, completed: false },
+          { reps: 12, kg: 27.5, rir: 2, completed: false },
+        ],
+      },
+      {
+        id: "ex3",
+        libraryExerciseId: "lib-sq",
+        name: "Barbell Squat",
+        imageUrl: "/images/squat-thumb.png", // Replace with a real path
+        restTimeSeconds: 180,
+        lastTimeKg: 100,
+        sets: [
+          { reps: 8, kg: 102.5, rir: 2, completed: false },
+          { reps: 8, kg: 102.5, rir: 2, completed: false },
+          { reps: 8, kg: 102.5, rir: 1, completed: false },
+        ],
+      },
+    ],
   },
-  't10': {
-    id: "t10",
-    title: "Pull Day",
-    duration: "Approx. 55 mins",
-    equipment: ["T-Bar", "Lat Machine"],
-    content: [
-      { id: "ex4", name: "T-Bar Rows", targetSets: 4, targetReps: "8", sets: [{ id: 1, reps: null, weight: null, isCompleted: false }] },
-      { id: "ex5", name: "Lat Pulldowns", targetSets: 4, targetReps: "10", sets: [{ id: 1, reps: null, weight: null, isCompleted: false }] },
-    ]
-  },
-  // You can add other fitness task IDs here as needed
-  't1': {
-    id: "t1",
-    title: "Leg Day",
-    duration: "Approx. 45 mins",
-    equipment: ["Barbell", "Leg Press Machine"],
-     content: [
-      { id: "ex6", name: "Barbell Squats", targetSets: 4, targetReps: "10", sets: [{ id: 1, reps: null, weight: null, isCompleted: false }] },
-      { id: "ex7", name: "Leg Press", targetSets: 3, targetReps: "12", sets: [{ id: 1, reps: null, weight: null, isCompleted: false }] },
-    ]
-  }
-};
+];
 
-// ==================================================================
-// HELPER FUNCTION to find a detailed program by ID
-// ==================================================================
 export const findExerciseProgramById = (id: string): DetailedFitnessTask | undefined => {
-  return mockExercisePrograms[id];
+  return mockPrograms.find((p) => p.id === id);
 };
