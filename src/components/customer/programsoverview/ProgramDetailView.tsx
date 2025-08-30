@@ -68,54 +68,53 @@ export default function ProgramDetailView({ task }: { task: ScheduledTask | null
         </div>
       </div>
 
-      {/* CONTENT - Added a max-width wrapper */}
-      <div className="flex-1 p-4 md:p-6 pt-4 overflow-y-auto">
-        <div className="max-w-md mx-auto">
-            {/* Updated heading color for dark mode */}
-            <h3 className="font-semibold text-lg text-slate-700 dark:text-slate-200 mb-4">Today's Plan:</h3>
-           <ul className="space-y-3">
-             {task.content.filter((item): item is NonNullable<typeof item> => item != null).map((item, i) => {
-               const isObject = typeof item === 'object' && item !== null;
-               const contentText = isObject ? (item as any).name : String(item);
-               const sets = isObject ? (item as any).sets : null;
-               const reps = isObject ? (item as any).reps : null;
-               
-               return (
-                 <li
-                   key={i}
-                      // Updated list item styles for dark mode and layout
-                   className="flex items-center justify-between p-4 bg-white dark:bg-[#0d1218] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 transition-transform hover:scale-[1.02]"
-                 >
-                  <div className="flex items-center">
-                      <span className="text-2xl mr-4">{getEmojiForItem(item, task.type)}</span>
-                      <div>
-                        {/* Updated text color for dark mode */}
-                        <span className="text-slate-800 dark:text-slate-200 font-medium">{contentText}</span>
-                      </div>
-                  </div>
-                   {sets && reps && (
-                     <span className="font-mono text-sm text-slate-500 dark:text-slate-400 font-semibold">
-                       {sets}x{reps}
-                     </span>
-                   )}
-                 </li>
-               );
-             })}
-           </ul>
-        </div>
+      {/* CONTENT - Increased top padding (pt-8) */}
+      <div className="flex-1 p-4 md:p-6 pt-8 overflow-y-auto">
+        {/* Adjusted max-width for better proportions */}
+        <div className="max-w-sm mx-auto">
+            <h3 className="font-semibold text-lg text-slate-700 dark:text-slate-200 mb-4">Today's Plan:</h3>
+           <ul className="space-y-3">
+             {task.content.filter((item): item is NonNullable<typeof item> => item != null).map((item, i) => {
+               const isObject = typeof item === 'object' && item !== null;
+               const contentText = isObject ? (item as any).name : String(item);
+               const sets = isObject ? (item as any).sets : null;
+               const reps = isObject ? (item as any).reps : null;
+               
+               return (
+                 <li
+                   key={i}
+                   className="flex items-center justify-between p-4 bg-white dark:bg-[#0d1218] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 transition-transform hover:scale-[1.02]"
+                 >
+                  <div className="flex items-center">
+                      <span className="text-2xl mr-4">{getEmojiForItem(item, task.type)}</span>
+                      <div>
+                        <span className="text-slate-800 dark:text-slate-200 font-medium">{contentText}</span>
+                      </div>
+                  </div>
+                   {sets && reps && (
+                     <span className="font-mono text-sm text-slate-500 dark:text-slate-400 font-semibold">
+                       {sets}x{reps}
+                     </span>
+                   )}
+                 </li>
+               );
+             })}
+           </ul>
+        </div>
       </div>
 
-      {/* FOOTER */}
-        {/* Updated footer styles for dark mode */}
+      {/* FOOTER - Added a max-width wrapper to match content */}
       <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-[#1e262e]/50 backdrop-blur-sm flex-shrink-0">
-        <Button
-          onClick={handleStartClick} // ✅ 5. ADD onClick HANDLER
-          size="lg"
-          className="w-full h-12 font-bold rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center"
-        >
-          <PlayCircle className="w-5 h-5 mr-2" />
-          Start Task
-        </Button>
+        <div className="max-w-sm mx-auto">
+            <Button
+              onClick={handleStartClick}
+              size="lg"
+              className="w-full h-12 font-bold rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 flex items-center justify-center"
+            >
+              <PlayCircle className="w-5 h-5 mr-2" />
+              Start Task
+            </Button>
+        </div>
       </div>
     </div>
   );
