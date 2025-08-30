@@ -84,10 +84,11 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
   };
 
   return (
-    <div className="space-y-4 rounded-2xl bg-card border p-4 sm:p-6">
+    // ✅ Main container is now full-width with padding
+    <div className="w-full space-y-4 rounded-2xl bg-card border p-4">
       <div className="flex justify-between items-start gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{exercise.name}</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{exercise.name}</h2>
           <p className="text-sm font-semibold text-muted-foreground">{exercise.targetSets} Sets | Target: {exercise.sets[0]?.targetReps} Reps</p>
           <PerformanceInsight sets={exercise.sets} />
         </div>
@@ -98,10 +99,11 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
       </div>
       
       {/* --- Table Header (visible on larger screens) --- */}
-      <div className="hidden sm:grid grid-cols-12 gap-4 px-4 text-xs font-bold uppercase text-muted-foreground">
+      <div className="hidden sm:grid grid-cols-10 gap-4 px-2 text-xs font-bold uppercase text-muted-foreground">
         <div className="col-span-1 text-center">Set</div>
-        <div className="col-span-8">Performance</div>
-        <div className="col-span-3 text-center">Actions</div>
+        <div className="col-span-4">KG</div>
+        <div className="col-span-3">Reps</div>
+        <div className="col-span-2 text-center">Actions</div>
       </div>
       
       {/* --- Sets List --- */}
@@ -109,54 +111,52 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
         {exercise.sets.map((set, index) => (
           <div 
             key={index} 
-            // ✅ Mobile-first classes: flexbox for mobile, grid for sm screens and up
-            className="flex sm:grid sm:grid-cols-12 gap-3 sm:gap-4 items-center rounded-2xl p-3 transition-colors group bg-background"
+            // ✅ A simpler, more robust grid that works on all screen sizes
+            className="grid grid-cols-10 gap-2 items-center rounded-xl p-2 transition-colors group bg-background"
           >
             {/* Set Number */}
-            <div className="flex-shrink-0 sm:col-span-1 text-center font-bold text-lg text-primary">{index + 1}</div>
+            <div className="col-span-1 text-center font-bold text-lg text-primary">{index + 1}</div>
             
-            {/* ✅ Performance inputs grouped for better mobile layout */}
-            <div className="flex-1 sm:col-span-8 grid grid-cols-2 gap-3">
-              <div>
-                 <label className="text-xs font-medium text-muted-foreground sm:hidden mb-1.5 block">KG</label>
-                 <Input
-                  type="number"
-                  placeholder={getPreviousKg(set.previous)}
-                  value={set.performedKg ?? ""}
-                  onChange={(e) => onSetChange(index, { performedKg: parseFloat(e.target.value) || null })}
-                  className="w-full h-12 text-center font-semibold text-base"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground sm:hidden mb-1.5 block">Reps</label>
-                <Input
-                  type="number"
-                  placeholder={set.targetReps}
-                  value={set.performedReps ?? ""}
-                  onChange={(e) => onSetChange(index, { performedReps: parseFloat(e.target.value) || null })}
-                  className="w-full h-12 text-center font-semibold text-base"
-                />
-              </div>
+            {/* KG Input */}
+            <div className="col-span-4">
+              <label className="text-xs font-medium text-muted-foreground sm:hidden mb-1.5 block">KG</label>
+              <Input
+                type="number"
+                placeholder={getPreviousKg(set.previous)}
+                value={set.performedKg ?? ""}
+                onChange={(e) => onSetChange(index, { performedKg: parseFloat(e.target.value) || null })}
+                className="w-full h-11 text-center font-semibold text-base"
+              />
+            </div>
+
+            {/* Reps Input */}
+            <div className="col-span-3">
+              <label className="text-xs font-medium text-muted-foreground sm:hidden mb-1.5 block">Reps</label>
+              <Input
+                type="number"
+                placeholder={set.targetReps}
+                value={set.performedReps ?? ""}
+                onChange={(e) => onSetChange(index, { performedReps: parseFloat(e.target.value) || null })}
+                className="w-full h-11 text-center font-semibold text-base"
+              />
             </div>
 
             {/* Actions (Checkbox & Remove) */}
-            <div className="flex-shrink-0 sm:col-span-3 flex items-center justify-center h-full gap-2">
+            <div className="col-span-2 flex items-center justify-center h-full gap-1">
               <Checkbox
                 checked={set.completed}
                 onCheckedChange={(checked) => onSetChange(index, { completed: !!checked })}
-                className={cn(
-                    "h-12 w-12 transition-all",
-                    set.completed && "bg-primary border-primary text-primary-foreground"
-                )}
+                // ✅ Balanced button sizes
+                className="h-9 w-9 data-[state=checked]:bg-primary"
               />
               {exercise.sets.length > 1 && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-12 w-12 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-500"
+                  className="h-9 w-9 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-500"
                   onClick={() => onRemoveSet(index)}
                 >
-                  <Trash2 className="h-5 w-5" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               )}
             </div>
@@ -170,7 +170,7 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
           variant="outline"
           className="w-full h-12 text-base rounded-xl"
         >
-          <PlusCircle className="w-5 h-5 mr-2" />
+          <PlusCircle className="w-5 w-5 mr-2" />
           Add Set
         </Button>
       </div>
