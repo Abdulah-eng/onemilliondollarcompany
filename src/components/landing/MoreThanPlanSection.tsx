@@ -25,7 +25,6 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
 
 export default function MoreThanPlanSection() {
   return (
-    // ✅ 3. GRADIENT ADJUSTED to fade out higher up
     <section className="relative pt-20 pb-32 bg-white">
       <div className="absolute inset-x-0 top-0 h-[500px] bg-gradient-to-b from-[#DDF5F0]/70 via-[#B2E0D9]/30 to-transparent" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -53,7 +52,8 @@ export default function MoreThanPlanSection() {
           className={cn(
             'flex gap-6 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 scroll-px-4',
             'lg:grid lg:grid-cols-4 lg:gap-8 lg:overflow-visible lg:mx-0 lg:px-0',
-            'pb-8' // ✅ 2. PADDING ADDED to prevent shadow clipping
+            // ✅ INCREASED PADDING for more shadow room
+            'pb-12'
           )}
           data-reveal
         >
@@ -62,21 +62,22 @@ export default function MoreThanPlanSection() {
               key={card.title}
               className={cn(
                 'relative flex-shrink-0 w-[90%] sm:w-80 lg:w-auto',
-                // ✅ 2. SHADOW ENHANCED
-                'rounded-2xl shadow-2xl shadow-black/20 snap-center overflow-hidden'
+                'rounded-2xl snap-center overflow-hidden transition-all duration-300 group',
+                // ✅ REPLACED with a custom, softer, multi-layered shadow
+                // This shadow is larger, more blurred, and uses your primary color for a subtle glow.
+                'shadow-[0_10px_30px_-15px_rgba(0,0,0,0.1),_0_20px_50px_-20px_rgba(34,139,121,0.2)]',
+                'hover:shadow-[0_10px_30px_-15px_rgba(0,0,0,0.15),_0_25px_60px_-20px_rgba(34,139,121,0.25)] hover:-translate-y-1'
               )}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              {/* Background image */}
-              <BlurImage src={card.image} alt={card.title} />
-
-              {/* ✅ 1. GRADIENT OVERLAY ADDED for text contrast */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent rounded-2xl" />
+              <div className="absolute inset-0 transition-all duration-300 group-hover:scale-105">
+                 <BlurImage src={card.image} alt={card.title} />
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent rounded-2xl" />
+              </div>
 
               {/* Content */}
               <div className="relative z-10 flex flex-col justify-end h-full p-6 sm:p-8 min-h-[400px]">
                 <div>
-                  {/* ✅ 1. TEXT MADE WHITE */}
                   <h3 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3 text-white">
                     {card.title}
                   </h3>
