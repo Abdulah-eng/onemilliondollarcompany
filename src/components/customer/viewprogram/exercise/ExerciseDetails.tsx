@@ -169,6 +169,7 @@ export default function ExerciseDetails({ exercise, onSetChange, onAddSet, onRem
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, x: -300, transition: { duration: 0.2 } }}
               transition={{ type: "spring", stiffness: 350, damping: 35 }}
+              className="w-full"
             >
               <SetRow
                 set={set}
