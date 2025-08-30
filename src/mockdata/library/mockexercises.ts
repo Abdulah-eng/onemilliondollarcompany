@@ -1,11 +1,9 @@
-
 // src/mockdata/library/mockexercises.ts
 
 export interface ExerciseGuide {
   id: string; // Corresponds to libraryExerciseId
   name: string;
   imageUrl: string;
-  videoUrl?: string;
   description: string;
   benefits: string[];
   instructions: string[];
@@ -16,36 +14,60 @@ export interface ExerciseGuide {
 
 export const mockExerciseGuides: ExerciseGuide[] = [
   {
-    id: "lib-bc",
-    name: "Barbell Curl",
-    imageUrl: "/images/barbell-curl-guide.png", // Replace with a real path
-    description: "Barbell Curl is a classic and effective biceps exercise that lets you train both arms simultaneously with solid resistance and a stable movement path. It’s known for building biceps size and strength, providing a strong foundation for arm power and muscle growth.",
-    benefits: ["Build big and strong biceps", "Increase arm volume with progressive overload", "Improve symmetry and upper body strength"],
-    instructions: ["Stand with feet hip-width apart and grip the bar with a supinated grip (palms facing forward), about shoulder-width apart.", "Keep your elbows close to your body, chest up, and shoulders neutral.", "Bend at the elbows and lift the bar in a controlled motion toward your shoulders.", "Slowly lower the bar back down with a controlled tempo."],
-    proTip: "Use an EZ bar if you have wrist issues – it reduces strain on the wrists and makes the exercise more ergonomic.",
-    commonMistakes: ["Swinging the body to lift the bar.", "Raising the elbows forward.", "Lowering the bar too quickly."],
-    forBestResults: ["Use moderate weight with good form.", "Hold a pause at the top for maximum contraction.", "Perform in the middle or start of the session when you’re fresh and focused."],
-  },
-  {
-    id: "lib-sr",
-    name: "Seated Row",
-    imageUrl: "/images/seated-row-guide.png", // Replace with a real path
-    description: "The seated row is a pulling exercise that works the back muscles, particularly the latissimus dorsi. It also works the forearm muscles and the upper arm muscles.",
-    benefits: ["Strengthens back muscles", "Improves posture", "Increases pulling strength"],
-    instructions: ["Sit on the bench with your knees bent and grasp the cable attachment.", "Keep your back straight, then pull the handle toward your lower abdomen.", "Squeeze your back muscles at the peak of the movement.", "Slowly return to the starting position."],
-    commonMistakes: ["Rounding the lower back.", "Using momentum to pull the weight."],
-    forBestResults: ["Focus on squeezing the shoulder blades together.", "Use a full range of motion."],
-  },
-  {
     id: "lib-sq",
-    name: "Barbell Squat",
-    imageUrl: "/images/squat-guide.png", // Replace with a real path
-    description: "The barbell squat is a compound exercise that trains muscles in the thighs, hips and buttocks, quads, and hamstrings, and strengthens the bones, ligaments and insertion of the tendons throughout the lower body.",
-    benefits: ["Builds lower body strength and muscle.", "Improves core stability.", "Increases bone density."],
-    instructions: ["Stand with your feet shoulder-width apart, with the barbell resting on your upper back.", "Keeping your chest up and back straight, lower your body until your thighs are parallel to the floor.", "Push through your heels to return to the starting position."],
+    name: "Squats",
+    imageUrl: "/images/squat-guide.png",
+    description: "A fundamental compound exercise for building lower body strength.",
+    benefits: ["Builds leg and glute muscles", "Improves core stability", "Increases bone density"],
+    instructions: ["Keep your chest up and back straight.", "Lower your hips until your thighs are parallel to the floor.", "Push through your heels to return to the start."],
+    proTip: "If you have trouble with depth, try placing a small plate under your heels.",
     commonMistakes: ["Letting your knees cave inward.", "Rounding your back.", "Not going deep enough."],
-    forBestResults: ["Keep your core tight throughout the movement.", "Control the descent and explode up.", "Experiment with foot placement to find what's comfortable."],
-  }
+    forBestResults: ["Keep your core tight throughout the movement.", "Control the descent and explode up."],
+  },
+  {
+    id: "lib-lp",
+    name: "Leg Press",
+    imageUrl: "/images/leg-press-guide.png",
+    description: "A machine-based exercise that targets the quads, hamstrings, and glutes.",
+    benefits: ["Isolates leg muscles", "Allows for heavy weight with support"],
+    instructions: ["Position your feet shoulder-width apart on the platform.", "Lower the weight until your knees are at a 90-degree angle.", "Press the weight back up, but do not lock your knees."],
+    proTip: "Changing your foot position can target different muscles. Higher for glutes, lower for quads.",
+    commonMistakes: ["Using a partial range of motion.", "Lifting your hips off the seat.", "Locking out your knees at the top."],
+    forBestResults: ["Focus on a slow, controlled negative.", "Pause briefly at the bottom of the movement."],
+  },
+  {
+    id: "lib-bp",
+    name: "Bench Press",
+    imageUrl: "/images/bench-press-guide.png",
+    description: "The classic upper body exercise for building chest, shoulder, and triceps strength.",
+    benefits: ["Builds pectoral muscles", "Increases upper body pushing power"],
+    instructions: ["Lie on the bench with your feet flat on the floor.", "Grip the bar slightly wider than shoulder-width.", "Lower the bar to your chest, then press it back up forcefully."],
+    proTip: "Tuck your elbows at a 45-degree angle to protect your shoulders.",
+    commonMistakes: ["Bouncing the bar off your chest.", "Flaring your elbows too wide.", "Lifting your hips off the bench."],
+    forBestResults: ["Keep your shoulder blades retracted and down.", "Control the bar path on both the up and down phases."],
+  },
+  {
+    id: "lib-td",
+    name: "Tricep Dips",
+    imageUrl: "/images/tricep-dips-guide.png",
+    description: "A bodyweight exercise that effectively targets the triceps.",
+    benefits: ["Builds arm strength and definition", "Requires minimal equipment"],
+    instructions: ["Place your hands on a bench or chair behind you.", "Lower your body until your elbows are at a 90-degree angle.", "Push back up to the starting position."],
+    proTip: "Keep your hips close to the bench to maximize tricep engagement.",
+    commonMistakes: ["Going too low and straining shoulders.", "Flaring elbows out to the sides."],
+    forBestResults: ["Focus on the squeeze at the top of the movement.", "Add a weight plate to your lap for extra resistance."],
+  },
+  {
+    id: "lib-ip",
+    name: "Incline Press",
+    imageUrl: "/images/incline-press-guide.png",
+    description: "Targets the upper portion of the pectoral muscles.",
+    benefits: ["Develops the upper chest", "Adds variety to your pressing routine"],
+    instructions: ["Set the bench to a 30-45 degree incline.", "Perform the press as you would with a flat bench.", "Focus on squeezing your upper chest at the top of the movement."],
+    proTip: "Using dumbbells instead of a barbell can improve stabilization and range of motion.",
+    commonMistakes: ["Using too steep of an incline, which works the shoulders more.", "Not controlling the weight on the way down."],
+    forBestResults: ["Pause for a second at the bottom.", "Don't let the weights touch at the top; keep constant tension."],
+  },
 ];
 
 export const findExerciseGuideById = (id: string): ExerciseGuide | undefined => {
