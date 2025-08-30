@@ -10,7 +10,8 @@ import {
 } from "@/mockdata/programs/mockprograms";
 import { isSameDay, parseISO, addDays } from "date-fns";
 
-type TabType = "active" | "scheduled" | "purchased";
+// Removed "purchased" from the type
+type TabType = "active" | "scheduled";
 
 export default function MyProgramsPage() {
   const [tab, setTab] = useState<TabType>("active");
@@ -53,10 +54,11 @@ export default function MyProgramsPage() {
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-8 space-y-8">
       <Tabs value={tab} onValueChange={(v) => setTab(v as TabType)}>
-        <TabsList className="grid grid-cols-3 w-full max-w-sm mx-auto rounded-xl bg-white dark:bg-[#1e262e] p-1 shadow-sm">
+        {/* Changed grid-cols-3 to grid-cols-2 */}
+        <TabsList className="grid grid-cols-2 w-full max-w-sm mx-auto rounded-xl bg-white dark:bg-[#1e262e] p-1 shadow-sm">
           <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
-          <TabsTrigger value="purchased">Purchased</TabsTrigger>
+          {/* Removed the "Purchased" trigger */}
         </TabsList>
       </Tabs>
 
