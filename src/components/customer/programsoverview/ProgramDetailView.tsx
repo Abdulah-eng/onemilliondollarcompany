@@ -48,7 +48,7 @@ export default function ProgramDetailView({ task }: { task: ScheduledTask | null
   };
 
   return (
-    // Updated main container background for dark mode
+    // Updated main container background for dark mode
     <div className="flex flex-col h-full bg-slate-50 dark:bg-[#1e262e]">
       {/* HEADER */}
       <div className="relative h-48 md:h-64 flex-shrink-0">
@@ -68,25 +68,35 @@ export default function ProgramDetailView({ task }: { task: ScheduledTask | null
         </div>
       </div>
 
-      {/* CONTENT */}
-      <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-4">
-        {/* Updated heading color for dark mode */}
+      {/* CONTENT - Added pt-4 for more space */}
+      <div className="flex-1 p-4 md:p-6 pt-4 overflow-y-auto space-y-4">
+        {/* Updated heading color for dark mode */}
         <h3 className="font-semibold text-lg text-slate-700 dark:text-slate-200">Today's Plan:</h3>
          <ul className="space-y-3">
            {task.content.filter((item): item is NonNullable<typeof item> => item != null).map((item, i) => {
-             // ✅ 4. HANDLE BOTH STRING AND OBJECT CONTENT
-             const isObject = typeof item === 'object' && item !== null && item && 'name' in item;
+             const isObject = typeof item === 'object' && item !== null;
              const contentText = isObject ? (item as any).name : String(item);
+             const sets = isObject ? (item as any).sets : null;
+             const reps = isObject ? (item as any).reps : null;
              
              return (
                <li
                  key={i}
-                    // Updated list item styles for dark mode
-                 className="flex items-center p-4 bg-white dark:bg-card rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 transition-transform hover:scale-[1.02]"
+                    // Updated list item styles for dark mode and layout
+                 className="flex items-center justify-between p-4 bg-white dark:bg-[#0d1218] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 transition-transform hover:scale-[1.02]"
                >
-                 <span className="text-2xl mr-4">{getEmojiForItem(item, task.type)}</span>
-                    {/* Updated text color for dark mode */}
-                 <span className="text-slate-800 dark:text-slate-200 font-medium">{contentText}</span>
+                <div className="flex items-center">
+                    <span className="text-2xl mr-4">{getEmojiForItem(item, task.type)}</span>
+                    <div>
+                      {/* Updated text color for dark mode */}
+                      <span className="text-slate-800 dark:text-slate-200 font-medium">{contentText}</span>
+                    </div>
+                </div>
+                 {sets && reps && (
+                   <span className="font-mono text-sm text-slate-500 dark:text-slate-400 font-semibold">
+                     {sets}x{reps}
+                   </span>
+                 )}
                </li>
              );
            })}
@@ -94,7 +104,7 @@ export default function ProgramDetailView({ task }: { task: ScheduledTask | null
       </div>
 
       {/* FOOTER */}
-        {/* Updated footer styles for dark mode */}
+        {/* Updated footer styles for dark mode */}
       <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-[#1e262e]/50 backdrop-blur-sm flex-shrink-0">
         <Button
           onClick={handleStartClick} // ✅ 5. ADD onClick HANDLER
