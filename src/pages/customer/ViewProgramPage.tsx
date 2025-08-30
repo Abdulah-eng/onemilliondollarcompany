@@ -100,6 +100,7 @@ export default function ViewProgramPage() {
 
   const selectedExercise = workoutData.exercises.find(ex => ex.id === selectedExerciseId);
   const exerciseGuide = selectedExercise ? findExerciseGuideById(selectedExercise.libraryExerciseId) : null;
+  
   const headerTask = {
     ...workoutData,
     type: "fitness",
