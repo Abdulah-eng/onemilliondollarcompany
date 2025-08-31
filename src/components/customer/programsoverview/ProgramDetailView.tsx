@@ -73,7 +73,16 @@ export default function ProgramDetailView({
     >
       {/* HEADER (No changes) */}
       <div className="relative h-40 md:h-56 flex-shrink-0 pt-6 max-w-md mx-auto w-full">
-        {/* ... header content ... */}
+        <img src={config.imageUrl} alt={task.title} className="w-full h-full object-cover rounded-xl" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-xl" />
+        <div className="absolute bottom-4 left-4 text-white">
+          <Badge variant="secondary" className="mb-2 bg-white/20 backdrop-blur-sm border-0 text-white">
+            {task.programTitle} - Week {task.weekNumber}
+          </Badge>
+          <h2 className="text-2xl md:text-3xl font-bold drop-shadow-lg">
+            {config.emoji} {task.title}
+          </h2>
+        </div>
       </div>
 
       {/* CONTENT */}
