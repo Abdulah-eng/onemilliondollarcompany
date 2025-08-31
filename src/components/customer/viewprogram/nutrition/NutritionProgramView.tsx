@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { DetailedNutritionTask } from "@/mockdata/viewprograms/mocknutritionprograms";
 import MealCarousel from "./MealCarousel";
-import InteractiveRecipeView from "./InteractiveRecipeView"; // ✅ IMPORT the new component
+import InteractiveRecipeView from "./InteractiveRecipeView";
 
 interface NutritionProgramViewProps {
   nutritionData: DetailedNutritionTask;
@@ -24,11 +24,9 @@ export default function NutritionProgramView({ nutritionData }: NutritionProgram
         onSelectMeal={setSelectedMealId}
       />
       
-      {/* ✅ REPLACE RecipeDetails with the new InteractiveRecipeView */}
+      {/* ✅ REMOVED the wrapper div with px-4 to allow full-width display */}
       {selectedMeal && selectedMeal.recipe && (
-        <div className="px-4">
-            <InteractiveRecipeView recipe={selectedMeal.recipe} />
-        </div>
+        <InteractiveRecipeView recipe={selectedMeal.recipe} />
       )}
     </main>
   );
