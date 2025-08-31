@@ -62,14 +62,15 @@ export default function MyProgramsPage() {
   const handleScheduledProgramClick = (program: Program) => {
     const mockTask: ScheduledTask = {
       id: program.id,
-      date: parseISO(program.startDate),
+      date: parseISO(program.startDate!),
       title: program.title,
       programTitle: program.title,
+      programId: program.id,
       type: program.type,
       weekNumber: 1, // Placeholder
-      dayOfWeek: 1,  // Placeholder
       status: "pending",
       content: ["Program preview..."], // Placeholder
+      progress: 0,
     };
     setSelectedTask(mockTask);
   };

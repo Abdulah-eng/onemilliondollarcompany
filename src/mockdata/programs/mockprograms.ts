@@ -38,6 +38,7 @@ export interface Program {
   title: string;
   description: string;
   imageUrl: string; // ✅ ADDED: Image for the program card
+  type: ProgramTaskType; // ✅ ADDED: Program type for UI config
   status: "active" | "scheduled" | "purchased";
   startDate?: string;
   weeks: ProgramWeek[];
@@ -85,6 +86,7 @@ export const mockPrograms: Program[] = [
     title: "4-Week Wellness Plan",
     description: "A holistic 4-week plan for body and mind.",
     imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1200",
+    type: "fitness",
     status: "active",
     startDate: "2025-08-11", // Past start date
     weeks: [
@@ -131,6 +133,7 @@ export const mockPrograms: Program[] = [
     title: "Mindful Movement Challenge",
     description: "A 2-week challenge to connect your mind and body.",
     imageUrl: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1200",
+    type: "mental",
     status: "scheduled",
     startDate: "2025-09-15", // Future start date
     weeks: [
