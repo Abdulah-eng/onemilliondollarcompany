@@ -1,8 +1,7 @@
 // src/components/customer/viewprogram/exercise/ExerciseCarousel.tsx
 
 import { WorkoutExercise } from "@/mockdata/viewprograms/mockexerciseprograms";
-// ✅ FIXED: Corrected import path using the '@/' alias
-import ItemCarousel, { CarouselItem } from '@/mockdata/viewprograms/shared/ItemCarousel';
+import ItemCarousel, { CarouselItem } from '../shared/ItemCarousel';
 
 interface ExerciseCarouselProps {
   exercises: WorkoutExercise[];
