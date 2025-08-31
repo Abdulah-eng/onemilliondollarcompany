@@ -1,5 +1,6 @@
 import { MentalHealthActivity } from "@/mockdata/viewprograms/mockmentalhealthprograms";
-import ItemCarousel, { CarouselItem } from '@/mockdata/viewprograms/shared/ItemCarousel';
+// ✅ FIXED: Corrected import path to point to the 'components' directory
+import ItemCarousel, { CarouselItem } from '@/components/customer/viewprogram/shared/ItemCarousel';
 
 interface ActivityCarouselProps {
   activities: MentalHealthActivity[];
@@ -8,12 +9,10 @@ interface ActivityCarouselProps {
 }
 
 export default function ActivityCarousel({ activities, selectedActivityId, onSelectActivity }: ActivityCarouselProps) {
-  // Transform specific activity data into the generic format
   const carouselItems: CarouselItem[] = activities.map(activity => ({
     id: activity.id,
     imageUrl: activity.imageUrl,
-    // ✅ Changed to use 'timeOfDay' for the label as requested
-    label: activity.timeOfDay, 
+    label: activity.timeOfDay,
     isCompleted: activity.isCompleted,
   }));
   
