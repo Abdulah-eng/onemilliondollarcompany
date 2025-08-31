@@ -30,14 +30,20 @@ export default function ItemCarousel({ items, selectedItemId, onSelectItem }: It
                     onClick={() => onSelectItem(item.id)}
                     className={cn(
                         "relative flex-shrink-0 w-20 h-20 rounded-full transition-all duration-200 focus:outline-none mb-2",
-                        // ✅ FIXED: Added 'p-1' when selected to give space for the ring offset.
-                        // The ring will now appear fully within the button's padded area.
-                        isSelected ? "ring-2 ring-primary ring-offset-2 ring-offset-background p-1" : "ring-0"
+                        // The button itself will now always provide a small amount of "safe space"
+                        // inside, ensuring the ring and offset render correctly.
+                        // We remove the conditional padding from here.
+                        isSelected ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : "ring-0"
                     )}
                 >
-                    {/* Background Image */}
+                    {/* Background Image Container */}
+                    {/* ✅ FIXED: Added padding to the image container itself when selected.
+                             This creates the internal space needed for the ring to draw without clipping. */}
                     <div
-                        className="absolute inset-0 bg-cover bg-center rounded-full"
+                        className={cn(
+                            "absolute inset-0 bg-cover bg-center rounded-full",
+                            isSelected && "p-1.5" // Adjust this padding value if needed
+                        )}
                         style={{ backgroundImage: `url(${item.imageUrl})` }}
                     />
                     
