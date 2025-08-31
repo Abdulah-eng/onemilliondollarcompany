@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { DetailedNutritionTask } from "@/mockdata/viewprograms/mocknutritionprograms";
 import MealCarousel from "./MealCarousel";
-import RecipeDetails from "@/components/customer/library/recipe/RecipeDetails";
+import InteractiveRecipeView from "./InteractiveRecipeView"; // ✅ IMPORT the new component
 
 interface NutritionProgramViewProps {
   nutritionData: DetailedNutritionTask;
@@ -23,7 +23,13 @@ export default function NutritionProgramView({ nutritionData }: NutritionProgram
         selectedMealId={selectedMealId!}
         onSelectMeal={setSelectedMealId}
       />
-      {selectedMeal && selectedMeal.recipe && <RecipeDetails recipe={selectedMeal.recipe} />}
+      
+      {/* ✅ REPLACE RecipeDetails with the new InteractiveRecipeView */}
+      {selectedMeal && selectedMeal.recipe && (
+        <div className="px-4">
+            <InteractiveRecipeView recipe={selectedMeal.recipe} />
+        </div>
+      )}
     </main>
   );
 }
