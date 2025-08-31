@@ -55,14 +55,39 @@ export default function InteractiveRecipeView({ recipe }: { recipe: Recipe }) {
     };
   }, [portions, recipe]);
 
-  // Content for Ingredients and Instructions tabs
-  const IngredientsContent = () => ( /* ... no changes ... */ );
-  const InstructionsContent = () => ( /* ... no changes ... */ );
+  // ✅ FIXED: Restored the actual content for these components
+  const IngredientsContent = () => (
+    <div>
+      <h3 className="text-lg font-bold mb-4 text-foreground text-center">Ingredients for {portions} serving{portions > 1 && 's'}</h3>
+      <ul className="space-y-2">
+        {adjustedIngredients.map((ing, index) => (
+          <li key={index} className="flex justify-between items-center text-sm p-3 bg-background rounded-lg">
+            <span className="text-muted-foreground">{ing.name}</span>
+            <span className="font-bold text-primary">{formatQuantity(ing.quantity, ing.unit)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+  
+  const InstructionsContent = () => (
+    <div>
+      <h3 className="text-lg font-bold mb-4 text-foreground text-center">Instructions</h3>
+      <ol className="space-y-4">
+        {recipe.instructions.map((step, index) => (
+          <li key={index} className="flex items-start gap-3">
+             <Checkbox id={`step-${index}`} checked={checkedSteps[index]} onCheckedChange={() => handleToggleStep(index)} className="mt-1 h-5 w-5 shrink-0"/>
+            <label htmlFor={`step-${index}`} className={cn("text-sm leading-relaxed text-muted-foreground", checkedSteps[index] && "line-through opacity-60")}>
+              {step}
+            </label>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
 
   return (
-    // ✅ NEW simplified main container, inspired by ExerciseGuide.tsx
     <div className="w-full space-y-6">
-        {/* ✅ Image is now a simple rounded square */}
         <div className="w-full aspect-square overflow-hidden rounded-2xl bg-muted">
             <img 
                 src={recipe.imageUrl} 
@@ -70,8 +95,6 @@ export default function InteractiveRecipeView({ recipe }: { recipe: Recipe }) {
                 className="w-full h-full object-cover"
             />
         </div>
-
-        {/* ✅ Content container with padding for mobile, but NO background */}
         <div className="px-4 space-y-6">
             <div className="flex justify-center">
                 <div className="flex items-center gap-4 bg-background px-4 py-2 rounded-full shadow-sm">
@@ -99,28 +122,10 @@ export default function InteractiveRecipeView({ recipe }: { recipe: Recipe }) {
                         <TabsTrigger value="instructions">Instructions</TabsTrigger>
                     </TabsList>
                     <TabsContent value="ingredients" className="pt-6">
-                        <h3 className="text-lg font-bold mb-4 text-foreground text-center">Ingredients for {portions} serving{portions > 1 && 's'}</h3>
-                        <ul className="space-y-2">
-                        {adjustedIngredients.map((ing, index) => (
-                            <li key={index} className="flex justify-between items-center text-sm p-3 bg-background rounded-lg">
-                            <span className="text-muted-foreground">{ing.name}</span>
-                            <span className="font-bold text-primary">{formatQuantity(ing.quantity, ing.unit)}</span>
-                            </li>
-                        ))}
-                        </ul>
+                        <IngredientsContent />
                     </TabsContent>
                     <TabsContent value="instructions" className="pt-6">
-                        <h3 className="text-lg font-bold mb-4 text-foreground text-center">Instructions</h3>
-                        <ol className="space-y-4">
-                        {recipe.instructions.map((step, index) => (
-                            <li key={index} className="flex items-start gap-3">
-                                <Checkbox id={`step-${index}`} checked={checkedSteps[index]} onCheckedChange={() => handleToggleStep(index)} className="mt-1 h-5 w-5 shrink-0"/>
-                                <label htmlFor={`step-${index}`} className={cn("text-sm leading-relaxed text-muted-foreground", checkedSteps[index] && "line-through opacity-60")}>
-                                    {step}
-                                </label>
-                            </li>
-                        ))}
-                        </ol>
+                        <InstructionsContent />
                     </TabsContent>
                 </Tabs>
             </div>
