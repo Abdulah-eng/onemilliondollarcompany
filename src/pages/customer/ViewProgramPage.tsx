@@ -1,23 +1,29 @@
 // src/pages/customer/ViewProgramPage.tsx
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { findProgramByIdAndType, ProgramData } from "@/mockdata/viewprograms/programFinder";
+
+// ✅ Import all necessary data types
 import { DetailedFitnessTask } from "@/mockdata/viewprograms/mockexerciseprograms";
 import { DetailedNutritionTask } from "@/mockdata/viewprograms/mocknutritionprograms";
 import { DetailedMentalHealthTask } from "@/mockdata/viewprograms/mockmentalhealthprograms";
+
+// ✅ Import all specialized headers
 import WorkoutHeader from "@/components/customer/viewprogram/exercise/WorkoutHeader";
 import NutritionHeader from "@/components/customer/viewprogram/nutrition/NutritionHeader";
 import MentalHealthHeader from "@/components/customer/viewprogram/mentalhealth/MentalHealthHeader";
+
+// ✅ Import all view components
 import CoachMessage from "@/components/customer/viewprogram/CoachMessage";
 import FitnessProgramView from "@/components/customer/viewprogram/exercise/FitnessProgramView";
 import NutritionProgramView from "@/components/customer/viewprogram/nutrition/NutritionProgramView";
 import MentalHealthProgramView from "@/components/customer/viewprogram/mentalhealth/MentalHealthProgramView";
-import { Loader2, ChevronUp } from "lucide-react";
+
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
-
+// Helper components remain the same
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen">
     <Loader2 className="h-8 w-8 animate-spin" />
@@ -33,36 +39,10 @@ const NotFound = () => (
   </div>
 );
 
-const RecipePeekDrawer = ({ task, isVisible }: { task: DetailedNutritionTask, isVisible: boolean }) => {
-    // Use the first meal's recipe for the peek view title
-    const recipeName = task.meals?.[0]?.recipe?.name;
-    if (!recipeName) return null;
-    
-    return (
-        <div className={cn(
-            "fixed bottom-0 left-0 right-0 z-40 md:hidden bg-card border-t border-border p-4 transition-transform duration-300 ease-in-out",
-            isVisible ? "translate-y-0" : "translate-y-full"
-        )}>
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-sm font-medium text-muted-foreground">Up Next: Recipe</p>
-                    <h3 className="text-lg font-bold">{recipeName}</h3>
-                </div>
-                <div className="flex flex-col items-center text-primary animate-pulse">
-                    <ChevronUp className="h-5 w-5"/>
-                    <span className="text-xs font-bold">Scroll</span>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 export default function ViewProgramPage() {
   const { type, id } = useParams<{ type: string; id: string }>();
   const [programData, setProgramData] = useState<ProgramData | null>(null);
   const [loading, setLoading] = useState(true);
-  // ✅ NEW STATE: Tracks if the main recipe component is visible on screen.
-  const [isRecipeInView, setIsRecipeInView] = useState(true);
 
   useEffect(() => {
     setLoading(true);
@@ -73,27 +53,29 @@ export default function ViewProgramPage() {
     setLoading(false);
   }, [id, type]);
 
+  // ✅ Renders the correct specialized header based on program type
   const renderProgramHeader = () => {
     if (!programData) return null;
     switch (programData.type) {
-      case 'fitness': return <WorkoutHeader task={programData as DetailedFitnessTask} />;
-      case 'nutrition': return <NutritionHeader task={programData as DetailedNutritionTask} />;
-      case 'mental': return <MentalHealthHeader task={programData as DetailedMentalHealthTask} />;
-      default: return null;
+      case 'fitness':
+        return <WorkoutHeader task={programData as DetailedFitnessTask} />;
+      case 'nutrition':
+        return <NutritionHeader task={programData as DetailedNutritionTask} />;
+      case 'mental':
+        return <MentalHealthHeader task={programData as DetailedMentalHealthTask} />;
+      default:
+        return null;
     }
   };
 
+  // ✅ Renders the correct program content view
   const renderProgramView = () => {
     if (!programData) return null;
     switch (programData.type) {
       case 'fitness':
         return <FitnessProgramView initialData={programData as DetailedFitnessTask} />;
       case 'nutrition':
-        // ✅ Pass the state setter function down to the nutrition view.
-        return <NutritionProgramView 
-                    nutritionData={programData as DetailedNutritionTask} 
-                    onRecipeVisibilityChange={setIsRecipeInView} 
-                />;
+        return <NutritionProgramView nutritionData={programData as DetailedNutritionTask} />;
       case 'mental':
         return <MentalHealthProgramView initialData={programData as DetailedMentalHealthTask} />;
       default:
@@ -104,6 +86,7 @@ export default function ViewProgramPage() {
   if (loading) return <LoadingSpinner />;
   if (!programData) return <NotFound />;
   
+  // ✅ Gets the correct button text for the program type
   const getButtonText = () => {
     switch (programData.type) {
         case 'fitness': return 'Complete Workout';
@@ -114,26 +97,19 @@ export default function ViewProgramPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen w-full max-w-5xl mx-auto md:px-4">
+    <div className="flex flex-col min-h-screen w-full max-w-5xl mx-auto px-4">
       <div className="flex-1 overflow-auto space-y-8 py-8">
+        {/* ✅ Renders the appropriate header */}
         {renderProgramHeader()}
         <CoachMessage message={programData.coachNotes} />
         {renderProgramView()}
       </div>
 
-      <div className="sticky bottom-4 z-50 flex w-full justify-center px-4 md:px-0">
+      <div className="sticky bottom-4 z-50 flex w-full justify-center px-0">
         <Button size="lg" className="h-12 w-full max-w-md rounded-xl font-bold shadow-lg">
           {getButtonText()}
         </Button>
       </div>
-
-      {/* ✅ The peek drawer is now visible when the recipe is NOT in view. */}
-      {programData.type === 'nutrition' && (
-          <RecipePeekDrawer 
-            task={programData as DetailedNutritionTask} 
-            isVisible={!isRecipeInView} 
-          />
-      )}
     </div>
   );
 }
