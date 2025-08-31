@@ -59,20 +59,20 @@ export default function InteractiveRecipeView({ recipe }: { recipe: Recipe }) {
 
   return (
     <div className="relative w-full">
-      {/* Background highlight */}
-      <div className="absolute top-0 left-0 right-0 h-48 bg-primary/10 dark:bg-primary/5 rounded-t-3xl" />
+      {/* Background highlight - hidden on mobile */}
+      <div className="absolute top-0 left-0 right-0 h-48 bg-primary/10 dark:bg-primary/5 rounded-t-3xl hidden sm:block" />
 
       {/* Recipe image popping out */}
-      <div className="relative flex justify-center -mt-10">
+      <div className="relative flex justify-center -mt-10 sm:-mt-10">
         <img 
           src={recipe.imageUrl} 
           alt={recipe.name}
-          className="w-64 h-64 rounded-full object-cover border-8 border-card shadow-xl -mb-16"
+          className="w-48 h-48 sm:w-64 sm:h-64 rounded-full object-cover border-4 sm:border-8 border-card shadow-xl -mb-12 sm:-mb-16"
         />
       </div>
 
-      {/* Content container */}
-      <div className="relative bg-card p-8 rounded-3xl space-y-8">
+      {/* Content container - full width on mobile, card on desktop */}
+      <div className="relative bg-card w-screen left-1/2 -ml-[50vw] sm:w-full sm:left-auto sm:ml-0 -mt-6 sm:mt-0 p-4 sm:p-8 sm:rounded-3xl space-y-6 sm:space-y-8 sm:shadow-sm">
         
         {/* Portion Adjuster */}
         <div className="flex justify-center">
@@ -84,13 +84,13 @@ export default function InteractiveRecipeView({ recipe }: { recipe: Recipe }) {
         </div>
 
         {/* Title + Description */}
-        <div className="text-center space-y-3">
-          <h2 className="text-3xl font-extrabold tracking-tight">{recipe.name}</h2>
-          <p className="text-base text-muted-foreground max-w-2xl mx-auto">{recipe.description}</p>
+        <div className="text-center space-y-2 sm:space-y-3">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">{recipe.name}</h2>
+          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-2">{recipe.description}</p>
         </div>
 
         {/* Key Stats */}
-        <div className="flex justify-around items-center p-4 bg-background rounded-2xl shadow-sm">
+        <div className="flex justify-around items-center p-3 sm:p-4 bg-background rounded-xl sm:rounded-2xl shadow-sm">
           <KeyStat icon={Clock} value={recipe.prepTime} label="Prep" />
           <KeyStat icon={ChefHat} value={recipe.cookTime} label="Cook" />
           <KeyStat icon={Flame} value={`${Math.round(adjustedNutrition.calories)}`} label="Calories" />
@@ -103,29 +103,29 @@ export default function InteractiveRecipeView({ recipe }: { recipe: Recipe }) {
               <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
               <TabsTrigger value="instructions">Instructions</TabsTrigger>
             </TabsList>
-            <TabsContent value="ingredients" className="pt-6">
-              <h3 className="text-xl font-bold mb-4 text-center">Ingredients for {portions} serving{portions > 1 && 's'}</h3>
-              <ul className="space-y-3">
+            <TabsContent value="ingredients" className="pt-4 sm:pt-6">
+              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-center">Ingredients for {portions} serving{portions > 1 && 's'}</h3>
+              <ul className="space-y-2 sm:space-y-3">
                 {adjustedIngredients.map((ing, index) => (
-                  <li key={index} className="flex justify-between items-center text-base p-3 bg-background rounded-lg">
+                  <li key={index} className="flex justify-between items-center text-sm sm:text-base p-2 sm:p-3 bg-background rounded-lg">
                     <span className="text-muted-foreground">{ing.name}</span>
                     <span className="font-semibold text-primary">{formatQuantity(ing.quantity, ing.unit)}</span>
                   </li>
                 ))}
               </ul>
             </TabsContent>
-            <TabsContent value="instructions" className="pt-6">
-              <h3 className="text-xl font-bold mb-4 text-center">Instructions</h3>
-              <ol className="space-y-4">
+            <TabsContent value="instructions" className="pt-4 sm:pt-6">
+              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-center">Instructions</h3>
+              <ol className="space-y-3 sm:space-y-4">
                 {recipe.instructions.map((step, index) => (
-                  <li key={index} className="flex items-start gap-3">
+                  <li key={index} className="flex items-start gap-2 sm:gap-3">
                     <Checkbox
                       id={`step-${index}`}
                       checked={checkedSteps[index]}
                       onCheckedChange={() => handleToggleStep(index)}
-                      className="mt-1 h-5 w-5 shrink-0"
+                      className="mt-0.5 sm:mt-1 h-4 w-4 sm:h-5 sm:w-5 shrink-0"
                     />
-                    <label htmlFor={`step-${index}`} className={cn("text-base leading-relaxed text-muted-foreground", checkedSteps[index] && "line-through opacity-60")}>
+                    <label htmlFor={`step-${index}`} className={cn("text-sm sm:text-base leading-relaxed text-muted-foreground", checkedSteps[index] && "line-through opacity-60")}>
                       {step}
                     </label>
                   </li>
