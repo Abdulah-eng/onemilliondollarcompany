@@ -50,8 +50,7 @@ export default function ProgramDetailView({
 
   const handleStartClick = () => {
     if (task.detailedProgramId) {
-      // ✅ FIXED: Navigation now points to the correct route format
-      navigate(`/program/${task.detailedProgramId}`);
+      navigate(`/program/${task.type}/${task.detailedProgramId}`);
     }
   };
   
