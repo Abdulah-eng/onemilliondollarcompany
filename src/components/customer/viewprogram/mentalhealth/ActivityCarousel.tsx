@@ -1,7 +1,5 @@
-// src/components/customer/viewprogram/mentalhealth/ActivityCarousel.tsx
-
 import { MentalHealthActivity } from "@/mockdata/viewprograms/mockmentalhealthprograms";
-import ItemCarousel, { CarouselItem } from '../shared/ItemCarousel';
+import ItemCarousel, { CarouselItem } from '@/mockdata/viewprograms/shared/ItemCarousel';
 
 interface ActivityCarouselProps {
   activities: MentalHealthActivity[];
@@ -13,9 +11,10 @@ export default function ActivityCarousel({ activities, selectedActivityId, onSel
   // Transform specific activity data into the generic format
   const carouselItems: CarouselItem[] = activities.map(activity => ({
     id: activity.id,
-    imageUrl: activity.imageUrl, // Assumes you've added this to your MentalHealthActivity type
-    label: activity.name,        // Shows "Morning Meditation", etc.
-    isCompleted: activity.isCompleted, // Assumes this property exists
+    imageUrl: activity.imageUrl,
+    // ✅ Changed to use 'timeOfDay' for the label as requested
+    label: activity.timeOfDay, 
+    isCompleted: activity.isCompleted,
   }));
   
   return (
