@@ -1,10 +1,16 @@
-import { useNavigate } from "react-router-dom";
+// src/components/customer/programsoverview/ProgramDetailView.tsx
+
+import { useNavigate, useParams } from "react-router-dom";
+import { useRef, useMemo, useEffect } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
 import { ScheduledTask, typeConfig } from "@/mockdata/programs/mockprograms";
 import { findDetailedTaskById, DetailViewItem } from "@/mockdata/viewprograms/mockdetailedviews";
+import { findProgramByIdAndType } from "@/mockdata/viewprograms/programFinder";
+
 import { PlayCircle } from "lucide-react";
-import { useRef, useMemo } from "react";
 
 const TaskListItem = ({ item }: { item: DetailViewItem }) => {
   return (
@@ -20,13 +26,13 @@ const TaskListItem = ({ item }: { item: DetailViewItem }) => {
 
 // A fallback component for simple string content
 const SimpleTaskListItem = ({ name }: { name: string }) => {
-    return (
-        <li className="flex items-center gap-4 p-3 bg-white dark:bg-[#0d1218] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
-             <div className="h-16 w-16 rounded-lg bg-muted dark:bg-slate-700" />
-            <p className="font-semibold text-slate-800 dark:text-slate-200">{name}</p>
-        </li>
-    )
-}
+  return (
+    <li className="flex items-center gap-4 p-3 bg-white dark:bg-[#0d1218] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+      <div className="h-16 w-16 rounded-lg bg-muted dark:bg-slate-700" />
+      <p className="font-semibold text-slate-800 dark:text-slate-200">{name}</p>
+    </li>
+  );
+};
 
 export default function ProgramDetailView({
   task,
@@ -36,25 +42,56 @@ export default function ProgramDetailView({
   onClose?: () => void;
 }) {
   const navigate = useNavigate();
+  const { id, type } = useParams<{ id?: string; type?: string }>();
   const touchStartY = useRef<number | null>(null);
+
+  // --- Legacy redirect logic ---
+  useEffect(() => {
+    if (!task && id && !type) {
+      const types = ["fitness", "nutrition", "mental"];
+      for (const t of types) {
+        const program = findProgramByIdAndType(t, id);
+        if (program) {
+          navigate(`/program/${t}/${id}`, { replace: true });
+          return;
+        }
+      }
+      navigate("/customer/programs", { replace: true });
+    }
+  }, [task, id, type, navigate]);
+
+  // If no task and no redirect case, show loader
+  if (!task && id && !type) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Redirecting...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!task) return null;
+
+  const config = typeConfig[task.type];
 
   const detailedContent = useMemo(() => {
     if (task?.detailedProgramId) {
       return findDetailedTaskById(task.detailedProgramId)?.content;
     }
-    return null; // Return null if no detailed view exists
+    return null;
   }, [task]);
-
-  if (!task) return null;
-  const config = typeConfig[task.type];
 
   const handleStartClick = () => {
     if (task.detailedProgramId) {
       navigate(`/program/${task.type}/${task.detailedProgramId}`);
     }
   };
-  
-  const handleTouchStart = (e: React.TouchEvent) => { touchStartY.current = e.touches[0].clientY; };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (touchStartY.current !== null) {
       const deltaY = touchStartY.current - e.changedTouches[0].clientY;
@@ -71,7 +108,7 @@ export default function ProgramDetailView({
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* HEADER (No changes) */}
+      {/* HEADER */}
       <div className="relative h-40 md:h-56 flex-shrink-0 pt-6 max-w-md mx-auto w-full">
         <img src={config.imageUrl} alt={task.title} className="w-full h-full object-cover rounded-xl" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-xl" />
@@ -88,10 +125,7 @@ export default function ProgramDetailView({
       {/* CONTENT */}
       <div className="flex-1 p-4 md:p-6 pt-4 overflow-y-auto">
         <div className="max-w-md w-full mx-auto">
-          <h3 className="font-semibold text-lg text-slate-700 dark:text-slate-200 mb-4">
-            Today's Plan:
-          </h3>
-          {/* ✅ FIXED: Logic now correctly displays detailed content OR falls back to simple content */}
+          <h3 className="font-semibold text-lg text-slate-700 dark:text-slate-200 mb-4">Today's Plan:</h3>
           {detailedContent ? (
             <ul className="space-y-3">
               {detailedContent.map((item, i) => (
@@ -100,15 +134,15 @@ export default function ProgramDetailView({
             </ul>
           ) : (
             <ul className="space-y-3">
-                {task.content.map((name, i) => (
-                    <SimpleTaskListItem key={i} name={name} />
-                ))}
+              {task.content.map((name, i) => (
+                <SimpleTaskListItem key={i} name={name} />
+              ))}
             </ul>
           )}
         </div>
       </div>
 
-      {/* FOOTER (No changes) */}
+      {/* FOOTER */}
       <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-[#1e262e]/50 backdrop-blur-sm flex-shrink-0">
         <div className="max-w-md w-full mx-auto">
           <Button
