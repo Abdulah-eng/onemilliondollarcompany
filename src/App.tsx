@@ -27,112 +27,114 @@ import CustomerDashboardPage from "./pages/customer/CustomerDashboard";
 import CoachDashboardPage from "./pages/coach/CoachDashboard";
 import MyProgramsPage from "./pages/customer/MyProgramsPage";
 import ViewProgramPage from "./pages/customer/ViewProgramPage";
+import LibraryPage from "./pages/customer/LibraryPage"; // ✅ IMPORT THE NEW LIBRARY PAGE
 
-// --- LOADING COMPONENT ---
+// ... (LoadingScreen, queryClient, and routing logic components remain unchanged) ...
+
 const LoadingScreen = () => (
-  <div className="flex h-screen w-full items-center justify-center bg-emerald-50">
-    <Loader2 className="h-10 w-10 animate-spin text-emerald-500" />
-  </div>
+  <div className="flex h-screen w-full items-center justify-center bg-emerald-50">
+    <Loader2 className="h-10 w-10 animate-spin text-emerald-500" />
+  </div>
 );
 
 const queryClient = new QueryClient();
 
-// --- ROUTING LOGIC ---
 const PublicRoutesLayout = () => {
-  const { profile, loading } = useAuth();
-  if (loading) return <LoadingScreen />;
-  if (profile) {
-    if (profile.role === "coach") return <Navigate to="/coach/dashboard" replace />;
-    if (profile.onboarding_complete) return <Navigate to="/customer/dashboard" replace />;
-    return <Navigate to="/onboarding/step-1" replace />;
-  }
-  return <Outlet />;
+  const { profile, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  if (profile) {
+    if (profile.role === "coach") return <Navigate to="/coach/dashboard" replace />;
+    if (profile.onboarding_complete) return <Navigate to="/customer/dashboard" replace />;
+    return <Navigate to="/onboarding/step-1" replace />;
+  }
+  return <Outlet />;
 };
 
 const ProtectedRoutesLayout = () => {
-  const { profile, loading } = useAuth();
-  if (loading) return <LoadingScreen />;
-  if (!profile) return <Navigate to="/login" replace />;
-  return <Outlet />;
+  const { profile, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  if (!profile) return <Navigate to="/login" replace />;
+  return <Outlet />;
 };
 
 const OnboardingGate = () => {
-  const { profile, loading } = useAuth();
-  if (loading) return <LoadingScreen />;
-  if (!profile) return <Navigate to="/login" replace />;
-  if (profile.role !== "customer") return <Navigate to="/login" replace />;
-  if (profile.onboarding_complete) return <Navigate to="/customer/dashboard" replace />;
-  return (
-    <OnboardingProvider>
-      <Outlet />
-    </OnboardingProvider>
-  );
+  const { profile, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  if (!profile) return <Navigate to="/login" replace />;
+  if (profile.role !== "customer") return <Navigate to="/login" replace />;
+  if (profile.onboarding_complete) return <Navigate to="/customer/dashboard" replace />;
+  return (
+    <OnboardingProvider>
+      <Outlet />
+    </OnboardingProvider>
+  );
 };
+
 
 // --- MAIN APP COMPONENT ---
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <Toaster richColors position="top-right" />
-          <Routes>
-            {/* 1. Public Routes */}
-            <Route path="/" element={<LandingPage />} />
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <Toaster richColors position="top-right" />
+          <Routes>
+            {/* 1. Public Routes */}
+            <Route path="/" element={<LandingPage />} />
 
-            {/* 2. Authentication Routes */}
-            <Route element={<PublicRoutesLayout />}>
-              <Route path="/get-started" element={<GetStartedPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            </Route>
+            {/* 2. Authentication Routes */}
+            <Route element={<PublicRoutesLayout />}>
+              <Route path="/get-started" element={<GetStartedPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            </Route>
 
-            {/* 3. Protected Routes */}
-            <Route element={<ProtectedRoutesLayout />}>
-              {/* Coach Routes */}
-              <Route
-                element={
-                  <RoleGate allowedRole="coach">
-                    <AppShell />
-                  </RoleGate>
-                }
-              >
-                <Route path="/coach/dashboard" element={<CoachDashboardPage />} />
-                {/* Add other coach routes here */}
-              </Route>
+            {/* 3. Protected Routes */}
+            <Route element={<ProtectedRoutesLayout />}>
+              {/* Coach Routes */}
+              <Route
+                element={
+                  <RoleGate allowedRole="coach">
+                    <AppShell />
+                  </RoleGate>
+                }
+              >
+                <Route path="/coach/dashboard" element={<CoachDashboardPage />} />
+              </Route>
 
-              {/* Customer Routes */}
-              <Route
-                element={
-                  <RoleGate allowedRole="customer">
-                    <AppShell />
-                  </RoleGate>
-                }
-              >
-                <Route path="/customer/dashboard" element={<CustomerDashboardPage />} />
-                <Route path="/customer/programs" element={<MyProgramsPage />} />
-                <Route path="/program/:type/:id" element={<ViewProgramPage />} />
-                <Route path="/program/:id" element={<ViewProgramPage />} />
-                {/* Add other customer routes here */}
-              </Route>
+              {/* Customer Routes */}
+              <Route
+                element={
+                  <RoleGate allowedRole="customer">
+                    <AppShell />
+                  </RoleGate>
+                }
+              >
+                <Route path="/customer/dashboard" element={<CustomerDashboardPage />} />
+                <Route path="/customer/programs" element={<MyProgramsPage />} />
+                {/* ✅ ADDED THE NEW LIBRARY ROUTE */}
+                <Route path="/customer/library" element={<LibraryPage />} />
+                <Route path="/program/:type/:id" element={<ViewProgramPage />} />
+                <Route path="/program/:id" element={<ViewProgramPage />} />
+              </Route>
 
-              {/* Onboarding Routes */}
-              <Route path="/onboarding" element={<OnboardingGate />}>
-                <Route path="step-1" element={<GoalSelectionStep />} />
-                <Route path="step-2" element={<PersonalInfoStep />} />
-                <Route path="step-3" element={<PreferencesStep />} />
-                <Route path="step-4" element={<ContactStep />} />
-                <Route path="success" element={<OnboardingSuccess />} />
-              </Route>
-            </Route>
+              {/* Onboarding Routes */}
+              <Route path="/onboarding" element={<OnboardingGate />}>
+                <Route path="step-1" element={<GoalSelectionStep />} />
+                <Route path="step-2" element={<PersonalInfoStep />} />
+                <Route path="step-3" element={<PreferencesStep />} />
+                <Route path="step-4" element={<ContactStep />} />
+                <Route path="success" element={<OnboardingSuccess />} />
+              </Route>
+            </Route>
 
-            {/* Catch all */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+            {/* Catch all */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
 );
 
 export default App;
