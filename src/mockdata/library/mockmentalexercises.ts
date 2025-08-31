@@ -3,16 +3,18 @@
 export interface MentalHealthGuide {
   id: string;
   name: string;
+  imageUrl: string;
   description: string;
   benefits: string[];
   instructions: string[];
   icon: string; // e.g., an emoji or icon name
 }
 
-const mockMentalHealthGuides: MentalHealthGuide[] = [
+export const mockMentalHealthGuides: MentalHealthGuide[] = [
   {
     id: "mh-lib-1",
     name: "Guided Meditation",
+    imageUrl: "/images/mental-health/meditation.png",
     icon: "🧘‍♀️",
     description: "A 10-minute guided session to calm the mind and reduce stress.",
     benefits: ["Reduces Stress", "Improves Focus", "Promotes Emotional Health"],
@@ -27,6 +29,7 @@ const mockMentalHealthGuides: MentalHealthGuide[] = [
   {
     id: "mh-lib-2",
     name: "Gratitude Journaling",
+    imageUrl: "/images/mental-health/journaling.png",
     icon: "✍️",
     description: "A short exercise to reflect on what you're thankful for, fostering a positive mindset.",
     benefits: ["Increases Positivity", "Improves Self-Esteem", "Enhances Empathy"],

@@ -23,7 +23,7 @@ export interface Recipe {
   instructions: string[];
 }
 
-const mockRecipes: Recipe[] = [
+export const mockRecipes: Recipe[] = [
   {
     id: "recipe-1",
     name: "Grilled Chicken Salad",
