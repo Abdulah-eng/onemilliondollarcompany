@@ -12,8 +12,8 @@ export function ScheduledProgramCard({
   program: Program;
   onClick: () => void;
 }) {
-  const config = typeConfig[program.type];
-  const startDate = parseISO(program.startDate);
+  const config = typeConfig[program.type] || typeConfig.fitness; // Fallback to fitness config
+  const startDate = parseISO(program.startDate!);
 
   return (
     <div
