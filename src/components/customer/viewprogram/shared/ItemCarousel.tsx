@@ -20,19 +20,19 @@ interface ItemCarouselProps {
 export default function ItemCarousel({ items, selectedItemId, onSelectItem }: ItemCarouselProps) {
   return (
     <div className="relative">
-      {/* Increased padding on mobile to accommodate text below circles */}
       <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4">
         {items.map((item) => {
           const isSelected = item.id === selectedItemId;
 
           return (
-            // The button now wraps both the circle and the text
             <div key={item.id} className="flex-shrink-0 flex flex-col items-center">
                 <button
                     onClick={() => onSelectItem(item.id)}
                     className={cn(
-                        "relative flex-shrink-0 w-20 h-20 rounded-full transition-all duration-200 focus:outline-none mb-2", // Added mb-2 for spacing
-                        isSelected ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : "ring-0"
+                        "relative flex-shrink-0 w-20 h-20 rounded-full transition-all duration-200 focus:outline-none mb-2",
+                        // ✅ FIXED: Added 'p-1' when selected to give space for the ring offset.
+                        // The ring will now appear fully within the button's padded area.
+                        isSelected ? "ring-2 ring-primary ring-offset-2 ring-offset-background p-1" : "ring-0"
                     )}
                 >
                     {/* Background Image */}
