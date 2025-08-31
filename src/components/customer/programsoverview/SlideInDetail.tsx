@@ -1,3 +1,5 @@
+// src/components/customer/programsoverview/SlideInDetail.tsx
+
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
@@ -9,11 +11,13 @@ import { X } from 'lucide-react';
 export default function SlideInDetail({
   task,
   isMobile,
-  onClose
+  onClose,
+  showFooter, // ✅ ADDED PROP
 }: {
   task: ScheduledTask | null,
   isMobile: boolean,
-  onClose: () => void
+  onClose: () => void,
+  showFooter?: boolean, // ✅ ADDED PROP TYPE
 }) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -32,16 +36,13 @@ export default function SlideInDetail({
   if (isMobile) {
     return (
       <Drawer open={!!task} onOpenChange={(open) => !open && onClose()} closeThreshold={0.4}>
-        {/* Added padding-top (pt-4) for space and a specific dark background color */}
         <DrawerContent className="h-[90%] rounded-t-3xl border-none bg-slate-50 dark:bg-[#1e262e] pt-4">
-          <ProgramDetailView task={task} />
+          <ProgramDetailView task={task} showFooter={showFooter} /> {/* ✅ PASS PROP */}
         </DrawerContent>
       </Drawer>
     );
   }
 
-  // ✅ For desktop, we render the backdrop and panel as separate fixed elements
-  // This prevents any parent layout from creating a gap.
   const desktopSlideIn = (
     <>
       {/* Backdrop */}
@@ -60,7 +61,7 @@ export default function SlideInDetail({
           isVisible ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <ProgramDetailView task={task} />
+        <ProgramDetailView task={task} showFooter={showFooter} /> {/* ✅ PASS PROP */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors"
