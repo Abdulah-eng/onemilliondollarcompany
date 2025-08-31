@@ -1,5 +1,3 @@
-// src/components/customer/viewprogram/nutrition/NutritionProgramView.tsx
-
 import { useState } from "react";
 import { DetailedNutritionTask } from "@/mockdata/viewprograms/mocknutritionprograms";
 import MealCarousel from "./MealCarousel";
@@ -17,14 +15,13 @@ export default function NutritionProgramView({ nutritionData }: NutritionProgram
   const selectedMeal = nutritionData.meals.find(m => m.id === selectedMealId);
 
   return (
-    <main className="space-y-8 pb-20">
+    <main className="w-full space-y-10 pb-20">
       <MealCarousel
         meals={nutritionData.meals}
         selectedMealId={selectedMealId!}
         onSelectMeal={setSelectedMealId}
       />
       
-      {/* ✅ REMOVED the wrapper div with px-4 to allow full-width display */}
       {selectedMeal && selectedMeal.recipe && (
         <InteractiveRecipeView recipe={selectedMeal.recipe} />
       )}
