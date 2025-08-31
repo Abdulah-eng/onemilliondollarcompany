@@ -27,21 +27,22 @@ import CustomerDashboardPage from "./pages/customer/CustomerDashboard";
 import CoachDashboardPage from "./pages/coach/CoachDashboard";
 import MyProgramsPage from "./pages/customer/MyProgramsPage";
 import ViewProgramPage from "./pages/customer/ViewProgramPage";
-import LegacyProgramRedirect from "./pages/customer/LegacyProgramRedirect";
-
 
 // --- LOADING COMPONENT ---
-const LoadingScreen = () => <div className="flex h-screen w-full items-center justify-center bg-emerald-50"><Loader2 className="h-10 w-10 animate-spin text-emerald-500" /></div>;
+const LoadingScreen = () => (
+  <div className="flex h-screen w-full items-center justify-center bg-emerald-50">
+    <Loader2 className="h-10 w-10 animate-spin text-emerald-500" />
+  </div>
+);
 
 const queryClient = new QueryClient();
 
 // --- ROUTING LOGIC ---
-
 const PublicRoutesLayout = () => {
   const { profile, loading } = useAuth();
   if (loading) return <LoadingScreen />;
   if (profile) {
-    if (profile.role === 'coach') return <Navigate to="/coach/dashboard" replace />;
+    if (profile.role === "coach") return <Navigate to="/coach/dashboard" replace />;
     if (profile.onboarding_complete) return <Navigate to="/customer/dashboard" replace />;
     return <Navigate to="/onboarding/step-1" replace />;
   }
@@ -55,12 +56,11 @@ const ProtectedRoutesLayout = () => {
   return <Outlet />;
 };
 
-
 const OnboardingGate = () => {
   const { profile, loading } = useAuth();
   if (loading) return <LoadingScreen />;
   if (!profile) return <Navigate to="/login" replace />;
-  if (profile.role !== 'customer') return <Navigate to="/login" replace />;
+  if (profile.role !== "customer") return <Navigate to="/login" replace />;
   if (profile.onboarding_complete) return <Navigate to="/customer/dashboard" replace />;
   return (
     <OnboardingProvider>
@@ -70,7 +70,6 @@ const OnboardingGate = () => {
 };
 
 // --- MAIN APP COMPONENT ---
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -80,7 +79,7 @@ const App = () => (
           <Routes>
             {/* 1. Public Routes */}
             <Route path="/" element={<LandingPage />} />
-            
+
             {/* 2. Authentication Routes */}
             <Route element={<PublicRoutesLayout />}>
               <Route path="/get-started" element={<GetStartedPage />} />
@@ -91,21 +90,32 @@ const App = () => (
             {/* 3. Protected Routes */}
             <Route element={<ProtectedRoutesLayout />}>
               {/* Coach Routes */}
-              <Route element={<RoleGate allowedRole="coach"><AppShell /></RoleGate>}>
+              <Route
+                element={
+                  <RoleGate allowedRole="coach">
+                    <AppShell />
+                  </RoleGate>
+                }
+              >
                 <Route path="/coach/dashboard" element={<CoachDashboardPage />} />
                 {/* Add other coach routes here */}
               </Route>
-              
+
               {/* Customer Routes */}
-              <Route element={<RoleGate allowedRole="customer"><AppShell /></RoleGate>}>
+              <Route
+                element={
+                  <RoleGate allowedRole="customer">
+                    <AppShell />
+                  </RoleGate>
+                }
+              >
                 <Route path="/customer/dashboard" element={<CustomerDashboardPage />} />
                 <Route path="/customer/programs" element={<MyProgramsPage />} />
                 <Route path="/program/:type/:id" element={<ViewProgramPage />} />
-                <Route path="/program/:id" element={<LegacyProgramRedirect />} />
-                
+                <Route path="/program/:id" element={<ViewProgramPage />} />
                 {/* Add other customer routes here */}
               </Route>
-              
+
               {/* Onboarding Routes */}
               <Route path="/onboarding" element={<OnboardingGate />}>
                 <Route path="step-1" element={<GoalSelectionStep />} />
