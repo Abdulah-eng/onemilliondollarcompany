@@ -73,9 +73,10 @@ export default function RecipeDetails({ recipe }: { recipe: Recipe }) {
   }, [portions, recipe]);
 
   return (
+    // ✅ NEW main container inspired by FitnessProgramView
     <div className="w-full space-y-6">
-        {/* Image always stretches to edges */}
-        <div className="w-full aspect-square overflow-hidden rounded-2xl bg-muted">
+        {/* ✅ Image now has responsive sizing */}
+        <div className="w-full sm:max-w-2xl sm:mx-auto aspect-square sm:aspect-video overflow-hidden rounded-2xl bg-muted shadow-lg">
             <img 
                 src={recipe.imageUrl} 
                 alt={recipe.name}
@@ -83,9 +84,11 @@ export default function RecipeDetails({ recipe }: { recipe: Recipe }) {
             />
         </div>
 
-        {/* ✅ Main content container, now px-0 for mobile. Padding for internal elements is controlled individually. */}
-        <div className="px-0 sm:px-4 space-y-6">
-            {/* Portion Adjuster - maintains internal padding for good look */}
+        {/* ✅ Content container with responsive card layout */}
+        <div className={cn(
+            "space-y-6 px-4", // Base padding for mobile
+            "sm:bg-card sm:p-6 sm:rounded-2xl sm:border" // Card layout for desktop
+        )}>
             <div className="flex justify-center">
                 <div className="flex items-center gap-4 bg-background px-4 py-2 rounded-full shadow-sm">
                     <Button onClick={() => setPortions((p) => Math.max(1, p - 1))} size="icon" variant="ghost" className="rounded-full h-10 w-10">
@@ -98,20 +101,18 @@ export default function RecipeDetails({ recipe }: { recipe: Recipe }) {
                 </div>
             </div>
 
-            {/* Title and Description - uses px-4 for readability, but content container is px-0 */}
-            <div className="text-center space-y-3 px-4 sm:px-0"> {/* ✅ Added px-4 for mobile, px-0 for desktop */}
+            <div className="text-center space-y-3">
                 <h2 className="text-3xl font-extrabold tracking-tight">{recipe.name}</h2>
                 <p className="text-base text-muted-foreground max-w-2xl mx-auto">{recipe.description}</p>
             </div>
 
-            {/* Key Stats - maintains internal padding for good look */}
-            <div className="flex justify-around items-center p-4 bg-background rounded-2xl mx-4 sm:mx-0"> {/* ✅ Added mx-4 for mobile, mx-0 for desktop to constrain */}
+            <div className="flex justify-around items-center p-4 bg-background rounded-2xl">
                 <KeyStat icon={Clock} value={recipe.prepTime} label="Prep" />
                 <KeyStat icon={ChefHat} value={recipe.cookTime} label="Cook" />
                 <KeyStat icon={Flame} value={`${Math.round(adjustedNutrition.calories)}`} label="Calories"/>
             </div>
 
-            <div className="px-4 sm:px-0"> {/* ✅ Added px-4 for mobile, px-0 for desktop to contain Tabs */}
+            <div>
                 <Tabs defaultValue="ingredients">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
@@ -119,7 +120,7 @@ export default function RecipeDetails({ recipe }: { recipe: Recipe }) {
                     </TabsList>
                     <TabsContent value="ingredients" className="pt-6">
                         <h3 className="text-xl font-bold mb-4 text-center">Ingredients for {portions} serving{portions > 1 && "s"}</h3>
-                        <ul className="space-y-3 px-0"> {/* ✅ Removed px-4/sm:px-0 here to ensure list items are also edge-to-edge */}
+                        <ul className="space-y-3">
                         {adjustedIngredients.map((ing, index) => (
                             <li key={index} className="flex justify-between items-center text-base p-3 bg-background rounded-lg">
                             <span className="text-muted-foreground">{ing.name}</span>
@@ -130,7 +131,7 @@ export default function RecipeDetails({ recipe }: { recipe: Recipe }) {
                     </TabsContent>
                     <TabsContent value="instructions" className="pt-6">
                         <h3 className="text-xl font-bold mb-4 text-center">Instructions</h3>
-                        <ol className="space-y-4 px-0"> {/* ✅ Removed px-4/sm:px-0 here to ensure list items are also edge-to-edge */}
+                        <ol className="space-y-4">
                         {recipe.instructions.map((step, index) => (
                             <li key={index} className="flex items-start gap-3">
                             <Checkbox id={`step-${index}`} checked={checkedSteps[index]} onCheckedChange={() => handleToggleStep(index)} className="mt-1 h-5 w-5 shrink-0"/>
