@@ -73,9 +73,7 @@ export default function RecipeDetails({ recipe }: { recipe: Recipe }) {
   }, [portions, recipe]);
 
   return (
-    // ✅ NEW simplified main container
     <div className="w-full space-y-6">
-        {/* ✅ Image is now a simple rounded square */}
         <div className="w-full aspect-square overflow-hidden rounded-2xl bg-muted">
             <img 
                 src={recipe.imageUrl} 
@@ -84,7 +82,6 @@ export default function RecipeDetails({ recipe }: { recipe: Recipe }) {
             />
         </div>
 
-        {/* ✅ Content container with padding for mobile, but NO background */}
         <div className="px-4 space-y-6">
             <div className="flex justify-center">
                 <div className="flex items-center gap-4 bg-background px-4 py-2 rounded-full shadow-sm">
