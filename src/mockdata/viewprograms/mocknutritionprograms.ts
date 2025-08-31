@@ -8,6 +8,9 @@ export interface Meal {
   recipeId: string;
   // For convenience, we can resolve the recipe here
   recipe: Recipe | undefined;
+  // Required for carousel component
+  imageUrl: string;
+  isCompleted: boolean;
 }
 
 export interface DetailedNutritionTask {
@@ -29,8 +32,22 @@ const mockDetailedNutritionPrograms: DetailedNutritionTask[] = [
     totalCalories: 2400,
     totalProtein: 180,
     meals: [
-      { id: "meal-1", mealType: "Breakfast", recipeId: "recipe-2", recipe: findRecipeById("recipe-2") },
-      { id: "meal-2", mealType: "Lunch", recipeId: "recipe-1", recipe: findRecipeById("recipe-1") },
+      { 
+        id: "meal-1", 
+        mealType: "Breakfast", 
+        recipeId: "recipe-2", 
+        recipe: findRecipeById("recipe-2"),
+        imageUrl: "/images/breakfast.jpg",
+        isCompleted: false
+      },
+      { 
+        id: "meal-2", 
+        mealType: "Lunch", 
+        recipeId: "recipe-1", 
+        recipe: findRecipeById("recipe-1"),
+        imageUrl: "/images/lunch.jpg",
+        isCompleted: false
+      },
       // Add more meals for dinner, snacks etc.
     ]
   }
