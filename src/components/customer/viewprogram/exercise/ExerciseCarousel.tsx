@@ -1,7 +1,6 @@
-// src/components/customer/viewprogram/exercise/ExerciseCarousel.tsx
-
 import { WorkoutExercise } from "@/mockdata/viewprograms/mockexerciseprograms";
-import ItemCarousel, { CarouselItem } from '../shared/ItemCarousel';
+// ✅ FIXED: Corrected import path to point to the 'components' directory
+import ItemCarousel, { CarouselItem } from '@/components/customer/viewprogram/shared/ItemCarousel';
 
 interface ExerciseCarouselProps {
   exercises: WorkoutExercise[];
@@ -10,7 +9,6 @@ interface ExerciseCarouselProps {
 }
 
 export default function ExerciseCarousel({ exercises, selectedExerciseId, onSelectExercise }: ExerciseCarouselProps) {
-  // Transform specific exercise data into the generic format
   const carouselItems: CarouselItem[] = exercises.map(exercise => ({
     id: exercise.id,
     imageUrl: exercise.imageUrl,
