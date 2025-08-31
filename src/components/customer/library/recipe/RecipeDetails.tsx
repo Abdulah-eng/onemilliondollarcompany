@@ -1,3 +1,5 @@
+// src/components/customer/library/recipe/RecipeDetails.tsx
+
 import { useState, useMemo } from "react";
 import { Recipe } from "@/mockdata/library/mockrecipes";
 import { Button } from "@/components/ui/button";
@@ -72,15 +74,12 @@ export default function RecipeDetails({ recipe }: { recipe: Recipe }) {
 
   return (
     <div className="relative w-full">
-      {/* Background highlight */}
-      <div className="absolute top-0 left-0 right-0 h-48 bg-primary/10 dark:bg-primary/5 rounded-t-3xl" />
-
-      {/* Recipe image popping out */}
-      <div className="relative flex justify-center -mt-10">
+      {/* Recipe image with rounded square for mobile, hidden on larger screens */}
+      <div className="block sm:hidden w-full aspect-square overflow-hidden">
         <img
           src={recipe.imageUrl}
           alt={recipe.name}
-          className="w-64 h-64 rounded-full object-cover border-8 border-card shadow-xl -mb-16"
+          className="w-full h-full object-cover rounded-2xl"
         />
       </div>
 
@@ -88,10 +87,10 @@ export default function RecipeDetails({ recipe }: { recipe: Recipe }) {
       <div
         className={cn(
           "relative space-y-8",
-          // mobile: full width, transparent bg
-          "bg-transparent p-4",
-          // desktop+: white card
-          "sm:bg-card sm:p-8 sm:rounded-3xl sm:shadow-sm"
+          // mobile: full width, white background that starts right after the image, rounded top
+          "bg-card p-4 rounded-t-3xl -mt-6",
+          // desktop+: white card, full rounded
+          "sm:p-8 sm:rounded-3xl sm:shadow-sm sm:mt-0"
         )}
       >
         {/* Portion Adjuster */}
