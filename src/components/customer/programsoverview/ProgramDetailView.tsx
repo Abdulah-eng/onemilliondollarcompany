@@ -108,37 +108,40 @@ export default function ProgramDetailView({
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* HEADER */}
-      <div className="relative h-40 md:h-56 flex-shrink-0 pt-6 max-w-md mx-auto w-full">
-        <img src={config.imageUrl} alt={task.title} className="w-full h-full object-cover rounded-xl" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-xl" />
-        <div className="absolute bottom-4 left-4 text-white">
-          <Badge variant="secondary" className="mb-2 bg-white/20 backdrop-blur-sm border-0 text-white">
-            {task.programTitle} - Week {task.weekNumber}
-          </Badge>
-          <h2 className="text-2xl md:text-3xl font-bold drop-shadow-lg">
-            {config.emoji} {task.title}
-          </h2>
+      {/* SCROLLABLE WRAPPER for header and content */}
+      <div className="flex-1 overflow-y-auto">
+        {/* HEADER */}
+        <div className="relative h-40 md:h-56 pt-6 max-w-md mx-auto w-full">
+          <img src={config.imageUrl} alt={task.title} className="w-full h-full object-cover rounded-xl" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-xl" />
+          <div className="absolute bottom-4 left-4 text-white">
+            <Badge variant="secondary" className="mb-2 bg-white/20 backdrop-blur-sm border-0 text-white">
+              {task.programTitle} - Week {task.weekNumber}
+            </Badge>
+            <h2 className="text-2xl md:text-3xl font-bold drop-shadow-lg">
+              {config.emoji} {task.title}
+            </h2>
+          </div>
         </div>
-      </div>
 
-      {/* CONTENT */}
-      <div className="flex-1 p-4 md:p-6 pt-4 overflow-y-auto">
-        <div className="max-w-md w-full mx-auto">
-          <h3 className="font-semibold text-lg text-slate-700 dark:text-slate-200 mb-4">Today's Plan:</h3>
-          {detailedContent ? (
-            <ul className="space-y-3">
-              {detailedContent.map((item, i) => (
-                <TaskListItem key={i} item={item} />
-              ))}
-            </ul>
-          ) : (
-            <ul className="space-y-3">
-              {task.content.map((name, i) => (
-                <SimpleTaskListItem key={i} name={name} />
-              ))}
-            </ul>
-          )}
+        {/* CONTENT */}
+        <div className="p-4 md:p-6 pt-4">
+          <div className="max-w-md w-full mx-auto">
+            <h3 className="font-semibold text-lg text-slate-700 dark:text-slate-200 mb-4">Today's Plan:</h3>
+            {detailedContent ? (
+              <ul className="space-y-3">
+                {detailedContent.map((item, i) => (
+                  <TaskListItem key={i} item={item} />
+                ))}
+              </ul>
+            ) : (
+              <ul className="space-y-3">
+                {task.content.map((name, i) => (
+                  <SimpleTaskListItem key={i} name={name} />
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
 
