@@ -55,11 +55,10 @@ export default function InteractiveRecipeView({ recipe }: { recipe: Recipe }) {
     };
   }, [portions, recipe]);
 
-  // ✅ FIXED: Restored the actual content for these components
   const IngredientsContent = () => (
     <div>
       <h3 className="text-lg font-bold mb-4 text-foreground text-center">Ingredients for {portions} serving{portions > 1 && 's'}</h3>
-      <ul className="space-y-2">
+      <ul className="space-y-2 px-4 sm:px-0"> {/* ✅ Added px-4 for mobile, px-0 for desktop */}
         {adjustedIngredients.map((ing, index) => (
           <li key={index} className="flex justify-between items-center text-sm p-3 bg-background rounded-lg">
             <span className="text-muted-foreground">{ing.name}</span>
@@ -73,7 +72,7 @@ export default function InteractiveRecipeView({ recipe }: { recipe: Recipe }) {
   const InstructionsContent = () => (
     <div>
       <h3 className="text-lg font-bold mb-4 text-foreground text-center">Instructions</h3>
-      <ol className="space-y-4">
+      <ol className="space-y-4 px-4 sm:px-0"> {/* ✅ Added px-4 for mobile, px-0 for desktop */}
         {recipe.instructions.map((step, index) => (
           <li key={index} className="flex items-start gap-3">
              <Checkbox id={`step-${index}`} checked={checkedSteps[index]} onCheckedChange={() => handleToggleStep(index)} className="mt-1 h-5 w-5 shrink-0"/>
@@ -88,6 +87,7 @@ export default function InteractiveRecipeView({ recipe }: { recipe: Recipe }) {
 
   return (
     <div className="w-full space-y-6">
+        {/* Image always stretches to edges */}
         <div className="w-full aspect-square overflow-hidden rounded-2xl bg-muted">
             <img 
                 src={recipe.imageUrl} 
@@ -95,7 +95,10 @@ export default function InteractiveRecipeView({ recipe }: { recipe: Recipe }) {
                 className="w-full h-full object-cover"
             />
         </div>
-        <div className="px-4 space-y-6">
+
+        {/* ✅ Main content container, now px-0 for mobile. Padding for internal elements is controlled individually. */}
+        <div className="px-0 sm:px-4 space-y-6"> 
+            {/* Portion Adjuster - maintains internal padding for good look */}
             <div className="flex justify-center">
                 <div className="flex items-center gap-4 bg-background px-4 py-2 rounded-full shadow-sm">
                     <Button onClick={() => setPortions(p => Math.max(1, p - 1))} size="icon" variant="ghost" className="rounded-full h-10 w-10"><Minus className="w-5 h-5" /></Button>
@@ -104,18 +107,20 @@ export default function InteractiveRecipeView({ recipe }: { recipe: Recipe }) {
                 </div>
             </div>
 
-            <div className="text-center space-y-2">
+            {/* Title and Description - uses px-4 for readability, but content container is px-0 */}
+            <div className="text-center space-y-2 px-4 sm:px-0"> {/* ✅ Added px-4 for mobile, px-0 for desktop */}
                 <h2 className="text-3xl font-extrabold tracking-tight">{recipe.name}</h2>
                 <p className="text-muted-foreground max-w-xl mx-auto">{recipe.description}</p>
             </div>
 
-            <div className="flex justify-around items-center p-4 bg-background rounded-2xl">
+            {/* Key Stats - maintains internal padding for good look */}
+            <div className="flex justify-around items-center p-4 bg-background rounded-2xl mx-4 sm:mx-0"> {/* ✅ Added mx-4 for mobile, mx-0 for desktop to constrain */}
                 <KeyStat icon={Clock} value={recipe.prepTime} label="Prep" />
                 <KeyStat icon={ChefHat} value={recipe.cookTime} label="Cook" />
                 <KeyStat icon={Flame} value={`${Math.round(adjustedNutrition.calories)}`} label="Calories" />
             </div>
 
-            <div>
+            <div className="px-4 sm:px-0"> {/* ✅ Added px-4 for mobile, px-0 for desktop to contain Tabs */}
                 <Tabs defaultValue="ingredients">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
