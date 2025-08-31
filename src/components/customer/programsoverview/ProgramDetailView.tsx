@@ -24,7 +24,6 @@ const TaskListItem = ({ item }: { item: DetailViewItem }) => {
   );
 };
 
-// A fallback component for simple string content
 const SimpleTaskListItem = ({ name }: { name: string }) => {
   return (
     <li className="flex items-center gap-4 p-3 bg-white dark:bg-[#0d1218] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
@@ -37,9 +36,11 @@ const SimpleTaskListItem = ({ name }: { name: string }) => {
 export default function ProgramDetailView({
   task,
   onClose,
+  showFooter = true, // ✅ ADDED PROP WITH DEFAULT VALUE
 }: {
   task: ScheduledTask | null;
   onClose?: () => void;
+  showFooter?: boolean; // ✅ ADDED PROP TYPE
 }) {
   const navigate = useNavigate();
   const { id, type } = useParams<{ id?: string; type?: string }>();
@@ -127,7 +128,9 @@ export default function ProgramDetailView({
         {/* CONTENT */}
         <div className="p-4 md:p-6 pt-4">
           <div className="max-w-md w-full mx-auto">
-            <h3 className="font-semibold text-lg text-slate-700 dark:text-slate-200 mb-4">Today's Plan:</h3>
+            <h3 className="font-semibold text-lg text-slate-700 dark:text-slate-200 mb-4">
+              {showFooter ? "Today's Plan:" : "Program Preview:"}
+            </h3>
             {detailedContent ? (
               <ul className="space-y-3">
                 {detailedContent.map((item, i) => (
@@ -145,20 +148,22 @@ export default function ProgramDetailView({
         </div>
       </div>
 
-      {/* FOOTER */}
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-[#1e262e]/50 backdrop-blur-sm flex-shrink-0">
-        <div className="max-w-md w-full mx-auto">
-          <Button
-            onClick={handleStartClick}
-            size="lg"
-            className="w-full h-12 font-bold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg flex items-center justify-center"
-            disabled={!task.detailedProgramId}
-          >
-            <PlayCircle className="w-5 h-5 mr-2" />
-            Start Task
-          </Button>
+      {/* ✅ CONDITIONALLY RENDERED FOOTER */}
+      {showFooter && (
+        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-[#1e262e]/50 backdrop-blur-sm flex-shrink-0">
+          <div className="max-w-md w-full mx-auto">
+            <Button
+              onClick={handleStartClick}
+              size="lg"
+              className="w-full h-12 font-bold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg flex items-center justify-center"
+              disabled={!task.detailedProgramId}
+            >
+              <PlayCircle className="w-5 h-5 mr-2" />
+              Start Task
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
