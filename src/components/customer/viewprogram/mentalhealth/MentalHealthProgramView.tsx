@@ -17,12 +17,10 @@ export default function MentalHealthProgramView({ initialData }: MentalHealthPro
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(
     programData.activities.length > 0 ? programData.activities[0].id : null
   );
-  // ✅ UPDATED breakpoint to 768px
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
   useEffect(() => {
-    // ✅ UPDATED breakpoint to 768px
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -40,7 +38,7 @@ export default function MentalHealthProgramView({ initialData }: MentalHealthPro
   const activityGuide = selectedActivity ? findMentalHealthGuideById(selectedActivity.libraryActivityId) : null;
 
   return (
-    <main className="space-y-8">
+    <main className="space-y-8 pb-32">
       <ActivityCarousel
         activities={programData.activities}
         selectedActivityId={selectedActivityId!}
@@ -56,7 +54,6 @@ export default function MentalHealthProgramView({ initialData }: MentalHealthPro
       <GuideDrawer
         guideData={activityGuide}
         isMobile={isMobile}
-        triggerText="View Guide:"
       >
         {activityGuide && <MentalHealthGuide guide={activityGuide} />}
       </GuideDrawer>
