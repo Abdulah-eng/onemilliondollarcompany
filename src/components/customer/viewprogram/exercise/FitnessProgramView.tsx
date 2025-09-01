@@ -17,17 +17,16 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
   const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(
     initialData.exercises.length > 0 ? initialData.exercises[0].id : null
   );
-  // ✅ UPDATED breakpoint to 768px
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  // ✅ REVERTED breakpoint to 1024px for iPad support
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
   useEffect(() => {
-    // ✅ UPDATED breakpoint to 768px
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    // ✅ REVERTED breakpoint to 1024px for iPad support
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ... (handleSetChange, handleAddSet, handleRemoveSet functions remain unchanged)
   const handleSetChange = (exerciseId: string, setIndex: number, updatedSet: Partial<ExerciseSet>) => {
     setWorkoutData(prevData => {
       const newWorkoutData = JSON.parse(JSON.stringify(prevData));
@@ -70,7 +69,8 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
   const exerciseGuide = selectedExercise ? findExerciseGuideById(selectedExercise.libraryExerciseId) : null;
 
   return (
-    <main className="space-y-8">
+    // ✅ ADDED back bottom padding to ensure space at the end of the scroll
+    <main className="space-y-8 pb-20">
       <ExerciseCarousel
         exercises={workoutData.exercises}
         selectedExerciseId={selectedExerciseId!}
