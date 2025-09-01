@@ -16,17 +16,17 @@ export default function GuideDrawer({ guideData, isMobile, triggerText, children
     return null;
   }
 
-  // On desktop, render the content directly (inline)
+  // On desktop, render the content directly, as before.
   if (!isMobile) {
     return <>{children}</>;
   }
   
-  // On mobile/tablet, render the drawer system
+  // On mobile/tablet, render the stable drawer system.
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        {/* ✅ REMOVED fixed positioning. This is now a regular block element. */}
-        <div className="px-4">
+        {/* ✅ FIXED: This trigger is now reliably stuck to the bottom of the viewport on mobile */}
+        <div className="fixed bottom-20 left-0 right-0 z-10 p-4">
           <div className="flex items-center justify-between w-full max-w-md mx-auto h-14 px-4 bg-card border rounded-xl shadow-lg cursor-pointer active:scale-95 transition-transform">
             <div className="flex items-center gap-3 overflow-hidden">
               <span className="font-bold text-lg flex-shrink-0">{triggerText}</span>
@@ -39,7 +39,6 @@ export default function GuideDrawer({ guideData, isMobile, triggerText, children
         </div>
       </DrawerTrigger>
       <DrawerContent className="h-[80%] rounded-t-3xl border-none bg-background pt-4">
-        {/* The scrollable content inside the opened drawer */}
         <div className="overflow-y-auto p-4">
            {children}
         </div>
