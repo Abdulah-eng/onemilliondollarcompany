@@ -70,12 +70,27 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center space-x-2">
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/login" className={cn(textColor, textShadow, "hover:text-primary")}>Login</Link>
-            </Button>
-            <Button asChild variant="default" size="sm">
-              <Link to="/get-started" className={cn(textColor, textShadow)}>Get Started</Link>
-            </Button>
+            <Link 
+              to="/login" 
+              className={cn(
+                "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 rounded-md px-3 hover:bg-accent hover:text-accent-foreground",
+                textColor, 
+                textShadow, 
+                "hover:text-primary"
+              )}
+            >
+              Login
+            </Link>
+            <Link 
+              to="/get-started" 
+              className={cn(
+                "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 rounded-md px-3 bg-primary text-primary-foreground hover:bg-primary/90",
+                textColor, 
+                textShadow
+              )}
+            >
+              Get Started
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -103,12 +118,20 @@ export default function Navbar() {
             ))}
           </div>
           <div className="px-4 pt-4 pb-4 space-y-3">
-            <Button variant="ghost" className="w-full justify-center text-lg font-semibold h-12" asChild>
-              <Link to="/login" onClick={() => setIsOpen(false)}>Login</Link>
-            </Button>
-            <Button variant="default" className="w-full justify-center text-lg font-semibold h-12" asChild>
-              <Link to="/get-started" onClick={() => setIsOpen(false)}>Get Started</Link>
-            </Button>
+            <Link 
+              to="/login" 
+              onClick={() => setIsOpen(false)}
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 w-full justify-center text-lg font-semibold h-12 hover:bg-accent hover:text-accent-foreground"
+            >
+              Login
+            </Link>
+            <Link 
+              to="/get-started" 
+              onClick={() => setIsOpen(false)}
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 w-full justify-center text-lg font-semibold h-12 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              Get Started
+            </Link>
           </div>
         </div>
       )}
