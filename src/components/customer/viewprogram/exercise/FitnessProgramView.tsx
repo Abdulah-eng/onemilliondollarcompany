@@ -1,11 +1,12 @@
 // src/components/customer/viewprogram/exercise/FitnessProgramView.tsx
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DetailedFitnessTask, ExerciseSet } from "@/mockdata/viewprograms/mockexerciseprograms";
 import { findExerciseGuideById } from "@/mockdata/library/mockexercises";
 import ExerciseCarousel from "./ExerciseCarousel";
 import ExerciseDetails from "./ExerciseDetails";
 import ExerciseGuide from "@/components/customer/library/exercises/ExerciseGuide";
+import GuideDrawer from "../shared/GuideDrawer"; // ✅ IMPORT FROM THE NEW SHARED LOCATION
 
 interface FitnessProgramViewProps {
   initialData: DetailedFitnessTask;
@@ -16,8 +17,16 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
   const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(
     initialData.exercises.length > 0 ? initialData.exercises[0].id : null
   );
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
-  const handleSetChange = (exerciseId: string, setIndex: number, updatedSet: Partial<ExerciseSet>) => {
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // ... (handleSetChange, handleAddSet, handleRemoveSet functions remain unchanged)
+    const handleSetChange = (exerciseId: string, setIndex: number, updatedSet: Partial<ExerciseSet>) => {
     setWorkoutData(prevData => {
       const newWorkoutData = JSON.parse(JSON.stringify(prevData));
       const exerciseToUpdate = newWorkoutData.exercises.find((ex: { id: string; }) => ex.id === exerciseId);
@@ -36,10 +45,7 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
         const lastSet = exerciseToUpdate.sets[exerciseToUpdate.sets.length - 1];
         const newSet: ExerciseSet = {
           targetReps: lastSet?.targetReps || "8-12",
-          performedKg: null,
-          performedReps: null,
-          completed: false,
-          previous: "New set",
+          performedKg: null, performedReps: null, completed: false, previous: "New set",
         };
         exerciseToUpdate.sets.push(newSet);
       }
@@ -58,11 +64,12 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
     });
   };
 
+
   const selectedExercise = workoutData.exercises.find(ex => ex.id === selectedExerciseId);
   const exerciseGuide = selectedExercise ? findExerciseGuideById(selectedExercise.libraryExerciseId) : null;
 
   return (
-    <main className="space-y-8 pb-20">
+    <main className="space-y-8">
       <ExerciseCarousel
         exercises={workoutData.exercises}
         selectedExerciseId={selectedExerciseId!}
@@ -80,7 +87,14 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
         />
       )}
 
-      {exerciseGuide && <ExerciseGuide guide={exerciseGuide} />}
+      {/* ✅ Use the generic GuideDrawer */}
+      <GuideDrawer
+        guideData={exerciseGuide}
+        isMobile={isMobile}
+        triggerText="How to do:"
+      >
+        {exerciseGuide && <ExerciseGuide guide={exerciseGuide} />}
+      </GuideDrawer>
     </main>
   );
 }
