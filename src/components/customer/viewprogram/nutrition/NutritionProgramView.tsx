@@ -36,7 +36,6 @@ export default function NutritionProgramView({ nutritionData }: NutritionProgram
       <GuideDrawer
         guideData={selectedRecipe}
         isMobile={isMobile}
-        triggerText="View Recipe:"
       >
         {selectedRecipe && <RecipeDetails recipe={selectedRecipe} />}
       </GuideDrawer>

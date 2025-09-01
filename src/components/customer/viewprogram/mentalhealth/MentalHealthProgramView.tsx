@@ -54,7 +54,6 @@ export default function MentalHealthProgramView({ initialData }: MentalHealthPro
       <GuideDrawer
         guideData={activityGuide}
         isMobile={isMobile}
-        triggerText="View Guide:"
       >
         {activityGuide && <MentalHealthGuide guide={activityGuide} />}
       </GuideDrawer>

@@ -67,7 +67,7 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
   const exerciseGuide = selectedExercise ? findExerciseGuideById(selectedExercise.libraryExerciseId) : null;
 
   return (
-    // ✅ ADDED bottom padding to prevent content being hidden by the trigger
+    // Add bottom padding to ensure content doesn't hide behind the drawer
     <main className="space-y-8 pb-32">
       <ExerciseCarousel
         exercises={workoutData.exercises}
@@ -89,7 +89,6 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
       <GuideDrawer
         guideData={exerciseGuide}
         isMobile={isMobile}
-        triggerText="How to do:"
       >
         {exerciseGuide && <ExerciseGuide guide={exerciseGuide} />}
       </GuideDrawer>
