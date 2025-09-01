@@ -17,6 +17,7 @@ export default function MentalHealthProgramView({ initialData }: MentalHealthPro
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(
     programData.activities.length > 0 ? programData.activities[0].id : null
   );
+  // ✅ Corrected breakpoint for iPad and smaller devices
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
   useEffect(() => {
@@ -38,7 +39,8 @@ export default function MentalHealthProgramView({ initialData }: MentalHealthPro
   const activityGuide = selectedActivity ? findMentalHealthGuideById(selectedActivity.libraryActivityId) : null;
 
   return (
-    <main className="space-y-8 pb-32">
+    // ✅ Re-added bottom padding to ensure scroll space for the trigger
+    <main className="space-y-8 pb-20">
       <ActivityCarousel
         activities={programData.activities}
         selectedActivityId={selectedActivityId!}
@@ -54,6 +56,7 @@ export default function MentalHealthProgramView({ initialData }: MentalHealthPro
       <GuideDrawer
         guideData={activityGuide}
         isMobile={isMobile}
+        triggerText="View Guide:"
       >
         {activityGuide && <MentalHealthGuide guide={activityGuide} />}
       </GuideDrawer>
