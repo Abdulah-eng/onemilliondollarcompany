@@ -4,9 +4,9 @@ import { Badge } from '@/components/ui/badge';
 
 export default function FeaturesSection() {
   return (
-    <section
-      className="light relative pt-20 pb-32 overflow-visible bg-gradient-to-b from-white via-[#DDF5F0]/50 to-[#DDF5F0]/70"
-    >
+    <section
+      className="relative pt-20 pb-32 overflow-visible bg-gradient-to-b from-white via-[#BFEDE6]/80 to-[#A8E3DB]/90"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16" data-reveal>

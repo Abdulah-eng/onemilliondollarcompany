@@ -24,10 +24,13 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
 }
 
 export default function MoreThanPlanSection() {
-  return (
-    <section className="light relative pt-20 pb-32 bg-white">
-      <div className="absolute inset-x-0 top-0 h-[500px] bg-gradient-to-b from-[#DDF5F0]/70 via-[#B2E0D9]/30 to-transparent" />
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+  return (
+    <section className="relative pt-20 pb-32 bg-white">
+      {/* Connector Gradient - overlaps with Features section */}
+      <div className="absolute inset-x-0 top-0 h-[200px] bg-gradient-to-b from-[#A8E3DB]/90 via-[#B2E0D9]/60 to-transparent z-0" />
+      {/* Main Section Gradient */}
+      <div className="absolute inset-x-0 top-32 h-[400px] bg-gradient-to-b from-[#DDF5F0]/70 via-[#B2E0D9]/30 to-transparent z-0" />
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div
           className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-16 items-center"
