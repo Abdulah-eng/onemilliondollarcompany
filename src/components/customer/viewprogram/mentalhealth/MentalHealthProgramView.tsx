@@ -6,7 +6,7 @@ import { findMentalHealthGuideById } from "@/mockdata/library/mockmentalexercise
 import ActivityCarousel from "./ActivityCarousel";
 import ActivityDetails from "./ActivityDetails";
 import MentalHealthGuide from "@/components/customer/library/mentalexercise/MentalHealthGuide";
-import GuideDrawer from "../shared/GuideDrawer"; // ✅ IMPORT THE GENERIC DRAWER
+import GuideDrawer from "../shared/GuideDrawer";
 
 interface MentalHealthProgramViewProps {
   initialData: DetailedMentalHealthTask;
@@ -17,11 +17,12 @@ export default function MentalHealthProgramView({ initialData }: MentalHealthPro
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(
     programData.activities.length > 0 ? programData.activities[0].id : null
   );
-  // ✅ ADD STATE TO DETECT MOBILE/TABLET
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  // ✅ UPDATED breakpoint to 768px
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    // ✅ UPDATED breakpoint to 768px
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -52,7 +53,6 @@ export default function MentalHealthProgramView({ initialData }: MentalHealthPro
         />
       )}
       
-      {/* ✅ Use the generic GuideDrawer for the mental health guide */}
       <GuideDrawer
         guideData={activityGuide}
         isMobile={isMobile}
