@@ -14,12 +14,10 @@ export default function NutritionProgramView({ nutritionData }: NutritionProgram
   const [selectedMealId, setSelectedMealId] = useState<string | null>(
     nutritionData.meals.length > 0 ? nutritionData.meals[0].id : null
   );
-  // ✅ UPDATED breakpoint to 768px
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
   useEffect(() => {
-    // ✅ UPDATED breakpoint to 768px
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -28,7 +26,7 @@ export default function NutritionProgramView({ nutritionData }: NutritionProgram
   const selectedRecipe = selectedMeal?.recipe;
 
   return (
-    <main className="w-full space-y-10">
+    <main className="w-full space-y-10 pb-32">
       <MealCarousel
         meals={nutritionData.meals}
         selectedMealId={selectedMealId!}
@@ -38,7 +36,6 @@ export default function NutritionProgramView({ nutritionData }: NutritionProgram
       <GuideDrawer
         guideData={selectedRecipe}
         isMobile={isMobile}
-        triggerText="View Recipe:"
       >
         {selectedRecipe && <RecipeDetails recipe={selectedRecipe} />}
       </GuideDrawer>
