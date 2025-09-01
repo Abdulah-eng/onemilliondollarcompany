@@ -1,11 +1,12 @@
 // src/components/customer/viewprogram/mentalhealth/MentalHealthProgramView.tsx
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DetailedMentalHealthTask } from "@/mockdata/viewprograms/mockmentalhealthprograms";
 import { findMentalHealthGuideById } from "@/mockdata/library/mockmentalexercises";
 import ActivityCarousel from "./ActivityCarousel";
 import ActivityDetails from "./ActivityDetails";
 import MentalHealthGuide from "@/components/customer/library/mentalexercise/MentalHealthGuide";
+import GuideDrawer from "../shared/GuideDrawer"; // ✅ IMPORT THE GENERIC DRAWER
 
 interface MentalHealthProgramViewProps {
   initialData: DetailedMentalHealthTask;
@@ -16,6 +17,14 @@ export default function MentalHealthProgramView({ initialData }: MentalHealthPro
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(
     programData.activities.length > 0 ? programData.activities[0].id : null
   );
+  // ✅ ADD STATE TO DETECT MOBILE/TABLET
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleActivityToggle = (activityId: string, isCompleted: boolean) => {
     setProgramData(prevData => {
@@ -30,7 +39,7 @@ export default function MentalHealthProgramView({ initialData }: MentalHealthPro
   const activityGuide = selectedActivity ? findMentalHealthGuideById(selectedActivity.libraryActivityId) : null;
 
   return (
-    <main className="space-y-8 pb-20">
+    <main className="space-y-8">
       <ActivityCarousel
         activities={programData.activities}
         selectedActivityId={selectedActivityId!}
@@ -42,7 +51,15 @@ export default function MentalHealthProgramView({ initialData }: MentalHealthPro
           onActivityToggle={handleActivityToggle}
         />
       )}
-      {activityGuide && <MentalHealthGuide guide={activityGuide} />}
+      
+      {/* ✅ Use the generic GuideDrawer for the mental health guide */}
+      <GuideDrawer
+        guideData={activityGuide}
+        isMobile={isMobile}
+        triggerText="View Guide:"
+      >
+        {activityGuide && <MentalHealthGuide guide={activityGuide} />}
+      </GuideDrawer>
     </main>
   );
 }
