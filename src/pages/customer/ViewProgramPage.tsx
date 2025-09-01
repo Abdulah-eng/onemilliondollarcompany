@@ -98,7 +98,7 @@ export default function ViewProgramPage() {
 
   return (
     <div className="flex flex-col min-h-screen w-full max-w-5xl mx-auto px-4">
-      <div className="flex-1 overflow-auto space-y-8 py-8">
+      <div className="flex-1 overflow-auto space-y-8 py-8" data-guide-scroll="true">
         {/* ✅ Renders the appropriate header */}
         {renderProgramHeader()}
         <CoachMessage message={programData.coachNotes} />

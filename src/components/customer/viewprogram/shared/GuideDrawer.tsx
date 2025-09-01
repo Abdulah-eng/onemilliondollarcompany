@@ -2,7 +2,7 @@
 
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { ChevronUp } from "lucide-react";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
 interface GuideDrawerProps {
   guideData: { name: string } | null;
@@ -17,6 +17,38 @@ export default function GuideDrawer({
   triggerText,
   children,
 }: GuideDrawerProps) {
+  const originalPaddingRef = useRef<string>("");
+
+  // Apply bottom padding on mobile when drawer exists
+  useEffect(() => {
+    if (!isMobile || !guideData) return;
+
+    const scrollContainer = document.querySelector('[data-guide-scroll="true"]') as HTMLElement;
+    if (!scrollContainer) return;
+
+    // Store original padding
+    const currentPadding = scrollContainer.style.paddingBottom;
+    originalPaddingRef.current = currentPadding;
+
+    // Apply new padding with safe area
+    scrollContainer.style.paddingBottom = "calc(15vh + 4rem + env(safe-area-inset-bottom))";
+
+    // Resize listener to ensure padding persists
+    const handleResize = () => {
+      if (window.innerWidth < 768 && guideData) {
+        scrollContainer.style.paddingBottom = "calc(15vh + 4rem + env(safe-area-inset-bottom))";
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      scrollContainer.style.paddingBottom = originalPaddingRef.current;
+    };
+  }, [isMobile, guideData]);
+
   if (!guideData) return null;
 
   // On desktop and larger → render normally
