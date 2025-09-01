@@ -1,9 +1,10 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth, AuthProvider } from "./contexts/AuthContext";
 import { OnboardingProvider } from "./contexts/OnboardingContext";
+import { ThemeProvider } from "next-themes";
 import { Loader2 } from "lucide-react";
 
 // --- LAYOUTS ---
@@ -72,68 +73,88 @@ const OnboardingGate = () => {
 };
 
 
+// Themed App wrapper that forces light theme on specific pages
+const ThemedApp = () => {
+  const location = useLocation();
+  
+  // Pages that should always use light theme
+  const lightThemePages = ['/', '/login', '/get-started', '/forgot-password'];
+  const shouldForceLightTheme = lightThemePages.includes(location.pathname);
+  
+  return (
+    <ThemeProvider 
+      attribute="class" 
+      defaultTheme="system" 
+      enableSystem
+      forcedTheme={shouldForceLightTheme ? "light" : undefined}
+    >
+      <AuthProvider>
+        <Toaster richColors position="top-right" />
+        <Routes>
+          {/* 1. Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* 2. Authentication Routes */}
+          <Route element={<PublicRoutesLayout />}>
+            <Route path="/get-started" element={<GetStartedPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          </Route>
+
+          {/* 3. Protected Routes */}
+          <Route element={<ProtectedRoutesLayout />}>
+            {/* Coach Routes */}
+            <Route
+              element={
+                <RoleGate allowedRole="coach">
+                  <AppShell />
+                </RoleGate>
+              }
+            >
+              <Route path="/coach/dashboard" element={<CoachDashboardPage />} />
+            </Route>
+
+            {/* Customer Routes */}
+            <Route
+              element={
+                <RoleGate allowedRole="customer">
+                  <AppShell />
+                </RoleGate>
+              }
+            >
+              <Route path="/customer/dashboard" element={<CustomerDashboardPage />} />
+              <Route path="/customer/programs" element={<MyProgramsPage />} />
+              <Route path="/customer/library" element={<LibraryPage />} />
+              {/* ✅ ADDED THE NEW PROGRESS ROUTE */}
+              <Route path="/customer/progress" element={<ProgressPage />} />
+              <Route path="/program/:type/:id" element={<ViewProgramPage />} />
+              <Route path="/program/:id" element={<ViewProgramPage />} />
+            </Route>
+
+            {/* Onboarding Routes */}
+            <Route path="/onboarding" element={<OnboardingGate />}>
+              <Route path="step-1" element={<GoalSelectionStep />} />
+              <Route path="step-2" element={<PersonalInfoStep />} />
+              <Route path="step-3" element={<PreferencesStep />} />
+              <Route path="step-4" element={<ContactStep />} />
+              <Route path="success" element={<OnboardingSuccess />} />
+            </Route>
+          </Route>
+
+          {/* Catch all */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+};
+
 // --- MAIN APP COMPONENT ---
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <BrowserRouter>
-        <AuthProvider>
-          <Toaster richColors position="top-right" />
-          <Routes>
-            {/* 1. Public Routes */}
-            <Route path="/" element={<LandingPage />} />
-
-            {/* 2. Authentication Routes */}
-            <Route element={<PublicRoutesLayout />}>
-              <Route path="/get-started" element={<GetStartedPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            </Route>
-
-            {/* 3. Protected Routes */}
-            <Route element={<ProtectedRoutesLayout />}>
-              {/* Coach Routes */}
-              <Route
-                element={
-                  <RoleGate allowedRole="coach">
-                    <AppShell />
-                  </RoleGate>
-                }
-              >
-                <Route path="/coach/dashboard" element={<CoachDashboardPage />} />
-              </Route>
-
-              {/* Customer Routes */}
-              <Route
-                element={
-                  <RoleGate allowedRole="customer">
-                    <AppShell />
-                  </RoleGate>
-                }
-              >
-                <Route path="/customer/dashboard" element={<CustomerDashboardPage />} />
-                <Route path="/customer/programs" element={<MyProgramsPage />} />
-                <Route path="/customer/library" element={<LibraryPage />} />
-                {/* ✅ ADDED THE NEW PROGRESS ROUTE */}
-                <Route path="/customer/progress" element={<ProgressPage />} />
-                <Route path="/program/:type/:id" element={<ViewProgramPage />} />
-                <Route path="/program/:id" element={<ViewProgramPage />} />
-              </Route>
-
-              {/* Onboarding Routes */}
-              <Route path="/onboarding" element={<OnboardingGate />}>
-                <Route path="step-1" element={<GoalSelectionStep />} />
-                <Route path="step-2" element={<PersonalInfoStep />} />
-                <Route path="step-3" element={<PreferencesStep />} />
-                <Route path="step-4" element={<ContactStep />} />
-                <Route path="success" element={<OnboardingSuccess />} />
-              </Route>
-            </Route>
-
-            {/* Catch all */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
+        <ThemedApp />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
