@@ -17,17 +17,14 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
   const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(
     initialData.exercises.length > 0 ? initialData.exercises[0].id : null
   );
-  // ✅ UPDATED breakpoint to 768px
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
   useEffect(() => {
-    // ✅ UPDATED breakpoint to 768px
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ... (handleSetChange, handleAddSet, handleRemoveSet functions remain unchanged)
   const handleSetChange = (exerciseId: string, setIndex: number, updatedSet: Partial<ExerciseSet>) => {
     setWorkoutData(prevData => {
       const newWorkoutData = JSON.parse(JSON.stringify(prevData));
@@ -70,7 +67,8 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
   const exerciseGuide = selectedExercise ? findExerciseGuideById(selectedExercise.libraryExerciseId) : null;
 
   return (
-    <main className="space-y-8">
+    // Add bottom padding to ensure content doesn't hide behind the drawer
+    <main className="space-y-8 pb-32">
       <ExerciseCarousel
         exercises={workoutData.exercises}
         selectedExerciseId={selectedExerciseId!}
@@ -91,7 +89,6 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
       <GuideDrawer
         guideData={exerciseGuide}
         isMobile={isMobile}
-        triggerText="How to do:"
       >
         {exerciseGuide && <ExerciseGuide guide={exerciseGuide} />}
       </GuideDrawer>
