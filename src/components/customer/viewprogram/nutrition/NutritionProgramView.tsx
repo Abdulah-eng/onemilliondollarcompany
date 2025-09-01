@@ -14,11 +14,12 @@ export default function NutritionProgramView({ nutritionData }: NutritionProgram
   const [selectedMealId, setSelectedMealId] = useState<string | null>(
     nutritionData.meals.length > 0 ? nutritionData.meals[0].id : null
   );
-  // ✅ Corrected breakpoint for iPad and smaller devices
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  // ✅ UPDATED breakpoint to 768px
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    // ✅ UPDATED breakpoint to 768px
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -27,8 +28,7 @@ export default function NutritionProgramView({ nutritionData }: NutritionProgram
   const selectedRecipe = selectedMeal?.recipe;
 
   return (
-    // ✅ Re-added bottom padding to ensure scroll space for the trigger
-    <main className="w-full space-y-10 pb-20">
+    <main className="w-full space-y-10">
       <MealCarousel
         meals={nutritionData.meals}
         selectedMealId={selectedMealId!}
