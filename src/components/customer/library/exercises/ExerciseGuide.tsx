@@ -25,7 +25,7 @@ const InstructionStep = ({ index, children }: { index: number, children: React.R
     </li>
 );
 
-// Helper to create styled sections, replacing the accordion
+// Helper to create styled sections
 const InfoSection = ({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) => (
     <div className="py-4 border-t border-border first:border-t-0 first:pt-0 last:pb-0">
         <h3 className="text-lg font-semibold flex items-center gap-2 mb-3">
@@ -56,7 +56,6 @@ export default function ExerciseGuide({ guide }: ExerciseGuideProps) {
             <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">{guide.description}</p>
         </div>
         
-        {/* All content is now in styled sections */}
         <div className="space-y-2">
             <InfoSection icon="💪" title="What it's good for">
                 <ul className="space-y-2">
