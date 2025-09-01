@@ -29,7 +29,7 @@ export default function MacroCard({ data }: { data: MacroData }) {
             </ResponsiveContainer>
         </div>
         <div>
-            <p className="text-2xl font-bold">{data.kcal.toLocaleString()}</p>
+            <p className="text-2xl font-bold">{data.kcal?.toLocaleString() || '0'}</p>
             <p className="text-sm text-muted-foreground">Avg. Daily Kcal</p>
         </div>
        </div>
