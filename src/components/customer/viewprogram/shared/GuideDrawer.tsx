@@ -1,22 +1,17 @@
 // src/components/customer/viewprogram/shared/GuideDrawer.tsx
 
-import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import React, { useState, useEffect } from "react";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { ChevronUp } from "lucide-react";
+import React from "react";
 
 interface GuideDrawerProps {
   guideData: { name: string } | null;
   isMobile: boolean;
+  triggerText: string;
   children: React.ReactNode;
 }
 
-export default function GuideDrawer({ guideData, isMobile, children }: GuideDrawerProps) {
-  const [snap, setSnap] = useState<number | string | null>(0.15);
-
-  // Reset the drawer to its peeky state when the guide data changes (e.g., user selects a new exercise)
-  useEffect(() => {
-    setSnap(0.15);
-  }, [guideData]);
-
+export default function GuideDrawer({ guideData, isMobile, triggerText, children }: GuideDrawerProps) {
   if (!guideData) {
     return null;
   }
@@ -26,15 +21,25 @@ export default function GuideDrawer({ guideData, isMobile, children }: GuideDraw
     return <>{children}</>;
   }
   
-  // On mobile/tablet, render the controlled drawer
+  // On mobile/tablet, render the drawer system
   return (
-    <Drawer
-      open={!!guideData}
-      snapPoints={[0.15, 0.8]}
-      activeSnapPoint={snap}
-      setActiveSnapPoint={setSnap}
-    >
+    <Drawer>
+      <DrawerTrigger asChild>
+        {/* ✅ REMOVED fixed positioning. This is now a regular block element. */}
+        <div className="px-4">
+          <div className="flex items-center justify-between w-full max-w-md mx-auto h-14 px-4 bg-card border rounded-xl shadow-lg cursor-pointer active:scale-95 transition-transform">
+            <div className="flex items-center gap-3 overflow-hidden">
+              <span className="font-bold text-lg flex-shrink-0">{triggerText}</span>
+              <span className="font-semibold text-muted-foreground truncate">{guideData.name}</span>
+            </div>
+            <div className="flex flex-col items-center text-primary animate-pulse">
+                <ChevronUp className="h-5 w-5"/>
+            </div>
+          </div>
+        </div>
+      </DrawerTrigger>
       <DrawerContent className="h-[80%] rounded-t-3xl border-none bg-background pt-4">
+        {/* The scrollable content inside the opened drawer */}
         <div className="overflow-y-auto p-4">
            {children}
         </div>
