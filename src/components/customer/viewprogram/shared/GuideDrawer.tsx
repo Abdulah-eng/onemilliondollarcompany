@@ -5,7 +5,7 @@ import { ChevronUp } from "lucide-react";
 import React from "react";
 
 interface GuideDrawerProps {
-  // Pass any object with a 'name' property
+  // Pass any object that has a 'name' property
   guideData: { name: string } | null;
   isMobile: boolean;
   triggerText: string;
@@ -29,11 +29,11 @@ export default function GuideDrawer({ guideData, isMobile, triggerText, children
         {/* This is the "peeky" bar at the bottom */}
         <div className="sticky bottom-[76px] z-10 p-4">
           <div className="flex items-center justify-between w-full max-w-md mx-auto h-14 px-4 bg-card border rounded-xl shadow-lg cursor-pointer active:scale-95 transition-transform">
-            <div className="flex items-center gap-3">
-              <span className="font-bold text-lg">{triggerText}</span>
+            <div className="flex items-center gap-3 overflow-hidden">
+              <span className="font-bold text-lg flex-shrink-0">{triggerText}</span>
               <span className="font-semibold text-muted-foreground truncate">{guideData.name}</span>
             </div>
-            <div className="flex flex-col items-center text-primary">
+            <div className="flex flex-col items-center text-primary animate-pulse">
                 <ChevronUp className="h-5 w-5"/>
             </div>
           </div>
