@@ -27,9 +27,9 @@ export default function MoreThanPlanSection() {
   return (
     <section className="relative pt-20 pb-32 bg-white">
       {/* Connector Gradient - overlaps with Features section */}
-      <div className="absolute inset-x-0 top-0 h-[200px] bg-gradient-to-b from-[#A8E3DB]/90 via-[#B2E0D9]/60 to-transparent z-0" />
+      <div className="absolute inset-x-0 top-0 h-[140px] bg-gradient-to-b from-[#BFEDE6]/40 via-[#B2E0D9]/25 to-transparent z-0" />
       {/* Main Section Gradient */}
-      <div className="absolute inset-x-0 top-32 h-[400px] bg-gradient-to-b from-[#DDF5F0]/70 via-[#B2E0D9]/30 to-transparent z-0" />
+      <div className="absolute inset-x-0 top-28 h-[320px] bg-gradient-to-b from-[#DDF5F0]/50 via-[#B2E0D9]/20 to-transparent z-0" />
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div
