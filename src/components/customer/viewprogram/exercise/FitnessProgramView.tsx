@@ -6,7 +6,7 @@ import { findExerciseGuideById } from "@/mockdata/library/mockexercises";
 import ExerciseCarousel from "./ExerciseCarousel";
 import ExerciseDetails from "./ExerciseDetails";
 import ExerciseGuide from "@/components/customer/library/exercises/ExerciseGuide";
-import GuideDrawer from "../shared/GuideDrawer"; // ✅ IMPORT FROM THE NEW SHARED LOCATION
+import GuideDrawer from "../shared/GuideDrawer";
 
 interface FitnessProgramViewProps {
   initialData: DetailedFitnessTask;
@@ -17,16 +17,18 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
   const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(
     initialData.exercises.length > 0 ? initialData.exercises[0].id : null
   );
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  // ✅ UPDATED breakpoint to 768px
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    // ✅ UPDATED breakpoint to 768px
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // ... (handleSetChange, handleAddSet, handleRemoveSet functions remain unchanged)
-    const handleSetChange = (exerciseId: string, setIndex: number, updatedSet: Partial<ExerciseSet>) => {
+  const handleSetChange = (exerciseId: string, setIndex: number, updatedSet: Partial<ExerciseSet>) => {
     setWorkoutData(prevData => {
       const newWorkoutData = JSON.parse(JSON.stringify(prevData));
       const exerciseToUpdate = newWorkoutData.exercises.find((ex: { id: string; }) => ex.id === exerciseId);
@@ -64,7 +66,6 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
     });
   };
 
-
   const selectedExercise = workoutData.exercises.find(ex => ex.id === selectedExerciseId);
   const exerciseGuide = selectedExercise ? findExerciseGuideById(selectedExercise.libraryExerciseId) : null;
 
@@ -86,8 +87,7 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
           onRemoveSet={(setIndex) => handleRemoveSet(selectedExercise.id, setIndex)}
         />
       )}
-
-      {/* ✅ Use the generic GuideDrawer */}
+      
       <GuideDrawer
         guideData={exerciseGuide}
         isMobile={isMobile}
