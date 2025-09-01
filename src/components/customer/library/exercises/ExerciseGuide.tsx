@@ -1,32 +1,46 @@
 // src/components/customer/library/exercises/ExerciseGuide.tsx
 
 import { ExerciseGuide as ExerciseGuideData } from "@/mockdata/library/mockexercises";
-// ✅ Import the new optimized media component
 import OptimizedMedia from "@/components/ui/OptimizedMedia";
-// ✅ Import Accordion components from your UI library
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 interface ExerciseGuideProps {
   guide: ExerciseGuideData;
 }
 
-// A small helper component for cleanly styled list items
-const InfoListItem = ({ children }: { children: React.ReactNode }) => (
+// Helper for list items (Benefits, Mistakes, etc.)
+const InfoListItem = ({ icon, children }: { icon: React.ReactNode, children: React.ReactNode }) => (
   <li className="flex items-start gap-3">
-    <span className="mt-1 text-primary">▪</span>
+    <span className="mt-1 text-primary">{icon}</span>
     <span className="flex-1 text-muted-foreground">{children}</span>
   </li>
 );
 
+// Helper for instruction steps
+const InstructionStep = ({ index, children }: { index: number, children: React.ReactNode }) => (
+    <li className="flex items-start gap-3">
+        <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary font-bold text-xs text-primary-foreground">
+            {index + 1}
+        </span>
+        <span className="flex-1 text-muted-foreground">{children}</span>
+    </li>
+);
+
+// Helper to create styled sections, replacing the accordion
+const InfoSection = ({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) => (
+    <div className="py-4 border-t border-border first:border-t-0 first:pt-0 last:pb-0">
+        <h3 className="text-lg font-semibold flex items-center gap-2 mb-3">
+            <span>{icon}</span>
+            {title}
+        </h3>
+        {children}
+    </div>
+);
+
+
 export default function ExerciseGuide({ guide }: ExerciseGuideProps) {
   return (
-    <div className="space-y-6">
-      {/* ✅ 1. Optimized Media Player */}
+    <div className="w-full">
+      {/* 1. Optimized Media Player at the top */}
       <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted shadow-lg">
         <OptimizedMedia
           imageUrl={guide.imageUrl}
@@ -35,75 +49,46 @@ export default function ExerciseGuide({ guide }: ExerciseGuideProps) {
         />
       </div>
 
-      <div className="px-2">
-        <h2 className="text-3xl font-bold tracking-tight">{guide.name}</h2>
-        <p className="mt-2 text-muted-foreground">{guide.description}</p>
-      </div>
-
-      {/* ✅ 2. Appealing Accordion Layout */}
-      <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
-        <AccordionItem value="item-1">
-          <AccordionTrigger className="text-lg font-semibold">💪 What it's good for</AccordionTrigger>
-          <AccordionContent className="pt-2">
-            <ul className="space-y-2">
-              {guide.benefits.map((benefit, i) => <InfoListItem key={i}>{benefit}</InfoListItem>)}
-            </ul>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="item-2">
-          <AccordionTrigger className="text-lg font-semibold">🧠 How to do it</AccordionTrigger>
-          <AccordionContent className="pt-2">
-            <ol className="space-y-4">
-              {guide.instructions.map((step, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary font-bold text-xs text-primary-foreground">
-                    {i + 1}
-                  </span>
-                  <span className="flex-1 text-muted-foreground">{step}</span>
-                </li>
-              ))}
-            </ol>
-          </AccordionContent>
-        </AccordionItem>
-
-        {guide.proTip && (
-          <AccordionItem value="item-3">
-            <AccordionTrigger className="text-lg font-semibold">💡 Pro tip</AccordionTrigger>
-            <AccordionContent className="pt-2 text-muted-foreground">
-              {guide.proTip}
-            </AccordionContent>
-          </AccordionItem>
-        )}
-
-        <AccordionItem value="item-4">
-          <AccordionTrigger className="text-lg font-semibold">⚠️ Avoid these mistakes</AccordionTrigger>
-          <AccordionContent className="pt-2">
-            <ul className="space-y-2">
-              {guide.commonMistakes.map((mistake, i) => (
-                 <li key={i} className="flex items-start gap-3">
-                    <span className="mt-1">❌</span>
-                    <span className="flex-1 text-muted-foreground">{mistake}</span>
-                 </li>
-              ))}
-            </ul>
-          </AccordionContent>
-        </AccordionItem>
+      {/* 2. Content card that "underlaps" the media */}
+      <div className="relative bg-card rounded-t-3xl -mt-8 p-4 pt-8 md:p-6 md:pt-10 space-y-6">
+        <div className="text-center px-2">
+            <h2 className="text-3xl font-bold tracking-tight">{guide.name}</h2>
+            <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">{guide.description}</p>
+        </div>
         
-        <AccordionItem value="item-5" className="border-b-0">
-          <AccordionTrigger className="text-lg font-semibold">🎯 For best results</AccordionTrigger>
-          <AccordionContent className="pt-2">
-            <ul className="space-y-2">
-              {guide.forBestResults.map((tip, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <span className="mt-1">✅</span>
-                  <span className="flex-1 text-muted-foreground">{tip}</span>
-                </li>
-              ))}
-            </ul>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+        {/* All content is now in styled sections */}
+        <div className="space-y-2">
+            <InfoSection icon="💪" title="What it's good for">
+                <ul className="space-y-2">
+                    {guide.benefits.map((benefit, i) => <InfoListItem key={i} icon="▪">{benefit}</InfoListItem>)}
+                </ul>
+            </InfoSection>
+
+            <InfoSection icon="🧠" title="How to do it">
+                <ol className="space-y-4">
+                    {guide.instructions.map((step, i) => <InstructionStep key={i} index={i}>{step}</InstructionStep>)}
+                </ol>
+            </InfoSection>
+
+            {guide.proTip && (
+                <InfoSection icon="💡" title="Pro tip">
+                    <p className="text-muted-foreground">{guide.proTip}</p>
+                </InfoSection>
+            )}
+
+            <InfoSection icon="⚠️" title="Avoid these mistakes">
+                <ul className="space-y-2">
+                    {guide.commonMistakes.map((mistake, i) => <InfoListItem key={i} icon="❌">{mistake}</InfoListItem>)}
+                </ul>
+            </InfoSection>
+            
+            <InfoSection icon="🎯" title="For best results">
+                <ul className="space-y-2">
+                    {guide.forBestResults.map((tip, i) => <InfoListItem key={i} icon="✅">{tip}</InfoListItem>)}
+                </ul>
+            </InfoSection>
+        </div>
+      </div>
     </div>
   );
 }
