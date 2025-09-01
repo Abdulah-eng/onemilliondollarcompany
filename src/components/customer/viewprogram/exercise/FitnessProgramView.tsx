@@ -17,11 +17,9 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
   const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(
     initialData.exercises.length > 0 ? initialData.exercises[0].id : null
   );
-  // ✅ REVERTED breakpoint to 1024px for iPad support
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
   useEffect(() => {
-    // ✅ REVERTED breakpoint to 1024px for iPad support
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -69,8 +67,8 @@ export default function FitnessProgramView({ initialData }: FitnessProgramViewPr
   const exerciseGuide = selectedExercise ? findExerciseGuideById(selectedExercise.libraryExerciseId) : null;
 
   return (
-    // ✅ ADDED back bottom padding to ensure space at the end of the scroll
-    <main className="space-y-8 pb-20">
+    // ✅ ADDED bottom padding to prevent content being hidden by the trigger
+    <main className="space-y-8 pb-32">
       <ExerciseCarousel
         exercises={workoutData.exercises}
         selectedExerciseId={selectedExerciseId!}
