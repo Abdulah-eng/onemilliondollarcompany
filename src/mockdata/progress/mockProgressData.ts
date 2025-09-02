@@ -49,7 +49,7 @@ export interface Recipe {
     macros: { protein: number; carbs: number; fat: number; };
 }
 
-// UPDATED: Added new goal type for nutrition
+// CORRECTED: Added 'IMPROVE_NUTRITION' to the type definition
 export interface UserGoal {
   id: string;
   title: string;
@@ -59,50 +59,40 @@ export interface UserGoal {
 }
 
 export interface ProgressData {
-  // 1. Hero
   weightEntries: WeightEntry[];
   workoutStreak: number;
   kcalBurnedLast7Days: number;
   userGoals: UserGoal[];
-  // 2. Daily Check-in
   dailyCheckins: DailyCheckin[];
-  // 3. Fitness
   fitnessProgression: {
     exercises: ExerciseProgress[];
     weeklyVolume: { week: string; volume: number }[];
-    consistency: number; // 0-100
+    consistency: number;
   };
-  // 4. Nutrition
   nutrition: {
     macros: { date: string; protein: number; carbs: number; fat: number }[];
-    mealCompletion: number; // 0-100
+    mealCompletion: number;
     outsideMeals: number;
     recentRecipes: Recipe[];
   };
-  // 5. Mental Health
   mentalHealth: MentalHealthData;
-  // 6. Body Comp
   photoEntries: PhotoEntry[];
-  // 7. Smart Insights
   smartInsights: SmartInsight[];
 }
 
 // --- MOCK DATA GENERATION ---
 export const mockProgressData: ProgressData = {
-  // 1. Hero
   weightEntries: Array.from({ length: 90 }).map((_, i) => ({
     date: format(subDays(new Date(), 89 - i), 'yyyy-MM-dd'),
     weight: 86.5 - i * 0.05 + (Math.random() - 0.5) * 0.5,
   })),
   workoutStreak: 14,
   kcalBurnedLast7Days: 3250,
-  // UPDATED: Added a third goal for nutrition
   userGoals: [
     { id: 'g1', title: 'Improve Sleep', type: 'IMPROVE_SLEEP', targetValue: 8, targetUnit: 'hrs' },
     { id: 'g2', title: 'Build Muscle', type: 'BUILD_MUSCLE', targetValue: 160, targetUnit: 'g' },
     { id: 'g3', title: 'Nutrition Quality', type: 'IMPROVE_NUTRITION', targetValue: 160, targetUnit: 'g protein' },
   ],
-  // 2. Daily Check-in (Extended to 90 days)
   dailyCheckins: Array.from({ length: 90 }).map((_, i) => ({
     date: format(subDays(new Date(), 89 - i), 'yyyy-MM-dd'),
     waterLiters: 2.5 + Math.random(),
@@ -111,7 +101,6 @@ export const mockProgressData: ProgressData = {
     mood: ['good', 'great', 'okay'][Math.floor(Math.random() * 3)] as 'good',
     stressLevel: Math.floor(2 + Math.random() * 5),
   })),
-  // 3. Fitness
   fitnessProgression: {
     exercises: [
         { exerciseName: 'Deadlift', personalRecord: { value: 140, unit: 'kg', date: format(subDays(new Date(), 5), 'yyyy-MM-dd') }, history: [] },
@@ -123,7 +112,6 @@ export const mockProgressData: ProgressData = {
     ],
     consistency: 88,
   },
-  // 4. Nutrition (Extended to 90 days)
   nutrition: {
     macros: Array.from({ length: 90 }).map((_, i) => ({
       date: format(subDays(new Date(), 89 - i), 'yyyy-MM-dd'),
@@ -139,19 +127,16 @@ export const mockProgressData: ProgressData = {
         { id: 'r3', name: 'Protein Pancakes', imageUrl: 'https://placehold.co/400x400/fbbf24/FFF?text=🥞', portion: '3 pancakes', calories: 420, macros: { protein: 35, carbs: 50, fat: 12 } },
     ]
   },
-  // 5. Mental Health
   mentalHealth: {
       meditationMinutes: Array.from({ length: 90 }).map((_, i) => ({ date: format(subDays(new Date(), 89-i), 'yyyy-MM-dd'), minutes: Math.random() > 0.3 ? 10 + Math.floor(Math.random() * 10) : 0 })),
       yogaSessions: Array.from({ length: 90 }).map((_, i) => ({ date: format(subDays(new Date(), 89-i), 'yyyy-MM-dd'), completed: Math.random() > 0.6 })),
   },
-  // 6. Body Comp
   photoEntries: [
     { id: 'p1', date: format(subDays(new Date(), 90), 'MMM d'), imageUrl: 'https://placehold.co/400x600/000000/FFF?text=Start' },
     { id: 'p2', date: format(subDays(new Date(), 60), 'MMM d'), imageUrl: 'https://placehold.co/400x600/333333/FFF?text=Month+1' },
     { id: 'p3', date: format(subDays(new Date(), 30), 'MMM d'), imageUrl: 'https://placehold.co/400x600/666666/FFF?text=Month+2' },
     { id: 'p4', date: format(subDays(new Date(), 2), 'MMM d'), imageUrl: 'https://placehold.co/400x600/999999/FFF?text=Today' },
   ],
-  // 7. Smart Insights
   smartInsights: [
       { id: 's1', emoji: '💡', text: 'On weeks with 7h+ sleep, you had 20% higher workout adherence.', type: 'positive' },
       { id: 's2', emoji: '💧', text: 'Water intake is trending down. Aim for 3L to boost energy levels.', type: 'warning'},
