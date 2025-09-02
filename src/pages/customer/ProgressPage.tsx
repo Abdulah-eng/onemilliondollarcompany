@@ -21,7 +21,6 @@ export default function ProgressPage() {
   const [modalData, setModalData] = useState<{ title: string; content: React.ReactNode } | null>(null);
 
   // --- EXAMPLE MODAL HANDLER ---
-  // This function would be passed to child components to open the modal
   const handleCardClick = (title: string, content: React.ReactNode) => {
     setModalData({ title, content });
   };
@@ -30,9 +29,13 @@ export default function ProgressPage() {
   const last7DaysCheckins = data.dailyCheckins.slice(-7);
   const avgSleep = last7DaysCheckins.reduce((sum, day) => sum + day.sleepHours, 0) / last7DaysCheckins.length;
   const avgEnergy = last7DaysCheckins.reduce((sum, day) => sum + day.energyLevel, 0) / last7DaysCheckins.length;
+  
+  // --- NEW: Calculate averages for goal progression ---
+  const last7DaysMacros = data.nutrition.macros.slice(-7);
+  const avgProtein = last7DaysMacros.reduce((sum, day) => sum + day.protein, 0) / last7DaysMacros.length;
+  const avgCarbs = last7DaysMacros.reduce((sum, day) => sum + day.carbs, 0) / last7DaysMacros.length;
 
   return (
-    // Added 'relative' and 'min-h-screen' for FAB positioning
     <div className="relative w-full min-h-screen">
       <div className="w-full max-w-4xl mx-auto px-4 py-8 pb-28 space-y-10">
         {/* --- HEADER --- */}
@@ -41,24 +44,28 @@ export default function ProgressPage() {
           <p className="text-muted-foreground">A detailed overview of your wellness journey.</p>
         </div>
 
-        {/* 1. Hero Progress Snapshot */}
+        {/* 1. Hero Progress Snapshot --- UPDATED PROPS --- */}
         <HeroProgressSnapshot
-          weightEntries={data.weightEntries}
           streak={data.workoutStreak}
           avgSleep={avgSleep}
           avgEnergy={avgEnergy}
+          kcalBurned={data.kcalBurnedLast7Days}
+          goals={data.userGoals}
+          dailyCheckins={data.dailyCheckins}
+          avgProtein={avgProtein}
+          avgCarbs={avgCarbs}
         />
 
         {/* 2. Smart Insights */}
         <SmartInsights insights={data.smartInsights} />
 
-        {/* 3. Daily Check-in Trends (Wellness Overview) - UPDATED */}
+        {/* 3. Daily Check-in Trends (Wellness Overview) */}
         <DailyCheckinTrends checkins={data.dailyCheckins} onCardClick={handleCardClick} />
         
         {/* 4. Fitness Progression */}
         <FitnessProgression data={data.fitnessProgression} />
 
-        {/* 5. Nutrition Progression - UPDATED */}
+        {/* 5. Nutrition Progression */}
         <NutritionProgression data={data.nutrition} />
 
         {/* 6. Mental Health Progression */}
@@ -71,10 +78,10 @@ export default function ProgressPage() {
         </div>
       </div>
       
-      {/* --- NEW FLOATING ACTION BUTTON --- */}
+      {/* --- FLOATING ACTION BUTTON --- */}
       <FloatingActionButton />
 
-      {/* --- NEW GENERIC DETAIL MODAL --- */}
+      {/* --- GENERIC DETAIL MODAL --- */}
       <Dialog open={!!modalData} onOpenChange={() => setModalData(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
