@@ -25,15 +25,35 @@ export default function ProgressPage() {
     setModalData({ title, content });
   };
 
+  // Defensive programming: ensure data exists
+  if (!data || !data.dailyCheckins || !data.nutrition?.macros) {
+    return (
+      <div className="w-full max-w-4xl mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold tracking-tight">Loading Progress...</h1>
+          <p className="text-muted-foreground">Please wait while we load your data.</p>
+        </div>
+      </div>
+    );
+  }
+
   // Calculate averages for Hero card
   const last7DaysCheckins = data.dailyCheckins.slice(-7);
-  const avgSleep = last7DaysCheckins.reduce((sum, day) => sum + day.sleepHours, 0) / last7DaysCheckins.length;
-  const avgEnergy = last7DaysCheckins.reduce((sum, day) => sum + day.energyLevel, 0) / last7DaysCheckins.length;
+  const avgSleep = last7DaysCheckins.length > 0 
+    ? last7DaysCheckins.reduce((sum, day) => sum + day.sleepHours, 0) / last7DaysCheckins.length 
+    : 0;
+  const avgEnergy = last7DaysCheckins.length > 0
+    ? last7DaysCheckins.reduce((sum, day) => sum + day.energyLevel, 0) / last7DaysCheckins.length
+    : 0;
   
   // --- NEW: Calculate averages for goal progression ---
   const last7DaysMacros = data.nutrition.macros.slice(-7);
-  const avgProtein = last7DaysMacros.reduce((sum, day) => sum + day.protein, 0) / last7DaysMacros.length;
-  const avgCarbs = last7DaysMacros.reduce((sum, day) => sum + day.carbs, 0) / last7DaysMacros.length;
+  const avgProtein = last7DaysMacros.length > 0
+    ? last7DaysMacros.reduce((sum, day) => sum + day.protein, 0) / last7DaysMacros.length
+    : 0;
+  const avgCarbs = last7DaysMacros.length > 0
+    ? last7DaysMacros.reduce((sum, day) => sum + day.carbs, 0) / last7DaysMacros.length
+    : 0;
 
   return (
     <div className="relative w-full min-h-screen">
