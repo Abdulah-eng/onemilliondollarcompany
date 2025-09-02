@@ -1,4 +1,3 @@
-// src/mockdata/progress/mockProgressData.ts
 import { subDays, format } from 'date-fns';
 
 // --- INTERFACES ---
@@ -50,7 +49,6 @@ export interface Recipe {
     macros: { protein: number; carbs: number; fat: number; };
 }
 
-// --- NEW INTERFACE FOR USER GOALS ---
 export interface UserGoal {
   id: string;
   title: string;
@@ -63,7 +61,7 @@ export interface ProgressData {
   // 1. Hero
   weightEntries: WeightEntry[];
   workoutStreak: number;
-  // --- NEW HERO DATA ---
+  // --- HERO DATA ---
   kcalBurnedLast7Days: number;
   userGoals: UserGoal[];
   // 2. Daily Check-in
@@ -97,12 +95,10 @@ export const mockProgressData: ProgressData = {
     weight: 86.5 - i * 0.15 + (Math.random() - 0.5) * 0.5,
   })),
   workoutStreak: 14,
-  // --- NEW MOCK DATA ---
   kcalBurnedLast7Days: 3250,
   userGoals: [
-    { id: 'g1', title: 'Improve Sleep Quality', type: 'IMPROVE_SLEEP', targetValue: 8, targetUnit: 'hrs' },
-    // Example of another goal:
-    // { id: 'g2', title: 'Build Lean Muscle', type: 'BUILD_MUSCLE', targetValue: 160, targetUnit: 'g protein' },
+    { id: 'g1', title: 'Improve Sleep', type: 'IMPROVE_SLEEP', targetValue: 8, targetUnit: 'hrs' },
+    { id: 'g2', title: 'Build Muscle', type: 'BUILD_MUSCLE', targetValue: 160, targetUnit: 'g protein' },
   ],
   // 2. Daily Check-in
   dailyCheckins: Array.from({ length: 14 }).map((_, i) => ({
@@ -174,7 +170,7 @@ export const mockProgressData: ProgressData = {
     { id: 'p3', date: format(subDays(new Date(), 30), 'MMM d'), imageUrl: 'https://placehold.co/400x600/666666/FFF?text=Month+2' },
     { id: 'p4', date: format(subDays(new Date(), 2), 'MMM d'), imageUrl: 'https://placehold.co/400x600/999999/FFF?text=Today' },
   ],
-  // 7. Smart Insights (UPDATED)
+  // 7. Smart Insights
   smartInsights: [
       { id: 's1', emoji: '💡', text: 'On weeks with 7h+ sleep, you had 20% higher workout adherence.', type: 'positive' },
       { id: 's2', emoji: '💧', text: 'Water intake is trending down. Aim for 3L to boost energy levels.', type: 'warning'},
