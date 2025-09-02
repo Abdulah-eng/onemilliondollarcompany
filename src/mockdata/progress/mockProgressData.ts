@@ -49,7 +49,6 @@ export interface Recipe {
     macros: { protein: number; carbs: number; fat: number; };
 }
 
-// CORRECTED: Added 'IMPROVE_NUTRITION' to the type definition
 export interface UserGoal {
   id: string;
   title: string;
@@ -101,11 +100,44 @@ export const mockProgressData: ProgressData = {
     mood: ['good', 'great', 'okay'][Math.floor(Math.random() * 3)] as 'good',
     stressLevel: Math.floor(2 + Math.random() * 5),
   })),
+  // CORRECTED: Populated exercise history for the new chart
   fitnessProgression: {
     exercises: [
-        { exerciseName: 'Deadlift', personalRecord: { value: 140, unit: 'kg', date: format(subDays(new Date(), 5), 'yyyy-MM-dd') }, history: [] },
-        { exerciseName: 'Bench Press', personalRecord: { value: 95, unit: 'kg', date: format(subDays(new Date(), 12), 'yyyy-MM-dd') }, history: [] },
-        { exerciseName: 'Squat', personalRecord: { value: 125, unit: 'kg', date: format(subDays(new Date(), 20), 'yyyy-MM-dd') }, history: [] }
+      {
+        exerciseName: 'Deadlift',
+        personalRecord: { value: 140, unit: 'kg', date: format(subDays(new Date(), 5), 'yyyy-MM-dd') },
+        history: [
+          { date: format(subDays(new Date(), 40), 'yyyy-MM-dd'), weight: 120, reps: 5, sets: 3 },
+          { date: format(subDays(new Date(), 33), 'yyyy-MM-dd'), weight: 125, reps: 4, sets: 3 },
+          { date: format(subDays(new Date(), 26), 'yyyy-MM-dd'), weight: 125, reps: 5, sets: 3 },
+          { date: format(subDays(new Date(), 19), 'yyyy-MM-dd'), weight: 130, reps: 4, sets: 3 },
+          { date: format(subDays(new Date(), 12), 'yyyy-MM-dd'), weight: 135, reps: 3, sets: 3 },
+          { date: format(subDays(new Date(), 5), 'yyyy-MM-dd'), weight: 140, reps: 1, sets: 1 },
+        ],
+      },
+      {
+        exerciseName: 'Bench Press',
+        personalRecord: { value: 95, unit: 'kg', date: format(subDays(new Date(), 12), 'yyyy-MM-dd') },
+        history: [
+          { date: format(subDays(new Date(), 45), 'yyyy-MM-dd'), weight: 80, reps: 8, sets: 4 },
+          { date: format(subDays(new Date(), 38), 'yyyy-MM-dd'), weight: 82.5, reps: 7, sets: 4 },
+          { date: format(subDays(new Date(), 31), 'yyyy-MM-dd'), weight: 85, reps: 6, sets: 4 },
+          { date: format(subDays(new Date(), 24), 'yyyy-MM-dd'), weight: 87.5, reps: 5, sets: 4 },
+          { date: format(subDays(new Date(), 17), 'yyyy-MM-dd'), weight: 90, reps: 4, sets: 4 },
+          { date: format(subDays(new Date(), 12), 'yyyy-MM-dd'), weight: 95, reps: 2, sets: 3 },
+        ],
+      },
+      {
+        exerciseName: 'Squat',
+        personalRecord: { value: 125, unit: 'kg', date: format(subDays(new Date(), 20), 'yyyy-MM-dd') },
+        history: [
+          { date: format(subDays(new Date(), 50), 'yyyy-MM-dd'), weight: 110, reps: 5, sets: 5 },
+          { date: format(subDays(new Date(), 43), 'yyyy-MM-dd'), weight: 115, reps: 5, sets: 5 },
+          { date: format(subDays(new Date(), 36), 'yyyy-MM-dd'), weight: 115, reps: 6, sets: 4 },
+          { date: format(subDays(new Date(), 28), 'yyyy-MM-dd'), weight: 120, reps: 4, sets: 4 },
+          { date: format(subDays(new Date(), 20), 'yyyy-MM-dd'), weight: 125, reps: 3, sets: 4 },
+        ],
+      }
     ],
     weeklyVolume: [
         { week: 'W1', volume: 10500 }, { week: 'W2', volume: 11200 }, { week: 'W3', volume: 11000 }, { week: 'W4', volume: 12500 },
