@@ -4,7 +4,12 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export default function WeightProgressCard({ data }: { data: WeightEntry[] }) {
+interface WeightProgressCardProps {
+    data: WeightEntry[];
+    onCardClick: () => void;
+}
+
+export default function WeightProgressCard({ data, onCardClick }: WeightProgressCardProps) {
   if (data.length < 2) return <div>Not enough data to show trend.</div>;
 
   const latestWeight = data[data.length - 1].weight;
@@ -13,11 +18,12 @@ export default function WeightProgressCard({ data }: { data: WeightEntry[] }) {
   const isDecreasing = change < 0;
 
   return (
-    <motion.div 
-        className="bg-card dark:bg-[#0d1218] p-4 sm:p-6 rounded-2xl border border-border/50"
+    <motion.div
+        className="bg-card dark:bg-[#0d1218] p-4 sm:p-6 rounded-2xl border border-border/50 cursor-pointer hover:border-primary/50 transition-colors"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.6 }}
+        onClick={onCardClick}
     >
       <div className="flex justify-between items-start mb-4">
         <div>
@@ -34,7 +40,13 @@ export default function WeightProgressCard({ data }: { data: WeightEntry[] }) {
           <LineChart data={data} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
             <XAxis dataKey="date" tickFormatter={(str) => new Date(str).toLocaleDateString('en-US', { month: 'short' })} stroke="hsl(var(--muted-foreground))" fontSize={12} />
             <YAxis domain={['dataMin - 2', 'dataMax + 2']} stroke="hsl(var(--muted-foreground))" fontSize={12} />
-            <Tooltip />
+            <Tooltip 
+                 contentStyle={{
+                    background: "hsl(var(--background))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.5rem",
+                }}
+            />
             <Line type="monotone" dataKey="weight" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
