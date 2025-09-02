@@ -58,7 +58,7 @@ export default function GuideDrawer({
 
   // On iPad and below → bottom drawer
   return (
-    <Drawer defaultOpen>
+    <Drawer>
       <DrawerTrigger asChild>
         <div className="fixed bottom-0 left-0 right-0 z-20 h-[15vh] px-4">
           <div className="flex items-center justify-between w-full h-full max-w-md mx-auto bg-card border-t rounded-t-2xl shadow-xl cursor-pointer active:scale-95 transition-transform">
