@@ -1,13 +1,22 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import Navbar from '@/components/landing/Navbar';
 import HeroSection from '@/components/landing/HeroSection';
 import FeaturesSection from '@/components/landing/FeaturesSection';
-import MoreThanPlanSection from '@/components/landing/MoreThanPlanSection';
-import HowItWorksSection from '@/components/landing/HowItWorksSection';
-import TestimonialsSection from '@/components/landing/TestimonialsSection';
-import PricingSection from '@/components/landing/PricingSection';
-import CTASection from '@/components/landing/CTASection';
 import Footer from '@/components/landing/Footer';
+
+// Lazy load below-the-fold sections
+const MoreThanPlanSection = lazy(() => import('@/components/landing/MoreThanPlanSection'));
+const HowItWorksSection = lazy(() => import('@/components/landing/HowItWorksSection'));
+const TestimonialsSection = lazy(() => import('@/components/landing/TestimonialsSection'));
+const PricingSection = lazy(() => import('@/components/landing/PricingSection'));
+const CTASection = lazy(() => import('@/components/landing/CTASection'));
+
+// Loading fallback component
+const SectionLoader = () => (
+  <div className="py-16 flex items-center justify-center">
+    <div className="animate-pulse text-muted-foreground">Loading...</div>
+  </div>
+);
 
 // Scroll animation hook
 function useRevealOnScroll() {
@@ -41,21 +50,31 @@ export default function LandingPage() {
         <section id="features" aria-label="Core Features" data-reveal className="reveal">
           <FeaturesSection />
         </section>
-        <section id="more-than-plan" aria-label="More Than a Plan" data-reveal className="reveal">
-          <MoreThanPlanSection />
-        </section>
-        <section id="how-it-works" aria-label="How It Works" data-reveal className="reveal">
-          <HowItWorksSection />
-        </section>
-        <section id="testimonials" aria-label="Testimonials" data-reveal className="reveal">
-          <TestimonialsSection />
-        </section>
-        <section id="pricing" aria-label="Pricing Plans" data-reveal className="reveal">
-          <PricingSection />
-        </section>
-        <section id="cta" aria-label="Call to Action" data-reveal className="reveal">
-          <CTASection />
-        </section>
+        <section id="more-than-plan" aria-label="More Than a Plan" data-reveal className="reveal">
+          <Suspense fallback={<SectionLoader />}>
+            <MoreThanPlanSection />
+          </Suspense>
+        </section>
+        <section id="how-it-works" aria-label="How It Works" data-reveal className="reveal">
+          <Suspense fallback={<SectionLoader />}>
+            <HowItWorksSection />
+          </Suspense>
+        </section>
+        <section id="testimonials" aria-label="Testimonials" data-reveal className="reveal">
+          <Suspense fallback={<SectionLoader />}>
+            <TestimonialsSection />
+          </Suspense>
+        </section>
+        <section id="pricing" aria-label="Pricing Plans" data-reveal className="reveal">
+          <Suspense fallback={<SectionLoader />}>
+            <PricingSection />
+          </Suspense>
+        </section>
+        <section id="cta" aria-label="Call to Action" data-reveal className="reveal">
+          <Suspense fallback={<SectionLoader />}>
+            <CTASection />
+          </Suspense>
+        </section>
       </main>
       {/* Added "light" class to footer */}
       <footer className="light bg-card text-card-foreground border-t">

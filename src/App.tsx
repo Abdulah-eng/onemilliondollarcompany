@@ -11,24 +11,25 @@ import { Loader2 } from "lucide-react";
 import AppShell from "@/components/layouts/AppShell";
 import RoleGate from "@/components/routing/RoleGate";
 
-// --- PAGES ---
+// --- PAGES (Lazy Loaded) ---
 import LandingPage from "./pages/public/LandingPage";
-import GetStartedPage from "./pages/auth/GetStartedPage";
-import LoginPage from "./pages/auth/LoginPage";
-import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
-import NotFound from "./pages/NotFound";
-import GoalSelectionStep from "./pages/onboarding/GoalSelectionStep";
-import PersonalInfoStep from "./pages/onboarding/PersonalInfoStep";
-import PreferencesStep from "./pages/onboarding/PreferencesStep";
-import ContactStep from "./pages/onboarding/ContactStep";
-import OnboardingSuccess from "./pages/onboarding/OnboardingSuccess";
-import CustomerDashboardPage from "./pages/customer/CustomerDashboard";
-import CoachDashboardPage from "./pages/coach/CoachDashboard";
-import MyProgramsPage from "./pages/customer/MyProgramsPage";
-import ViewProgramPage from "./pages/customer/ViewProgramPage";
-import LibraryPage from "./pages/customer/LibraryPage";
-// ✅ IMPORT THE NEW PROGRESS PAGE
-import ProgressPage from "./pages/customer/ProgressPage";
+import { lazy, Suspense } from "react";
+
+const GetStartedPage = lazy(() => import("./pages/auth/GetStartedPage"));
+const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const GoalSelectionStep = lazy(() => import("./pages/onboarding/GoalSelectionStep"));
+const PersonalInfoStep = lazy(() => import("./pages/onboarding/PersonalInfoStep"));
+const PreferencesStep = lazy(() => import("./pages/onboarding/PreferencesStep"));
+const ContactStep = lazy(() => import("./pages/onboarding/ContactStep"));
+const OnboardingSuccess = lazy(() => import("./pages/onboarding/OnboardingSuccess"));
+const CustomerDashboardPage = lazy(() => import("./pages/customer/CustomerDashboard"));
+const CoachDashboardPage = lazy(() => import("./pages/coach/CoachDashboard"));
+const MyProgramsPage = lazy(() => import("./pages/customer/MyProgramsPage"));
+const ViewProgramPage = lazy(() => import("./pages/customer/ViewProgramPage"));
+const LibraryPage = lazy(() => import("./pages/customer/LibraryPage"));
+const ProgressPage = lazy(() => import("./pages/customer/ProgressPage"));
 
 
 // ... (LoadingScreen, queryClient, and routing logic components remain unchanged) ...
@@ -88,63 +89,131 @@ const ThemedApp = () => {
       enableSystem
       forcedTheme={shouldForceLightTheme ? "light" : undefined}
     >
-      <AuthProvider>
-        <Toaster richColors position="top-right" />
-        <Routes>
-          {/* 1. Public Routes */}
-          <Route path="/" element={<LandingPage />} />
+      <Toaster richColors position="top-right" />
+      <Routes>
+        {/* 1. Landing Page (Outside AuthProvider for performance) */}
+        <Route path="/" element={<LandingPage />} />
 
-          {/* 2. Authentication Routes */}
-          <Route element={<PublicRoutesLayout />}>
-            <Route path="/get-started" element={<GetStartedPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          </Route>
+        {/* 2. All other routes inside AuthProvider */}
+        <Route path="*" element={
+          <AuthProvider>
+            <Routes>
+              {/* Authentication Routes */}
+              <Route element={<PublicRoutesLayout />}>
+                <Route path="/get-started" element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <GetStartedPage />
+                  </Suspense>
+                } />
+                <Route path="/login" element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <LoginPage />
+                  </Suspense>
+                } />
+                <Route path="/forgot-password" element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <ForgotPasswordPage />
+                  </Suspense>
+                } />
+              </Route>
 
-          {/* 3. Protected Routes */}
-          <Route element={<ProtectedRoutesLayout />}>
-            {/* Coach Routes */}
-            <Route
-              element={
-                <RoleGate allowedRole="coach">
-                  <AppShell />
-                </RoleGate>
-              }
-            >
-              <Route path="/coach/dashboard" element={<CoachDashboardPage />} />
-            </Route>
+              {/* Protected Routes */}
+              <Route element={<ProtectedRoutesLayout />}>
+                {/* Coach Routes */}
+                <Route
+                  element={
+                    <RoleGate allowedRole="coach">
+                      <AppShell />
+                    </RoleGate>
+                  }
+                >
+                  <Route path="/coach/dashboard" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <CoachDashboardPage />
+                    </Suspense>
+                  } />
+                </Route>
 
-            {/* Customer Routes */}
-            <Route
-              element={
-                <RoleGate allowedRole="customer">
-                  <AppShell />
-                </RoleGate>
-              }
-            >
-              <Route path="/customer/dashboard" element={<CustomerDashboardPage />} />
-              <Route path="/customer/programs" element={<MyProgramsPage />} />
-              <Route path="/customer/library" element={<LibraryPage />} />
-              {/* ✅ ADDED THE NEW PROGRESS ROUTE */}
-              <Route path="/customer/progress" element={<ProgressPage />} />
-              <Route path="/program/:type/:id" element={<ViewProgramPage />} />
-              <Route path="/program/:id" element={<ViewProgramPage />} />
-            </Route>
+                {/* Customer Routes */}
+                <Route
+                  element={
+                    <RoleGate allowedRole="customer">
+                      <AppShell />
+                    </RoleGate>
+                  }
+                >
+                  <Route path="/customer/dashboard" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <CustomerDashboardPage />
+                    </Suspense>
+                  } />
+                  <Route path="/customer/programs" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <MyProgramsPage />
+                    </Suspense>
+                  } />
+                  <Route path="/customer/library" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <LibraryPage />
+                    </Suspense>
+                  } />
+                  <Route path="/customer/progress" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <ProgressPage />
+                    </Suspense>
+                  } />
+                  <Route path="/program/:type/:id" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <ViewProgramPage />
+                    </Suspense>
+                  } />
+                  <Route path="/program/:id" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <ViewProgramPage />
+                    </Suspense>
+                  } />
+                </Route>
 
-            {/* Onboarding Routes */}
-            <Route path="/onboarding" element={<OnboardingGate />}>
-              <Route path="step-1" element={<GoalSelectionStep />} />
-              <Route path="step-2" element={<PersonalInfoStep />} />
-              <Route path="step-3" element={<PreferencesStep />} />
-              <Route path="step-4" element={<ContactStep />} />
-              <Route path="success" element={<OnboardingSuccess />} />
-            </Route>
-          </Route>
+                {/* Onboarding Routes */}
+                <Route path="/onboarding" element={<OnboardingGate />}>
+                  <Route path="step-1" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <GoalSelectionStep />
+                    </Suspense>
+                  } />
+                  <Route path="step-2" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <PersonalInfoStep />
+                    </Suspense>
+                  } />
+                  <Route path="step-3" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <PreferencesStep />
+                    </Suspense>
+                  } />
+                  <Route path="step-4" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <ContactStep />
+                    </Suspense>
+                  } />
+                  <Route path="success" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <OnboardingSuccess />
+                    </Suspense>
+                  } />
+                </Route>
+              </Route>
 
-          {/* Catch all */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </AuthProvider>
+              {/* Catch all */}
+              <Route path="*" element={
+                <Suspense fallback={<LoadingScreen />}>
+                  <NotFound />
+                </Suspense>
+              } />
+            </Routes>
+          </AuthProvider>
+        } />
+      </Routes>
     </ThemeProvider>
   );
 };
