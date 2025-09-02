@@ -90,22 +90,22 @@ export interface ProgressData {
 // --- MOCK DATA GENERATION ---
 export const mockProgressData: ProgressData = {
   // 1. Hero
-  weightEntries: Array.from({ length: 30 }).map((_, i) => ({
-    date: format(subDays(new Date(), 29 - i), 'yyyy-MM-dd'),
-    weight: 86.5 - i * 0.15 + (Math.random() - 0.5) * 0.5,
+  weightEntries: Array.from({ length: 90 }).map((_, i) => ({
+    date: format(subDays(new Date(), 89 - i), 'yyyy-MM-dd'),
+    weight: 86.5 - i * 0.05 + (Math.random() - 0.5) * 0.5,
   })),
   workoutStreak: 14,
   kcalBurnedLast7Days: 3250,
   userGoals: [
     { id: 'g1', title: 'Improve Sleep', type: 'IMPROVE_SLEEP', targetValue: 8, targetUnit: 'hrs' },
-    { id: 'g2', title: 'Build Muscle', type: 'BUILD_MUSCLE', targetValue: 160, targetUnit: 'g protein' },
+    { id: 'g2', title: 'Build Muscle', type: 'BUILD_MUSCLE', targetValue: 160, targetUnit: 'g' },
   ],
-  // 2. Daily Check-in
-  dailyCheckins: Array.from({ length: 14 }).map((_, i) => ({
-    date: format(subDays(new Date(), 13 - i), 'yyyy-MM-dd'),
+  // 2. Daily Check-in (Extended to 90 days)
+  dailyCheckins: Array.from({ length: 90 }).map((_, i) => ({
+    date: format(subDays(new Date(), 89 - i), 'yyyy-MM-dd'),
     waterLiters: 2.5 + Math.random(),
-    sleepHours: 7.5 + (Math.random() - 0.5) * 2,
-    energyLevel: Math.floor(3 + Math.random() * 2.5),
+    sleepHours: 7.2 + Math.sin(i / 10) * 0.8 + (Math.random() - 0.5) * 1.5,
+    energyLevel: Math.max(1, Math.min(5, Math.floor(3 + Math.sin(i / 10) + Math.random() * 2.5))),
     mood: ['good', 'great', 'okay'][Math.floor(Math.random() * 3)] as 'good',
     stressLevel: Math.floor(2 + Math.random() * 5),
   })),
@@ -136,13 +136,13 @@ export const mockProgressData: ProgressData = {
     ],
     consistency: 88,
   },
-  // 4. Nutrition
+  // 4. Nutrition (Extended to 90 days)
   nutrition: {
-    macros: Array.from({ length: 7 }).map((_, i) => ({
-        date: format(subDays(new Date(), 6 - i), 'yyyy-MM-dd'),
-        protein: 150 + (Math.random() - 0.5) * 20,
-        carbs: 200 + (Math.random() - 0.5) * 30,
-        fat: 60 + (Math.random() - 0.5) * 15,
+    macros: Array.from({ length: 90 }).map((_, i) => ({
+      date: format(subDays(new Date(), 89 - i), 'yyyy-MM-dd'),
+      protein: 150 + Math.sin(i/7) * 15 + (Math.random() - 0.5) * 20,
+      carbs: 200 + Math.sin(i/10) * 20 + (Math.random() - 0.5) * 30,
+      fat: 60 + (Math.random() - 0.5) * 15,
     })),
     mealCompletion: 92,
     outsideMeals: 3,
@@ -154,12 +154,12 @@ export const mockProgressData: ProgressData = {
   },
   // 5. Mental Health
   mentalHealth: {
-      meditationMinutes: Array.from({ length: 7 }).map((_, i) => ({
-          date: format(subDays(new Date(), 6-i), 'yyyy-MM-dd'),
+      meditationMinutes: Array.from({ length: 90 }).map((_, i) => ({
+          date: format(subDays(new Date(), 89-i), 'yyyy-MM-dd'),
           minutes: Math.random() > 0.3 ? 10 + Math.floor(Math.random() * 10) : 0,
       })),
-      yogaSessions: Array.from({ length: 7 }).map((_, i) => ({
-          date: format(subDays(new Date(), 6-i), 'yyyy-MM-dd'),
+      yogaSessions: Array.from({ length: 90 }).map((_, i) => ({
+          date: format(subDays(new Date(), 89-i), 'yyyy-MM-dd'),
           completed: Math.random() > 0.6,
       })),
   },
