@@ -79,8 +79,8 @@ const TodaysProgram = () => {
   return (
     <div className="w-full max-w-5xl mx-auto space-y-8">
       <div className="px-2">
-        <p className="text-sm text-slate-500">Tuesday, 26 August 2025</p>
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Today's Focus 💪</h2>
+        <p className="text-sm text-muted-foreground">Tuesday, 26 August 2025</p>
+        <h2 className="text-2xl font-bold text-foreground">Today's Focus 💪</h2>
       </div>
 
       {/* Primary Program Card (Full Width) */}
@@ -140,7 +140,7 @@ const TodaysProgram = () => {
       {/* Secondary Programs Section (Unchanged) */}
       {secondaryPrograms.length > 0 && (
         <div className="pt-6">
-          <h3 className="mb-4 text-xl font-bold text-slate-700 dark:text-slate-200 px-2">Later Today</h3>
+          <h3 className="mb-4 text-xl font-bold text-foreground px-2">Later Today</h3>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {secondaryPrograms.map((item) => {
               const config = programConfig[item.type];

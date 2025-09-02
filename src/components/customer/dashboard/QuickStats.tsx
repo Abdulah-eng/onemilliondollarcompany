@@ -37,7 +37,7 @@ const QuickStats = () => {
 
   return (
     <div>
-        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">Your Weekly Stats</h2>
+        <h2 className="text-xl font-bold text-foreground mb-4">Your Weekly Stats</h2>
         <div className="p-1 -m-1">
             <div className="flex gap-3 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {statItems.map((stat) => (
@@ -77,19 +77,19 @@ const StatCard: React.FC<StatCardProps> = ({ emoji, label, value, isLocked, tren
 
   if (isLocked) {
     return (
-      <Card className="min-w-[160px] flex-1 shadow-sm border bg-slate-100/80 border-slate-200 dark:bg-slate-800/40 dark:border-slate-700">
-        <CardContent className="p-4 flex flex-col justify-center items-center h-full text-center gap-2">
-          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-            <span className="text-lg filter grayscale">{emoji}</span>
-            <p className="text-xs font-semibold">{label}</p>
-          </div>
-          <div className="flex flex-col items-center gap-2 mt-1">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
-              <Lock size={12} />
-              <span>Premium Feature</span>
-            </div>
-            <Button size="sm" className="h-7 px-3 text-xs bg-orange-500 hover:bg-orange-600 rounded-full">Upgrade</Button>
-          </div>
+      <Card className="min-w-[160px] flex-1 shadow-sm bg-card border">
+        <CardContent className="p-4 flex flex-col justify-center items-center h-full text-center gap-2">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <span className="text-lg filter grayscale">{emoji}</span>
+            <p className="text-xs font-semibold">{label}</p>
+          </div>
+          <div className="flex flex-col items-center gap-2 mt-1">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
+              <Lock size={12} />
+              <span>Premium Feature</span>
+            </div>
+            <Button size="sm" className="h-7 px-3 text-xs bg-orange-500 hover:bg-orange-600 rounded-full">Upgrade</Button>
+          </div>
         </CardContent>
       </Card>
     );

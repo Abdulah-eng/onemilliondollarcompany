@@ -78,7 +78,7 @@ export default function MyProgramsPage() {
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-8 space-y-8">
       <Tabs value={tab} onValueChange={(v) => setTab(v as TabType)}>
-        <TabsList className="grid grid-cols-2 w-full max-w-sm mx-auto rounded-xl bg-white dark:bg-[#1e262e] p-1 shadow-sm">
+        <TabsList className="grid grid-cols-2 w-full max-w-sm mx-auto rounded-xl bg-card p-1 shadow-sm">
           <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
         </TabsList>
@@ -96,13 +96,13 @@ export default function MyProgramsPage() {
               programEndDate={programEndDate}
             />
           ) : (
-            <div className="p-4 text-center border border-dashed rounded-2xl text-gray-400">
+            <div className="p-4 text-center border border-dashed rounded-2xl text-muted-foreground">
               No active program schedule found.
             </div>
           )}
           <div className="space-y-6">
             {todayTasks.length === 0 ? (
-              <div className="p-8 text-center border border-dashed rounded-2xl text-gray-500">
+              <div className="p-8 text-center border border-dashed rounded-2xl text-muted-foreground">
                 No tasks today!
               </div>
             ) : (
@@ -123,7 +123,7 @@ export default function MyProgramsPage() {
       {tab === "scheduled" && (
         <div className="space-y-6">
           {scheduledPrograms.length === 0 ? (
-            <div className="p-8 text-center border border-dashed rounded-2xl text-gray-500">
+            <div className="p-8 text-center border border-dashed rounded-2xl text-muted-foreground">
               No scheduled programs.
             </div>
           ) : (

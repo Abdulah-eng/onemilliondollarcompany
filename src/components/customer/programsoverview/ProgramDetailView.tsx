@@ -14,11 +14,11 @@ import { PlayCircle } from "lucide-react";
 
 const TaskListItem = ({ item }: { item: DetailViewItem }) => {
   return (
-    <li className="flex items-center gap-4 p-3 bg-white dark:bg-[#0d1218] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+    <li className="flex items-center gap-4 p-3 bg-card rounded-xl shadow-sm border">
       <img src={item.imageUrl} alt={item.name} className="h-16 w-16 rounded-lg object-cover" />
       <div className="flex-1">
-        <p className="font-semibold text-slate-800 dark:text-slate-200">{item.name}</p>
-        <p className="text-sm text-slate-500 dark:text-slate-400">{item.details}</p>
+        <p className="font-semibold text-foreground">{item.name}</p>
+        <p className="text-sm text-muted-foreground">{item.details}</p>
       </div>
     </li>
   );
@@ -26,9 +26,9 @@ const TaskListItem = ({ item }: { item: DetailViewItem }) => {
 
 const SimpleTaskListItem = ({ name }: { name: string }) => {
   return (
-    <li className="flex items-center gap-4 p-3 bg-white dark:bg-[#0d1218] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
-      <div className="h-16 w-16 rounded-lg bg-muted dark:bg-slate-700" />
-      <p className="font-semibold text-slate-800 dark:text-slate-200">{name}</p>
+    <li className="flex items-center gap-4 p-3 bg-card rounded-xl shadow-sm border">
+      <div className="h-16 w-16 rounded-lg bg-muted" />
+      <p className="font-semibold text-foreground">{name}</p>
     </li>
   );
 };
@@ -105,7 +105,7 @@ export default function ProgramDetailView({
 
   return (
     <div
-      className="flex flex-col h-full bg-slate-50 dark:bg-[#1e262e]"
+      className="flex flex-col h-full bg-background"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -128,7 +128,7 @@ export default function ProgramDetailView({
         {/* CONTENT */}
         <div className="p-4 md:p-6 pt-4">
           <div className="max-w-md w-full mx-auto">
-            <h3 className="font-semibold text-lg text-slate-700 dark:text-slate-200 mb-4">
+            <h3 className="font-semibold text-lg text-foreground mb-4">
               {showFooter ? "Today's Plan:" : "Program Preview:"}
             </h3>
             {detailedContent ? (
@@ -150,7 +150,7 @@ export default function ProgramDetailView({
 
       {/* ✅ CONDITIONALLY RENDERED FOOTER */}
       {showFooter && (
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-[#1e262e]/50 backdrop-blur-sm flex-shrink-0">
+        <div className="p-4 border-t bg-card/60 backdrop-blur-sm flex-shrink-0">
           <div className="max-w-md w-full mx-auto">
             <Button
               onClick={handleStartClick}

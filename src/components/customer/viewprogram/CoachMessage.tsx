@@ -14,21 +14,21 @@ export default function CoachMessage({ message }: { message: string }) {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, height: 0, marginBottom: 0, transition: { duration: 0.3 } }}
-        className="relative overflow-hidden rounded-2xl bg-white p-4 shadow-md border"
+        className="relative overflow-hidden rounded-2xl bg-card p-4 shadow-md border"
       >
         <div className="flex items-center gap-4">
           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-green-100">
             <Lightbulb className="h-5 w-5 text-green-600" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-slate-800">A Tip From Your Coach</h3>
-            <p className="text-sm text-slate-500">
+            <h3 className="font-semibold text-foreground">A Tip From Your Coach</h3>
+            <p className="text-sm text-muted-foreground">
               {message}
             </p>
           </div>
           <button
             onClick={() => setIsVisible(false)}
-            className="p-2 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="p-2 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <X className="h-5 w-5" />
           </button>

@@ -18,7 +18,7 @@ export function ScheduledProgramCard({
   return (
     <div
       onClick={onClick}
-      className="relative cursor-pointer w-full overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-shadow duration-300 rounded-3xl group min-h-[260px] bg-white"
+      className="relative cursor-pointer w-full overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-shadow duration-300 rounded-3xl group min-h-[260px] bg-card"
     >
       {/* Background Image with blur and grayscale */}
       <img

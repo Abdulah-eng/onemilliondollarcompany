@@ -36,7 +36,7 @@ export default function SlideInDetail({
   if (isMobile) {
     return (
       <Drawer open={!!task} onOpenChange={(open) => !open && onClose()} closeThreshold={0.4}>
-        <DrawerContent className="h-[90%] rounded-t-3xl border-none bg-slate-50 dark:bg-[#1e262e] pt-4">
+        <DrawerContent className="h-[90%] rounded-t-3xl border-none bg-background pt-4">
           <ProgramDetailView task={task} showFooter={showFooter} /> {/* ✅ PASS PROP */}
         </DrawerContent>
       </Drawer>

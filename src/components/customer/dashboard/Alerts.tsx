@@ -44,7 +44,7 @@ const AlertItem = ({ emoji, emojiBg, title, description, extra, onDismiss, isFir
   return (
     <motion.div
       exit={{ opacity: 0, height: 0, transition: { duration: 0.2 } }}
-      className={`relative bg-white dark:bg-card group w-full ${isFirst ? "rounded-t-2xl" : ""} ${isLast ? "rounded-b-2xl overflow-hidden" : ""}`}
+      className={`relative bg-card group w-full ${isFirst ? "rounded-t-2xl" : ""} ${isLast ? "rounded-b-2xl overflow-hidden" : ""}`}
     >
       {/* swipe background */}
       {isTouch && (
@@ -64,16 +64,16 @@ const AlertItem = ({ emoji, emojiBg, title, description, extra, onDismiss, isFir
         style={{ x }}
         onDragEnd={isTouch ? handleDragEnd : undefined}
         onTap={isTouch ? handleProceed : undefined}
-        className="relative p-4 px-6 flex items-center gap-4 hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+        className="relative p-4 px-6 flex items-center gap-4 hover:bg-muted/40 transition-colors cursor-pointer"
       >
         <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg ${emojiBg}`}>
           <span className="text-xl">{emoji}</span>
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-slate-700 dark:text-slate-200">{title}</h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">{description}</p>
-          {extra && <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">{extra}</div>}
+          <h3 className="font-semibold text-foreground">{title}</h3>
+          <p className="text-sm text-muted-foreground">{description}</p>
+          {extra && <div className="mt-1 text-xs text-muted-foreground">{extra}</div>}
         </div>
 
         {device === "desktop" && (
@@ -83,7 +83,7 @@ const AlertItem = ({ emoji, emojiBg, title, description, extra, onDismiss, isFir
                 e.stopPropagation();
                 onDismiss();
               }}
-              className="p-2 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+              className="p-2 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               <X className="w-5 h-5" />
             </button>
@@ -92,7 +92,7 @@ const AlertItem = ({ emoji, emojiBg, title, description, extra, onDismiss, isFir
                 e.stopPropagation();
                 handleProceed();
               }}
-              className="p-2 rounded-full text-slate-500 hover:bg-orange-100 hover:text-orange-600 dark:text-slate-400 dark:hover:bg-orange-500/20 dark:hover:text-orange-400"
+              className="p-2 rounded-full text-muted-foreground hover:bg-orange-100 hover:text-orange-600 dark:hover:bg-orange-500/20 dark:hover:text-orange-400"
             >
               <ArrowRight className="w-5 h-5" />
             </button>

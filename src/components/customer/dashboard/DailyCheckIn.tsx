@@ -73,7 +73,7 @@ const DailyCheckIn = () => {
   if (checkedIn) {
     return (
       <div>
-        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">Daily Check-in</h2>
+        <h2 className="text-xl font-bold text-foreground mb-4">Daily Check-in</h2>
         <Card className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg">
           <CardContent className="p-6 text-center flex flex-col items-center gap-2">
             <Check className="w-10 h-10 bg-white/20 text-white rounded-full p-2"/>
@@ -86,7 +86,7 @@ const DailyCheckIn = () => {
 
   return (
     <div className="animate-fade-in-up">
-      <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">Daily Check-in</h2>
+      <h2 className="text-xl font-bold text-foreground mb-4">Daily Check-in</h2>
       <div className="space-y-4">
         <div
           ref={scrollContainerRef}
@@ -109,12 +109,12 @@ const DailyCheckIn = () => {
 
         <div className="flex lg:hidden justify-center gap-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <button key={i} onClick={() => setActiveStep(i)} className={cn("w-2 h-2 rounded-full transition-all", activeStep === i ? 'bg-orange-500 scale-125' : 'bg-gray-300')}/>
+            <button key={i} onClick={() => setActiveStep(i)} className={cn("w-2 h-2 rounded-full transition-all", activeStep === i ? 'bg-orange-500 scale-125' : 'bg-muted')}/>
           ))}
         </div>
         
         <div className="pt-2 flex justify-center">
-            <Button onClick={handleLogCheckIn} disabled={!isComplete} size="lg" className="w-full max-w-sm bg-orange-500 hover:bg-orange-600 font-bold disabled:bg-gray-300">
+            <Button onClick={handleLogCheckIn} disabled={!isComplete} size="lg" className="w-full max-w-sm bg-orange-500 hover:bg-orange-600 font-bold disabled:bg-muted">
               {isComplete ? "Log Today's Check-in" : "Complete All Items"}
             </Button>
         </div>
@@ -133,7 +133,7 @@ const WaterModule = ({ value, onChange }) => {
             {/* FIX: Removed max-w- class to allow flexbox to use available space */}
             <div className="flex flex-wrap gap-1.5 justify-center mx-auto">
                 {Array.from({ length: 8 }).map((_, i) => (
-                <button key={i} onClick={() => onChange(i + 1 === value ? i : i + 1)} className={cn("w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110", i < value ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-400 dark:bg-slate-700 dark:text-slate-400')}>
+                <button key={i} onClick={() => onChange(i + 1 === value ? i : i + 1)} className={cn("w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110", i < value ? 'bg-blue-500 text-white' : 'bg-muted text-muted-foreground')}>
                     <Droplets size={16} />
                 </button>
                 ))}
@@ -175,11 +175,11 @@ interface CheckInModuleProps {
 }
 
 const CheckInModule: React.FC<CheckInModuleProps> = ({ icon, title, feedback, trend, children }) => (
-  <Card className="bg-white dark:bg-[#1e262e] shadow-md hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
+  <Card className="bg-card shadow-md hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
     <CardHeader className="pb-2">
-      <CardTitle className="text-base font-semibold flex items-center gap-2 text-slate-700 dark:text-slate-200">
-        {icon} {title}
-        {trend?.text && <span className="ml-auto flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">{trend.icon} {trend.text}</span>}
+      <CardTitle className="text-base font-semibold flex items-center gap-2 text-foreground">
+        {icon} {title}
+        {trend?.text && <span className="ml-auto flex items-center gap-1 text-xs font-medium text-muted-foreground">{trend.icon} {trend.text}</span>}
       </CardTitle>
     </CardHeader>
     <CardContent className="flex-1 flex flex-col justify-center p-4">
@@ -195,7 +195,7 @@ const EmojiSlider = ({ options, value, onChange, showLabels = false }) => (
   <div className="relative flex justify-between items-center pt-2 w-full">
     {options.map((option) => (
       <div key={option.value} className="flex flex-col items-center gap-1">
-        {showLabels && <span className="text-xs font-medium text-slate-500 dark:text-slate-400 h-4">{option.label}</span>}
+        {showLabels && <span className="text-xs font-medium text-muted-foreground h-4">{option.label}</span>}
         <button onClick={() => onChange(option.value)} className="transition-transform duration-200 ease-out hover:scale-125">
           <span className={cn("text-3xl transition-all duration-200", value === option.value ? 'opacity-100 scale-110' : 'opacity-40 grayscale hover:opacity-75')}>
             {option.emoji}
@@ -207,7 +207,7 @@ const EmojiSlider = ({ options, value, onChange, showLabels = false }) => (
 );
 
 const FeedbackMessage = ({ text }) => (
-    <p key={text} className="text-xs text-slate-500 dark:text-slate-400 italic text-center mt-3 h-8 animate-fade-in">
+    <p key={text} className="text-xs text-muted-foreground italic text-center mt-3 h-8 animate-fade-in">
         {text}
     </p>
 );
