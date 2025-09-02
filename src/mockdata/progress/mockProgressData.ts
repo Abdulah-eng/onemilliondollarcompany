@@ -37,7 +37,18 @@ export interface MentalHealthData {
 export interface SmartInsight {
     id: string;
     text: string;
+    emoji: string;
     type: 'positive' | 'warning';
+}
+
+// --- NEW INTERFACE FOR RECIPES ---
+export interface Recipe {
+    id: string;
+    name: string;
+    imageUrl: string;
+    portion: string;
+    calories: number;
+    macros: { protein: number; carbs: number; fat: number; };
 }
 
 export interface ProgressData {
@@ -57,6 +68,8 @@ export interface ProgressData {
     macros: { date: string; protein: number; carbs: number; fat: number }[];
     mealCompletion: number; // 0-100
     outsideMeals: number;
+    // --- NEW RECIPE DATA ---
+    recentRecipes: Recipe[];
   };
   // 5. Mental Health
   mentalHealth: MentalHealthData;
@@ -120,6 +133,12 @@ export const mockProgressData: ProgressData = {
     })),
     mealCompletion: 92,
     outsideMeals: 3,
+    // --- NEW RECENT RECIPES DATA ---
+    recentRecipes: [
+        { id: 'r1', name: 'Spicy Salmon Bowl', imageUrl: 'https://placehold.co/400x400/f87171/FFF?text=🍲', portion: '1 bowl', calories: 550, macros: { protein: 40, carbs: 55, fat: 20 } },
+        { id: 'r2', name: 'Chicken & Quinoa', imageUrl: 'https://placehold.co/400x400/34d399/FFF?text=🥗', portion: '1 serving', calories: 480, macros: { protein: 50, carbs: 40, fat: 15 } },
+        { id: 'r3', name: 'Protein Pancakes', imageUrl: 'https://placehold.co/400x400/fbbf24/FFF?text=🥞', portion: '3 pancakes', calories: 420, macros: { protein: 35, carbs: 50, fat: 12 } },
+    ]
   },
   // 5. Mental Health
   mentalHealth: {
@@ -134,15 +153,15 @@ export const mockProgressData: ProgressData = {
   },
   // 6. Body Comp
   photoEntries: [
-    { id: 'p1', date: format(subDays(new Date(), 90), 'MMM d'), imageUrl: 'https://placehold.co/400x400/000000/FFF?text=Start' },
-    { id: 'p2', date: format(subDays(new Date(), 60), 'MMM d'), imageUrl: 'https://placehold.co/400x400/333333/FFF?text=Month+1' },
-    { id: 'p3', date: format(subDays(new Date(), 30), 'MMM d'), imageUrl: 'https://placehold.co/400x400/666666/FFF?text=Month+2' },
-    { id: 'p4', date: format(subDays(new Date(), 2), 'MMM d'), imageUrl: 'https://placehold.co/400x400/999999/FFF?text=Today' },
+    { id: 'p1', date: format(subDays(new Date(), 90), 'MMM d'), imageUrl: 'https://placehold.co/400x600/000000/FFF?text=Start' },
+    { id: 'p2', date: format(subDays(new Date(), 60), 'MMM d'), imageUrl: 'https://placehold.co/400x600/333333/FFF?text=Month+1' },
+    { id: 'p3', date: format(subDays(new Date(), 30), 'MMM d'), imageUrl: 'https://placehold.co/400x600/666666/FFF?text=Month+2' },
+    { id: 'p4', date: format(subDays(new Date(), 2), 'MMM d'), imageUrl: 'https://placehold.co/400x600/999999/FFF?text=Today' },
   ],
-  // 7. Smart Insights
+  // 7. Smart Insights (UPDATED)
   smartInsights: [
-      { id: 's1', text: 'On weeks with 7h+ sleep, you had 20% higher workout adherence.', type: 'positive' },
-      { id: 's2', text: 'Water intake is trending down, which may explain recent lower energy scores.', type: 'warning'},
-      { id: 's3', text: 'Your protein consistency this month is strongly correlated with your new PR on Deadlifts!', type: 'positive'},
+      { id: 's1', emoji: '💡', text: 'On weeks with 7h+ sleep, you had 20% higher workout adherence.', type: 'positive' },
+      { id: 's2', emoji: '💧', text: 'Water intake is trending down. Aim for 3L to boost energy levels.', type: 'warning'},
+      { id: 's3', emoji: '💪', text: 'Your protein consistency is paying off with that new Deadlift PR!', type: 'positive'},
   ],
 };
