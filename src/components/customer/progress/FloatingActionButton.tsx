@@ -1,13 +1,15 @@
 // src/components/customer/progress/FloatingActionButton.tsx
 import { useState } from 'react';
-import { Plus, Weight, Camera, Dumbbell } from 'lucide-react';
+// Import ClipboardCheck for the new item
+import { Plus, Weight, Camera, ClipboardCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
+// --- UPDATED ACTION ITEMS ---
 const actionItems = [
-    { label: 'Log Workout', icon: <Dumbbell className="h-5 w-5" />, action: () => alert('Log Workout') },
-    { label: 'Add Photo', icon: <Camera className="h-5 w-5" />, action: () => alert('Add Photo') },
     { label: 'Weigh In', icon: <Weight className="h-5 w-5" />, action: () => alert('Weigh In') },
+    { label: 'Progression Photo', icon: <Camera className="h-5 w-5" />, action: () => alert('Progression Photo') },
+    { label: 'Daily Check in', icon: <ClipboardCheck className="h-5 w-5" />, action: () => alert('Daily Check in') },
 ];
 
 export default function FloatingActionButton() {
