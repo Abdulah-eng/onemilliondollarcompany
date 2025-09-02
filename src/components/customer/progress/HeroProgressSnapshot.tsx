@@ -70,24 +70,23 @@ export default function HeroProgressSnapshot({
     const dataKey = selectedGoal.type === 'IMPROVE_SLEEP' ? 'sleepHours' : 'protein';
     const sourceData = selectedGoal.type === 'IMPROVE_SLEEP' ? dailyCheckins : nutrition.macros;
 
-    // Aggregate weekly/monthly if timeRange >= 30
     if (timeRange === 7) {
       return sourceData.slice(-7).map(d => ({
         date: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         value: d[dataKey as keyof typeof d] as number,
       }));
     } else {
-      const chunkSize = timeRange === 30 ? 7 : 30; // weekly or monthly chunks
+      const chunkSize = timeRange === 30 ? 7 : 30; // weekly or monthly
       const sliced = sourceData.slice(-timeRange);
       const aggregated: { date: string; value: number }[] = [];
       for (let i = 0; i < sliced.length; i += chunkSize) {
         const chunk = sliced.slice(i, i + chunkSize);
         const avgValue = chunk.reduce((sum, d) => sum + (d[dataKey as keyof typeof d] as number), 0) / chunk.length;
         aggregated.push({
-          date: new Date(chunk[chunk.length - 1].date).toLocaleDateString('en-US', {
-            month: 'short',
-            day: timeRange === 30 ? 'numeric' : undefined,
-          }),
+          date:
+            timeRange === 30
+              ? new Date(chunk[chunk.length - 1].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+              : new Date(chunk[chunk.length - 1].date).toLocaleDateString('en-US', { month: 'short' }),
           value: avgValue,
         });
       }
@@ -150,41 +149,54 @@ export default function HeroProgressSnapshot({
         <p className="text-sm text-white/70">Average over last {timeRange} days</p>
 
         <div className="flex-grow w-full h-48 sm:h-56 mt-4 -mx-2 overflow-x-auto">
-          <ResponsiveContainer width={Math.max(chartData.length * 50, 300)} height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-              <defs>
-                <linearGradient id={`color${selectedGoal.type}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]} stopOpacity={0.4} />
-                  <stop offset="95%" stopColor={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis
-                dataKey="date"
-                stroke="#fff"
-                fontSize={12}
-                tick={{ fill: 'rgba(255,255,255,0.7)' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.2)', strokeWidth: 1, strokeDasharray: '3 3' }} />
-              <Area
-                type="monotone"
-                dataKey="value"
-                unit={selectedGoal.targetUnit}
-                stroke={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]}
-                strokeWidth={3}
-                fillOpacity={1}
-                fill={`url(#color${selectedGoal.type})`}
-                isAnimationActive={false} // disable heavy animation
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          <div style={{ minWidth: chartData.length * 60 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id={`color${selectedGoal.type}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset="5%"
+                      stopColor={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]}
+                      stopOpacity={0.4}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]}
+                      stopOpacity={0}
+                    />
+                  </linearGradient>
+                </defs>
+                <XAxis
+                  dataKey="date"
+                  stroke="#fff"
+                  fontSize={12}
+                  tick={{ fill: 'rgba(255,255,255,0.7)' }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ stroke: 'rgba(255,255,255,0.2)', strokeWidth: 1, strokeDasharray: '3 3' }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  unit={selectedGoal.targetUnit}
+                  stroke={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]}
+                  strokeWidth={3}
+                  fillOpacity={1}
+                  fill={`url(#color${selectedGoal.type})`}
+                  isAnimationActive={false}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
       {/* Time Range & Mini Stats */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4">
-        <div className="flex gap-2 overflow-x-auto p-1 rounded-full bg-black/20">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4">
+        <div className="flex gap-2 overflow-x-auto p-1 rounded-full bg-black/20 flex-shrink-0">
           {timeRanges.map(range => (
             <button
               key={range}
@@ -198,12 +210,10 @@ export default function HeroProgressSnapshot({
             </button>
           ))}
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 mt-2 sm:mt-0">
+        <div className="flex items-center gap-4 sm:gap-6 mt-2 sm:mt-0">
           <MiniStat icon={<Flame className="h-6 w-6 text-orange-300" />} value={`${streak}`} label="Streak" />
           <MiniStat icon={<Zap className="h-6 w-6 text-yellow-300" />} value={`${avgEnergy.toFixed(1)}/5`} label="Energy" />
           <MiniStat icon={<Activity className="h-6 w-6 text-rose-300" />} value={`${kcalBurned.toLocaleString()}`} label="Kcal" />
         </div>
       </div>
-    </motion.div>
-  );
-}
+   
