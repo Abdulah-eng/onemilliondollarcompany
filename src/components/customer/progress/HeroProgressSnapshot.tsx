@@ -1,24 +1,14 @@
 import { useState, useMemo, useCallback } from 'react';
 import { DailyCheckin, UserGoal } from '@/mockdata/progress/mockProgressData';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  Tooltip,
-  ResponsiveContainer,
-  TooltipProps,
-  CartesianGrid,
-} from 'recharts';
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import { Flame, Zap, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-// Type for time range selection
-type TimeRange = '7D' | '4W' | '3M'; // weekly/monthly options
+type TimeRange = 7 | 30 | 90;
+const timeRanges: TimeRange[] = [7, 30, 90];
 
-const timeRanges: TimeRange[] = ['7D', '4W', '3M'];
-
-// Goal-based gradient & stroke colors
+// Static color configs
 const goalColors = {
   IMPROVE_SLEEP: 'from-purple-500 to-indigo-500',
   BUILD_MUSCLE: 'from-orange-500 to-red-500',
@@ -39,49 +29,19 @@ const MiniStat = ({ icon, value, label }: { icon: React.ReactNode; value: string
   </div>
 );
 
-// Tooltip for chart
+// Custom tooltip
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-background/80 backdrop-blur-sm p-3 rounded-lg border border-border/50 shadow-lg">
-        <p className="text-sm font-bold text-foreground">{`${payload[0].value?.toFixed(1)} ${
-          payload[0].unit || ''
-        }`}</p>
+        <p className="text-sm font-bold text-foreground">
+          {`${payload[0].value?.toFixed(1)} ${payload[0].unit || ''}`}
+        </p>
         <p className="text-xs text-muted-foreground">{label}</p>
       </div>
     );
   }
   return null;
-};
-
-// Utility: group by week or month
-const groupData = (data: { date: string; value: number }[], range: TimeRange) => {
-  if (range === '7D') return data.slice(-7); // show last 7 days directly
-
-  const grouped: Record<string, { sum: number; count: number }> = {};
-
-  data.forEach((d) => {
-    const dateObj = new Date(d.date);
-    let key: string;
-
-    if (range === '4W') {
-      // group by ISO week
-      const week = Math.ceil(dateObj.getDate() / 7);
-      key = `${dateObj.getFullYear()}-W${week}`;
-    } else {
-      // 3M → group by month
-      key = `${dateObj.getFullYear()}-${dateObj.getMonth() + 1}`;
-    }
-
-    if (!grouped[key]) grouped[key] = { sum: 0, count: 0 };
-    grouped[key].sum += d.value;
-    grouped[key].count++;
-  });
-
-  return Object.entries(grouped).map(([key, { sum, count }]) => ({
-    date: key,
-    value: sum / count,
-  }));
 };
 
 export default function HeroProgressSnapshot({
@@ -100,33 +60,46 @@ export default function HeroProgressSnapshot({
   avgEnergy: number;
 }) {
   const [selectedGoal, setSelectedGoal] = useState<UserGoal | undefined>(goals?.[0]);
-  const [timeRange, setTimeRange] = useState<TimeRange>('7D');
+  const [timeRange, setTimeRange] = useState<TimeRange>(7);
+
+  const handleGoalChange = useCallback((goal: UserGoal) => setSelectedGoal(goal), []);
+  const handleRangeChange = useCallback((range: TimeRange) => setTimeRange(range), []);
 
   const chartData = useMemo(() => {
     if (!selectedGoal) return [];
     const dataKey = selectedGoal.type === 'IMPROVE_SLEEP' ? 'sleepHours' : 'protein';
     const sourceData = selectedGoal.type === 'IMPROVE_SLEEP' ? dailyCheckins : nutrition.macros;
 
-    // Raw daily values
-    const rawData = sourceData.map((d) => ({
-      date: d.date,
-      value: d[dataKey as keyof typeof d] as number,
-    }));
-
-    // Group by range
-    return groupData(rawData, timeRange);
+    // Aggregate weekly/monthly if timeRange >= 30
+    if (timeRange === 7) {
+      return sourceData.slice(-7).map(d => ({
+        date: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        value: d[dataKey as keyof typeof d] as number,
+      }));
+    } else {
+      const chunkSize = timeRange === 30 ? 7 : 30; // weekly or monthly chunks
+      const sliced = sourceData.slice(-timeRange);
+      const aggregated: { date: string; value: number }[] = [];
+      for (let i = 0; i < sliced.length; i += chunkSize) {
+        const chunk = sliced.slice(i, i + chunkSize);
+        const avgValue = chunk.reduce((sum, d) => sum + (d[dataKey as keyof typeof d] as number), 0) / chunk.length;
+        aggregated.push({
+          date: new Date(chunk[chunk.length - 1].date).toLocaleDateString('en-US', {
+            month: 'short',
+            day: timeRange === 30 ? 'numeric' : undefined,
+          }),
+          value: avgValue,
+        });
+      }
+      return aggregated;
+    }
   }, [selectedGoal, timeRange, dailyCheckins, nutrition.macros]);
 
   const mainMetric = useMemo(() => {
     if (!chartData.length) return { value: 'N/A', unit: '' };
     const avg = chartData.reduce((sum, item) => sum + item.value, 0) / chartData.length;
-    return {
-      value: avg.toFixed(1),
-      unit: selectedGoal?.targetUnit || '',
-    };
+    return { value: avg.toFixed(1), unit: selectedGoal?.targetUnit || '' };
   }, [chartData, selectedGoal]);
-
-  const handleGoalChange = useCallback((goal: UserGoal) => setSelectedGoal(goal), []);
 
   if (!selectedGoal) return null;
 
@@ -142,13 +115,13 @@ export default function HeroProgressSnapshot({
       transition={{ duration: 0.5 }}
     >
       {/* Goal Selection */}
-      <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
-        {goals.map((goal) => (
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        {goals.map(goal => (
           <button
             key={goal.id}
             onClick={() => handleGoalChange(goal)}
             className={cn(
-              'text-sm font-semibold px-3 py-1.5 rounded-full transition-all whitespace-nowrap',
+              'text-sm font-semibold px-3 py-1.5 rounded-full transition-all',
               selectedGoal?.id === goal.id
                 ? 'bg-white/90 text-black'
                 : 'bg-white/20 hover:bg-white/30 text-white'
@@ -159,7 +132,7 @@ export default function HeroProgressSnapshot({
         ))}
       </div>
 
-      {/* Main Metric & Chart */}
+      {/* Metric & Chart */}
       <div className="flex-grow flex flex-col">
         <AnimatePresence mode="wait">
           <motion.div
@@ -174,28 +147,17 @@ export default function HeroProgressSnapshot({
             <span className="text-xl font-medium text-white/80">{mainMetric.unit}</span>
           </motion.div>
         </AnimatePresence>
-        <p className="text-sm text-white/70">
-          Average over last {timeRange === '7D' ? '7 days' : timeRange === '4W' ? '4 weeks' : '3 months'}
-        </p>
+        <p className="text-sm text-white/70">Average over last {timeRange} days</p>
 
-        <div className="flex-grow w-full h-48 sm:h-56 mt-4 -mx-2">
-          <ResponsiveContainer>
+        <div className="flex-grow w-full h-48 sm:h-56 mt-4 -mx-2 overflow-x-auto">
+          <ResponsiveContainer width={Math.max(chartData.length * 50, 300)} height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
               <defs>
                 <linearGradient id={`color${selectedGoal.type}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]}
-                    stopOpacity={0.4}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]}
-                    stopOpacity={0}
-                  />
+                  <stop offset="5%" stopColor={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]} stopOpacity={0.4} />
+                  <stop offset="95%" stopColor={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="rgba(255,255,255,0.1)" vertical={false} />
               <XAxis
                 dataKey="date"
                 stroke="#fff"
@@ -204,7 +166,7 @@ export default function HeroProgressSnapshot({
                 tickLine={false}
                 axisLine={false}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.2)', strokeWidth: 1, strokeDasharray: '3 3' }} />
               <Area
                 type="monotone"
                 dataKey="value"
@@ -213,6 +175,7 @@ export default function HeroProgressSnapshot({
                 strokeWidth={3}
                 fillOpacity={1}
                 fill={`url(#color${selectedGoal.type})`}
+                isAnimationActive={false} // disable heavy animation
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -221,21 +184,21 @@ export default function HeroProgressSnapshot({
 
       {/* Time Range & Mini Stats */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4">
-        <div className="flex items-center gap-1 p-1 rounded-full bg-black/20">
-          {timeRanges.map((range) => (
+        <div className="flex gap-2 overflow-x-auto p-1 rounded-full bg-black/20">
+          {timeRanges.map(range => (
             <button
               key={range}
-              onClick={() => setTimeRange(range)}
+              onClick={() => handleRangeChange(range)}
               className={cn(
-                'px-3 py-1 text-xs font-semibold rounded-full',
+                'px-3 py-1 text-xs font-semibold rounded-full flex-shrink-0',
                 timeRange === range ? 'bg-white/90 text-black' : 'text-white/70 hover:bg-white/10'
               )}
             >
-              {range}
+              {range}D
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-4 sm:gap-6">
+        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 mt-2 sm:mt-0">
           <MiniStat icon={<Flame className="h-6 w-6 text-orange-300" />} value={`${streak}`} label="Streak" />
           <MiniStat icon={<Zap className="h-6 w-6 text-yellow-300" />} value={`${avgEnergy.toFixed(1)}/5`} label="Energy" />
           <MiniStat icon={<Activity className="h-6 w-6 text-rose-300" />} value={`${kcalBurned.toLocaleString()}`} label="Kcal" />
