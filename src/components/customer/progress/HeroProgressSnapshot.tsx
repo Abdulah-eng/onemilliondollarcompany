@@ -40,6 +40,9 @@ export default function HeroProgressSnapshot({
     nutrition,
     kcalBurned,
     avgEnergy,
+    avgSleep,
+    avgProtein,
+    avgCarbs,
 }: {
     streak: number;
     goals: UserGoal[];

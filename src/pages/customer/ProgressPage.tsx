@@ -47,7 +47,7 @@ export default function ProgressPage() {
     : 0;
   
   // --- NEW: Calculate averages for goal progression ---
-  const last7DaysMacros = data.nutrition.macros.slice(-7);
+  const last7DaysMacros = data.nutrition?.macros?.slice(-7) || [];
   const avgProtein = last7DaysMacros.length > 0
     ? last7DaysMacros.reduce((sum, day) => sum + day.protein, 0) / last7DaysMacros.length
     : 0;
@@ -72,6 +72,7 @@ export default function ProgressPage() {
           kcalBurned={data.kcalBurnedLast7Days}
           goals={data.userGoals}
           dailyCheckins={data.dailyCheckins}
+          nutrition={data.nutrition}
           avgProtein={avgProtein}
           avgCarbs={avgCarbs}
         />
