@@ -50,6 +50,9 @@ export default function HeroProgressSnapshot({
     nutrition: { macros: { date: string; protein: number; carbs: number; fat: number }[] };
     kcalBurned: number;
     avgEnergy: number;
+    avgSleep: number;
+    avgProtein: number;
+    avgCarbs: number;
 }) {
     const [selectedGoal, setSelectedGoal] = useState<UserGoal | undefined>(goals?.[0]);
     const [timeRange, setTimeRange] = useState<TimeRange>(7);
