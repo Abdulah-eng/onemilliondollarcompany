@@ -41,7 +41,6 @@ export interface SmartInsight {
     type: 'positive' | 'warning';
 }
 
-// --- NEW INTERFACE FOR RECIPES ---
 export interface Recipe {
     id: string;
     name: string;
@@ -51,10 +50,22 @@ export interface Recipe {
     macros: { protein: number; carbs: number; fat: number; };
 }
 
+// --- NEW INTERFACE FOR USER GOALS ---
+export interface UserGoal {
+  id: string;
+  title: string;
+  type: 'IMPROVE_SLEEP' | 'BUILD_MUSCLE';
+  targetValue?: number;
+  targetUnit?: string;
+}
+
 export interface ProgressData {
   // 1. Hero
   weightEntries: WeightEntry[];
   workoutStreak: number;
+  // --- NEW HERO DATA ---
+  kcalBurnedLast7Days: number;
+  userGoals: UserGoal[];
   // 2. Daily Check-in
   dailyCheckins: DailyCheckin[];
   // 3. Fitness
@@ -68,7 +79,6 @@ export interface ProgressData {
     macros: { date: string; protein: number; carbs: number; fat: number }[];
     mealCompletion: number; // 0-100
     outsideMeals: number;
-    // --- NEW RECIPE DATA ---
     recentRecipes: Recipe[];
   };
   // 5. Mental Health
@@ -87,6 +97,13 @@ export const mockProgressData: ProgressData = {
     weight: 86.5 - i * 0.15 + (Math.random() - 0.5) * 0.5,
   })),
   workoutStreak: 14,
+  // --- NEW MOCK DATA ---
+  kcalBurnedLast7Days: 3250,
+  userGoals: [
+    { id: 'g1', title: 'Improve Sleep Quality', type: 'IMPROVE_SLEEP', targetValue: 8, targetUnit: 'hrs' },
+    // Example of another goal:
+    // { id: 'g2', title: 'Build Lean Muscle', type: 'BUILD_MUSCLE', targetValue: 160, targetUnit: 'g protein' },
+  ],
   // 2. Daily Check-in
   dailyCheckins: Array.from({ length: 14 }).map((_, i) => ({
     date: format(subDays(new Date(), 13 - i), 'yyyy-MM-dd'),
@@ -133,7 +150,6 @@ export const mockProgressData: ProgressData = {
     })),
     mealCompletion: 92,
     outsideMeals: 3,
-    // --- NEW RECENT RECIPES DATA ---
     recentRecipes: [
         { id: 'r1', name: 'Spicy Salmon Bowl', imageUrl: 'https://placehold.co/400x400/f87171/FFF?text=🍲', portion: '1 bowl', calories: 550, macros: { protein: 40, carbs: 55, fat: 20 } },
         { id: 'r2', name: 'Chicken & Quinoa', imageUrl: 'https://placehold.co/400x400/34d399/FFF?text=🥗', portion: '1 serving', calories: 480, macros: { protein: 50, carbs: 40, fat: 15 } },
