@@ -1,14 +1,24 @@
 import { useState, useMemo, useCallback } from 'react';
 import { DailyCheckin, UserGoal } from '@/mockdata/progress/mockProgressData';
-import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  Tooltip,
+  ResponsiveContainer,
+  TooltipProps,
+  CartesianGrid,
+} from 'recharts';
 import { Flame, Zap, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-type TimeRange = 7 | 30 | 90;
-const timeRanges: TimeRange[] = [7, 30, 90];
+// Type for time range selection
+type TimeRange = '7D' | '4W' | '3M'; // weekly/monthly options
 
-// Move static objects outside component
+const timeRanges: TimeRange[] = ['7D', '4W', '3M'];
+
+// Goal-based gradient & stroke colors
 const goalColors = {
   IMPROVE_SLEEP: 'from-purple-500 to-indigo-500',
   BUILD_MUSCLE: 'from-orange-500 to-red-500',
@@ -29,7 +39,7 @@ const MiniStat = ({ icon, value, label }: { icon: React.ReactNode; value: string
   </div>
 );
 
-// Custom tooltip (memoized)
+// Tooltip for chart
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
@@ -42,6 +52,36 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
     );
   }
   return null;
+};
+
+// Utility: group by week or month
+const groupData = (data: { date: string; value: number }[], range: TimeRange) => {
+  if (range === '7D') return data.slice(-7); // show last 7 days directly
+
+  const grouped: Record<string, { sum: number; count: number }> = {};
+
+  data.forEach((d) => {
+    const dateObj = new Date(d.date);
+    let key: string;
+
+    if (range === '4W') {
+      // group by ISO week
+      const week = Math.ceil(dateObj.getDate() / 7);
+      key = `${dateObj.getFullYear()}-W${week}`;
+    } else {
+      // 3M → group by month
+      key = `${dateObj.getFullYear()}-${dateObj.getMonth() + 1}`;
+    }
+
+    if (!grouped[key]) grouped[key] = { sum: 0, count: 0 };
+    grouped[key].sum += d.value;
+    grouped[key].count++;
+  });
+
+  return Object.entries(grouped).map(([key, { sum, count }]) => ({
+    date: key,
+    value: sum / count,
+  }));
 };
 
 export default function HeroProgressSnapshot({
@@ -60,17 +100,21 @@ export default function HeroProgressSnapshot({
   avgEnergy: number;
 }) {
   const [selectedGoal, setSelectedGoal] = useState<UserGoal | undefined>(goals?.[0]);
-  const [timeRange, setTimeRange] = useState<TimeRange>(7);
+  const [timeRange, setTimeRange] = useState<TimeRange>('7D');
 
   const chartData = useMemo(() => {
     if (!selectedGoal) return [];
     const dataKey = selectedGoal.type === 'IMPROVE_SLEEP' ? 'sleepHours' : 'protein';
     const sourceData = selectedGoal.type === 'IMPROVE_SLEEP' ? dailyCheckins : nutrition.macros;
 
-    return sourceData.slice(-timeRange).map((d) => ({
-      date: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    // Raw daily values
+    const rawData = sourceData.map((d) => ({
+      date: d.date,
       value: d[dataKey as keyof typeof d] as number,
     }));
+
+    // Group by range
+    return groupData(rawData, timeRange);
   }, [selectedGoal, timeRange, dailyCheckins, nutrition.macros]);
 
   const mainMetric = useMemo(() => {
@@ -98,13 +142,13 @@ export default function HeroProgressSnapshot({
       transition={{ duration: 0.5 }}
     >
       {/* Goal Selection */}
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
         {goals.map((goal) => (
           <button
             key={goal.id}
             onClick={() => handleGoalChange(goal)}
             className={cn(
-              'text-sm font-semibold px-3 py-1.5 rounded-full transition-all',
+              'text-sm font-semibold px-3 py-1.5 rounded-full transition-all whitespace-nowrap',
               selectedGoal?.id === goal.id
                 ? 'bg-white/90 text-black'
                 : 'bg-white/20 hover:bg-white/30 text-white'
@@ -130,7 +174,9 @@ export default function HeroProgressSnapshot({
             <span className="text-xl font-medium text-white/80">{mainMetric.unit}</span>
           </motion.div>
         </AnimatePresence>
-        <p className="text-sm text-white/70">Average over last {timeRange} days</p>
+        <p className="text-sm text-white/70">
+          Average over last {timeRange === '7D' ? '7 days' : timeRange === '4W' ? '4 weeks' : '3 months'}
+        </p>
 
         <div className="flex-grow w-full h-48 sm:h-56 mt-4 -mx-2">
           <ResponsiveContainer>
@@ -149,6 +195,7 @@ export default function HeroProgressSnapshot({
                   />
                 </linearGradient>
               </defs>
+              <CartesianGrid stroke="rgba(255,255,255,0.1)" vertical={false} />
               <XAxis
                 dataKey="date"
                 stroke="#fff"
@@ -157,7 +204,7 @@ export default function HeroProgressSnapshot({
                 tickLine={false}
                 axisLine={false}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.2)', strokeWidth: 1, strokeDasharray: '3 3' }} />
+              <Tooltip content={<CustomTooltip />} />
               <Area
                 type="monotone"
                 dataKey="value"
@@ -166,7 +213,6 @@ export default function HeroProgressSnapshot({
                 strokeWidth={3}
                 fillOpacity={1}
                 fill={`url(#color${selectedGoal.type})`}
-                isAnimationActive={false} // disable heavy chart animation
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -185,7 +231,7 @@ export default function HeroProgressSnapshot({
                 timeRange === range ? 'bg-white/90 text-black' : 'text-white/70 hover:bg-white/10'
               )}
             >
-              {range}D
+              {range}
             </button>
           ))}
         </div>
