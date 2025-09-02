@@ -121,7 +121,7 @@ export default function HeroProgressSnapshot({
         </AnimatePresence>
         <p className="text-sm text-white/70">Average over last {timeRange} days</p>
 
-        {/* --- Chart with horizontal scroll --- */}
+        {/* --- Chart with horizontal scroll for mobile --- */}
         <div className="flex-grow w-full h-48 sm:h-56 mt-4 -mx-2 overflow-x-auto">
           <div style={{ minWidth: chartData.length * 50 }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -159,7 +159,7 @@ export default function HeroProgressSnapshot({
                   stroke={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]}
                   strokeWidth={3}
                   fillOpacity={1}
-                  fill={`url(#color${selectedGoal.type})`}
+                  fill={`url(#color${selectedGoal.type})`} // <- color trend indicator preserved
                   isAnimationActive={false} // prevent lag
                 />
               </AreaChart>
