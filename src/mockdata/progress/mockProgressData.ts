@@ -49,10 +49,11 @@ export interface Recipe {
     macros: { protein: number; carbs: number; fat: number; };
 }
 
+// UPDATED: Added new goal type for nutrition
 export interface UserGoal {
   id: string;
   title: string;
-  type: 'IMPROVE_SLEEP' | 'BUILD_MUSCLE';
+  type: 'IMPROVE_SLEEP' | 'BUILD_MUSCLE' | 'IMPROVE_NUTRITION';
   targetValue?: number;
   targetUnit?: string;
 }
@@ -61,7 +62,6 @@ export interface ProgressData {
   // 1. Hero
   weightEntries: WeightEntry[];
   workoutStreak: number;
-  // --- HERO DATA ---
   kcalBurnedLast7Days: number;
   userGoals: UserGoal[];
   // 2. Daily Check-in
@@ -96,9 +96,11 @@ export const mockProgressData: ProgressData = {
   })),
   workoutStreak: 14,
   kcalBurnedLast7Days: 3250,
+  // UPDATED: Added a third goal for nutrition
   userGoals: [
     { id: 'g1', title: 'Improve Sleep', type: 'IMPROVE_SLEEP', targetValue: 8, targetUnit: 'hrs' },
     { id: 'g2', title: 'Build Muscle', type: 'BUILD_MUSCLE', targetValue: 160, targetUnit: 'g' },
+    { id: 'g3', title: 'Nutrition Quality', type: 'IMPROVE_NUTRITION', targetValue: 160, targetUnit: 'g protein' },
   ],
   // 2. Daily Check-in (Extended to 90 days)
   dailyCheckins: Array.from({ length: 90 }).map((_, i) => ({
@@ -112,27 +114,12 @@ export const mockProgressData: ProgressData = {
   // 3. Fitness
   fitnessProgression: {
     exercises: [
-        {
-            exerciseName: 'Deadlift',
-            personalRecord: { value: 140, unit: 'kg', date: format(subDays(new Date(), 5), 'yyyy-MM-dd') },
-            history: [{ date: '2023-01-15', weight: 120, reps: 5, sets: 3 }],
-        },
-        {
-            exerciseName: 'Bench Press',
-            personalRecord: { value: 95, unit: 'kg', date: format(subDays(new Date(), 12), 'yyyy-MM-dd') },
-            history: [{ date: '2023-01-10', weight: 80, reps: 8, sets: 4 }],
-        },
-        {
-            exerciseName: 'Squat',
-            personalRecord: { value: 125, unit: 'kg', date: format(subDays(new Date(), 20), 'yyyy-MM-dd') },
-            history: [{ date: '2023-01-05', weight: 110, reps: 5, sets: 5 }],
-        }
+        { exerciseName: 'Deadlift', personalRecord: { value: 140, unit: 'kg', date: format(subDays(new Date(), 5), 'yyyy-MM-dd') }, history: [] },
+        { exerciseName: 'Bench Press', personalRecord: { value: 95, unit: 'kg', date: format(subDays(new Date(), 12), 'yyyy-MM-dd') }, history: [] },
+        { exerciseName: 'Squat', personalRecord: { value: 125, unit: 'kg', date: format(subDays(new Date(), 20), 'yyyy-MM-dd') }, history: [] }
     ],
     weeklyVolume: [
-        { week: 'W1', volume: 10500 },
-        { week: 'W2', volume: 11200 },
-        { week: 'W3', volume: 11000 },
-        { week: 'W4', volume: 12500 },
+        { week: 'W1', volume: 10500 }, { week: 'W2', volume: 11200 }, { week: 'W3', volume: 11000 }, { week: 'W4', volume: 12500 },
     ],
     consistency: 88,
   },
@@ -154,14 +141,8 @@ export const mockProgressData: ProgressData = {
   },
   // 5. Mental Health
   mentalHealth: {
-      meditationMinutes: Array.from({ length: 90 }).map((_, i) => ({
-          date: format(subDays(new Date(), 89-i), 'yyyy-MM-dd'),
-          minutes: Math.random() > 0.3 ? 10 + Math.floor(Math.random() * 10) : 0,
-      })),
-      yogaSessions: Array.from({ length: 90 }).map((_, i) => ({
-          date: format(subDays(new Date(), 89-i), 'yyyy-MM-dd'),
-          completed: Math.random() > 0.6,
-      })),
+      meditationMinutes: Array.from({ length: 90 }).map((_, i) => ({ date: format(subDays(new Date(), 89-i), 'yyyy-MM-dd'), minutes: Math.random() > 0.3 ? 10 + Math.floor(Math.random() * 10) : 0 })),
+      yogaSessions: Array.from({ length: 90 }).map((_, i) => ({ date: format(subDays(new Date(), 89-i), 'yyyy-MM-dd'), completed: Math.random() > 0.6 })),
   },
   // 6. Body Comp
   photoEntries: [
