@@ -1,78 +1,80 @@
 // src/pages/customer/ProgressPage.tsx
 import { mockProgressData } from '@/mockdata/progress/mockProgressData';
-import { Button } from '@/components/ui/button';
-import QuickStats from '@/components/customer/progress/QuickStats';
 import SectionHeader from '@/components/customer/progress/SectionHeader';
-import GoalCard from '@/components/customer/progress/GoalCard';
-import DailyCheckinCard from '@/components/customer/progress/DailyCheckinCard';
-import FitnessTrendCard from '@/components/customer/progress/FitnessTrendCard';
+
+// --- NEW COMPONENT IMPORTS ---
+import HeroProgressSnapshot from '@/components/customer/progress/HeroProgressSnapshot';
+import DailyCheckinTrends from '@/components/customer/progress/DailyCheckinTrends';
+import FitnessProgression from '@/components/customer/progress/FitnessProgression';
+import NutritionProgression from '@/components/customer/progress/NutritionProgression';
+import MentalHealthProgression from '@/components/customer/progress/MentalHealthProgression';
 import WeightProgressCard from '@/components/customer/progress/WeightProgressCard';
 import PhotoProgressCard from '@/components/customer/progress/PhotoProgressCard';
-import MacroCard from '@/components/customer/progress/MacroCard';
+import SmartInsights from '@/components/customer/progress/SmartInsights';
 
 export default function ProgressPage() {
   const data = mockProgressData;
 
+  // Calculate averages for Hero card
+  const last7DaysCheckins = data.dailyCheckins.slice(-7);
+  const avgSleep = last7DaysCheckins.reduce((sum, day) => sum + day.sleepHours, 0) / last7DaysCheckins.length;
+  const avgEnergy = last7DaysCheckins.reduce((sum, day) => sum + day.energyLevel, 0) / last7DaysCheckins.length;
+
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <div className="w-full max-w-4xl mx-auto px-4 py-8 space-y-10">
       {/* --- HEADER --- */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Your Progress</h1>
-          <p className="text-muted-foreground">An overview of your trends and achievements.</p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Your Progress</h1>
+        <p className="text-muted-foreground">A detailed overview of your wellness journey.</p>
       </div>
 
-      {/* --- QUICK STATS & MAIN TRENDS --- */}
-      <QuickStats data={data.mainStats} />
+      {/* 1. Hero Progress Snapshot */}
+      <HeroProgressSnapshot
+        weightEntries={data.weightEntries}
+        streak={data.workoutStreak}
+        avgSleep={avgSleep}
+        avgEnergy={avgEnergy}
+      />
 
-      {/* --- GOALS --- */}
+      {/* 7. Smart Insights */}
       <div className="space-y-4">
-        <SectionHeader title="Your Goals" actionText="Manage Goals" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {data.goals.map(goal => <GoalCard key={goal.id} goal={goal} />)}
+        <SectionHeader title="Smart Insights" />
+        <SmartInsights insights={data.smartInsights} />
+      </div>
+
+      {/* 2. Daily Check-in Trends (Wellness Overview) */}
+      <div className="space-y-4">
+        <SectionHeader title="Daily Check-in Trends" />
+        <DailyCheckinTrends checkins={data.dailyCheckins} />
+      </div>
+      
+      {/* 3. Fitness Progression */}
+      <div className="space-y-4">
+        <SectionHeader title="Fitness Progression" />
+        <FitnessProgression data={data.fitnessProgression} />
+      </div>
+
+      {/* 4. Nutrition Progression */}
+      <div className="space-y-4">
+        <SectionHeader title="Nutrition Progression" />
+        <NutritionProgression data={data.nutrition} />
+      </div>
+
+      {/* 5. Mental Health Progression */}
+      <div className="space-y-4">
+        <SectionHeader title="Mental Health Progression" />
+        <MentalHealthProgression mentalHealth={data.mentalHealth} dailyCheckins={data.dailyCheckins}/>
+      </div>
+
+      {/* 6. Weight & Body Composition */}
+      <div className="space-y-4">
+        <SectionHeader title="Weight & Body Composition" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <WeightProgressCard data={data.weightEntries} />
+          <PhotoProgressCard photos={data.photoEntries} />
         </div>
       </div>
       
-      {/* --- DAILY CHECK-INS --- */}
-      <div className="space-y-4">
-        <SectionHeader title="Daily Check-ins" actionText="View All" />
-         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {data.dailyCheckins.slice(-4).map(checkin => <DailyCheckinCard key={checkin.date} checkin={checkin} />)}
-        </div>
-      </div>
-
-      {/* --- PROGRAM TRENDS --- */}
-      <div className="space-y-4">
-        <SectionHeader title="Program Trends" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <MacroCard data={data.nutrition} />
-            <div className="grid grid-cols-2 gap-4">
-                 {data.fitnessTrends.map(trend => <FitnessTrendCard key={trend.id} trend={trend} />)}
-            </div>
-            {/* You can add a mental health summary card here */}
-             <div className="bg-card dark:bg-[#0d1218] p-4 rounded-2xl border border-border/50">
-                <p className="font-semibold">Mental Wellness</p>
-                <p className="text-2xl font-bold">{data.avgMeditationMinutes} min</p>
-                <p className="text-sm text-muted-foreground">Avg. Meditation</p>
-            </div>
-        </div>
-      </div>
-
-      {/* --- OTHER TRENDS (WEIGHT & PHOTOS) --- */}
-      <div className="space-y-4">
-        <SectionHeader title="Body Composition" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <WeightProgressCard data={data.weightEntries} />
-            <PhotoProgressCard photos={data.photoEntries} />
-        </div>
-      </div>
-
-       {/* --- ACTION BUTTONS (Optional Footer) --- */}
-       <div className="flex gap-2 w-full pt-4">
-          <Button size="lg" className="w-full">Log Today's Weight</Button>
-          <Button size="lg" variant="outline" className="w-full">Add New Photo</Button>
-        </div>
     </div>
   );
 }
