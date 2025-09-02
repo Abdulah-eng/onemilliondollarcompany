@@ -105,7 +105,7 @@ export default function ViewProgramPage() {
         {renderProgramView()}
       </div>
 
-      <div className="sticky bottom-[calc(15vh+env(safe-area-inset-bottom)+0.75rem)] md:bottom-4 z-50 flex w-full justify-center px-0">
+      <div className="sticky bottom-[calc(15vh+env(safe-area-inset-bottom)+1rem)] md:bottom-4 z-40 md:z-50 flex w-full justify-center px-0">
         <Button size="lg" className="h-12 w-full max-w-md rounded-xl font-bold shadow-lg">
           {getButtonText()}
         </Button>
