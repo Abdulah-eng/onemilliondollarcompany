@@ -117,7 +117,7 @@ export default function HeroProgressSnapshot({
     <motion.div
       layout
       className={cn(
-        'w-full rounded-3xl p-4 sm:p-6 text-white overflow-hidden flex flex-col transition-colors duration-500',
+        'w-full rounded-3xl p-4 sm:p-6 text-white overflow-hidden flex flex-col transition-colors duration-500 bg-gradient-to-br',
         goalColors[selectedGoal.type as keyof typeof goalColors]
       )}
       initial={{ opacity: 0, y: 20 }}
