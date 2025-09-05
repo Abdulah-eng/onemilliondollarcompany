@@ -7,10 +7,10 @@ import RecipeCard from './RecipeCard';
 
 // Using the exact colors from your app's design
 const COLORS = {
-    carbs: '#f59e0b',    // Orange/yellow
-    protein: '#a855f7', // Purple
+    carbs: '#f97316',    // Orange/yellow
+    protein: '#a855f7',  // Purple
     fat: '#ef4444',      // Red
-    bg: '#e2e8f0',     // Soft gray for background rings
+    bg: '#e2e8f0',       // Soft gray for background rings
 };
 
 export default function NutritionProgression({ data }: { data: ProgressData['nutrition'] }) {
@@ -53,13 +53,11 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
         { name: 'Protein', value: consumedData.protein, color: COLORS.protein },
         { name: 'Fat', value: consumedData.fat, color: COLORS.fat },
     ];
-
+    
     // Get today's data for remaining calories, intake, and burned metrics
     const todayData = data.macros[data.macros.length - 1];
     const totalCaloriesToday = Math.round(todayData.protein * 4 + todayData.carbs * 4 + todayData.fat * 9);
     const caloriesLeft = Math.max(data.recommended.kcal - totalCaloriesToday, 0);
-    const intake = todayData.kcal;
-    const burned = data.kcalBurnedLast7Days / 7;
 
     return (
         <motion.div
@@ -68,10 +66,10 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
-            {/* Top Section: Remaining Calories and Timeframe Selector */}
+            {/* NEW: Remaining Kcal Header and Timeframe Selector */}
             <div className="flex justify-between items-center flex-wrap gap-2">
                 <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Remaining</h3>
+                    <p className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Remaining</p>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">{caloriesLeft} Kcal</p>
                 </div>
                 <div className="flex items-center text-sm font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full p-1">
@@ -90,43 +88,47 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 </div>
             </div>
 
-            {/* Middle Section: Pie Chart and Macro Details */}
+            {/* NEW: Pie Chart with concentric rings and Macro Breakdown */}
             <div className="flex flex-col md:flex-row items-center justify-center gap-6">
                 <div className="h-48 w-48 relative flex-shrink-0">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
-                            {/* Background Circle */}
+                            {/* Outer ring for Carbs */}
                             <Pie
-                                data={[{ name: 'bg', value: 100 }]}
+                                data={[{ name: 'Carbs', value: consumedData.carbs, fill: COLORS.carbs }, { name: 'Carbs-bg', value: Math.max(0, data.recommended.carbs - consumedData.carbs), fill: '#e2e8f0' }]}
                                 dataKey="value"
                                 cx="50%"
                                 cy="50%"
                                 outerRadius={80}
-                                innerRadius={60}
-                                fill={COLORS.bg}
-                                isAnimationActive={false}
-                            />
-                            {/* Data Circles */}
-                            <Pie
-                                data={pieData}
-                                dataKey="value"
-                                nameKey="name"
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={80}
-                                innerRadius={60}
+                                innerRadius={70}
                                 startAngle={90}
                                 endAngle={-270}
-                            >
-                                {pieData.map((entry, index) => (
-                                    <Cell
-                                        key={`cell-${index}`}
-                                        fill={entry.color}
-                                        stroke={COLORS.bg}
-                                        strokeWidth={4}
-                                    />
-                                ))}
-                            </Pie>
+                                cornerRadius={8}
+                            />
+                            {/* Middle ring for Protein */}
+                            <Pie
+                                data={[{ name: 'Protein', value: consumedData.protein, fill: COLORS.protein }, { name: 'Protein-bg', value: Math.max(0, data.recommended.protein - consumedData.protein), fill: '#e2e8f0' }]}
+                                dataKey="value"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={65}
+                                innerRadius={55}
+                                startAngle={90}
+                                endAngle={-270}
+                                cornerRadius={8}
+                            />
+                            {/* Inner ring for Fat */}
+                            <Pie
+                                data={[{ name: 'Fat', value: consumedData.fat, fill: COLORS.fat }, { name: 'Fat-bg', value: Math.max(0, data.recommended.fat - consumedData.fat), fill: '#e2e8f0' }]}
+                                dataKey="value"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={50}
+                                innerRadius={40}
+                                startAngle={90}
+                                endAngle={-270}
+                                cornerRadius={8}
+                            />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
@@ -135,35 +137,15 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 <div className="flex flex-col gap-2 w-full max-w-sm">
                     <div className="flex items-center justify-between text-gray-900 dark:text-white text-sm font-semibold">
                         <p>Carbs</p>
-                        <p>{todayData.carbs} / {data.recommended.carbs} g</p>
+                        <p>{todayData.carbs}g / {data.recommended.carbs}g</p>
                     </div>
                     <div className="flex items-center justify-between text-gray-900 dark:text-white text-sm font-semibold">
                         <p>Protein</p>
-                        <p>{todayData.protein} / {data.recommended.protein} g</p>
+                        <p>{todayData.protein}g / {data.recommended.protein}g</p>
                     </div>
                     <div className="flex items-center justify-between text-gray-900 dark:text-white text-sm font-semibold">
                         <p>Fat</p>
-                        <p>{todayData.fat} / {data.recommended.fat} g</p>
-                    </div>
-                </div>
-            </div>
-
-            <hr className="my-4 border-gray-200 dark:border-gray-700" />
-
-            {/* Intake & Burned Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center gap-4">
-                    <span role="img" aria-label="salad bowl" className="text-3xl">🥗</span>
-                    <div className="space-y-1">
-                        <p className="font-bold text-xl">{intake} Cal</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Intake</p>
-                    </div>
-                </div>
-                <div className="p-4 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center gap-4">
-                    <span role="img" aria-label="fire" className="text-3xl">🔥</span>
-                    <div className="space-y-1">
-                        <p className="font-bold text-xl">{Math.round(burned)} Cal</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Burned</p>
+                        <p>{todayData.fat}g / {data.recommended.fat}g</p>
                     </div>
                 </div>
             </div>
