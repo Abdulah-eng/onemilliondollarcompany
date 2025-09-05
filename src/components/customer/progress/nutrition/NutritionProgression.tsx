@@ -126,8 +126,8 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     </div>
                 </div>
 
-                {/* Three macro bars horizontally */}
-                <div className="w-full flex justify-between gap-4">
+                {/* Three macro bars - responsive layout */}
+                <div className="w-full flex flex-col sm:flex-row justify-between gap-4">
                     {/* Protein */}
                     <div className="flex-1 flex flex-col gap-2">
                         <div className="text-xs font-medium text-gray-300 uppercase tracking-wide">Protein</div>
