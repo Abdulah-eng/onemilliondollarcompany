@@ -117,7 +117,7 @@ export default function HeroProgressSnapshot({
     <motion.div
       layout
       className={cn(
-        'w-full rounded-3xl p-4 sm:p-6 text-white overflow-hidden flex flex-col transition-colors duration-500 bg-gradient-to-br',
+        'w-full rounded-3xl p-4 sm:p-6 text-white overflow-hidden flex flex-col transition-colors duration-500',
         goalColors[selectedGoal.type as keyof typeof goalColors]
       )}
       initial={{ opacity: 0, y: 20 }}
@@ -150,13 +150,13 @@ export default function HeroProgressSnapshot({
         {/* --- Chart with horizontal scroll for mobile --- */}
         <div className="flex-grow w-full h-48 sm:h-56 mt-4 -mx-2 overflow-x-auto">
           {/* The inner div's minWidth enables scrolling for daily views */}
-          <div className="h-full bg-black/10 dark:bg-white/5 rounded-lg p-2" style={{ minWidth: timeRange === 30 ? '100%' : '500px' }}>
+          <div className="h-full" style={{ minWidth: timeRange === 30 ? '100%' : '500px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
                 <defs>
                   <linearGradient id={`color${selectedGoal.type}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]} stopOpacity={0.7} />
-                    <stop offset="95%" stopColor={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]} stopOpacity={0.15} />
+                    <stop offset="5%" stopColor={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="date" stroke="#fff" fontSize={12} tick={{ fill: 'rgba(255,255,255,0.7)' }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
