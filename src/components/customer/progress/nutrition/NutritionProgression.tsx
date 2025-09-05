@@ -1,76 +1,95 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { PieChart, Pie, ResponsiveContainer } from 'recharts';
-import { ProgressData } from '@/mockdata/progress/mockProgressData';
 import { cn } from '@/lib/utils';
-import RecipeCard from './RecipeCard';
+// Note: All old Recharts and RecipeCard components have been removed as requested.
 
-// Using the exact colors from the provided image and a light gray for background
-const PIE_COLORS = ['#f97316', '#a855f7', '#ef4444']; // Orange, Purple, Red (Adjusted order to match the image)
-const PIE_BG_COLOR = '#e2e8f0'; // Light gray for the background of the pie chart rings
+// Define colors to match the user's provided images
+const MACRO_COLORS = {
+    carbs: '#f97316', // Orange
+    protein: '#a855f7', // Purple
+    fat: '#ef4444', // Red
+};
 
-// Dummy data for burned calories and weight trends to demonstrate the new sections
+// Dummy data for the new trend graph and calories burned
 const DUMMY_BURNED_KCAL = 350;
-const DUMMY_WEIGHT_TRENDS = [
-    { label: '1 Week', value: '-1.2 kg' },
-    { label: '30 Days', value: '-2.5 kg' },
-    { label: '6 Months', value: '-10 kg' },
-    { label: '1 Year', value: '-15 kg' },
-];
+const DUMMY_TREND_DATA = {
+    '1 Week': [
+        { date: 'Mon', weight: 80, kcal: 2100 },
+        { date: 'Tue', weight: 79.8, kcal: 2200 },
+        { date: 'Wed', weight: 79.5, kcal: 2050 },
+        { date: 'Thu', weight: 79.2, kcal: 2300 },
+        { date: 'Fri', weight: 79.1, kcal: 2150 },
+    ],
+    '30 Days': [
+        // A placeholder for 30-day data
+        { date: 'Week 1', weight: 79, kcal: 2000 },
+        { date: 'Week 2', weight: 78.5, kcal: 2100 },
+        { date: 'Week 3', weight: 78.2, kcal: 1950 },
+        { date: 'Week 4', weight: 78, kcal: 2200 },
+    ],
+    '6 Months': [
+        // A placeholder for 6-month data
+        { date: 'Jan', weight: 85, kcal: 2300 },
+        { date: 'Apr', weight: 81, kcal: 2100 },
+        { date: 'Jul', weight: 78, kcal: 2000 },
+    ],
+    '1 Year': [
+        // A placeholder for 1-year data
+        { date: 'Jan', weight: 90, kcal: 2500 },
+        { date: 'Jul', weight: 80, kcal: 2100 },
+    ],
+};
+
+// A simple component to render the semi-circular calorie bar
+const CalorieArc = ({ consumed, recommended }) => {
+    const percentage = Math.min(100, (consumed / recommended) * 100);
+    const strokeDashoffset = 471 - (471 * percentage) / 100;
+
+    return (
+        <div className="relative w-40 h-20 overflow-hidden flex items-end justify-center">
+            <svg
+                width="160"
+                height="80"
+                viewBox="0 0 160 80"
+                className="absolute transform scale-y-[-1] origin-bottom"
+            >
+                {/* Background arc */}
+                <path
+                    d="M 10 70 A 70 70 0 0 1 150 70"
+                    fill="none"
+                    stroke="#e2e8f0"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                />
+                {/* Foreground arc (consumed) */}
+                <path
+                    d="M 10 70 A 70 70 0 0 1 150 70"
+                    fill="none"
+                    stroke="#f97316"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    style={{
+                        strokeDasharray: 471,
+                        strokeDashoffset: strokeDashoffset,
+                        transition: 'stroke-dashoffset 0.5s ease-in-out',
+                    }}
+                />
+            </svg>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                <span role="img" aria-label="calories" className="text-3xl mb-1">🔥</span>
+                <span className="text-2xl font-bold">{consumed} <span className="text-sm font-normal">kcal</span></span>
+                <span className="text-sm text-gray-500 font-medium">of {recommended} kcal</span>
+            </div>
+        </div>
+    );
+};
 
 export default function NutritionProgression({ data }: { data: ProgressData['nutrition'] }) {
-    const [activeTimeframe, setActiveTimeframe] = useState('Today');
     const [activeTrend, setActiveTrend] = useState('1 Week');
-
-    // Dynamically calculate consumption based on the active timeframe
-    const consumedData = useMemo(() => {
-        let timeframeData = [];
-        if (activeTimeframe === 'Today') {
-            timeframeData = data.macros.slice(-1);
-        } else if (activeTimeframe === 'Week') {
-            timeframeData = data.macros.slice(-7);
-        } else { // Month
-            timeframeData = data.macros.slice(-30);
-        }
-
-        const totalMacros = timeframeData.reduce((acc, curr) => ({
-            protein: acc.protein + curr.protein,
-            carbs: acc.carbs + curr.carbs,
-            fat: acc.fat + curr.fat,
-        }), { protein: 0, carbs: 0, fat: 0 });
-
-        const totalDays = timeframeData.length || 1;
-
-        const protein = Math.round(totalMacros.protein / totalDays);
-        const carbs = Math.round(totalMacros.carbs / totalDays);
-        const fat = Math.round(totalMacros.fat / totalDays);
-
-        return {
-            protein,
-            carbs,
-            fat,
-            calories: Math.round(protein * 4 + carbs * 4 + fat * 9),
-        };
-    }, [data.macros, activeTimeframe]);
-    
-    // Get today's data for remaining calories
     const todayData = data.macros[data.macros.length - 1];
     const totalCaloriesToday = Math.round(todayData.protein * 4 + todayData.carbs * 4 + todayData.fat * 9);
-    const caloriesLeft = Math.max(data.recommended.kcal - totalCaloriesToday, 0);
 
-    // Data for the Pie Chart
-    const pieDataCarbs = [
-        { name: 'Carbs', value: consumedData.carbs, fill: PIE_COLORS[0] },
-        { name: 'Carbs-bg', value: Math.max(0, data.recommended.carbs - consumedData.carbs), fill: PIE_BG_COLOR },
-    ];
-    const pieDataProtein = [
-        { name: 'Protein', value: consumedData.protein, fill: PIE_COLORS[1] },
-        { name: 'Protein-bg', value: Math.max(0, data.recommended.protein - consumedData.protein), fill: PIE_BG_COLOR },
-    ];
-    const pieDataFat = [
-        { name: 'Fat', value: consumedData.fat, fill: PIE_COLORS[2] },
-        { name: 'Fat-bg', value: Math.max(0, data.recommended.fat - consumedData.fat), fill: PIE_BG_COLOR },
-    ];
+    const trendData = DUMMY_TREND_DATA[activeTrend];
 
     return (
         <motion.div
@@ -79,127 +98,96 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
-            {/* Remaining Kcal Header and Timeframe Selector */}
-            <div className="flex justify-between items-start flex-wrap gap-4">
-                <div className="flex flex-col">
-                    <p className="text-base font-medium text-gray-500 dark:text-gray-400">Remaining</p>
-                    <p className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white">{caloriesLeft} Kcal</p>
+            {/* TOP PART: Calorie Arc and Macro Bars */}
+            <div className="flex flex-col items-center gap-6">
+                <CalorieArc consumed={totalCaloriesToday} recommended={data.recommended.kcal} />
+                <div className="w-full flex justify-between gap-4 text-center">
+                    {/* Macro Bars */}
+                    {Object.entries({
+                        protein: todayData.protein,
+                        fat: todayData.fat,
+                        carbs: todayData.carbs
+                    }).map(([macro, value]) => (
+                        <div key={macro} className="flex-1">
+                            <h4 className="text-lg font-bold capitalize text-gray-900 dark:text-white mb-1">{macro}</h4>
+                            <div className="relative w-full h-2 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+                                <motion.div
+                                    className="h-full rounded-full"
+                                    style={{ backgroundColor: MACRO_COLORS[macro] }}
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${Math.min(100, (value / data.recommended[macro]) * 100)}%` }}
+                                    transition={{ duration: 0.5 }}
+                                ></motion.div>
+                            </div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white mt-2">
+                                {value}g / {data.recommended[macro]}g
+                            </p>
+                        </div>
+                    ))}
                 </div>
-                <div className="flex items-center text-sm font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full p-1 self-center md:self-auto">
-                    {['Today', 'Week', 'Month'].map(timeframe => (
+            </div>
+
+            <hr className="my-4 border-gray-200 dark:border-gray-700" />
+
+            {/* MIDDLE PART: Consumed and Burned */}
+            <div className="grid grid-cols-2 gap-4 text-center text-gray-900 dark:text-white">
+                <div className="bg-gray-100 dark:bg-gray-700 rounded-3xl p-4 flex flex-col items-center justify-center">
+                    <span role="img" aria-label="consumed" className="text-3xl mb-2">🍽️</span>
+                    <p className="text-xl font-bold">
+                        {totalCaloriesToday} <span className="text-sm font-normal text-gray-500 dark:text-gray-400">Kcal</span>
+                    </p>
+                    <p className="text-sm text-gray-500 font-medium dark:text-gray-400">Consumed</p>
+                </div>
+                <div className="bg-gray-100 dark:bg-gray-700 rounded-3xl p-4 flex flex-col items-center justify-center">
+                    <span role="img" aria-label="burned" className="text-3xl mb-2">🔥</span>
+                    <p className="text-xl font-bold">
+                        {DUMMY_BURNED_KCAL} <span className="text-sm font-normal text-gray-500 dark:text-gray-400">Kcal</span>
+                    </p>
+                    <p className="text-sm text-gray-500 font-medium dark:text-gray-400">Burned</p>
+                </div>
+            </div>
+
+            <hr className="my-4 border-gray-200 dark:border-gray-700" />
+
+            {/* BOTTOM PART: Weight and Consumption Trend */}
+            <div>
+                <h3 className="text-xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">Your Progress</h3>
+                <div className="flex items-center text-sm font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full p-1 mb-6 w-fit mx-auto">
+                    {Object.keys(DUMMY_TREND_DATA).map(timeframe => (
                         <button
                             key={timeframe}
-                            onClick={() => setActiveTimeframe(timeframe)}
+                            onClick={() => setActiveTrend(timeframe)}
                             className={cn(
                                 "px-4 py-1 rounded-full transition-colors",
-                                { 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm': activeTimeframe === timeframe }
+                                { 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm': activeTrend === timeframe }
                             )}
                         >
                             {timeframe}
                         </button>
                     ))}
                 </div>
-            </div>
-
-            {/* Pie Chart and Macro Breakdown */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12">
-                <div className="h-48 w-48 relative flex-shrink-0">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            {/* Outer ring for Carbs */}
-                            <Pie data={pieDataCarbs} dataKey="value" cx="50%" cy="50%" outerRadius={80} innerRadius={70} startAngle={90} endAngle={-270} cornerRadius={8} />
-                            {/* Middle ring for Protein */}
-                            <Pie data={pieDataProtein} dataKey="value" cx="50%" cy="50%" outerRadius={65} innerRadius={55} startAngle={90} endAngle={-270} cornerRadius={8} />
-                            {/* Inner ring for Fat */}
-                            <Pie data={pieDataFat} dataKey="value" cx="50%" cy="50%" outerRadius={50} innerRadius={40} startAngle={90} endAngle={-270} cornerRadius={8} />
-                        </PieChart>
-                    </ResponsiveContainer>
-                </div>
-
-                {/* Macro breakdown details */}
-                <div className="flex flex-col gap-3 w-full max-w-sm">
-                    <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: PIE_COLORS[0] }}></span>
-                        <div className="flex flex-grow justify-between items-center text-sm font-medium text-gray-900 dark:text-white">
-                            <p>Carbs</p>
-                            <p className="font-bold">{todayData.carbs}g / <span className="text-gray-500 dark:text-gray-400 font-normal">{data.recommended.carbs}g</span></p>
-                        </div>
+                
+                {/* Visual Trend Indicator (Simple SVG for demo) */}
+                <div className="w-full h-40 bg-gray-100 dark:bg-gray-700 rounded-2xl p-4 flex flex-col justify-between items-center relative">
+                    {/* Placeholder for a dynamic line graph */}
+                    <div className="flex w-full justify-between items-end h-full">
+                        {trendData.map((point, index) => (
+                            <div key={index} className="flex-1 flex flex-col items-center">
+                                {/* The height of the bar is a visual representation of progress */}
+                                <div
+                                    className="w-2 rounded-t-full transition-all duration-300"
+                                    style={{
+                                        height: `${(point.weight - Math.min(...trendData.map(d => d.weight))) / (Math.max(...trendData.map(d => d.weight)) - Math.min(...trendData.map(d => d.weight))) * 80 + 20}%`,
+                                        backgroundColor: '#a855f7',
+                                    }}
+                                ></div>
+                                <span className="text-xs text-gray-500 dark:text-gray-400 mt-2">{point.date}</span>
+                            </div>
+                        ))}
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: PIE_COLORS[1] }}></span>
-                        <div className="flex flex-grow justify-between items-center text-sm font-medium text-gray-900 dark:text-white">
-                            <p>Protein</p>
-                            <p className="font-bold">{todayData.protein}g / <span className="text-gray-500 dark:text-gray-400 font-normal">{data.recommended.protein}g</span></p>
-                        </div>
+                    <div className="absolute top-4 left-4 text-sm font-medium text-gray-500 dark:text-gray-400">
+                        <p>Weight: <span className="font-bold text-gray-900 dark:text-white">{trendData[trendData.length - 1].weight} kg</span></p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: PIE_COLORS[2] }}></span>
-                        <div className="flex flex-grow justify-between items-center text-sm font-medium text-gray-900 dark:text-white">
-                            <p>Fat</p>
-                            <p className="font-bold">{todayData.fat}g / <span className="text-gray-500 dark:text-gray-400 font-normal">{data.recommended.fat}g</span></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <hr className="my-4 border-gray-200 dark:border-gray-700" />
-            
-            {/* NEW: Calories Consumed & Burned Section */}
-            <div className="grid grid-cols-2 gap-4 text-center text-gray-900 dark:text-white">
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-2xl p-4 flex flex-col items-center justify-center">
-                    <p className="text-2xl font-bold flex items-center gap-2">
-                        {totalCaloriesToday} <span className="text-lg font-normal text-gray-500 dark:text-gray-400">Kcal</span>
-                    </p>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                        <span role="img" aria-label="consumed">🍽️</span> Consumed
-                    </p>
-                </div>
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-2xl p-4 flex flex-col items-center justify-center">
-                    <p className="text-2xl font-bold flex items-center gap-2">
-                        {DUMMY_BURNED_KCAL} <span className="text-lg font-normal text-gray-500 dark:text-gray-400">Kcal</span>
-                    </p>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                        <span role="img" aria-label="burned">🔥</span> Burned
-                    </p>
-                </div>
-            </div>
-
-            <hr className="my-4 border-gray-200 dark:border-gray-700" />
-            
-            {/* NEW: Weight Trend Indicator */}
-            <div>
-                <h3 className="text-xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">Weight Trend</h3>
-                <div className="flex flex-nowrap overflow-x-auto gap-3 pb-2 -mx-6 px-6 scrollbar-hidden">
-                    {DUMMY_WEIGHT_TRENDS.map((trend) => (
-                        <button
-                            key={trend.label}
-                            onClick={() => setActiveTrend(trend.label)}
-                            className={cn(
-                                "flex flex-col items-center justify-center flex-shrink-0 w-32 h-24 rounded-2xl p-4 transition-colors border-2",
-                                activeTrend === trend.label
-                                    ? "bg-purple-600 border-purple-600 text-white shadow-lg"
-                                    : "bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
-                            )}
-                        >
-                            <span className="text-2xl font-bold">{trend.value}</span>
-                            <span className={cn("text-sm mt-1", activeTrend === trend.label ? "text-purple-200" : "text-gray-500 dark:text-gray-400")}>{trend.label}</span>
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            <hr className="my-4 border-gray-200 dark:border-gray-700" />
-
-            {/* Today's Meals */}
-            <div className="pt-6">
-                <h3 className="text-xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">Today's Meals</h3>
-                <div className="space-y-4">
-                    {data.recentRecipes.map(recipe => (
-                        <RecipeCard key={recipe.id} recipe={recipe} />
-                    ))}
-                    <button className="w-full text-center text-sm font-semibold py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/20 dark:hover:bg-white/30 dark:text-white transition-colors">
-                        View All
-                    </button>
                 </div>
             </div>
         </motion.div>
