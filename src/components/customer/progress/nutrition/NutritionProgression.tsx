@@ -141,7 +141,9 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 <div className="w-full flex flex-col sm:flex-row justify-between gap-4">
                     {/* Protein */}
                     <div className="flex-1 flex flex-col gap-2">
-                        <div className="text-xs font-medium text-gray-300 uppercase tracking-wide">Protein</div>
+                        <div className="flex items-center gap-1 text-xs font-medium text-gray-300 uppercase tracking-wide">
+                            <span role="img" aria-label="protein">🥩</span> Protein
+                        </div>
                         <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
                             <motion.div
                                 className="h-full rounded-full"
@@ -158,7 +160,9 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
 
                     {/* Fat */}
                     <div className="flex-1 flex flex-col gap-2">
-                        <div className="text-xs font-medium text-gray-300 uppercase tracking-wide">Fat</div>
+                        <div className="flex items-center gap-1 text-xs font-medium text-gray-300 uppercase tracking-wide">
+                            <span role="img" aria-label="fat">🥑</span> Fat
+                        </div>
                         <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
                             <motion.div
                                 className="h-full rounded-full"
@@ -175,7 +179,9 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
 
                     {/* Carbs */}
                     <div className="flex-1 flex flex-col gap-2">
-                        <div className="text-xs font-medium text-gray-300 uppercase tracking-wide">Carbs</div>
+                        <div className="flex items-center gap-1 text-xs font-medium text-gray-300 uppercase tracking-wide">
+                            <span role="img" aria-label="carbs">🍞</span> Carbs
+                        </div>
                         <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
                             <motion.div
                                 className="h-full rounded-full"
@@ -203,7 +209,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
                 >
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 rounded-full bg-transparent flex items-center justify-center">
                         <span role="img" aria-label="consumed" className="text-2xl">🍽️</span>
                     </div>
                     <div className="flex-1">
@@ -222,7 +228,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: 0.4 }}
                 >
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 rounded-full bg-transparent flex items-center justify-center">
                         <span role="img" aria-label="burned" className="text-2xl">🔥</span>
                     </div>
                     <div className="flex-1">
