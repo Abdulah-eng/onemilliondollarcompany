@@ -3,11 +3,15 @@ import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { ProgressData } from '@/mockdata/progress/mockProgressData';
 import { cn } from '@/lib/utils';
-import RecipeCard from './RecipeCard'; // Corrected import path
+import RecipeCard from './RecipeCard';
 
-// Updated constants for the Pie Chart using colors from the provided image
-const PIE_COLORS = ['#8b5cf6', '#f97316', '#ef4444']; // Purple, Orange, Red
-const STROKE_COLOR = 'transparent'; // No stroke needed for this design
+// Using the exact colors from your app's design
+const COLORS = {
+    carbs: '#f59e0b',    // Orange/yellow
+    protein: '#a855f7', // Purple
+    fat: '#ef4444',      // Red
+    bg: '#e2e8f0',     // Soft gray for background rings
+};
 
 export default function NutritionProgression({ data }: { data: ProgressData['nutrition'] }) {
     const [activeTimeframe, setActiveTimeframe] = useState('Today');
@@ -34,43 +38,40 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
         const protein = Math.round(totalMacros.protein / totalDays);
         const carbs = Math.round(totalMacros.carbs / totalDays);
         const fat = Math.round(totalMacros.fat / totalDays);
-        const total = protein + carbs + fat;
 
         return {
             protein,
             carbs,
             fat,
-            total,
             calories: Math.round(protein * 4 + carbs * 4 + fat * 9),
         };
     }, [data.macros, activeTimeframe]);
-    
+
     // Data for the Pie Chart
     const pieData = [
-        { name: 'Carbs', value: consumedData.carbs, color: '#f59e0b' },
-        { name: 'Protein', value: consumedData.protein, color: '#8b5cf6' },
-        { name: 'Fat', value: consumedData.fat, color: '#ef4444' },
+        { name: 'Carbs', value: consumedData.carbs, color: COLORS.carbs },
+        { name: 'Protein', value: consumedData.protein, color: COLORS.protein },
+        { name: 'Fat', value: consumedData.fat, color: COLORS.fat },
     ];
 
     // Get today's data for remaining calories, intake, and burned metrics
     const todayData = data.macros[data.macros.length - 1];
     const totalCaloriesToday = Math.round(todayData.protein * 4 + todayData.carbs * 4 + todayData.fat * 9);
     const caloriesLeft = Math.max(data.recommended.kcal - totalCaloriesToday, 0);
-
-    const intake = todayData.kcal; // Assuming kcal in mock data is intake
-    const burned = data.kcalBurnedLast7Days / 7; // Average daily burned calories
+    const intake = todayData.kcal;
+    const burned = data.kcalBurnedLast7Days / 7;
 
     return (
         <motion.div
-            className="w-full rounded-3xl p-4 sm:p-6 overflow-hidden flex flex-col gap-6 transition-colors duration-500 bg-white dark:bg-gray-800 shadow-lg"
+            className="w-full rounded-3xl p-4 sm:p-6 overflow-hidden flex flex-col gap-6 bg-white dark:bg-gray-800 shadow-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
-            {/* Main Header and Timeframe Selector */}
+            {/* Top Section: Remaining Calories and Timeframe Selector */}
             <div className="flex justify-between items-center flex-wrap gap-2">
                 <div className="flex items-center gap-2">
-                    <p className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Remaining</p>
+                    <h3 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Remaining</h3>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">{caloriesLeft} Kcal</p>
                 </div>
                 <div className="flex items-center text-sm font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full p-1">
@@ -89,11 +90,23 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 </div>
             </div>
 
-            {/* Smart Pie Chart and Macro Breakdown */}
+            {/* Middle Section: Pie Chart and Macro Details */}
             <div className="flex flex-col md:flex-row items-center justify-center gap-6">
                 <div className="h-48 w-48 relative flex-shrink-0">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
+                            {/* Background Circle */}
+                            <Pie
+                                data={[{ name: 'bg', value: 100 }]}
+                                dataKey="value"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={80}
+                                innerRadius={60}
+                                fill={COLORS.bg}
+                                isAnimationActive={false}
+                            />
+                            {/* Data Circles */}
                             <Pie
                                 data={pieData}
                                 dataKey="value"
@@ -109,7 +122,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                     <Cell
                                         key={`cell-${index}`}
                                         fill={entry.color}
-                                        stroke={STROKE_COLOR}
+                                        stroke={COLORS.bg}
                                         strokeWidth={4}
                                     />
                                 ))}
@@ -118,19 +131,20 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     </ResponsiveContainer>
                 </div>
 
-                {/* Macro breakdown details */}
+                {/* Macro breakdown details with emojis */}
                 <div className="flex flex-col gap-2 w-full max-w-sm">
-                    {pieData.map(macro => (
-                        <div key={macro.name} className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: macro.color }}></div>
-                                <span className="text-sm font-medium">{macro.name}</span>
-                            </div>
-                            <span className="text-sm text-gray-900 dark:text-white font-semibold">
-                                {macro.value}g / {data.recommended[macro.name.toLowerCase()]}g
-                            </span>
-                        </div>
-                    ))}
+                    <div className="flex items-center justify-between text-gray-900 dark:text-white text-sm font-semibold">
+                        <p>Carbs</p>
+                        <p>{todayData.carbs} / {data.recommended.carbs} g</p>
+                    </div>
+                    <div className="flex items-center justify-between text-gray-900 dark:text-white text-sm font-semibold">
+                        <p>Protein</p>
+                        <p>{todayData.protein} / {data.recommended.protein} g</p>
+                    </div>
+                    <div className="flex items-center justify-between text-gray-900 dark:text-white text-sm font-semibold">
+                        <p>Fat</p>
+                        <p>{todayData.fat} / {data.recommended.fat} g</p>
+                    </div>
                 </div>
             </div>
 
