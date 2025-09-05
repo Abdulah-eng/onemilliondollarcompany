@@ -27,7 +27,7 @@ const AppShell = () => {
   const bottomNavItems: NavItem[] = navConfig.bottom;
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       {/* ✅ UPDATED: Replaced solid background with a subtle gradient */}
       <div className="theme-dashboard min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-stone-100 dark:from-black dark:to-gray-900">
         <SideNav navItems={navItems} bottomNavItems={bottomNavItems} />

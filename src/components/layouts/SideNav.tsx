@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { LogOut } from 'lucide-react';
 import {
   Sidebar,
@@ -23,8 +24,18 @@ interface SideNavProps {
 const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
   const location = useLocation();
   const { signOut } = useAuth();
-  const { state, isMobile } = useSidebar();
+  const { state, isMobile, setOpen, setOpenMobile } = useSidebar();
   const collapsed = state === 'collapsed';
+
+  const closeSidebar = () => {
+    setOpen(false);
+    setOpenMobile(false);
+  };
+
+  // Auto-close sidebar when route changes
+  useEffect(() => {
+    closeSidebar();
+  }, [location.pathname]);
 
   const isActive = (href: string) => location.pathname === href;
 
@@ -73,7 +84,7 @@ const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
                     isActive={isActive(item.href)}
                     className={btnClass}
                   >
-                    <Link to={item.href} className="flex items-center gap-3">
+                    <Link to={item.href} className="flex items-center gap-3" onClick={closeSidebar}>
                       <item.icon className="h-5 w-5 shrink-0" />
                       {showText && (
                         <span className="text-sm font-medium">{item.name}</span>
@@ -98,7 +109,7 @@ const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
                     isActive={isActive(item.href)}
                     className={btnClass}
                   >
-                    <Link to={item.href} className="flex items-center gap-3">
+                    <Link to={item.href} className="flex items-center gap-3" onClick={closeSidebar}>
                       <item.icon className="h-5 w-5 shrink-0" />
                       {showText && (
                         <span className="text-sm font-medium">{item.name}</span>
