@@ -3,13 +3,12 @@ import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { ProgressData } from '@/mockdata/progress/mockProgressData';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import RecipeCard from '../RecipeCard';
 
-// Updated constants for the Pie Chart using a new green color scheme
-const PIE_COLORS = ['#66bb6a', '#a5d6a7', '#81c784']; // Adjusted for a softer green palette
-const STROKE_COLOR = '#e0f2f1'; // Lighter green/grey for stroke
+// Updated constants for the Pie Chart using colors from the provided image
+const PIE_COLORS = ['#8b5cf6', '#f97316', '#ef4444']; // Purple, Orange, Red
+const STROKE_COLOR = 'transparent'; // No stroke needed for this design
 
-// Main Nutrition Progression component
 export default function NutritionProgression({ data }: { data: ProgressData['nutrition'] }) {
     const [activeTimeframe, setActiveTimeframe] = useState('Today');
 
@@ -45,36 +44,21 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
             calories: Math.round(protein * 4 + carbs * 4 + fat * 9),
         };
     }, [data.macros, activeTimeframe]);
-
+    
     // Data for the Pie Chart
     const pieData = [
-        { name: 'Protein', value: consumedData.protein, color: PIE_COLORS[0] },
-        { name: 'Carbs', value: consumedData.carbs, color: PIE_COLORS[1] },
-        { name: 'Fat', value: consumedData.fat, color: PIE_COLORS[2] },
+        { name: 'Carbs', value: consumedData.carbs, color: '#f59e0b' },
+        { name: 'Protein', value: consumedData.protein, color: '#8b5cf6' },
+        { name: 'Fat', value: consumedData.fat, color: '#ef4444' },
     ];
-    
-    // Calculate remaining calories for today's view
+
+    // Get today's data for remaining calories, intake, and burned metrics
     const todayData = data.macros[data.macros.length - 1];
     const totalCaloriesToday = Math.round(todayData.protein * 4 + todayData.carbs * 4 + todayData.fat * 9);
     const caloriesLeft = Math.max(data.recommended.kcal - totalCaloriesToday, 0);
 
-    // Get goal-oriented guidance
-    const getGuidance = useMemo(() => {
-        const proteinPercentage = (todayData.protein / data.recommended.protein) * 100;
-        const carbsPercentage = (todayData.carbs / data.recommended.carbs) * 100;
-        const fatPercentage = (todayData.fat / data.recommended.fat) * 100;
-
-        if (proteinPercentage < 70) {
-            return { title: "Boost Your Protein!", message: "You're a bit low on protein today. Add a lean protein source like chicken or fish to hit your target.", icon: "💪" };
-        }
-        if (carbsPercentage < 70) {
-            return { title: "Need More Energy?", message: "Your carb intake is low. Carbs fuel your workouts! Consider adding whole grains, fruits, or starchy vegetables.", icon: "🏃" };
-        }
-        if (fatPercentage < 70) {
-            return { title: "Healthy Fats are Key!", message: "Your fat intake is below target. Healthy fats from nuts, seeds, or avocado are crucial for hormone balance.", icon: "🥑" };
-        }
-        return { title: "Excellent Work Today!", message: "You're on track to hit your nutrition goals. Your balanced intake is helping you build a healthier you. Keep it up!", icon: "✅" };
-    }, [todayData, data.recommended]);
+    const intake = todayData.kcal; // Assuming kcal in mock data is intake
+    const burned = data.kcalBurnedLast7Days / 7; // Average daily burned calories
 
     return (
         <motion.div
@@ -83,20 +67,30 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
-            {/* Header with Remaining Calories */}
-            <div className="flex justify-between items-center">
-                <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Nutrition Overview</h3>
+            {/* Main Header and Timeframe Selector */}
+            <div className="flex justify-between items-center flex-wrap gap-2">
                 <div className="flex items-center gap-2">
-                    <span role="img" aria-label="fire" className="text-3xl">🔥</span>
-                    <div className="text-right">
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{caloriesLeft}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Calories Left</p>
-                    </div>
+                    <p className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Remaining</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{caloriesLeft} Kcal</p>
+                </div>
+                <div className="flex items-center text-sm font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full p-1">
+                    {['Today', 'Week', 'Month'].map(timeframe => (
+                        <button
+                            key={timeframe}
+                            onClick={() => setActiveTimeframe(timeframe)}
+                            className={cn(
+                                "px-4 py-1 rounded-full transition-colors",
+                                { 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm': activeTimeframe === timeframe }
+                            )}
+                        >
+                            {timeframe}
+                        </button>
+                    ))}
                 </div>
             </div>
 
-            {/* Smart Pie Chart and Timeframe Selector */}
-            <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-4">
+            {/* Smart Pie Chart and Macro Breakdown */}
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6">
                 <div className="h-48 w-48 relative flex-shrink-0">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -122,52 +116,56 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                             </Pie>
                         </PieChart>
                     </ResponsiveContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{consumedData.calories}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Kcal Avg</p>
+                </div>
+
+                {/* Macro breakdown details */}
+                <div className="flex flex-col gap-2 w-full max-w-sm">
+                    {pieData.map(macro => (
+                        <div key={macro.name} className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: macro.color }}></div>
+                                <span className="text-sm font-medium">{macro.name}</span>
+                            </div>
+                            <span className="text-sm text-gray-900 dark:text-white font-semibold">
+                                {macro.value}g / {data.recommended[macro.name.toLowerCase()]}g
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <hr className="my-4 border-gray-200 dark:border-gray-700" />
+
+            {/* Intake & Burned Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center gap-4">
+                    <span role="img" aria-label="salad bowl" className="text-3xl">🥗</span>
+                    <div className="space-y-1">
+                        <p className="font-bold text-xl">{intake} Cal</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Intake</p>
                     </div>
                 </div>
-                
-                {/* Timeframe & Macro Details */}
-                <div className="flex flex-col gap-4 w-full">
-                    <div className="flex justify-center md:justify-start gap-2 bg-gray-100 dark:bg-gray-700 rounded-full p-1">
-                        {['Today', 'Week', 'Month'].map(timeframe => (
-                            <button
-                                key={timeframe}
-                                onClick={() => setActiveTimeframe(timeframe)}
-                                className={cn(
-                                    "px-4 py-1 rounded-full text-sm font-semibold transition-colors",
-                                    { 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm': activeTimeframe === timeframe }
-                                )}
-                            >
-                                {timeframe}
-                            </button>
-                        ))}
-                    </div>
-                    
-                    {/* Macro breakdown */}
-                    <div className="flex flex-col gap-2">
-                        {pieData.map(macro => (
-                            <div key={macro.name} className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: macro.color }}></div>
-                                    <span className="text-sm font-medium">{macro.name}</span>
-                                </div>
-                                <span className="text-sm text-gray-900 dark:text-white font-semibold">{macro.value}g</span>
-                            </div>
-                        ))}
+                <div className="p-4 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center gap-4">
+                    <span role="img" aria-label="fire" className="text-3xl">🔥</span>
+                    <div className="space-y-1">
+                        <p className="font-bold text-xl">{Math.round(burned)} Cal</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Burned</p>
                     </div>
                 </div>
             </div>
-            
+
             <hr className="my-4 border-gray-200 dark:border-gray-700" />
             
-            {/* Goal-Oriented Guidance */}
-            <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-100 dark:bg-gray-700">
-                <span role="img" aria-label="guidance icon" className="text-3xl mt-1">{getGuidance.icon}</span>
-                <div>
-                    <h4 className="text-lg font-bold text-gray-900 dark:text-white">{getGuidance.title}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{getGuidance.message}</p>
+            {/* Today's Meals */}
+            <div className="pt-6">
+                <h3 className="text-xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">Today's Meals</h3>
+                <div className="space-y-4">
+                    {data.recentRecipes.map(recipe => (
+                        <RecipeCard key={recipe.id} recipe={recipe} />
+                    ))}
+                    <button className="w-full text-center text-sm font-semibold py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/20 dark:hover:bg-white/30 dark:text-white transition-colors">
+                        View All
+                    </button>
                 </div>
             </div>
         </motion.div>
