@@ -18,10 +18,10 @@ const CustomTooltip = ({ active, payload, label }) => {
     return null;
 };
 
-// Pie chart colors for the recommended intake
-const PIE_COLORS = ['#3B82F6', '#FBBF24', '#EF4444']; // Blue, Amber, Red
-
 export default function NutritionProgression({ data }: { data: ProgressData['nutrition'] }) {
+    // Pie chart colors for the recommended intake
+    const PIE_COLORS = ['#3B82F6', '#FBBF24', '#EF4444']; // Blue, Amber, Red
+
     // Calculate average macros and total calories for the chart
     const avgMacros = useMemo(() => {
         const totalMacros = data.macros.reduce((acc, curr) => ({
@@ -89,12 +89,26 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 </div>
 
                 {/* Daily Recommendations Pie Chart */}
-                <div className="w-full lg:col-span-2 mt-8">
+                <div className="w-full lg:col-span-2 mt-8 md:mt-0">
                     <h3 className="text-xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">Daily Recommendations</h3>
                     <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 h-48">
                         <div className="h-full w-48">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
+                                    <defs>
+                                        <linearGradient id="pieGradient1" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.9} />
+                                            <stop offset="95%" stopColor="#d1fae5" stopOpacity={0.5} />
+                                        </linearGradient>
+                                        <linearGradient id="pieGradient2" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.9} />
+                                            <stop offset="95%" stopColor="#fef3c7" stopOpacity={0.5} />
+                                        </linearGradient>
+                                        <linearGradient id="pieGradient3" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.9} />
+                                            <stop offset="95%" stopColor="#fee2e2" stopOpacity={0.5} />
+                                        </linearGradient>
+                                    </defs>
                                     <Pie
                                         data={recommendedIntake}
                                         dataKey="value"
@@ -102,11 +116,10 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                         cx="50%"
                                         cy="50%"
                                         outerRadius={80}
-                                        fill="#8884d8"
                                         labelLine={false}
                                     >
                                         {recommendedIntake.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                            <Cell key={`cell-${index}`} fill={`url(#pieGradient${index + 1})`} />
                                         ))}
                                     </Pie>
                                 </PieChart>
@@ -124,10 +137,10 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 </div>
             </div>
 
-            ---
+            <hr className="mt-6 md:mt-8 border-border/50" />
 
             {/* Section 2: Recent Meals */}
-            <div className="border-t border-border/50 pt-6 mt-6">
+            <div className="pt-6 mt-6">
                 <h3 className="text-xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">🍲 Recent Meals</h3>
                 <div className="space-y-4">
                     {displayRecentMeals.map(recipe => (
