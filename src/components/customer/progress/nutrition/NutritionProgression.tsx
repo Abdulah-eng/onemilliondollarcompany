@@ -51,15 +51,15 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
 
     return (
         <motion.div
-            className="w-full rounded-3xl p-6 sm:p-8 overflow-hidden flex flex-col gap-8 bg-[#1f2937] text-white shadow-lg"
+            className="w-full rounded-3xl p-6 sm:p-8 flex flex-col gap-8 bg-[#1f2937] text-white shadow-lg antialiased"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
-            {/* TOP PART: White container with semi-circular gauge and macro bars */}
-            <div className="rounded-2xl p-6 flex flex-col items-center gap-6">
+            {/* TOP PART: Container with semi-circular gauge and macro bars */}
+            <div className="rounded-2xl p-6 flex flex-col items-center gap-6 overflow-visible">
                 {/* Semi-circular calorie gauge */}
-                <div className="relative w-48 h-24 flex justify-center items-center">
+                <div className="relative w-48 h-24 flex justify-center items-center overflow-visible">
                     <svg width="192" height="96" viewBox="0 0 192 96" className="absolute">
                         <defs>
                             <linearGradient id="calorieGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -104,8 +104,8 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     {/* Center content */}
                     <div className="absolute flex flex-col items-center top-4">
                         <span role="img" aria-label="calories" className="text-2xl mb-1">🔥</span>
-                        <span className="text-2xl font-bold text-gray-900">{totalCaloriesToday}</span>
-                        <span className="text-sm text-gray-500">of {data.recommended.kcal} kcal</span>
+                        <span className="text-2xl font-bold text-white">{totalCaloriesToday}</span>
+                        <span className="text-sm text-gray-300">of {data.recommended.kcal} kcal</span>
                     </div>
                 </div>
 
@@ -113,8 +113,8 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 <div className="w-full flex justify-between gap-4">
                     {/* Protein */}
                     <div className="flex-1 flex flex-col gap-2">
-                        <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Protein</div>
-                        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="text-xs font-medium text-gray-300 uppercase tracking-wide">Protein</div>
+                        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
                             <motion.div
                                 className="h-full rounded-full"
                                 style={{ backgroundColor: MACRO_COLORS.protein }}
@@ -123,15 +123,15 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                 transition={{ duration: 0.8, delay: 0.2 }}
                             />
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-300">
                             {todayData.protein} / {data.recommended.protein} g
                         </div>
                     </div>
 
                     {/* Fat */}
                     <div className="flex-1 flex flex-col gap-2">
-                        <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Fat</div>
-                        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="text-xs font-medium text-gray-300 uppercase tracking-wide">Fat</div>
+                        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
                             <motion.div
                                 className="h-full rounded-full"
                                 style={{ backgroundColor: MACRO_COLORS.fat }}
@@ -140,15 +140,15 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                 transition={{ duration: 0.8, delay: 0.4 }}
                             />
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-300">
                             {todayData.fat} / {data.recommended.fat} g
                         </div>
                     </div>
 
                     {/* Carbs */}
                     <div className="flex-1 flex flex-col gap-2">
-                        <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Carbs</div>
-                        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="text-xs font-medium text-gray-300 uppercase tracking-wide">Carbs</div>
+                        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
                             <motion.div
                                 className="h-full rounded-full"
                                 style={{ backgroundColor: MACRO_COLORS.carbs }}
@@ -157,39 +157,35 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                 transition={{ duration: 0.8, delay: 0.6 }}
                             />
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-300">
                             {todayData.carbs} / {data.recommended.carbs} g
                         </div>
                     </div>
                 </div>
             </div>
 
-            ---
-
             {/* MIDDLE PART: Consumed and Burned */}
             <div className="flex justify-around items-center text-center">
                 <div className="flex flex-col items-center gap-2">
                     <span role="img" aria-label="consumed" className="text-3xl">🍽️</span>
                     <p className="text-base font-bold">
-                        {totalCaloriesToday} <span className="text-sm font-normal text-gray-400">Kcal</span>
+                        {totalCaloriesToday} <span className="text-sm font-normal text-gray-300">Kcal</span>
                     </p>
-                    <p className="text-xs text-gray-400 font-medium">Consumed</p>
+                    <p className="text-xs text-gray-300 font-medium">Consumed</p>
                 </div>
                 <div className="flex flex-col items-center gap-2">
                     <span role="img" aria-label="burned" className="text-3xl">🔥</span>
                     <p className="text-base font-bold">
-                        {DUMMY_BURNED_KCAL} <span className="text-sm font-normal text-gray-400">Kcal</span>
+                        {DUMMY_BURNED_KCAL} <span className="text-sm font-normal text-gray-300">Kcal</span>
                     </p>
-                    <p className="text-xs text-gray-400 font-medium">Burned</p>
+                    <p className="text-xs text-gray-300 font-medium">Burned</p>
                 </div>
             </div>
-
-            ---
 
             {/* BOTTOM PART: Weight and Consumption Trend */}
             <div>
                 <h3 className="text-lg font-bold tracking-tight mb-4">Your Progress</h3>
-                <div className="flex items-center text-xs font-semibold text-gray-400 bg-gray-800 rounded-full p-1 mb-4 w-fit mx-auto">
+                <div className="flex items-center text-xs font-semibold text-gray-300 bg-gray-800 rounded-full p-1 mb-4 w-fit mx-auto">
                     {Object.keys(DUMMY_TREND_DATA).map(timeframe => (
                         <button
                             key={timeframe}
@@ -204,7 +200,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     ))}
                 </div>
 
-                <div className="w-full h-40 bg-gray-800 rounded-2xl p-4 flex flex-col justify-between items-center relative">
+                <div className="w-full h-40 bg-gray-800 rounded-2xl p-4 flex flex-col justify-between items-center relative overflow-visible">
                     <div className="flex w-full justify-between items-end h-full">
                         {trendData.map((point, index) => (
                             <div key={index} className="flex-1 flex flex-col items-center">
@@ -215,11 +211,11 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                         backgroundColor: '#a855f7',
                                     }}
                                 ></div>
-                                <span className="text-xs text-gray-500 mt-2">{point.date}</span>
+                                <span className="text-xs text-gray-300 mt-2">{point.date}</span>
                             </div>
                         ))}
                     </div>
-                    <div className="absolute top-4 left-4 text-sm font-medium text-gray-500">
+                    <div className="absolute top-4 left-4 text-sm font-medium text-gray-300">
                         <p>Weight: <span className="font-bold text-white">{trendData[trendData.length - 1].weight} kg</span></p>
                     </div>
                 </div>
