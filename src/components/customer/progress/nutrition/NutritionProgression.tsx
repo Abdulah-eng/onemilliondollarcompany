@@ -317,12 +317,12 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     ))}
                 </div>
 
-                {/* Full-bleed Chart container for mobile */}
+                {/* Full-bleed Chart container */}
                 <div className="-mx-6 sm:-mx-8 md:mx-0">
                     {/* Enhanced Chart with Multiple Y-Axes */}
-                    <div className="h-72 sm:h-64 md:h-72 w-full overflow-hidden px-2 sm:px-4 md:px-0">
+                    <div className="h-72 sm:h-72 md:h-80 w-full overflow-visible">
                     <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart data={trendData} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
+                        <ComposedChart data={trendData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="consumedGradient" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
@@ -400,8 +400,9 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     </div>
                 </div>
 
-                {/* Enhanced Legend */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                {/* Enhanced Legend - Full bleed to align with chart */}
+                <div className="-mx-6 sm:-mx-8 md:mx-0">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-6 sm:px-8 md:px-0">
                     <div className="flex flex-wrap items-center gap-4 text-sm">
                         <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full bg-purple-500"></div>
@@ -422,6 +423,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                             {avgCaloriesConsumed - avgCaloriesBurned} kcal{' '}
                             <span className="font-normal text-gray-400">Net Surplus</span>
                         </p>
+                     </div>
                     </div>
                 </div>
             </div>
