@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import RecipeCard from './RecipeCard';
 
 // Custom Tooltip for the chart, styled to match the theme
-const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
+const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
             <div className="bg-background/80 backdrop-blur-sm p-3 rounded-lg border border-border/50 shadow-lg">
@@ -19,23 +19,17 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 };
 
 // Pie chart colors for the recommended intake
-const PIE_COLORS = ['#10b981', '#f59e0b', '#ef4444']; // Green, Amber, Red
+const PIE_COLORS = ['#3B82F6', '#FBBF24', '#EF4444']; // Blue, Amber, Red
 
 export default function NutritionProgression({ data }: { data: ProgressData['nutrition'] }) {
     // Calculate average macros and total calories for the chart
     const avgMacros = useMemo(() => {
-        if (!data?.macros || data.macros.length === 0) return [];
-        
-        const totalMacros = data.macros.reduce((acc, curr) => {
-            // Ensure curr is defined and has the required properties
-            if (!curr || typeof curr.protein !== 'number') return acc;
-            return {
-                protein: acc.protein + curr.protein,
-                carbs: acc.carbs + curr.carbs,
-                fat: acc.fat + curr.fat,
-                kcal: acc.kcal + (curr.protein * 4) + (curr.carbs * 4) + (curr.fat * 9),
-            };
-        }, { protein: 0, carbs: 0, fat: 0, kcal: 0 });
+        const totalMacros = data.macros.reduce((acc, curr) => ({
+            protein: acc.protein + curr.protein,
+            carbs: acc.carbs + curr.carbs,
+            fat: acc.fat + curr.fat,
+            kcal: acc.kcal + (curr.protein * 4) + (curr.carbs * 4) + (curr.fat * 9),
+        }), { protein: 0, carbs: 0, fat: 0, kcal: 0 });
 
         const totalDays = data.macros.length || 1;
 
@@ -49,8 +43,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
 
     // Data for the pie chart with recommended daily intake
     const recommendedIntake = useMemo(() => {
-        if (!data?.recommended) return [];
-        
+        const total = data.recommended.protein + data.recommended.carbs + data.recommended.fat;
         return [
             { name: 'Protein', value: data.recommended.protein, color: PIE_COLORS[0] },
             { name: 'Carbs', value: data.recommended.carbs, color: PIE_COLORS[1] },
@@ -96,7 +89,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 </div>
 
                 {/* Daily Recommendations Pie Chart */}
-                <div className="w-full lg:col-span-2">
+                <div className="w-full lg:col-span-2 mt-8">
                     <h3 className="text-xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">Daily Recommendations</h3>
                     <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 h-48">
                         <div className="h-full w-48">
