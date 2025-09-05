@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { ProgressData } from '@/mockdata/progress/mockProgressData';
+import { Utensils, Flame } from 'lucide-react';
 
 // Define colors to match the user's provided images
 const MACRO_COLORS = {
@@ -156,21 +157,44 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
             </div>
 
             {/* MIDDLE PART: Consumed and Burned */}
-            <div className="flex justify-around items-center text-center">
-                <div className="flex flex-col items-center gap-2">
-                    <span role="img" aria-label="consumed" className="text-3xl">🍽️</span>
-                    <p className="text-base font-bold">
-                        {totalCaloriesToday} <span className="text-sm font-normal text-gray-300">Kcal</span>
-                    </p>
-                    <p className="text-xs text-gray-300 font-medium">Consumed</p>
-                </div>
-                <div className="flex flex-col items-center gap-2">
-                    <span role="img" aria-label="burned" className="text-3xl">🔥</span>
-                    <p className="text-base font-bold">
-                        {DUMMY_BURNED_KCAL} <span className="text-sm font-normal text-gray-300">Kcal</span>
-                    </p>
-                    <p className="text-xs text-gray-300 font-medium">Burned</p>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Consumed Card */}
+                <motion.div 
+                    className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center gap-4"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
+                        <Utensils className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-bold text-white">{totalCaloriesToday}</span>
+                            <span className="text-sm font-medium text-gray-400">kcal</span>
+                        </div>
+                        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Consumed</p>
+                    </div>
+                </motion.div>
+
+                {/* Burned Card */}
+                <motion.div 
+                    className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center gap-4"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                >
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg">
+                        <Flame className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-bold text-white">{DUMMY_BURNED_KCAL}</span>
+                            <span className="text-sm font-medium text-gray-400">kcal</span>
+                        </div>
+                        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Burned</p>
+                    </div>
+                </motion.div>
             </div>
 
             {/* BOTTOM PART: Weight and Consumption Trend */}
