@@ -90,8 +90,8 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
 
                 {/* Daily Recommendations Pie Chart */}
                 <div className="w-full lg:col-span-2 mt-8 md:mt-0">
-                    <h3 className="text-xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">Daily Recommendations</h3>
-                    <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 h-48">
+                    <h3 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Daily Recommendations</h3>
+                    <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 h-48 mt-4">
                         <div className="h-full w-48">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
