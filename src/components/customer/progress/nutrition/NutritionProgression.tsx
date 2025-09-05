@@ -57,7 +57,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
             transition={{ duration: 0.5 }}
         >
             {/* TOP PART: White container with semi-circular gauge and macro bars */}
-            <div className="bg-white rounded-2xl p-6 flex flex-col items-center gap-6">
+            <div className="rounded-2xl p-6 flex flex-col items-center gap-6">
                 {/* Semi-circular calorie gauge */}
                 <div className="relative w-48 h-24 flex justify-center items-center">
                     <svg width="192" height="96" viewBox="0 0 192 96" className="absolute">
