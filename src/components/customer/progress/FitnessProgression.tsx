@@ -18,7 +18,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
         return (
             <div className="bg-background/80 backdrop-blur-sm p-3 rounded-lg border border-border/50 shadow-lg">
                 <p className="text-sm font-bold text-foreground">{`~${payload[0].value?.toFixed(0)} kg e-1RM`}</p>
-                <p className="text-xs text-white/70">{label}</p>
+                <p className="text-xs text-muted-foreground">{label}</p>
             </div>
         );
     }
@@ -49,7 +49,7 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
     return (
         <motion.div
             layout
-            className="w-full rounded-3xl p-4 sm:p-6 text-white overflow-hidden flex flex-col bg-gradient-to-br from-orange-500 to-red-500"
+            className="w-full rounded-3xl p-4 sm:p-6 overflow-hidden flex flex-col transition-colors duration-500 bg-white dark:bg-transparent"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
@@ -62,7 +62,7 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                         onClick={() => setSelectedExercise(ex)}
                         className={cn(
                             'text-sm font-semibold px-3 py-1.5 rounded-full transition-all',
-                            selectedExercise.exerciseName === ex.exerciseName ? 'bg-white/90 text-black' : 'bg-white/20 hover:bg-white/30 text-white'
+                            selectedExercise.exerciseName === ex.exerciseName ? 'bg-gray-900 text-white dark:bg-white/90 dark:text-black' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/20 dark:hover:bg-white/30 dark:text-white'
                         )}
                     >
                         {ex.exerciseName}
@@ -80,21 +80,21 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.3 }}
                     >
-                        <p className="text-white/80 text-lg">Personal Record</p>
-                        <p className="text-5xl sm:text-6xl font-bold tracking-tighter">
+                        <p className="text-gray-500 dark:text-white/80 text-lg">Personal Record</p>
+                        <p className="text-5xl sm:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white">
                             {selectedExercise.personalRecord.value}
-                            <span className="text-3xl font-medium text-white/80 ml-1">{selectedExercise.personalRecord.unit}</span>
+                            <span className="text-3xl font-medium text-gray-700 dark:text-white/80 ml-1">{selectedExercise.personalRecord.unit}</span>
                         </p>
                     </motion.div>
                 </AnimatePresence>
                 <div className="flex flex-col gap-2 text-right flex-shrink-0">
                     <div className="flex items-center gap-2">
-                        <p className="font-bold">{exerciseData.highest.toFixed(0)} kg</p>
-                        <ArrowUpCircle className="h-5 w-5 text-white/70" />
+                        <p className="font-bold text-gray-900 dark:text-white">{exerciseData.highest.toFixed(0)} kg</p>
+                        <ArrowUpCircle className="h-5 w-5 text-gray-500 dark:text-white/70" />
                     </div>
                     <div className="flex items-center gap-2">
-                        <p className="font-bold">{exerciseData.lowest.toFixed(0)} kg</p>
-                        <ArrowDownCircle className="h-5 w-5 text-white/70" />
+                        <p className="font-bold text-gray-900 dark:text-white">{exerciseData.lowest.toFixed(0)} kg</p>
+                        <ArrowDownCircle className="h-5 w-5 text-gray-500 dark:text-white/70" />
                     </div>
                 </div>
             </div>
@@ -105,22 +105,22 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                     <AreaChart data={exerciseData.chartData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
                         <defs>
                             <linearGradient id="colorFitness" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#8a2be2" stopOpacity={0.4} /> {/* Indigo */}
-                                <stop offset="95%" stopColor="#a855f7" stopOpacity={0} /> {/* Purple */}
+                                <stop offset="5%" stopColor="#f97316" stopOpacity={0.4} /> {/* Orange */}
+                                <stop offset="95%" stopColor="#f97316" stopOpacity={0} /> {/* Orange transparent */}
                             </linearGradient>
                         </defs>
-                        <XAxis dataKey="date" stroke="#fff" fontSize={12} tick={{ fill: 'rgba(255,255,255,0.7)' }} tickLine={false} axisLine={false} />
-                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.2)', strokeWidth: 1 }} />
-                        <Area type="monotone" dataKey="e1RM" stroke="#8a2be2" strokeWidth={3} fillOpacity={1} fill="url(#colorFitness)" />
+                        <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tick={{ fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(100,100,100,0.2)', strokeWidth: 1 }} />
+                        <Area type="monotone" dataKey="e1RM" stroke="#f97316" strokeWidth={3} fillOpacity={1} fill="url(#colorFitness)" />
                     </AreaChart>
                 </ResponsiveContainer>
             </div>
             
-            <div className="flex justify-between items-center mt-4">
-                <p className="text-sm font-semibold text-white/80">Strength Trend (est. 1-Rep Max)</p>
+            <div className="flex justify-between items-center mt-4 text-gray-900 dark:text-white">
+                <p className="text-sm font-semibold text-gray-500 dark:text-white/80">Strength Trend (est. 1-Rep Max)</p>
                 <div className="flex items-center gap-2">
-                    <Flame className="h-5 w-5 text-yellow-300"/>
-                    <p className="font-bold">{data.consistency}% <span className="font-normal text-white/70">Consistency</span></p>
+                    <Flame className="h-5 w-5 text-orange-500 dark:text-orange-300"/>
+                    <p className="font-bold">{data.consistency}% <span className="font-normal text-gray-500 dark:text-white/70">Consistency</span></p>
                 </div>
             </div>
         </motion.div>
