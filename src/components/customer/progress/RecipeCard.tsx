@@ -11,7 +11,7 @@ const MacroChip = ({ label, value, color }: { label: string, value: number, colo
 
 export default function RecipeCard({ recipe }: { recipe: Recipe }) {
     return (
-        <div className="bg-background/50 dark:bg-white/5 p-3 rounded-xl border border-border/50 space-y-3">
+        <div className="bg-gray-100 dark:bg-white/10 p-3 rounded-xl border border-border/50 space-y-3">
             <div className="flex items-center gap-3">
                 <div className="flex-shrink-0">
                     <img src={recipe.imageUrl} alt={recipe.name} className="h-14 w-14 rounded-lg object-cover" />
