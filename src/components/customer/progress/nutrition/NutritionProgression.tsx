@@ -90,18 +90,6 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                             transition={{ duration: 1.2, ease: "easeOut" }}
                         />
                         
-                        {/* Dynamic indicator dot */}
-                        <motion.circle
-                            cx={32 + 160 * Math.min(1, caloriePercentage / 100)}
-                            cy={96 - 80 * Math.sin(Math.PI * Math.min(1, caloriePercentage / 100))}
-                            r="8"
-                            fill="url(#calorieGradient)"
-                            stroke="#1f2937"
-                            strokeWidth="2"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ duration: 0.6, delay: 0.8 }}
-                        />
                     </svg>
                     
                     {/* Center content */}
