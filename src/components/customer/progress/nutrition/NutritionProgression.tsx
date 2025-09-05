@@ -239,7 +239,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
             </div>
 
             {/* BOTTOM PART: Enhanced Trend Analysis */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
                 {/* Header with main metrics */}
                 <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                     <div>
@@ -317,8 +317,10 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     ))}
                 </div>
 
-                {/* Enhanced Chart with Multiple Y-Axes */}
-                <div className="h-56 md:h-64 w-full overflow-hidden">
+                {/* Full-bleed Chart container for mobile */}
+                <div className="-mx-6 sm:-mx-8 md:mx-0">
+                    {/* Enhanced Chart with Multiple Y-Axes */}
+                    <div className="h-72 sm:h-64 md:h-72 w-full overflow-hidden px-2 sm:px-4 md:px-0">
                     <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart data={trendData} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
                             <defs>
@@ -394,7 +396,8 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                 activeDot={{ r: 6, stroke: '#a855f7', strokeWidth: 2, fill: '#fff' }}
                             />
                         </ComposedChart>
-                    </ResponsiveContainer>
+                     </ResponsiveContainer>
+                    </div>
                 </div>
 
                 {/* Enhanced Legend */}
