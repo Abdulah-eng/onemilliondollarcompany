@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import RecipeCard from './RecipeCard';
 
 // Custom Tooltip for the chart, styled to match the theme
-const CustomTooltip = ({ active, payload, label }) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
     if (active && payload && payload.length) {
         return (
             <div className="bg-background/80 backdrop-blur-sm p-3 rounded-lg border border-border/50 shadow-lg">
@@ -24,12 +24,18 @@ const PIE_COLORS = ['#10b981', '#f59e0b', '#ef4444']; // Green, Amber, Red
 export default function NutritionProgression({ data }: { data: ProgressData['nutrition'] }) {
     // Calculate average macros and total calories for the chart
     const avgMacros = useMemo(() => {
-        const totalMacros = data.macros.reduce((acc, curr) => ({
-            protein: acc.protein + curr.protein,
-            carbs: acc.carbs + curr.carbs,
-            fat: acc.fat + curr.fat,
-            kcal: acc.kcal + (curr.protein * 4) + (curr.carbs * 4) + (curr.fat * 9),
-        }), { protein: 0, carbs: 0, fat: 0, kcal: 0 });
+        if (!data?.macros || data.macros.length === 0) return [];
+        
+        const totalMacros = data.macros.reduce((acc, curr) => {
+            // Ensure curr is defined and has the required properties
+            if (!curr || typeof curr.protein !== 'number') return acc;
+            return {
+                protein: acc.protein + curr.protein,
+                carbs: acc.carbs + curr.carbs,
+                fat: acc.fat + curr.fat,
+                kcal: acc.kcal + (curr.protein * 4) + (curr.carbs * 4) + (curr.fat * 9),
+            };
+        }, { protein: 0, carbs: 0, fat: 0, kcal: 0 });
 
         const totalDays = data.macros.length || 1;
 
@@ -43,7 +49,8 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
 
     // Data for the pie chart with recommended daily intake
     const recommendedIntake = useMemo(() => {
-        const total = data.recommended.protein + data.recommended.carbs + data.recommended.fat;
+        if (!data?.recommended) return [];
+        
         return [
             { name: 'Protein', value: data.recommended.protein, color: PIE_COLORS[0] },
             { name: 'Carbs', value: data.recommended.carbs, color: PIE_COLORS[1] },

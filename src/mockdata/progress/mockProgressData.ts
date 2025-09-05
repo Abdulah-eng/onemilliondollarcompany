@@ -70,6 +70,7 @@ export interface ProgressData {
   };
   nutrition: {
     macros: { date: string; protein: number; carbs: number; fat: number }[];
+    recommended: { protein: number; carbs: number; fat: number };
     mealCompletion: number;
     outsideMeals: number;
     recentRecipes: Recipe[];
@@ -151,6 +152,7 @@ export const mockProgressData: ProgressData = {
       carbs: 200 + Math.sin(i/10) * 20 + (Math.random() - 0.5) * 30,
       fat: 60 + (Math.random() - 0.5) * 15,
     })),
+    recommended: { protein: 160, carbs: 220, fat: 65 },
     mealCompletion: 92,
     outsideMeals: 3,
     recentRecipes: [
