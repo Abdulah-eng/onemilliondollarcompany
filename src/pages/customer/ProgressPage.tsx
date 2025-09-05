@@ -7,7 +7,6 @@ import HeroProgressSnapshot from '@/components/customer/progress/HeroProgressSna
 import DailyCheckinTrends from '@/components/customer/progress/DailyCheckinTrends';
 import FitnessProgression from '@/components/customer/progress/fitness/FitnessProgression';
 import MentalHealthProgression from '@/components/customer/progress/mental/MentalHealthProgression';
-import WeightProgressCard from '@/components/customer/progress/WeightProgressCard';
 import PhotoProgressCard from '@/components/customer/progress/PhotoProgressCard';
 import SmartInsights from '@/components/customer/progress/SmartInsights';
 import FloatingActionButton from '@/components/customer/progress/FloatingActionButton';
@@ -94,9 +93,8 @@ export default function ProgressPage() {
         {/* 6. Mental Health Progression */}
         <MentalHealthProgression mentalHealth={data.mentalHealth} dailyCheckins={data.dailyCheckins}/>
 
-        {/* 7. Weight & Body Composition */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <WeightProgressCard data={data.weightEntries} onCardClick={() => handleCardClick("Weight Details", <p>Detailed weight view coming soon!</p>)} />
+        {/* 7. Photo Progress Card (Weight card removed) */}
+        <div className="grid grid-cols-1 gap-6">
           <PhotoProgressCard photos={data.photoEntries} />
         </div>
       </div>
