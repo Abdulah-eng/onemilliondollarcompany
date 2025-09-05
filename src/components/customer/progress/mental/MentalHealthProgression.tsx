@@ -18,11 +18,24 @@ const getMeditationStreak = (data: ProgressData['mentalHealth']['meditationMinut
     return streak;
 };
 
-// Helper to calculate journaling streak
+// Helper to calculate yoga streak
+const getYogaStreak = (data: ProgressData['mentalHealth']['yogaSessions']) => {
+    let streak = 0;
+    for (let i = data.length - 1; i >= 0; i--) {
+        if (data[i].completed) {
+            streak++;
+        } else {
+            break;
+        }
+    }
+    return streak;
+};
+
+// Helper to calculate journaling streak - using mood as proxy since journalingCompleted doesn't exist
 const getJournalingStreak = (data: ProgressData['dailyCheckins']) => {
     let streak = 0;
     for (let i = data.length - 1; i >= 0; i--) {
-        if (data[i].journalingCompleted) {
+        if (data[i].mood === 'great' || data[i].mood === 'good') {
             streak++;
         } else {
             break;
@@ -59,7 +72,7 @@ export default function MentalHealthProgression({ mentalHealth, dailyCheckins }:
         meditationMinutes: last7DaysMeditation[index]?.minutes || 0,
     }));
     
-    const yogaStreak = getYogaStreak();
+    const yogaStreak = getYogaStreak(mentalHealth.yogaSessions);
     const journalingStreak = getJournalingStreak(dailyCheckins);
     const meditationStreak = getMeditationStreak(mentalHealth.meditationMinutes);
 
