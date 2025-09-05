@@ -14,15 +14,15 @@ const calculateE1RM = (weight: number, reps: number) => {
 
 // Custom Tooltip for the chart
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-background/80 backdrop-blur-sm p-3 rounded-lg border border-border/50 shadow-lg">
-        <p className="text-sm font-bold text-foreground">{`~${payload[0].value?.toFixed(0)} kg e-1RM`}</p>
-        <p className="text-xs text-white/70">{label}</p>
-      </div>
-    );
-  }
-  return null;
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-background/80 backdrop-blur-sm p-3 rounded-lg border border-border/50 shadow-lg">
+                <p className="text-sm font-bold text-foreground">{`~${payload[0].value?.toFixed(0)} kg e-1RM`}</p>
+                <p className="text-xs text-white/70">{label}</p>
+            </div>
+        );
+    }
+    return null;
 };
 
 export default function FitnessProgression({ data }: { data: ProgressData['fitnessProgression'] }) {
@@ -105,13 +105,13 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                     <AreaChart data={exerciseData.chartData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
                         <defs>
                             <linearGradient id="colorFitness" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.4} />
-                                <stop offset="95%" stopColor="#fbbf24" stopOpacity={0} />
+                                <stop offset="5%" stopColor="#8a2be2" stopOpacity={0.4} /> {/* Indigo */}
+                                <stop offset="95%" stopColor="#a855f7" stopOpacity={0} /> {/* Purple */}
                             </linearGradient>
                         </defs>
                         <XAxis dataKey="date" stroke="#fff" fontSize={12} tick={{ fill: 'rgba(255,255,255,0.7)' }} tickLine={false} axisLine={false} />
                         <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.2)', strokeWidth: 1 }} />
-                        <Area type="monotone" dataKey="e1RM" stroke="#fbbf24" strokeWidth={3} fillOpacity={1} fill="url(#colorFitness)" />
+                        <Area type="monotone" dataKey="e1RM" stroke="#8a2be2" strokeWidth={3} fillOpacity={1} fill="url(#colorFitness)" />
                     </AreaChart>
                 </ResponsiveContainer>
             </div>
