@@ -92,7 +92,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
     const fatPercentage = Math.min(100, (todayData.fat / data.recommended.fat) * 100);
 
     return (
-        <>
+        <div className="w-full space-y-8">
             {/* TOP PART: Container with semi-circular gauge and macro bars */}
             <div className="rounded-2xl p-6 flex flex-col items-center gap-6 overflow-visible">
                 {/* Semi-circular calorie gauge */}
@@ -422,6 +422,6 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
