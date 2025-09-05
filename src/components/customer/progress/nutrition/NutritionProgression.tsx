@@ -59,8 +59,8 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
             {/* TOP PART: Container with semi-circular gauge and macro bars */}
             <div className="rounded-2xl p-6 flex flex-col items-center gap-6 overflow-visible">
                 {/* Semi-circular calorie gauge */}
-                <div className="relative w-48 h-24 flex justify-center items-center overflow-visible">
-                    <svg width="192" height="96" viewBox="0 0 192 96" className="absolute">
+                <div className="relative w-56 h-32 flex justify-center items-center">
+                    <svg width="224" height="128" viewBox="0 0 224 128" className="absolute">
                         <defs>
                             <linearGradient id="calorieGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                                 <stop offset="0%" style={{ stopColor: '#f97316', stopOpacity: 1 }} />
@@ -70,39 +70,42 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                         
                         {/* Background arc */}
                         <path
-                            d="M 24 72 A 72 72 0 0 1 168 72"
+                            d="M 32 96 A 80 80 0 0 1 192 96"
                             fill="none"
-                            stroke="#f3f4f6"
-                            strokeWidth="8"
+                            stroke="#4b5563"
+                            strokeWidth="12"
                             strokeLinecap="round"
                         />
                         
                         {/* Progress arc */}
                         <motion.path
-                            d="M 24 72 A 72 72 0 0 1 168 72"
+                            d="M 32 96 A 80 80 0 0 1 192 96"
                             fill="none"
                             stroke="url(#calorieGradient)"
-                            strokeWidth="8"
+                            strokeWidth="12"
                             strokeLinecap="round"
-                            initial={{ pathLength: 0 }}
-                            animate={{ pathLength: Math.min(1, caloriePercentage / 100) }}
-                            transition={{ duration: 1, ease: "easeOut" }}
+                            strokeDasharray="251.2"
+                            initial={{ strokeDashoffset: 251.2 }}
+                            animate={{ strokeDashoffset: 251.2 * (1 - Math.min(1, caloriePercentage / 100)) }}
+                            transition={{ duration: 1.2, ease: "easeOut" }}
                         />
                         
-                        {/* End knob */}
+                        {/* Dynamic indicator dot */}
                         <motion.circle
-                            cx={24 + 144 * Math.min(1, caloriePercentage / 100)}
-                            cy={72}
-                            r="6"
+                            cx={32 + 160 * Math.min(1, caloriePercentage / 100)}
+                            cy={96 - 80 * Math.sin(Math.PI * Math.min(1, caloriePercentage / 100))}
+                            r="8"
                             fill="url(#calorieGradient)"
+                            stroke="#1f2937"
+                            strokeWidth="2"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            transition={{ duration: 0.5, delay: 0.5 }}
+                            transition={{ duration: 0.6, delay: 0.8 }}
                         />
                     </svg>
                     
                     {/* Center content */}
-                    <div className="absolute flex flex-col items-center top-4">
+                    <div className="absolute flex flex-col items-center top-6">
                         <span role="img" aria-label="calories" className="text-2xl mb-1">🔥</span>
                         <span className="text-2xl font-bold text-white">{totalCaloriesToday}</span>
                         <span className="text-sm text-gray-300">of {data.recommended.kcal} kcal</span>
