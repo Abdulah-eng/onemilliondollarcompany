@@ -92,12 +92,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
     const fatPercentage = Math.min(100, (todayData.fat / data.recommended.fat) * 100);
 
     return (
-        <motion.div
-            className="w-full rounded-3xl p-6 sm:p-8 flex flex-col gap-8 bg-[#1f2937] text-white shadow-lg antialiased overflow-hidden"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-        >
+        <>
             {/* TOP PART: Container with semi-circular gauge and macro bars */}
             <div className="rounded-2xl p-6 flex flex-col items-center gap-6 overflow-visible">
                 {/* Semi-circular calorie gauge */}
@@ -427,6 +422,6 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     </div>
                 </div>
             </div>
-        </motion.div>
+        </>
     );
 }
