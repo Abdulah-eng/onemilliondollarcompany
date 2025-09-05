@@ -42,6 +42,9 @@ export default function HeroProgressSnapshot({
   nutrition,
   kcalBurned,
   avgEnergy,
+  avgSleep,
+  avgProtein,
+  avgCarbs,
 }: {
   streak: number;
   goals: UserGoal[];
@@ -49,6 +52,9 @@ export default function HeroProgressSnapshot({
   nutrition: { macros: { date: string; protein: number; carbs: number; fat: number }[] };
   kcalBurned: number;
   avgEnergy: number;
+  avgSleep: number;
+  avgProtein: number;
+  avgCarbs: number;
 }) {
   const [selectedGoal, setSelectedGoal] = useState<UserGoal | undefined>(goals?.[0]);
   const [timeRange, setTimeRange] = useState<TimeRange>(7);
@@ -82,7 +88,7 @@ export default function HeroProgressSnapshot({
       for (let i = 0; i < slicedData.length; i += 7) {
         const weekChunk = slicedData.slice(i, i + 7);
         if (weekChunk.length > 0) {
-          const weekAvg = weekChunk.reduce((sum, day) => sum + (day[dataKey as keyof typeof day] as number), 0) / weekChunk.length;
+          const weekAvg = weekChunk.reduce((sum, day) => sum + Number(day[dataKey as keyof typeof day]), 0) / weekChunk.length;
           weeklyData.push({
             date: `Week ${Math.floor(i / 7) + 1}`,
             value: weekAvg,
