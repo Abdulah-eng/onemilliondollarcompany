@@ -56,109 +56,109 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
-            {/* TOP PART: The integrated Calorie Arc and Macro Bars */}
-            <div className="flex flex-col items-center gap-6">
-                <div className="relative flex justify-center items-end w-full max-w-sm">
-                    {/* Calorie Arc and Fat Bar (Center) */}
-                    <div className="absolute top-0 w-full h-40 flex flex-col items-center justify-center">
-                        <svg
-                            className="absolute top-0"
-                            width="100%"
-                            height="100%"
-                            viewBox="0 0 160 80"
-                            preserveAspectRatio="xMidYMid slice"
-                        >
-                            <defs>
-                                <mask id="circle-mask">
-                                    <path
-                                        d="M 10 70 A 70 70 0 0 1 150 70"
-                                        fill="none"
-                                        stroke="white"
-                                        strokeWidth="10"
-                                        strokeLinecap="round"
-                                        transform="rotate(-180, 80, 70)"
-                                    />
-                                </mask>
-                            </defs>
+            {/* TOP PART: White container with semi-circular gauge and macro bars */}
+            <div className="bg-white rounded-2xl p-6 flex flex-col items-center gap-6">
+                {/* Semi-circular calorie gauge */}
+                <div className="relative w-48 h-24 flex justify-center items-center">
+                    <svg width="192" height="96" viewBox="0 0 192 96" className="absolute">
+                        <defs>
+                            <linearGradient id="calorieGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style={{ stopColor: '#f97316', stopOpacity: 1 }} />
+                                <stop offset="100%" style={{ stopColor: '#ea580c', stopOpacity: 1 }} />
+                            </linearGradient>
+                        </defs>
+                        
+                        {/* Background arc */}
+                        <path
+                            d="M 24 72 A 72 72 0 0 1 168 72"
+                            fill="none"
+                            stroke="#f3f4f6"
+                            strokeWidth="8"
+                            strokeLinecap="round"
+                        />
+                        
+                        {/* Progress arc */}
+                        <motion.path
+                            d="M 24 72 A 72 72 0 0 1 168 72"
+                            fill="none"
+                            stroke="url(#calorieGradient)"
+                            strokeWidth="8"
+                            strokeLinecap="round"
+                            initial={{ pathLength: 0 }}
+                            animate={{ pathLength: Math.min(1, caloriePercentage / 100) }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                        />
+                        
+                        {/* End knob */}
+                        <motion.circle
+                            cx={24 + 144 * Math.min(1, caloriePercentage / 100)}
+                            cy={72}
+                            r="6"
+                            fill="url(#calorieGradient)"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ duration: 0.5, delay: 0.5 }}
+                        />
+                    </svg>
+                    
+                    {/* Center content */}
+                    <div className="absolute flex flex-col items-center top-4">
+                        <span role="img" aria-label="calories" className="text-2xl mb-1">🔥</span>
+                        <span className="text-2xl font-bold text-gray-900">{totalCaloriesToday}</span>
+                        <span className="text-sm text-gray-500">of {data.recommended.kcal} kcal</span>
+                    </div>
+                </div>
 
-                            {/* Background arc for calories */}
-                            <path
-                                d="M 10 70 A 70 70 0 0 1 150 70"
-                                fill="none"
-                                stroke={MACRO_COLORS.background}
-                                strokeWidth="10"
-                                strokeLinecap="round"
-                                transform="rotate(-180, 80, 70)"
+                {/* Three macro bars horizontally */}
+                <div className="w-full flex justify-between gap-4">
+                    {/* Protein */}
+                    <div className="flex-1 flex flex-col gap-2">
+                        <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Protein</div>
+                        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <motion.div
+                                className="h-full rounded-full"
+                                style={{ backgroundColor: MACRO_COLORS.protein }}
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.min(100, (todayData.protein / data.recommended.protein) * 100)}%` }}
+                                transition={{ duration: 0.8, delay: 0.2 }}
                             />
-
-                            {/* Foreground arc for calories */}
-                            <motion.path
-                                d="M 10 70 A 70 70 0 0 1 150 70"
-                                fill="none"
-                                stroke={MACRO_COLORS.carbs}
-                                strokeWidth="10"
-                                strokeLinecap="round"
-                                transform="rotate(-180, 80, 70)"
-                                initial={{ pathLength: 0 }}
-                                animate={{ pathLength: Math.min(1, caloriePercentage / 100) }}
-                                transition={{ duration: 0.8 }}
-                            />
-
-                            {/* Fat foreground arc */}
-                            <motion.path
-                                d="M 10 70 A 70 70 0 0 1 150 70"
-                                fill="none"
-                                stroke={MACRO_COLORS.fat}
-                                strokeWidth="10"
-                                strokeLinecap="round"
-                                transform="rotate(-180, 80, 70)"
-                                initial={{ pathLength: 0 }}
-                                animate={{ pathLength: Math.min(1, fatPercentage / 100) }}
-                                transition={{ duration: 0.8 }}
-                            />
-                        </svg>
-
-                        <div className="absolute flex flex-col items-center top-1/2 -translate-y-1/2 mt-10">
-                            <span role="img" aria-label="calories" className="text-3xl mb-1">🔥</span>
-                            <span className="text-3xl font-bold">{totalCaloriesToday}</span>
-                            <span className="text-sm text-gray-400 font-medium">of {data.recommended.kcal} kcal</span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                            {todayData.protein} / {data.recommended.protein} g
                         </div>
                     </div>
 
-                    {/* Macro bars (Protein & Carbs) */}
-                    <div className="w-full flex justify-between items-end mt-16">
-                        {/* Protein Macro Bar (Left) */}
-                        <div className="flex flex-col items-start gap-2">
-                            <h4 className="text-sm font-bold">Protein</h4>
-                            <div className="relative w-28 h-1.5 rounded-full overflow-hidden bg-gray-700">
-                                <motion.div
-                                    className="h-full rounded-full"
-                                    style={{ backgroundColor: MACRO_COLORS.protein }}
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${Math.min(100, (todayData.protein / data.recommended.protein) * 100)}%` }}
-                                    transition={{ duration: 0.8 }}
-                                ></motion.div>
-                            </div>
-                            <p className="text-xs font-medium text-gray-400">
-                                {todayData.protein}g / {data.recommended.protein}g
-                            </p>
+                    {/* Fat */}
+                    <div className="flex-1 flex flex-col gap-2">
+                        <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Fat</div>
+                        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <motion.div
+                                className="h-full rounded-full"
+                                style={{ backgroundColor: MACRO_COLORS.fat }}
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.min(100, (todayData.fat / data.recommended.fat) * 100)}%` }}
+                                transition={{ duration: 0.8, delay: 0.4 }}
+                            />
                         </div>
+                        <div className="text-xs text-gray-500">
+                            {todayData.fat} / {data.recommended.fat} g
+                        </div>
+                    </div>
 
-                        {/* Carbs Macro Bar (Right) */}
-                        <div className="flex flex-col items-end gap-2 text-right">
-                            <h4 className="text-sm font-bold">Carbs</h4>
-                            <div className="relative w-28 h-1.5 rounded-full overflow-hidden bg-gray-700">
-                                <motion.div
-                                    className="h-full rounded-full"
-                                    style={{ backgroundColor: MACRO_COLORS.carbs }}
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${Math.min(100, (todayData.carbs / data.recommended.carbs) * 100)}%` }}
-                                    transition={{ duration: 0.8 }}
-                                ></motion.div>
-                            </div>
-                            <p className="text-xs font-medium text-gray-400">
-                                {todayData.carbs}g / {data.recommended.carbs}g
-                            </p>
+                    {/* Carbs */}
+                    <div className="flex-1 flex flex-col gap-2">
+                        <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Carbs</div>
+                        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <motion.div
+                                className="h-full rounded-full"
+                                style={{ backgroundColor: MACRO_COLORS.carbs }}
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.min(100, (todayData.carbs / data.recommended.carbs) * 100)}%` }}
+                                transition={{ duration: 0.8, delay: 0.6 }}
+                            />
+                        </div>
+                        <div className="text-xs text-gray-500">
+                            {todayData.carbs} / {data.recommended.carbs} g
                         </div>
                     </div>
                 </div>
