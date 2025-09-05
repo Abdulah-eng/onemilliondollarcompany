@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { ProgressData } from '@/mockdata/progress/mockProgressData';
-import { Utensils, Flame, TrendingUp, TrendingDown, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
 import { ComposedChart, Line, Area, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 
 // Define colors to match the user's provided images
@@ -192,6 +192,8 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 </div>
             </div>
 
+            ---
+
             {/* MIDDLE PART: Consumed and Burned */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Consumed Card */}
@@ -202,7 +204,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     transition={{ duration: 0.6, delay: 0.2 }}
                 >
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
-                        <Utensils className="w-6 h-6 text-white" />
+                        <span role="img" aria-label="consumed" className="text-2xl">🍽️</span>
                     </div>
                     <div className="flex-1">
                         <div className="flex items-baseline gap-1">
@@ -221,7 +223,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     transition={{ duration: 0.6, delay: 0.4 }}
                 >
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg">
-                        <Flame className="w-6 h-6 text-white" />
+                        <span role="img" aria-label="burned" className="text-2xl">🔥</span>
                     </div>
                     <div className="flex-1">
                         <div className="flex items-baseline gap-1">
@@ -232,6 +234,8 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     </div>
                 </motion.div>
             </div>
+
+            ---
 
             {/* BOTTOM PART: Enhanced Trend Analysis */}
             <div className="space-y-4 sm:space-y-6">
@@ -275,12 +279,12 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     {/* Avg metrics */}
                     <div className="flex flex-col gap-2 text-right">
                         <div className="flex items-center gap-2">
-                            <Utensils className="h-4 w-4 text-orange-400" />
+                            <span role="img" aria-label="consumed" className="text-base">🍽️</span>
                             <span className="text-sm text-gray-400">Avg Consumed:</span>
                             <span className="text-sm font-bold text-white">{avgCaloriesConsumed} kcal</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Flame className="h-4 w-4 text-red-400" />
+                            <span role="img" aria-label="burned" className="text-base">🔥</span>
                             <span className="text-sm text-gray-400">Avg Burned:</span>
                             <span className="text-sm font-bold text-white">{avgCaloriesBurned} kcal</span>
                         </div>
@@ -316,82 +320,82 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 <div className="-mx-6 sm:-mx-8 md:mx-0">
                     {/* Enhanced Chart with Multiple Y-Axes */}
                     <div className="h-72 sm:h-72 md:h-80 w-full overflow-visible">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart data={trendData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
-                            <defs>
-                                <linearGradient id="consumedGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
-                                    <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <XAxis 
-                                dataKey="date" 
-                                stroke="#9ca3af" 
-                                fontSize={12} 
-                                tick={{ fill: '#9ca3af' }} 
-                                tickLine={false} 
-                                axisLine={false} 
-                            />
-                            {/* Calories Y-axis (left) */}
-                            <YAxis 
-                                yAxisId="cal"
-                                stroke="#f97316" 
-                                fontSize={11}
-                                tick={{ fill: '#f97316' }}
-                                tickLine={false}
-                                axisLine={false}
-                                domain={['dataMin - 100', 'dataMax + 100']}
-                            />
-                            {/* Weight Y-axis (right) */}
-                            <YAxis 
-                                yAxisId="kg"
-                                orientation="right"
-                                stroke="#a855f7" 
-                                fontSize={11}
-                                tick={{ fill: '#a855f7' }}
-                                tickLine={false}
-                                axisLine={false}
-                                domain={['dataMin - 0.5', 'dataMax + 0.5']}
-                            />
-                            {/* Activity Y-axis (hidden) */}
-                            <YAxis 
-                                yAxisId="act"
-                                hide
-                                domain={[0, 100]}
-                            />
-                            <Tooltip content={<NutritionTooltip />} cursor={{ stroke: 'rgba(100,100,100,0.2)', strokeWidth: 1 }} />
-                            
-                            {/* Activity bars (background, using activity axis) */}
-                            <Bar 
-                                yAxisId="act"
-                                dataKey="activity" 
-                                fill="rgba(59, 130, 246, 0.2)" 
-                                radius={[2, 2, 0, 0]} 
-                            />
-                            
-                            {/* Consumed calories area (using calories axis) */}
-                            <Area 
-                                yAxisId="cal"
-                                type="monotone" 
-                                dataKey="consumed" 
-                                stroke="#f97316" 
-                                strokeWidth={2}
-                                fillOpacity={1} 
-                                fill="url(#consumedGradient)" 
-                            />
-                            
-                            {/* Weight line (using weight axis) */}
-                            <Line 
-                                yAxisId="kg"
-                                type="monotone" 
-                                dataKey="weight" 
-                                stroke="#a855f7" 
-                                strokeWidth={3}
-                                dot={{ fill: '#a855f7', strokeWidth: 2, r: 4 }}
-                                activeDot={{ r: 6, stroke: '#a855f7', strokeWidth: 2, fill: '#fff' }}
-                            />
-                        </ComposedChart>
-                     </ResponsiveContainer>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <ComposedChart data={trendData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+                                <defs>
+                                    <linearGradient id="consumedGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <XAxis 
+                                    dataKey="date" 
+                                    stroke="#9ca3af" 
+                                    fontSize={12} 
+                                    tick={{ fill: '#9ca3af' }} 
+                                    tickLine={false} 
+                                    axisLine={false} 
+                                />
+                                {/* Calories Y-axis (left) */}
+                                <YAxis 
+                                    yAxisId="cal"
+                                    stroke="#f97316" 
+                                    fontSize={11}
+                                    tick={{ fill: '#f97316' }}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    domain={['dataMin - 100', 'dataMax + 100']}
+                                />
+                                {/* Weight Y-axis (right) */}
+                                <YAxis 
+                                    yAxisId="kg"
+                                    orientation="right"
+                                    stroke="#a855f7" 
+                                    fontSize={11}
+                                    tick={{ fill: '#a855f7' }}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    domain={['dataMin - 0.5', 'dataMax + 0.5']}
+                                />
+                                {/* Activity Y-axis (hidden) */}
+                                <YAxis 
+                                    yAxisId="act"
+                                    hide
+                                    domain={[0, 100]}
+                                />
+                                <Tooltip content={<NutritionTooltip />} cursor={{ stroke: 'rgba(100,100,100,0.2)', strokeWidth: 1 }} />
+                                
+                                {/* Activity bars (background, using activity axis) */}
+                                <Bar 
+                                    yAxisId="act"
+                                    dataKey="activity" 
+                                    fill="rgba(59, 130, 246, 0.2)" 
+                                    radius={[2, 2, 0, 0]} 
+                                />
+                                
+                                {/* Consumed calories area (using calories axis) */}
+                                <Area 
+                                    yAxisId="cal"
+                                    type="monotone" 
+                                    dataKey="consumed" 
+                                    stroke="#f97316" 
+                                    strokeWidth={2}
+                                    fillOpacity={1} 
+                                    fill="url(#consumedGradient)" 
+                                />
+                                
+                                {/* Weight line (using weight axis) */}
+                                <Line 
+                                    yAxisId="kg"
+                                    type="monotone" 
+                                    dataKey="weight" 
+                                    stroke="#a855f7" 
+                                    strokeWidth={3}
+                                    dot={{ fill: '#a855f7', strokeWidth: 2, r: 4 }}
+                                    activeDot={{ r: 6, stroke: '#a855f7', strokeWidth: 2, fill: '#fff' }}
+                                />
+                            </ComposedChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
 
@@ -413,12 +417,12 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Activity className="h-4 w-4 text-blue-400"/>
+                        <Activity className="h-4 w-4 text-blue-400" />
                         <p className="font-bold text-white text-sm">
                             {avgCaloriesConsumed - avgCaloriesBurned} kcal{' '}
                             <span className="font-normal text-gray-400">Net Surplus</span>
                         </p>
-                     </div>
+                    </div>
                     </div>
                 </div>
             </div>
