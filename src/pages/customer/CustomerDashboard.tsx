@@ -1,6 +1,6 @@
 // src/pages/customer/CustomerDashboard.tsx
 import WelcomeHeader from '@/components/customer/dashboard/WelcomeHeader';
-import TodaysFocus from '@/components/customer/dashboard/TodaysFocus';
+import TodaysProgram from '@/components/customer/dashboard/TodaysFocus';
 import Alerts from '@/components/customer/dashboard/Alerts';
 import QuickStats from '@/components/customer/dashboard/QuickStats';
 import DailyCheckIn from '@/components/customer/dashboard/DailyCheckIn';
@@ -17,7 +17,7 @@ const CustomerDashboard = () => {
       {/* Main Dashboard Content */}
       <DailyCheckIn />
       <QuickStats />
-      <TodaysFocus />
+      <TodaysProgram />
     </div>
   );
 };
