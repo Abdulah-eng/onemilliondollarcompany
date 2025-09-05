@@ -14,7 +14,7 @@ const MiniStat = ({ icon, value, label, color }: { icon: React.ReactNode; value:
     {icon}
     <div>
       <p className={cn("font-bold text-lg", color)}>{value}</p>
-      <p className="text-xs text-white/70">{label}</p>
+      <p className="text-xs text-gray-500 dark:text-white/70">{label}</p>
     </div>
   </div>
 );
@@ -26,9 +26,9 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
       <div className="bg-background/80 backdrop-blur-sm p-3 rounded-lg border border-border/50 shadow-lg">
         <p className="text-sm font-bold text-foreground">
           {`${payload[0].value?.toFixed(1)} ${payload[0].unit || ''}`}
-          {isWeekly && <span className="font-normal text-white/70"> (avg)</span>}
+          {isWeekly && <span className="font-normal text-muted-foreground"> (avg)</span>}
         </p>
-        <p className="text-xs text-white/70">{label}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
       </div>
     );
   }
@@ -117,7 +117,8 @@ export default function HeroProgressSnapshot({
     <motion.div
       layout
       className={cn(
-        'w-full rounded-3xl p-4 sm:p-6 text-white overflow-hidden flex flex-col transition-colors duration-500',
+        'w-full rounded-3xl p-4 sm:p-6 overflow-hidden flex flex-col transition-colors duration-500',
+        'bg-white dark:bg-transparent',
         goalColors[selectedGoal.type as keyof typeof goalColors]
       )}
       initial={{ opacity: 0, y: 20 }}
@@ -130,7 +131,7 @@ export default function HeroProgressSnapshot({
           <button
             key={goal.id}
             onClick={() => setSelectedGoal(goal)}
-            className={cn('text-sm font-semibold px-3 py-1.5 rounded-full transition-all', selectedGoal?.id === goal.id ? 'bg-white/90 text-black' : 'bg-white/20 hover:bg-white/30 text-white')}
+            className={cn('text-sm font-semibold px-3 py-1.5 rounded-full transition-all', selectedGoal?.id === goal.id ? 'bg-gray-900 text-white dark:bg-white/90 dark:text-black' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/20 dark:hover:bg-white/30 dark:text-white')}
           >
             {goal.title}
           </button>
@@ -141,11 +142,11 @@ export default function HeroProgressSnapshot({
       <div className="flex-grow flex flex-col">
         <AnimatePresence mode="wait">
           <motion.div key={selectedGoal.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }} className="flex items-baseline gap-2">
-            <span className="text-5xl sm:text-6xl font-bold tracking-tighter">{mainMetric.value}</span>
-            <span className="text-xl font-medium text-white/80">{mainMetric.unit}</span>
+            <span className="text-5xl sm:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white">{mainMetric.value}</span>
+            <span className="text-xl font-medium text-gray-700 dark:text-white/80">{mainMetric.unit}</span>
           </motion.div>
         </AnimatePresence>
-        <p className="text-sm text-white/70">Average over last {timeRange} days</p>
+        <p className="text-sm text-muted-foreground">Average over last {timeRange} days</p>
 
         {/* --- Chart with horizontal scroll for mobile --- */}
         <div className="flex-grow w-full h-48 sm:h-56 mt-4 -mx-2 overflow-x-auto">
@@ -159,7 +160,7 @@ export default function HeroProgressSnapshot({
                     <stop offset="95%" stopColor={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="date" stroke="#fff" fontSize={12} tick={{ fill: 'rgba(255,255,255,0.7)' }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+                <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tick={{ fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
                 <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.2)', strokeWidth: 1, strokeDasharray: '3 3' }} />
                 <Area type="monotone" dataKey="value" unit={selectedGoal.targetUnit} stroke={goalStrokeColor[selectedGoal.type as keyof typeof goalStrokeColor]} strokeWidth={3} fillOpacity={1} fill={`url(#color${selectedGoal.type})`} />
               </AreaChart>
@@ -172,7 +173,7 @@ export default function HeroProgressSnapshot({
       <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4">
         <div className="flex items-center gap-1 p-1 rounded-full bg-black/20">
           {timeRanges.map(range => (
-            <button key={range} onClick={() => setTimeRange(range)} className={cn('px-3 py-1 text-xs font-semibold rounded-full', timeRange === range ? 'bg-white/90 text-black' : 'text-white/70 hover:bg-white/10')}>
+            <button key={range} onClick={() => setTimeRange(range)} className={cn('px-3 py-1 text-xs font-semibold rounded-full', timeRange === range ? 'bg-gray-900 text-white dark:bg-white/90 dark:text-black' : 'text-gray-600 hover:bg-gray-100 dark:text-white/70 dark:hover:bg-white/10')}>
               {range}D
             </button>
           ))}
