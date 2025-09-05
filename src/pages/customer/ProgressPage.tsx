@@ -6,13 +6,15 @@ import { mockProgressData } from '@/mockdata/progress/mockProgressData';
 import HeroProgressSnapshot from '@/components/customer/progress/HeroProgressSnapshot';
 import DailyCheckinTrends from '@/components/customer/progress/DailyCheckinTrends';
 import FitnessProgression from '@/components/customer/progress/FitnessProgression';
-import NutritionProgression from '@/components/customer/progress/NutritionProgression';
 import MentalHealthProgression from '@/components/customer/progress/MentalHealthProgression';
 import WeightProgressCard from '@/components/customer/progress/WeightProgressCard';
 import PhotoProgressCard from '@/components/customer/progress/PhotoProgressCard';
 import SmartInsights from '@/components/customer/progress/SmartInsights';
 import FloatingActionButton from '@/components/customer/progress/FloatingActionButton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+// Corrected import path for the NutritionProgression component
+import NutritionProgression from '@/components/customer/progress/nutrition/NutritionProgression';
 
 export default function ProgressPage() {
   const data = mockProgressData;
