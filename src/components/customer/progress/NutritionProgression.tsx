@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ProgressData } from '@/mockdata/progress/mockProgressData';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import RecipeCard from './RecipeCard';
@@ -18,6 +18,9 @@ const CustomTooltip = ({ active, payload, label }) => {
     return null;
 };
 
+// Pie chart colors for the recommended intake
+const PIE_COLORS = ['#10b981', '#f59e0b', '#ef4444']; // Green, Amber, Red
+
 export default function NutritionProgression({ data }: { data: ProgressData['nutrition'] }) {
     // Calculate average macros and total calories for the chart
     const avgMacros = useMemo(() => {
@@ -31,12 +34,22 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
         const totalDays = data.macros.length || 1;
 
         return [
-            { name: 'Protein', value: Math.round(totalMacros.protein / totalDays) },
-            { name: 'Carbs', value: Math.round(totalMacros.carbs / totalDays) },
-            { name: 'Fat', value: Math.round(totalMacros.fat / totalDays) },
-            { name: 'Kcal', value: Math.round(totalMacros.kcal / totalDays) },
+            { name: 'Protein', value: Math.round(totalMacros.protein / totalDays), color: '#34d399' }, // Green
+            { name: 'Carbs', value: Math.round(totalMacros.carbs / totalDays), color: '#fbbf24' }, // Yellow
+            { name: 'Fat', value: Math.round(totalMacros.fat / totalDays), color: '#f87171' }, // Red
+            { name: 'Kcal', value: Math.round(totalMacros.kcal / totalDays), color: '#60a5fa' }, // Blue
         ];
     }, [data.macros]);
+
+    // Data for the pie chart with recommended daily intake
+    const recommendedIntake = useMemo(() => {
+        const total = data.recommended.protein + data.recommended.carbs + data.recommended.fat;
+        return [
+            { name: 'Protein', value: data.recommended.protein, color: PIE_COLORS[0] },
+            { name: 'Carbs', value: data.recommended.carbs, color: PIE_COLORS[1] },
+            { name: 'Fat', value: data.recommended.fat, color: PIE_COLORS[2] },
+        ];
+    }, [data.recommended]);
 
     const displayRecentMeals = data.recentRecipes.slice(0, 3);
     const hasMoreMeals = data.recentRecipes.length > 3;
@@ -48,38 +61,70 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
         >
-            {/* Section 1: Macros Chart */}
-            <div>
-                <h3 className="text-xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">Nutrition Overview</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                    <div className="h-48 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={avgMacros} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                                <defs>
-                                    <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.8} />
-                                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0.4} />
+            {/* Section 1: Macros Chart & Recommendations */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+                {/* Bar Chart */}
+                <div className="h-48 w-full md:col-span-2 lg:col-span-1">
+                    <h3 className="text-xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">Nutrition Overview</h3>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={avgMacros} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                            <defs>
+                                {avgMacros.map((macro, index) => (
+                                    <linearGradient key={index} id={`gradient${index}`} x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor={macro.color} stopOpacity={0.8} />
+                                        <stop offset="95%" stopColor={macro.color} stopOpacity={0.4} />
                                     </linearGradient>
-                                </defs>
-                                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis hide />
-                                <Tooltip cursor={{ fill: 'hsl(var(--muted)/0.5)' }} content={<CustomTooltip />} />
-                                <Bar dataKey="value" barSize={30} fill="url(#barGradient)" radius={[10, 10, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                    <div className="flex justify-around md:flex-col items-center gap-4 text-gray-900 dark:text-white">
-                        <div className="text-center">
-                            <p className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-red-500">{data.mealCompletion}%</p>
-                            <p className="text-xs text-gray-500 dark:text-white/70">Meal Adherence</p>
+                                ))}
+                            </defs>
+                            <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis hide />
+                            <Tooltip cursor={{ fill: 'hsl(var(--muted)/0.5)' }} content={<CustomTooltip />} />
+                            <Bar dataKey="value" barSize={30} radius={[10, 10, 0, 0]} >
+                                {avgMacros.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={`url(#gradient${index})`} />
+                                ))}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* Daily Recommendations Pie Chart */}
+                <div className="w-full lg:col-span-2">
+                    <h3 className="text-xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">Daily Recommendations</h3>
+                    <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 h-48">
+                        <div className="h-full w-48">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={recommendedIntake}
+                                        dataKey="value"
+                                        nameKey="name"
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={80}
+                                        fill="#8884d8"
+                                        labelLine={false}
+                                    >
+                                        {recommendedIntake.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                    </Pie>
+                                </PieChart>
+                            </ResponsiveContainer>
                         </div>
-                        <div className="text-center">
-                            <p className="text-3xl font-bold">{data.outsideMeals}</p>
-                            <p className="text-xs text-gray-500 dark:text-white/70">Meals Out (7d)</p>
+                        <div className="flex-1 space-y-2">
+                            {recommendedIntake.map((entry, index) => (
+                                <div key={index} className="flex items-center gap-2">
+                                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: entry.color }} />
+                                    <p className="text-sm text-gray-900 dark:text-white">{entry.name}: <span className="font-semibold">{entry.value}g</span></p>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
             </div>
+
+            ---
 
             {/* Section 2: Recent Meals */}
             <div className="border-t border-border/50 pt-6 mt-6">
