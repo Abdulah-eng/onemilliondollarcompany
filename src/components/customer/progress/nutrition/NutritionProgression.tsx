@@ -5,13 +5,9 @@ import { ProgressData } from '@/mockdata/progress/mockProgressData';
 import { cn } from '@/lib/utils';
 import RecipeCard from './RecipeCard';
 
-// Using the exact colors from your app's design
-const COLORS = {
-    carbs: '#f97316',    // Orange/yellow
-    protein: '#a855f7',  // Purple
-    fat: '#ef4444',      // Red
-    bg: '#e2e8f0',       // Soft gray for background rings
-};
+// Using the exact colors from the provided image
+const PIE_COLORS = ['#a855f7', '#f97316', '#ef4444']; // Purple, Orange, Red
+const STROKE_COLOR = 'transparent'; // No stroke needed for this design
 
 export default function NutritionProgression({ data }: { data: ProgressData['nutrition'] }) {
     const [activeTimeframe, setActiveTimeframe] = useState('Today');
@@ -46,15 +42,15 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
             calories: Math.round(protein * 4 + carbs * 4 + fat * 9),
         };
     }, [data.macros, activeTimeframe]);
-
+    
     // Data for the Pie Chart
     const pieData = [
-        { name: 'Carbs', value: consumedData.carbs, color: COLORS.carbs },
-        { name: 'Protein', value: consumedData.protein, color: COLORS.protein },
-        { name: 'Fat', value: consumedData.fat, color: COLORS.fat },
+        { name: 'Protein', value: consumedData.protein, color: PIE_COLORS[0] },
+        { name: 'Carbs', value: consumedData.carbs, color: PIE_COLORS[1] },
+        { name: 'Fat', value: consumedData.fat, color: PIE_COLORS[2] },
     ];
     
-    // Get today's data for remaining calories, intake, and burned metrics
+    // Get today's data for remaining calories
     const todayData = data.macros[data.macros.length - 1];
     const totalCaloriesToday = Math.round(todayData.protein * 4 + todayData.carbs * 4 + todayData.fat * 9);
     const caloriesLeft = Math.max(data.recommended.kcal - totalCaloriesToday, 0);
@@ -88,14 +84,14 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 </div>
             </div>
 
-            {/* NEW: Pie Chart with concentric rings and Macro Breakdown */}
+            {/* NEW: Pie Chart and Macro Breakdown */}
             <div className="flex flex-col md:flex-row items-center justify-center gap-6">
                 <div className="h-48 w-48 relative flex-shrink-0">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                             {/* Outer ring for Carbs */}
                             <Pie
-                                data={[{ name: 'Carbs', value: consumedData.carbs, fill: COLORS.carbs }, { name: 'Carbs-bg', value: Math.max(0, data.recommended.carbs - consumedData.carbs), fill: '#e2e8f0' }]}
+                                data={[{ name: 'Carbs', value: consumedData.carbs, fill: PIE_COLORS[1] }, { name: 'Carbs-bg', value: Math.max(0, data.recommended.carbs - consumedData.carbs), fill: '#e2e8f0' }]}
                                 dataKey="value"
                                 cx="50%"
                                 cy="50%"
@@ -107,7 +103,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                             />
                             {/* Middle ring for Protein */}
                             <Pie
-                                data={[{ name: 'Protein', value: consumedData.protein, fill: COLORS.protein }, { name: 'Protein-bg', value: Math.max(0, data.recommended.protein - consumedData.protein), fill: '#e2e8f0' }]}
+                                data={[{ name: 'Protein', value: consumedData.protein, fill: PIE_COLORS[0] }, { name: 'Protein-bg', value: Math.max(0, data.recommended.protein - consumedData.protein), fill: '#e2e8f0' }]}
                                 dataKey="value"
                                 cx="50%"
                                 cy="50%"
@@ -119,7 +115,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                             />
                             {/* Inner ring for Fat */}
                             <Pie
-                                data={[{ name: 'Fat', value: consumedData.fat, fill: COLORS.fat }, { name: 'Fat-bg', value: Math.max(0, data.recommended.fat - consumedData.fat), fill: '#e2e8f0' }]}
+                                data={[{ name: 'Fat', value: consumedData.fat, fill: PIE_COLORS[2] }, { name: 'Fat-bg', value: Math.max(0, data.recommended.fat - consumedData.fat), fill: '#e2e8f0' }]}
                                 dataKey="value"
                                 cx="50%"
                                 cy="50%"
@@ -133,7 +129,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     </ResponsiveContainer>
                 </div>
 
-                {/* Macro breakdown details with emojis */}
+                {/* Macro breakdown details */}
                 <div className="flex flex-col gap-2 w-full max-w-sm">
                     <div className="flex items-center justify-between text-gray-900 dark:text-white text-sm font-semibold">
                         <p>Carbs</p>
