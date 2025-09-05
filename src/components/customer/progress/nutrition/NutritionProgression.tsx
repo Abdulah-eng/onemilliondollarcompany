@@ -5,9 +5,9 @@ import { ProgressData } from '@/mockdata/progress/mockProgressData';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
-// Constants for the Pie Chart
-const PIE_COLORS = ['#34d399', '#f59e0b', '#ef4444']; // Green (Protein), Yellow (Carbs), Red (Fat)
-const STROKE_COLOR = '#e5e7eb'; // Tailwind gray-200
+// Updated constants for the Pie Chart using a new green color scheme
+const PIE_COLORS = ['#66bb6a', '#a5d6a7', '#81c784']; // Adjusted for a softer green palette
+const STROKE_COLOR = '#e0f2f1'; // Lighter green/grey for stroke
 
 // Main Nutrition Progression component
 export default function NutritionProgression({ data }: { data: ProgressData['nutrition'] }) {
