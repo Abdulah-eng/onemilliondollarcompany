@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { ProgressData } from '@/mockdata/progress/mockProgressData'; // Keeping this import
+import { ProgressData } from '@/mockdata/progress/mockProgressData';
 
 // Define colors to match the user's provided images
 const MACRO_COLORS = {
-    carbs: '#f97316', // Orange
-    protein: '#a855f7', // Purple
-    fat: '#ef4444', // Red
+    protein: '#6b21a8', // Deep Purple
+    fat: '#ea580c',     // Deep Orange
+    carbs: '#f97316',   // Bright Orange
+    background: '#374151',
+    foreground: '#d4d4d4',
 };
 
 // Dummy data for the new trend graph and calories burned
@@ -44,7 +46,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
 
     const trendData = DUMMY_TREND_DATA[activeTrend];
 
-    // Calculate percentage for fat macro for the progress bar
+    const caloriePercentage = Math.min(100, (totalCaloriesToday / data.recommended.kcal) * 100);
     const fatPercentage = Math.min(100, (todayData.fat / data.recommended.fat) * 100);
 
     return (
@@ -56,40 +58,52 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
         >
             {/* TOP PART: The integrated Calorie Arc and Macro Bars */}
             <div className="flex flex-col items-center gap-6">
-                <div className="w-full grid grid-cols-3 items-center justify-between">
-                    {/* Protein Macro Bar (Left) */}
-                    <div className="flex flex-col items-start gap-2">
-                        <h4 className="text-sm font-bold">Protein</h4>
-                        <div className="relative w-full h-1.5 rounded-full overflow-hidden bg-gray-700">
-                            <motion.div
-                                className="h-full rounded-full"
-                                style={{ backgroundColor: MACRO_COLORS.protein }}
-                                initial={{ width: 0 }}
-                                animate={{ width: `${Math.min(100, (todayData.protein / data.recommended.protein) * 100)}%` }}
-                                transition={{ duration: 0.5 }}
-                            ></motion.div>
-                        </div>
-                        <p className="text-xs font-medium text-gray-400">
-                            {todayData.protein}g / {data.recommended.protein}g
-                        </p>
-                    </div>
-
-                    {/* Calorie Arc (Center) */}
-                    <div className="relative w-full h-20 flex flex-col items-center justify-center">
+                <div className="relative flex justify-center items-end w-full max-w-sm">
+                    {/* Calorie Arc and Fat Bar (Center) */}
+                    <div className="absolute top-0 w-full h-40 flex flex-col items-center justify-center">
                         <svg
-                            width="160"
-                            height="80"
+                            className="absolute top-0"
+                            width="100%"
+                            height="100%"
                             viewBox="0 0 160 80"
-                            className="absolute transform scale-y-[-1] origin-bottom"
+                            preserveAspectRatio="xMidYMid slice"
                         >
-                            {/* Background arc */}
+                            <defs>
+                                <mask id="circle-mask">
+                                    <path
+                                        d="M 10 70 A 70 70 0 0 1 150 70"
+                                        fill="none"
+                                        stroke="white"
+                                        strokeWidth="10"
+                                        strokeLinecap="round"
+                                        transform="rotate(-180, 80, 70)"
+                                    />
+                                </mask>
+                            </defs>
+
+                            {/* Background arc for calories */}
                             <path
                                 d="M 10 70 A 70 70 0 0 1 150 70"
                                 fill="none"
-                                stroke="#374151"
+                                stroke={MACRO_COLORS.background}
                                 strokeWidth="10"
                                 strokeLinecap="round"
+                                transform="rotate(-180, 80, 70)"
                             />
+
+                            {/* Foreground arc for calories */}
+                            <motion.path
+                                d="M 10 70 A 70 70 0 0 1 150 70"
+                                fill="none"
+                                stroke={MACRO_COLORS.carbs}
+                                strokeWidth="10"
+                                strokeLinecap="round"
+                                transform="rotate(-180, 80, 70)"
+                                initial={{ pathLength: 0 }}
+                                animate={{ pathLength: Math.min(1, caloriePercentage / 100) }}
+                                transition={{ duration: 0.8 }}
+                            />
+
                             {/* Fat foreground arc */}
                             <motion.path
                                 d="M 10 70 A 70 70 0 0 1 150 70"
@@ -97,51 +111,60 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                 stroke={MACRO_COLORS.fat}
                                 strokeWidth="10"
                                 strokeLinecap="round"
+                                transform="rotate(-180, 80, 70)"
                                 initial={{ pathLength: 0 }}
                                 animate={{ pathLength: Math.min(1, fatPercentage / 100) }}
-                                transition={{ duration: 0.5 }}
-                            />
-                            {/* Outer calorie foreground arc */}
-                            <motion.path
-                                d="M 10 70 A 70 70 0 0 1 150 70"
-                                fill="none"
-                                stroke={MACRO_COLORS.carbs}
-                                strokeWidth="10"
-                                strokeLinecap="round"
-                                initial={{ pathLength: 0 }}
-                                animate={{ pathLength: Math.min(1, totalCaloriesToday / data.recommended.kcal) }}
-                                transition={{ duration: 0.5 }}
+                                transition={{ duration: 0.8 }}
                             />
                         </svg>
+
                         <div className="absolute flex flex-col items-center top-1/2 -translate-y-1/2 mt-10">
                             <span role="img" aria-label="calories" className="text-3xl mb-1">🔥</span>
-                            <span className="text-2xl font-bold">{totalCaloriesToday}</span>
-                            <span className="text-xs text-gray-400 font-medium">{data.recommended.kcal} kcal</span>
+                            <span className="text-3xl font-bold">{totalCaloriesToday}</span>
+                            <span className="text-sm text-gray-400 font-medium">of {data.recommended.kcal} kcal</span>
                         </div>
                     </div>
 
-                    {/* Carbs Macro Bar (Right) */}
-                    <div className="flex flex-col items-end gap-2 text-right">
-                        <h4 className="text-sm font-bold">Carbs</h4>
-                        <div className="relative w-full h-1.5 rounded-full overflow-hidden bg-gray-700">
-                            <motion.div
-                                className="h-full rounded-full"
-                                style={{ backgroundColor: MACRO_COLORS.carbs }}
-                                initial={{ width: 0 }}
-                                animate={{ width: `${Math.min(100, (todayData.carbs / data.recommended.carbs) * 100)}%` }}
-                                transition={{ duration: 0.5 }}
-                            ></motion.div>
+                    {/* Macro bars (Protein & Carbs) */}
+                    <div className="w-full flex justify-between items-end mt-16">
+                        {/* Protein Macro Bar (Left) */}
+                        <div className="flex flex-col items-start gap-2">
+                            <h4 className="text-sm font-bold">Protein</h4>
+                            <div className="relative w-28 h-1.5 rounded-full overflow-hidden bg-gray-700">
+                                <motion.div
+                                    className="h-full rounded-full"
+                                    style={{ backgroundColor: MACRO_COLORS.protein }}
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${Math.min(100, (todayData.protein / data.recommended.protein) * 100)}%` }}
+                                    transition={{ duration: 0.8 }}
+                                ></motion.div>
+                            </div>
+                            <p className="text-xs font-medium text-gray-400">
+                                {todayData.protein}g / {data.recommended.protein}g
+                            </p>
                         </div>
-                        <p className="text-xs font-medium text-gray-400">
-                            {todayData.carbs}g / {data.recommended.carbs}g
-                        </p>
+
+                        {/* Carbs Macro Bar (Right) */}
+                        <div className="flex flex-col items-end gap-2 text-right">
+                            <h4 className="text-sm font-bold">Carbs</h4>
+                            <div className="relative w-28 h-1.5 rounded-full overflow-hidden bg-gray-700">
+                                <motion.div
+                                    className="h-full rounded-full"
+                                    style={{ backgroundColor: MACRO_COLORS.carbs }}
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${Math.min(100, (todayData.carbs / data.recommended.carbs) * 100)}%` }}
+                                    transition={{ duration: 0.8 }}
+                                ></motion.div>
+                            </div>
+                            <p className="text-xs font-medium text-gray-400">
+                                {todayData.carbs}g / {data.recommended.carbs}g
+                            </p>
+                        </div>
                     </div>
                 </div>
-                {/* Fat Macro Bar (Hidden for now as it's inside the arc as requested) */}
-                {/* The fat bar is now a component of the central arc, as seen in the image. */}
             </div>
 
-            <hr className="my-4 border-gray-700" />
+            ---
 
             {/* MIDDLE PART: Consumed and Burned */}
             <div className="flex justify-around items-center text-center">
@@ -161,7 +184,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 </div>
             </div>
 
-            <hr className="my-4 border-gray-700" />
+            ---
 
             {/* BOTTOM PART: Weight and Consumption Trend */}
             <div>
