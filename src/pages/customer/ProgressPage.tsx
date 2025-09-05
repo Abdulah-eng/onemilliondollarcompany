@@ -5,7 +5,7 @@ import { mockProgressData } from '@/mockdata/progress/mockProgressData';
 // --- NEW & UPDATED COMPONENT IMPORTS ---
 import HeroProgressSnapshot from '@/components/customer/progress/HeroProgressSnapshot';
 import DailyCheckinTrends from '@/components/customer/progress/DailyCheckinTrends';
-import FitnessProgression from '@/components/customer/progress/FitnessProgression';
+import FitnessProgression from '@/components/customer/progress/fitness/FitnessProgression';
 import MentalHealthProgression from '@/components/customer/progress/mental/MentalHealthProgression';
 import WeightProgressCard from '@/components/customer/progress/WeightProgressCard';
 import PhotoProgressCard from '@/components/customer/progress/PhotoProgressCard';
