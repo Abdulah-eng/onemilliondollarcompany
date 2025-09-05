@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { ProgressData } from '@/mockdata/progress/mockProgressData';
 import { cn } from '@/lib/utils';
-import RecipeCard from '../RecipeCard';
+import RecipeCard from './RecipeCard'; // Corrected import path
 
 // Updated constants for the Pie Chart using colors from the provided image
 const PIE_COLORS = ['#8b5cf6', '#f97316', '#ef4444']; // Purple, Orange, Red
