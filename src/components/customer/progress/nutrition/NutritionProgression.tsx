@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { ProgressData } from '@/mockdata/progress/mockProgressData';
-import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, Utensils, Zap, Scale } from 'lucide-react';
 import { ComposedChart, Line, Area, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 
 // Define colors to match the user's provided images
@@ -79,7 +79,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
     const todayData = data.macros[data.macros.length - 1];
     const totalCaloriesToday = Math.round(todayData.protein * 4 + todayData.carbs * 4 + todayData.fat * 9);
 
-    const trendData = DUMMY_TREND_DATA[activeTrend];
+    const trendData = DUMMY_TREND_DATA[activeTrend as keyof typeof DUMMY_TREND_DATA];
     
     // Calculate trend insights
     const currentWeight = trendData[trendData.length - 1]?.weight || 0;
@@ -92,10 +92,41 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
     const fatPercentage = Math.min(100, (todayData.fat / data.recommended.fat) * 100);
 
     return (
-        <div className="w-full space-y-8">
+        <motion.div
+            className="w-full flex flex-col gap-8 text-white"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+        >
+            {/* NEW HEADER SECTION */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6 p-6 sm:p-8 rounded-2xl bg-[#1f2937]">
+                <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center">
+                        <Utensils className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                        <h3 className="text-2xl font-bold tracking-tight">Nutrition & Activity</h3>
+                        <p className="text-sm text-gray-400">Your progress over the past {activeTrend === '7D' ? 'week' : activeTrend === '30D' ? 'month' : '3 months'}</p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-4">
+                    <div className="text-center">
+                        <p className="text-2xl font-bold text-orange-400">{avgCaloriesConsumed}<span className="text-sm font-medium">kcal</span></p>
+                        <p className="text-xs text-gray-400">Avg. Consumed</p>
+                    </div>
+                    <div className="text-center">
+                        <p className="text-2xl font-bold text-red-400">{avgCaloriesBurned}<span className="text-sm font-medium">kcal</span></p>
+                        <p className="text-xs text-gray-400">Avg. Burned</p>
+                    </div>
+                    <div className="text-center">
+                        <p className="text-2xl font-bold text-sky-400">{currentWeight.toFixed(1)}<span className="text-sm font-medium">kg</span></p>
+                        <p className="text-xs text-gray-400">Current Weight</p>
+                    </div>
+                </div>
+            </div>
+
             {/* TOP PART: Container with semi-circular gauge and macro bars */}
-            <div className="rounded-2xl p-6 flex flex-col items-center gap-6 overflow-visible">
-                {/* Semi-circular calorie gauge */}
+            <div className="rounded-2xl p-6 flex flex-col items-center gap-6 overflow-visible bg-[#1f2937]">
                 <div className="relative w-56 h-32 flex justify-center items-center">
                     <svg width="224" height="128" viewBox="0 0 224 128" className="absolute">
                         <defs>
@@ -105,7 +136,6 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                             </linearGradient>
                         </defs>
                         
-                        {/* Background arc */}
                         <path
                             d="M 32 96 A 80 80 0 0 1 192 96"
                             fill="none"
@@ -114,7 +144,6 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                             strokeLinecap="round"
                         />
                         
-                        {/* Progress arc */}
                         <motion.path
                             d="M 32 96 A 80 80 0 0 1 192 96"
                             fill="none"
@@ -129,7 +158,6 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                         
                     </svg>
                     
-                    {/* Center content */}
                     <div className="absolute flex flex-col items-center top-6">
                         <span role="img" aria-label="calories" className="text-2xl mb-1">🔥</span>
                         <span className="text-2xl font-bold text-white">{totalCaloriesToday}</span>
@@ -137,9 +165,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     </div>
                 </div>
 
-                {/* Three macro bars - responsive layout */}
                 <div className="w-full flex flex-col sm:flex-row justify-between gap-4">
-                    {/* Protein */}
                     <div className="flex-1 flex flex-col gap-2">
                         <div className="flex items-center gap-1 text-xs font-medium text-gray-300 uppercase tracking-wide">
                             <span role="img" aria-label="protein">🥩</span> Protein
@@ -158,7 +184,6 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                         </div>
                     </div>
 
-                    {/* Fat */}
                     <div className="flex-1 flex flex-col gap-2">
                         <div className="flex items-center gap-1 text-xs font-medium text-gray-300 uppercase tracking-wide">
                             <span role="img" aria-label="fat">🥑</span> Fat
@@ -177,7 +202,6 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                         </div>
                     </div>
 
-                    {/* Carbs */}
                     <div className="flex-1 flex flex-col gap-2">
                         <div className="flex items-center gap-1 text-xs font-medium text-gray-300 uppercase tracking-wide">
                             <span role="img" aria-label="carbs">🍞</span> Carbs
@@ -201,9 +225,8 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
             ---
 
             {/* MIDDLE PART: Consumed and Burned */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Consumed Card */}
-                <motion.div 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-6 sm:px-8">
+                <motion.div
                     className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center gap-4"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -221,8 +244,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     </div>
                 </motion.div>
 
-                {/* Burned Card */}
-                <motion.div 
+                <motion.div
                     className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center gap-4"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -245,8 +267,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
 
             {/* BOTTOM PART: Enhanced Trend Analysis */}
             <div className="space-y-4 sm:space-y-6">
-                {/* Header with main metrics */}
-                <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-4 px-6 sm:px-8">
                     <div>
                         <h3 className="text-lg font-bold tracking-tight text-white mb-2">Your Progress</h3>
                         <AnimatePresence mode="wait">
@@ -258,62 +279,41 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                 transition={{ duration: 0.3 }}
                                 className="space-y-1"
                             >
-                                <p className="text-gray-400 text-sm">Current Weight</p>
-                                <div className="flex items-center gap-2">
-                                    <p className="text-3xl font-bold tracking-tight text-white">
-                                        {currentWeight}
-                                        <span className="text-lg font-medium text-gray-400 ml-1">kg</span>
-                                    </p>
-                                    <div className={cn(
-                                        "px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1",
-                                        weightChange < 0 
-                                            ? "bg-green-500/20 text-green-400" 
-                                            : "bg-orange-500/20 text-orange-400"
-                                    )}>
-                                        {weightChange < 0 ? (
-                                            <TrendingDown className="h-3 w-3" />
-                                        ) : (
-                                            <TrendingUp className="h-3 w-3" />
-                                        )}
-                                        {weightChange > 0 ? '+' : ''}{weightChange.toFixed(1)}kg
+                                <p className="text-gray-400 text-sm">Average over {activeTrend}</p>
+                                <div className="flex flex-col sm:flex-row items-baseline gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <Scale className="h-4 w-4 text-purple-400" />
+                                        <p className="text-xl font-bold tracking-tight text-white">
+                                            {currentWeight.toFixed(1)} <span className="text-sm font-medium text-gray-400 ml-1">kg Weight</span>
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Utensils className="h-4 w-4 text-orange-400" />
+                                        <p className="text-xl font-bold tracking-tight text-white">
+                                            {avgCaloriesConsumed} <span className="text-sm font-medium text-gray-400 ml-1">Avg Consumed</span>
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Activity className="h-4 w-4 text-red-400" />
+                                        <p className="text-xl font-bold tracking-tight text-white">
+                                            {avgCaloriesBurned} <span className="text-sm font-medium text-gray-400 ml-1">Avg Burned</span>
+                                        </p>
                                     </div>
                                 </div>
                             </motion.div>
                         </AnimatePresence>
                     </div>
-                    
-                    {/* Avg metrics */}
-                    <div className="flex flex-col gap-2 text-right">
-                        <div className="flex items-center gap-2">
-                            <span role="img" aria-label="consumed" className="text-base">🍽️</span>
-                            <span className="text-sm text-gray-400">Avg Consumed:</span>
-                            <span className="text-sm font-bold text-white">{avgCaloriesConsumed} kcal</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span role="img" aria-label="burned" className="text-base">🔥</span>
-                            <span className="text-sm text-gray-400">Avg Burned:</span>
-                            <span className="text-sm font-bold text-white">{avgCaloriesBurned} kcal</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Activity className="h-4 w-4 text-blue-400" />
-                            <span className="text-sm text-gray-400">Net Surplus:</span>
-                            <span className="text-sm font-bold text-white">
-                                {avgCaloriesConsumed - avgCaloriesBurned} kcal
-                            </span>
-                        </div>
-                    </div>
                 </div>
 
-                {/* Timeframe selector */}
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap px-6 sm:px-8">
                     {Object.keys(DUMMY_TREND_DATA).map(timeframe => (
                         <button
                             key={timeframe}
                             onClick={() => setActiveTrend(timeframe)}
                             className={cn(
                                 'text-sm font-semibold px-3 py-1.5 rounded-full transition-all',
-                                activeTrend === timeframe 
-                                    ? 'bg-gray-100 text-gray-900 dark:bg-white/90 dark:text-black' 
+                                activeTrend === timeframe
+                                    ? 'bg-gray-100 text-gray-900 dark:bg-white/90 dark:text-black'
                                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700 dark:bg-white/10 dark:hover:bg-white/20 dark:text-white'
                             )}
                         >
@@ -322,9 +322,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     ))}
                 </div>
 
-                {/* Full-bleed Chart container */}
                 <div className="-mx-6 sm:-mx-8 md:mx-0">
-                    {/* Enhanced Chart with Multiple Y-Axes */}
                     <div className="h-72 sm:h-72 md:h-80 w-full overflow-visible">
                         <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart data={trendData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
@@ -334,68 +332,59 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                         <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <XAxis 
-                                    dataKey="date" 
-                                    stroke="#9ca3af" 
-                                    fontSize={12} 
-                                    tick={{ fill: '#9ca3af' }} 
-                                    tickLine={false} 
-                                    axisLine={false} 
+                                <XAxis
+                                    dataKey="date"
+                                    stroke="#9ca3af"
+                                    fontSize={12}
+                                    tick={{ fill: '#9ca3af' }}
+                                    tickLine={false}
+                                    axisLine={false}
                                 />
-                                {/* Calories Y-axis (left) */}
-                                <YAxis 
+                                <YAxis
                                     yAxisId="cal"
-                                    stroke="#f97316" 
+                                    stroke="#f97316"
                                     fontSize={11}
                                     tick={{ fill: '#f97316' }}
                                     tickLine={false}
                                     axisLine={false}
                                     domain={['dataMin - 100', 'dataMax + 100']}
                                 />
-                                {/* Weight Y-axis (right) */}
-                                <YAxis 
+                                <YAxis
                                     yAxisId="kg"
                                     orientation="right"
-                                    stroke="#a855f7" 
+                                    stroke="#a855f7"
                                     fontSize={11}
                                     tick={{ fill: '#a855f7' }}
                                     tickLine={false}
                                     axisLine={false}
                                     domain={['dataMin - 0.5', 'dataMax + 0.5']}
                                 />
-                                {/* Activity Y-axis (hidden) */}
-                                <YAxis 
+                                <YAxis
                                     yAxisId="act"
                                     hide
                                     domain={[0, 100]}
                                 />
                                 <Tooltip content={<NutritionTooltip />} cursor={{ stroke: 'rgba(100,100,100,0.2)', strokeWidth: 1 }} />
-                                
-                                {/* Activity bars (background, using activity axis) */}
-                                <Bar 
+                                <Bar
                                     yAxisId="act"
-                                    dataKey="activity" 
-                                    fill="rgba(59, 130, 246, 0.2)" 
-                                    radius={[2, 2, 0, 0]} 
+                                    dataKey="activity"
+                                    fill="rgba(59, 130, 246, 0.2)"
+                                    radius={[2, 2, 0, 0]}
                                 />
-                                
-                                {/* Consumed calories area (using calories axis) */}
-                                <Area 
+                                <Area
                                     yAxisId="cal"
-                                    type="monotone" 
-                                    dataKey="consumed" 
-                                    stroke="#f97316" 
+                                    type="monotone"
+                                    dataKey="consumed"
+                                    stroke="#f97316"
                                     strokeWidth={2}
-                                    fillOpacity={1} 
-                                    fill="url(#consumedGradient)" 
+                                    fillOpacity={1}
+                                    fill="url(#consumedGradient)"
                                 />
-                                
-                                {/* Weight line (using weight axis) */}
-                                <Line 
+                                <Line
                                     yAxisId="kg"
-                                    type="monotone" 
-                                    dataKey="weight" 
-                                    stroke="#a855f7" 
+                                    type="monotone"
+                                    dataKey="weight"
+                                    stroke="#a855f7"
                                     strokeWidth={3}
                                     dot={{ fill: '#a855f7', strokeWidth: 2, r: 4 }}
                                     activeDot={{ r: 6, stroke: '#a855f7', strokeWidth: 2, fill: '#fff' }}
@@ -405,33 +394,25 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     </div>
                 </div>
 
-                {/* Enhanced Legend - Full bleed to align with chart */}
                 <div className="-mx-6 sm:-mx-8 md:mx-0">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-6 sm:px-8 md:px-0">
-                    <div className="flex flex-wrap items-center gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                            <span className="text-gray-400">Weight (kg)</span>
+                        <div className="flex flex-wrap items-center gap-4 text-sm">
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: MACRO_COLORS.protein }}></div>
+                                <span className="text-gray-400">Weight (kg)</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-sm"></div>
+                                <span className="text-gray-400">Consumed (kcal)</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-2 bg-blue-500/40 rounded-sm"></div>
+                                <span className="text-gray-400">Activity (%)</span>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-sm"></div>
-                            <span className="text-gray-400">Consumed (kcal)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-2 bg-blue-500/40 rounded-sm"></div>
-                            <span className="text-gray-400">Activity (%)</span>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Activity className="h-4 w-4 text-blue-400" />
-                        <p className="font-bold text-white text-sm">
-                            {avgCaloriesConsumed - avgCaloriesBurned} kcal{' '}
-                            <span className="font-normal text-gray-400">Net Surplus</span>
-                        </p>
-                    </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }
