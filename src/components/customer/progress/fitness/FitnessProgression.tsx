@@ -12,15 +12,15 @@ const calculateE1RM = (weight: number, reps: number) => {
     return weight / (1.0278 - 0.0278 * reps);
 };
 
-// Custom Tooltip for the chart
+// Custom Tooltip for the chart, now theme-aware
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-gray-800/95 backdrop-blur-sm p-3 rounded-lg border border-gray-600/50 shadow-lg min-w-[150px] text-white">
+            <div className="bg-gray-800/95 dark:bg-white/95 backdrop-blur-sm p-3 rounded-lg border border-gray-600/50 dark:border-gray-300/50 shadow-lg min-w-[150px] text-white dark:text-gray-900">
                 <p className="text-sm font-bold">{label}</p>
                 <div className="flex justify-between items-center text-xs mt-1">
-                    <span className="text-gray-400">e-1RM:</span>
-                    <span className="font-semibold text-orange-400">{payload[0].value?.toFixed(0)} kg</span>
+                    <span className="text-gray-400 dark:text-gray-600">e-1RM:</span>
+                    <span className="font-semibold text-orange-400 dark:text-orange-600">{payload[0].value?.toFixed(0)} kg</span>
                 </div>
             </div>
         );
@@ -34,7 +34,7 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
     const exerciseData = useMemo(() => {
         const history = selectedExercise.history || [];
         if (history.length === 0) {
-            return { chartData: [], highest: 0, lowest: 0 };
+            return { chartData: [], highest: 0, lowest: 0, currentE1RM: 0 };
         }
 
         const chartData = history.map(session => ({
@@ -52,20 +52,20 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
 
     return (
         <motion.div
-            className="w-full flex flex-col gap-8 text-white"
+            className="w-full flex flex-col gap-8 text-gray-900 dark:text-white"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
-            {/* NEW HEADER SECTION */}
-            <div className="flex flex-col md:flex-row justify-between items-center gap-6 p-6 sm:p-8 rounded-2xl bg-[#1f2937]">
+            {/* NEW HEADER SECTION, now theme-aware */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6 p-6 sm:p-8 rounded-2xl bg-white dark:bg-[#1f2937] shadow-lg dark:shadow-none">
                 <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center">
                         <Dumbbell className="w-8 h-8 text-white" />
                     </div>
                     <div>
-                        <h3 className="text-2xl font-bold tracking-tight">Fitness Progress</h3>
-                        <p className="text-sm text-gray-400">Your strength trend for {selectedExercise.exerciseName}</p>
+                        <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Fitness Progress</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Your strength trend for {selectedExercise.exerciseName}</p>
                     </div>
                 </div>
                 <AnimatePresence mode="wait">
@@ -78,24 +78,24 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                         className="flex items-center gap-4 text-center mt-4 md:mt-0"
                     >
                         <div className="text-center">
-                            <p className="text-2xl font-bold text-teal-400">{data.consistency}%</p>
-                            <p className="text-xs text-gray-400">Consistency</p>
+                            <p className="text-2xl font-bold text-teal-600 dark:text-teal-400">{data.consistency}%</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Consistency</p>
                         </div>
                         <div className="text-center">
-                            <p className="text-2xl font-bold text-amber-400">{selectedExercise.personalRecord.value.toFixed(0)}</p>
-                            <p className="text-xs text-gray-400">Personal Record ({selectedExercise.personalRecord.unit})</p>
+                            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{selectedExercise.personalRecord.value.toFixed(0)}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Personal Record ({selectedExercise.personalRecord.unit})</p>
                         </div>
                         <div className="text-center">
-                            <p className="text-2xl font-bold text-sky-400">{exerciseData.currentE1RM.toFixed(0)}</p>
-                            <p className="text-xs text-gray-400">Current e-1RM (kg)</p>
+                            <p className="text-2xl font-bold text-sky-600 dark:text-sky-400">{exerciseData.currentE1RM.toFixed(0)}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Current e-1RM (kg)</p>
                         </div>
                     </motion.div>
                 </AnimatePresence>
             </div>
 
-            {/* Main content container with padding */}
-            <div className="bg-[#1f2937] rounded-3xl p-6 sm:p-8 flex flex-col gap-6">
-                {/* Exercise Selector */}
+            {/* Main content container with padding, now theme-aware */}
+            <div className="bg-white dark:bg-[#1f2937] rounded-3xl p-6 sm:p-8 flex flex-col gap-6 shadow-lg dark:shadow-none">
+                {/* Exercise Selector, now theme-aware */}
                 <div className="flex items-center gap-2 flex-wrap">
                     {data.exercises.map(ex => (
                         <button
@@ -104,8 +104,8 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                             className={cn(
                                 'text-sm font-semibold px-3 py-1.5 rounded-full transition-all',
                                 selectedExercise.exerciseName === ex.exerciseName
-                                    ? 'bg-gray-100 text-gray-900'
-                                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                                    ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                             )}
                         >
                             {ex.exerciseName}
@@ -113,10 +113,10 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                     ))}
                 </div>
 
-                {/* Main chart section */}
+                {/* Main chart section, now theme-aware */}
                 <div className="space-y-4">
-                    <h3 className="text-lg font-bold tracking-tight text-white">Strength Trend</h3>
-                    <div className="h-60 w-full bg-gray-800 rounded-lg p-4">
+                    <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">Strength Trend</h3>
+                    <div className="h-60 w-full bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={exerciseData.chartData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
                                 <defs>
@@ -127,9 +127,9 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                                 </defs>
                                 <XAxis 
                                     dataKey="date" 
-                                    stroke="#9ca3af" 
+                                    stroke="hsl(var(--muted-foreground))" 
                                     fontSize={12} 
-                                    tick={{ fill: '#9ca3af' }} 
+                                    tick={{ fill: 'hsl(var(--muted-foreground))' }} 
                                     tickLine={false} 
                                     axisLine={false} 
                                 />
@@ -147,14 +147,14 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                     </div>
                 </div>
 
-                {/* Additional metrics/insights */}
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm">
+                {/* Additional metrics/insights, now theme-aware */}
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-900 dark:text-white">
                     <div className="flex items-center gap-2">
-                        <Trophy className="h-5 w-5 text-yellow-400" />
+                        <Trophy className="h-5 w-5 text-yellow-500 dark:text-yellow-400" />
                         <p>Highest e-1RM: <span className="font-bold">{exerciseData.highest.toFixed(0)} kg</span></p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Dumbbell className="h-5 w-5 text-gray-400" />
+                        <Dumbbell className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                         <p>Lowest e-1RM: <span className="font-bold">{exerciseData.lowest.toFixed(0)} kg</span></p>
                     </div>
                 </div>
