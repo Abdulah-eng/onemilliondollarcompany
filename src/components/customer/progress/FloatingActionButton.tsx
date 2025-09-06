@@ -51,7 +51,7 @@ const WeightScroller = ({ onWeightChange, value }) => {
 
 // Action items
 const actionItems = [
-  { label: 'Weigh In', icon: <Weight className="h-5 w-5" />, action: () => null },
+  { label: 'Weight In', icon: <Weight className="h-5 w-5" />, action: () => null },
   { label: 'Progression Photo', icon: <Camera className="h-5 w-5" />, action: () => null },
 ];
 
