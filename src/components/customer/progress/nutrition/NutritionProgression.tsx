@@ -125,7 +125,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 </div>
             </div>
 
-            ---
+            <hr className="my-4 border-t-2 border-gray-200" />
 
             {/* TOP PART: Container with semi-circular gauge and macro bars */}
             <div className="rounded-xl p-6 flex flex-col items-center gap-6 overflow-visible bg-gray-50">
@@ -224,7 +224,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 </div>
             </div>
 
-            ---
+            <hr className="my-4 border-t-2 border-gray-200" />
 
             {/* MIDDLE PART: Consumed and Burned */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -265,7 +265,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                 </motion.div>
             </div>
 
-            ---
+            <hr className="my-4 border-t-2 border-gray-200" />
 
             {/* BOTTOM PART: Enhanced Trend Analysis */}
             <div className="space-y-4 sm:space-y-6">
