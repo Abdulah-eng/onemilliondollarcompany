@@ -80,10 +80,19 @@ export default function FitnessProgression({
       };
     });
 
+    // Add ghost point to stretch line fully to the right
+    if (chartData.length > 0) {
+      const last = chartData[chartData.length - 1];
+      chartData.push({
+        timestamp: last.timestamp + 24 * 60 * 60 * 1000, // +1 day
+        e1RM: last.e1RM,
+      });
+    }
+
     const e1RMs = chartData.map((d) => d.e1RM);
     const highest = Math.max(...e1RMs);
     const lowest = Math.min(...e1RMs);
-    const currentE1RM = chartData[chartData.length - 1]?.e1RM || 0;
+    const currentE1RM = chartData[chartData.length - 2]?.e1RM || 0; // real last point
 
     return { chartData, highest, lowest, currentE1RM };
   }, [selectedExercise]);
@@ -173,7 +182,7 @@ export default function FitnessProgression({
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={exerciseData.chartData}
-                  margin={{ top: 10, right: -30, left: -30, bottom: 0 }} // stretch both sides
+                  margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
                 >
                   <defs>
                     <linearGradient id="colorFitness" x1="0" y1="0" x2="0" y2="1">
@@ -199,7 +208,6 @@ export default function FitnessProgression({
                       })
                     }
                   />
-                  {/* YAxis hidden for cleaner look */}
                   <Tooltip
                     content={<CustomTooltip />}
                     cursor={{ stroke: 'rgba(100,100,100,0.2)', strokeWidth: 1 }}
