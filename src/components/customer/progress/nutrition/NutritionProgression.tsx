@@ -324,10 +324,10 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     ))}
                 </div>
 
-                <div>
+                <div className="-mx-6 sm:-mx-8 md:mx-0">
                     <div className="h-72 sm:h-72 md:h-80 w-full overflow-visible">
                         <ResponsiveContainer width="100%" height="100%">
-                            <ComposedChart data={trendData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+                            <ComposedChart data={trendData} margin={{ top: 8, right: 0, left: 0, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="consumedGradient" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
