@@ -29,6 +29,20 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 };
 
 export default function FitnessProgression({ data }: { data: ProgressData['fitnessProgression'] }) {
+    // Defensive programming: ensure data and exercises exist
+    if (!data || !data.exercises || data.exercises.length === 0) {
+        return (
+            <div className="w-full flex flex-col gap-8 text-gray-900 dark:text-white">
+                <div className="bg-white dark:bg-[#1f2937] rounded-3xl p-6 sm:p-8 flex flex-col gap-6 shadow-lg dark:shadow-none">
+                    <div className="text-center">
+                        <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Fitness Progress</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">No fitness data available yet.</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    
     const [selectedExercise, setSelectedExercise] = useState(data.exercises[0]);
 
     const exerciseData = useMemo(() => {
