@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ProgressData } from '@/mockdata/progress/mockProgressData';
-import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Dumbbell, Trophy } from 'lucide-react';
