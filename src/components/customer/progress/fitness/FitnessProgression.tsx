@@ -137,7 +137,7 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                                         tick={{ fill: 'hsl(var(--muted-foreground))' }} 
                                         tickLine={false} 
                                         axisLine={false} 
-                                        padding={{ left: 15, right: 15 }} // Add padding to X-axis
+                                        padding={{ left: 15, right: 0 }}
                                     />
                                     <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(100,100,100,0.2)', strokeWidth: 1 }} />
                                     <Area 
