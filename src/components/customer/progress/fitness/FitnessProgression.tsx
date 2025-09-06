@@ -69,7 +69,7 @@ export default function FitnessProgression({
   const exerciseData = useMemo(() => {
     const history = selectedExercise.history || [];
     if (history.length === 0) {
-      return { chartData: [], highest: 0, lowest: 0, currentE1RM: 0 };
+      return { chartData: [], highest: 0, lowest: 0, currentE1RM: 0, domain: [0, 0] };
     }
 
     const chartData = history.map((session) => {
@@ -80,21 +80,19 @@ export default function FitnessProgression({
       };
     });
 
-    // Add ghost point to stretch line fully to the right
-    if (chartData.length > 0) {
-      const last = chartData[chartData.length - 1];
-      chartData.push({
-        timestamp: last.timestamp + 24 * 60 * 60 * 1000, // +1 day
-        e1RM: last.e1RM,
-      });
-    }
-
+    const timestamps = chartData.map((d) => d.timestamp);
     const e1RMs = chartData.map((d) => d.e1RM);
+
     const highest = Math.max(...e1RMs);
     const lowest = Math.min(...e1RMs);
-    const currentE1RM = chartData[chartData.length - 2]?.e1RM || 0; // real last point
+    const currentE1RM = e1RMs[e1RMs.length - 1] || 0;
 
-    return { chartData, highest, lowest, currentE1RM };
+    // Add small padding to center line
+    const minTs = Math.min(...timestamps);
+    const maxTs = Math.max(...timestamps);
+    const padding = (maxTs - minTs) * 0.1; // 10% padding on both sides
+
+    return { chartData, highest, lowest, currentE1RM, domain: [minTs - padding, maxTs + padding] };
   }, [selectedExercise]);
 
   return (
@@ -193,7 +191,7 @@ export default function FitnessProgression({
                   <XAxis
                     dataKey="timestamp"
                     type="number"
-                    domain={['dataMin', 'dataMax']}
+                    domain={exerciseData.domain} // centered domain
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
                     tick={{ fill: 'hsl(var(--muted-foreground))' }}
