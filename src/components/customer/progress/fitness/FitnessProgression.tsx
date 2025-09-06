@@ -123,7 +123,7 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                         <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">Strength Trend</h3>
                         <div className="h-60 w-full overflow-hidden -mx-6 sm:-mx-8">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={exerciseData.chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                                <AreaChart data={exerciseData.chartData} margin={{ top: 10, right: -16, left: 0, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="colorFitness" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#f97316" stopOpacity={0.4} />
@@ -137,7 +137,7 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                                         tick={{ fill: 'hsl(var(--muted-foreground))' }} 
                                         tickLine={false} 
                                         axisLine={false} 
-                                        padding={{ left: 15, right: 0 }}
+                                        padding={{ left: 0, right: 0 }}
                                     />
                                     <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(100,100,100,0.2)', strokeWidth: 1 }} />
                                     <Area 
