@@ -121,7 +121,7 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                     {/* Main chart section */}
                     <div className="space-y-4">
                         <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">Strength Trend</h3>
-                        <div className="h-60 w-full bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
+                        <div className="h-60 w-full rounded-lg p-4">
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={exerciseData.chartData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
                                     <defs>
