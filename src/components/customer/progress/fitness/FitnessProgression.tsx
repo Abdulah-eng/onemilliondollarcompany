@@ -4,6 +4,7 @@ import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, TooltipProps } fr
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Dumbbell, Trophy } from 'lucide-react';
+
 // Brzycki formula for estimating 1-Rep Max
 const calculateE1RM = (weight: number, reps: number) => {
     if (reps < 1) return 0;
@@ -28,7 +29,6 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 };
 
 export default function FitnessProgression({ data }: { data: ProgressData['fitnessProgression'] }) {
-    // Defensive programming: ensure data and exercises exist
     if (!data || !data.exercises || data.exercises.length === 0) {
         return (
             <div className="w-full flex flex-col gap-8 text-gray-900 dark:text-white">
@@ -70,9 +70,7 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
-            {/* NEW SINGLE CONTAINER: Combines header and main content */}
             <div className="bg-white dark:bg-[#1f2937] rounded-3xl p-6 sm:p-8 flex flex-col gap-6 shadow-lg dark:shadow-none">
-                {/* Header content section */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-4">
                         <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center">
@@ -108,12 +106,9 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                     </AnimatePresence>
                 </div>
                 
-                {/* Separator Line */}
                 <hr className="my-2 border-gray-200 dark:border-gray-700" />
                 
-                {/* Main content section */}
                 <div className="flex flex-col gap-6">
-                    {/* Exercise Selector */}
                     <div className="flex items-center gap-2 flex-wrap">
                         {data.exercises.map(ex => (
                             <button
@@ -131,12 +126,11 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                         ))}
                     </div>
 
-                    {/* Main chart section */}
                     <div className="space-y-4">
                         <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">Strength Trend</h3>
                         <div className="h-60 w-full overflow-hidden -mx-6 sm:-mx-8">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={exerciseData.chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                                <AreaChart data={exerciseData.chartData} margin={{ top: 10, right: -15, left: -15, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="colorFitness" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#f97316" stopOpacity={0.4} />
@@ -150,8 +144,8 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                                         tick={{ fill: 'hsl(var(--muted-foreground))' }} 
                                         tickLine={false} 
                                         axisLine={false} 
-                                        padding={{ left: 0, right: 0 }}
                                     />
+                                    <YAxis hide />
                                     <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(100,100,100,0.2)', strokeWidth: 1 }} />
                                     <Area 
                                         type="monotone" 
@@ -166,7 +160,6 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                         </div>
                     </div>
 
-                    {/* Additional metrics/insights */}
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-900 dark:text-white">
                         <div className="flex items-center gap-2">
                             <Trophy className="h-5 w-5 text-yellow-500 dark:text-yellow-400" />
