@@ -66,7 +66,7 @@ export default function FloatingActionButton() {
     const [isOpen, setIsOpen] = useState(false);
     const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
     const [isWeightModalOpen, setIsWeightModalOpen] = useState(false);
-    const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false); // New state for check-in modal
+    const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
     
     // Example state for previous and new weight
     const [previousWeight, setPreviousWeight] = useState(85.5); 
@@ -203,12 +203,12 @@ export default function FloatingActionButton() {
                 </DialogContent>
             </Dialog>
 
-            {/* Daily Check-in Modal */}
-            <Dialog open={isCheckInModalOpen} onOpenChange={setIsCheckInModalOpen}>
-              <DialogContent className="max-w-md p-0"> {/* Custom styling for the check-in modal */}
-                <DailyCheckIn />
-              </DialogContent>
-            </Dialog>
+            {/* Daily Check-in Modal */}
+            <Dialog open={isCheckInModalOpen} onOpenChange={setIsCheckInModalOpen}>
+              <DialogContent>
+                <DailyCheckIn />
+              </DialogContent>
+            </Dialog>
 
         </div>
     );
