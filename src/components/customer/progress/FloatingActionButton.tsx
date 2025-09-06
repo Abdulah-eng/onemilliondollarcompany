@@ -12,6 +12,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
+// Import the DailyCheckIn component
+import DailyCheckIn from '@/components/customer/dashboard/DailyCheckIn';
+
 // Helper component for the weight scroller
 const WeightScroller = ({ onWeightChange, value }) => {
   const weights = Array.from({ length: 201 }, (_, i) => 30 + i); // Weights from 30 to 230
@@ -54,15 +57,16 @@ const WeightScroller = ({ onWeightChange, value }) => {
 
 // --- UPDATED ACTION ITEMS ---
 const actionItems = [
-    { label: 'Weigh In', icon: <Weight className="h-5 w-5" />, action: () => null }, // We'll handle this action below
+    { label: 'Weigh In', icon: <Weight className="h-5 w-5" />, action: () => null },
     { label: 'Progression Photo', icon: <Camera className="h-5 w-5" />, action: () => null },
-    { label: 'Daily Check in', icon: <ClipboardCheck className="h-5 w-5" />, action: () => alert('Daily Check in') },
+    { label: 'Daily Check in', icon: <ClipboardCheck className="h-5 w-5" />, action: () => null },
 ];
 
 export default function FloatingActionButton() {
     const [isOpen, setIsOpen] = useState(false);
     const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
     const [isWeightModalOpen, setIsWeightModalOpen] = useState(false);
+    const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false); // New state for check-in modal
     
     // Example state for previous and new weight
     const [previousWeight, setPreviousWeight] = useState(85.5); 
@@ -81,6 +85,11 @@ export default function FloatingActionButton() {
       setIsWeightModalOpen(true);
     };
 
+    const handleCheckInAction = () => {
+      setIsOpen(false);
+      setIsCheckInModalOpen(true);
+    };
+
     const handleCameraClick = () => {
         if (cameraInputRef.current) {
             cameraInputRef.current.click();
@@ -96,6 +105,7 @@ export default function FloatingActionButton() {
     // Update actions for the new handlers
     actionItems[0].action = handleWeighInAction;
     actionItems[1].action = handlePhotoAction;
+    actionItems[2].action = handleCheckInAction;
 
     return (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col-reverse items-end">
@@ -192,6 +202,14 @@ export default function FloatingActionButton() {
                     </div>
                 </DialogContent>
             </Dialog>
+
+            {/* Daily Check-in Modal */}
+            <Dialog open={isCheckInModalOpen} onOpenChange={setIsCheckInModalOpen}>
+              <DialogContent className="max-w-md p-0"> {/* Custom styling for the check-in modal */}
+                <DailyCheckIn />
+              </DialogContent>
+            </Dialog>
+
         </div>
     );
 }
