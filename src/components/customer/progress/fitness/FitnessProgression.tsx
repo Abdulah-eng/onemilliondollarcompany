@@ -4,6 +4,7 @@ import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, TooltipProps } fr
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Dumbbell, Trophy } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Brzycki formula for estimating 1-Rep Max
 const calculateE1RM = (weight: number, reps: number) => {
@@ -29,6 +30,8 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 };
 
 export default function FitnessProgression({ data }: { data: ProgressData['fitnessProgression'] }) {
+    const isMobile = useIsMobile();
+    
     // Defensive programming: ensure data and exercises exist
     if (!data || !data.exercises || data.exercises.length === 0) {
         return (
@@ -44,6 +47,12 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
     }
     
     const [selectedExercise, setSelectedExercise] = useState(data.exercises[0]);
+
+    // Calculate chart margins to stretch equally to both sides
+    const chartMargin = useMemo(() => {
+        const margin = isMobile ? -24 : -32; // Match card padding
+        return { top: 10, right: margin, left: margin, bottom: 0 };
+    }, [isMobile]);
 
     const exerciseData = useMemo(() => {
         const history = selectedExercise.history || [];
@@ -137,7 +146,7 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                         <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">Strength Trend</h3>
                         <div className="h-60 w-full overflow-hidden -mx-6 sm:-mx-8">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={exerciseData.chartData} margin={{ top: 10, right: -16, left: 0, bottom: 0 }}>
+                                <AreaChart data={exerciseData.chartData} margin={chartMargin}>
                                     <defs>
                                         <linearGradient id="colorFitness" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#f97316" stopOpacity={0.4} />
