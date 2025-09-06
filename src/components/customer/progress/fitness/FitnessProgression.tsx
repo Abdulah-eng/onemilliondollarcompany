@@ -12,7 +12,7 @@ const calculateE1RM = (weight: number, reps: number) => {
     return weight / (1.0278 - 0.0278 * reps);
 };
 
-// Custom Tooltip for the chart, now theme-aware
+// Custom Tooltip for the chart
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
         return (
@@ -20,7 +20,9 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
                 <p className="text-sm font-bold">{label}</p>
                 <div className="flex justify-between items-center text-xs mt-1">
                     <span className="text-gray-400 dark:text-gray-600">e-1RM:</span>
-                    <span className="font-semibold text-orange-400 dark:text-orange-600">{payload[0].value?.toFixed(0)} kg</span>
+                    <span className="font-semibold text-orange-400 dark:text-orange-600">
+                        {payload[0].value?.toFixed(0)} kg
+                    </span>
                 </div>
             </div>
         );
@@ -34,14 +36,16 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
             <div className="w-full flex flex-col gap-8 text-gray-900 dark:text-white">
                 <div className="bg-white dark:bg-[#1f2937] rounded-3xl p-6 sm:p-8 flex flex-col gap-6 shadow-lg dark:shadow-none">
                     <div className="text-center">
-                        <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Fitness Progress</h3>
+                        <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                            Fitness Progress
+                        </h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">No fitness data available yet.</p>
                     </div>
                 </div>
             </div>
         );
     }
-    
+
     const [selectedExercise, setSelectedExercise] = useState(data.exercises[0]);
 
     const exerciseData = useMemo(() => {
@@ -51,7 +55,10 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
         }
 
         const chartData = history.map(session => ({
-            date: new Date(session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            date: new Date(session.date).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+            }),
             e1RM: calculateE1RM(session.weight, session.reps),
         }));
 
@@ -77,8 +84,12 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                             <Dumbbell className="w-8 h-8 text-white" />
                         </div>
                         <div>
-                            <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Fitness Progress</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Your strength trend for {selectedExercise.exerciseName}</p>
+                            <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                                Fitness Progress
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Your strength trend for {selectedExercise.exerciseName}
+                            </p>
                         </div>
                     </div>
                     <AnimatePresence mode="wait">
@@ -91,23 +102,31 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                             className="flex items-center gap-4 text-center mt-4 md:mt-0"
                         >
                             <div className="text-center">
-                                <p className="text-2xl font-bold text-teal-600 dark:text-teal-400">{data.consistency}%</p>
+                                <p className="text-2xl font-bold text-teal-600 dark:text-teal-400">
+                                    {data.consistency}%
+                                </p>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">Consistency</p>
                             </div>
                             <div className="text-center">
-                                <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{selectedExercise.personalRecord.value.toFixed(0)}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">Personal Record ({selectedExercise.personalRecord.unit})</p>
+                                <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                                    {selectedExercise.personalRecord.value.toFixed(0)}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    Personal Record ({selectedExercise.personalRecord.unit})
+                                </p>
                             </div>
                             <div className="text-center">
-                                <p className="text-2xl font-bold text-sky-600 dark:text-sky-400">{exerciseData.currentE1RM.toFixed(0)}</p>
+                                <p className="text-2xl font-bold text-sky-600 dark:text-sky-400">
+                                    {exerciseData.currentE1RM.toFixed(0)}
+                                </p>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">Current e-1RM (kg)</p>
                             </div>
                         </motion.div>
                     </AnimatePresence>
                 </div>
-                
+
                 <hr className="my-2 border-gray-200 dark:border-gray-700" />
-                
+
                 <div className="flex flex-col gap-6">
                     <div className="flex items-center gap-2 flex-wrap">
                         {data.exercises.map(ex => (
@@ -127,33 +146,44 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                     </div>
 
                     <div className="space-y-4">
-                        <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">Strength Trend</h3>
+                        <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
+                            Strength Trend
+                        </h3>
                         <div className="h-60 w-full overflow-hidden -mx-6 sm:-mx-8">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={exerciseData.chartData} margin={{ top: 10, right: -15, left: -15, bottom: 0 }}>
+                                <AreaChart
+                                    data={exerciseData.chartData}
+                                    margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
+                                >
                                     <defs>
                                         <linearGradient id="colorFitness" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#f97316" stopOpacity={0.4} />
                                             <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
-                                    <XAxis 
-                                        dataKey="date" 
-                                        stroke="hsl(var(--muted-foreground))" 
-                                        fontSize={12} 
-                                        tick={{ fill: 'hsl(var(--muted-foreground))' }} 
-                                        tickLine={false} 
-                                        axisLine={false} 
+                                    <XAxis
+                                        dataKey="date"
+                                        stroke="hsl(var(--muted-foreground))"
+                                        fontSize={12}
+                                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        allowDuplicatedCategory={false}
+                                        interval="preserveEnd"
+                                        padding={{ left: 0, right: 0 }}
                                     />
                                     {/* YAxis hidden for cleaner look */}
-                                    <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(100,100,100,0.2)', strokeWidth: 1 }} />
-                                    <Area 
-                                        type="monotone" 
-                                        dataKey="e1RM" 
-                                        stroke="#f97316" 
-                                        strokeWidth={3} 
-                                        fillOpacity={1} 
-                                        fill="url(#colorFitness)" 
+                                    <Tooltip
+                                        content={<CustomTooltip />}
+                                        cursor={{ stroke: 'rgba(100,100,100,0.2)', strokeWidth: 1 }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="e1RM"
+                                        stroke="#f97316"
+                                        strokeWidth={3}
+                                        fillOpacity={1}
+                                        fill="url(#colorFitness)"
                                     />
                                 </AreaChart>
                             </ResponsiveContainer>
@@ -163,11 +193,15 @@ export default function FitnessProgression({ data }: { data: ProgressData['fitne
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-900 dark:text-white">
                         <div className="flex items-center gap-2">
                             <Trophy className="h-5 w-5 text-yellow-500 dark:text-yellow-400" />
-                            <p>Highest e-1RM: <span className="font-bold">{exerciseData.highest.toFixed(0)} kg</span></p>
+                            <p>
+                                Highest e-1RM: <span className="font-bold">{exerciseData.highest.toFixed(0)} kg</span>
+                            </p>
                         </div>
                         <div className="flex items-center gap-2">
                             <Dumbbell className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                            <p>Lowest e-1RM: <span className="font-bold">{exerciseData.lowest.toFixed(0)} kg</span></p>
+                            <p>
+                                Lowest e-1RM: <span className="font-bold">{exerciseData.lowest.toFixed(0)} kg</span>
+                            </p>
                         </div>
                     </div>
                 </div>
