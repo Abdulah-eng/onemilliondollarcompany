@@ -23,7 +23,7 @@ export default function PhotoProgressCard({ photos }: { photos: PhotoEntry[] }) 
       
       {/* Latest Photo Section */}
       {latestPhoto && (
-        <div className="mb-6 rounded-xl overflow-hidden relative group">
+        <div className="mb-6 rounded-xl overflow-hidden relative group max-w-sm mx-auto md:max-w-md lg:max-w-xl">
           <img 
             src={latestPhoto.imageUrl} 
             alt={`Latest progress photo taken on ${latestPhoto.date}`} 
