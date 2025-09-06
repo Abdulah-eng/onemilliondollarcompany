@@ -10,25 +10,72 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
+
+// Helper component for the weight scroller
+const WeightScroller = ({ onWeightChange, value }) => {
+  const weights = Array.from({ length: 201 }, (_, i) => 30 + i); // Weights from 30 to 230
+  const decimals = Array.from({ length: 10 }, (_, i) => i); // Decimals from 0 to 9
+
+  return (
+    <div className="flex justify-center items-center space-x-2">
+      <div className="h-40 overflow-y-scroll w-20 text-center custom-scrollbar">
+        {weights.map((w) => (
+          <div
+            key={w}
+            className={`py-2 text-2xl font-bold ${
+              w === Math.floor(value) ? 'text-primary' : 'text-muted-foreground'
+            }`}
+          >
+            {w}
+          </div>
+        ))}
+      </div>
+      <span className="text-2xl font-bold">.</span>
+      <div className="h-40 overflow-y-scroll w-20 text-center custom-scrollbar">
+        {decimals.map((d) => (
+          <div
+            key={d}
+            className={`py-2 text-2xl font-bold ${
+              d === (value * 10) % 10 ? 'text-primary' : 'text-muted-foreground'
+            }`}
+          >
+            {d}
+          </div>
+        ))}
+      </div>
+      <span className="text-xl">kg</span>
+    </div>
+  );
+};
 
 // --- UPDATED ACTION ITEMS ---
 const actionItems = [
-    { label: 'Weigh In', icon: <Weight className="h-5 w-5" />, action: () => alert('Weigh In') },
-    { label: 'Progression Photo', icon: <Camera className="h-5 w-5" />, action: () => null }, // We'll handle this action below
+    { label: 'Weigh In', icon: <Weight className="h-5 w-5" />, action: () => null }, // We'll handle this action below
+    { label: 'Progression Photo', icon: <Camera className="h-5 w-5" />, action: () => null },
     { label: 'Daily Check in', icon: <ClipboardCheck className="h-5 w-5" />, action: () => alert('Daily Check in') },
 ];
 
 export default function FloatingActionButton() {
     const [isOpen, setIsOpen] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+    const [isWeightModalOpen, setIsWeightModalOpen] = useState(false);
+    
+    // Example state for previous and new weight
+    const [previousWeight, setPreviousWeight] = useState(85.5); 
+    const [currentWeight, setCurrentWeight] = useState(85.5);
+
     const fileInputRef = useRef(null);
     const cameraInputRef = useRef(null);
 
     const handlePhotoAction = () => {
         setIsOpen(false);
-        setIsModalOpen(true);
+        setIsPhotoModalOpen(true);
+    };
+
+    const handleWeighInAction = () => {
+      setIsOpen(false);
+      setIsWeightModalOpen(true);
     };
 
     const handleCameraClick = () => {
@@ -43,7 +90,8 @@ export default function FloatingActionButton() {
         }
     };
 
-    // Replace the Progression Photo action with the new function
+    // Update actions for the new handlers
+    actionItems[0].action = handleWeighInAction;
     actionItems[1].action = handlePhotoAction;
 
     return (
@@ -90,7 +138,8 @@ export default function FloatingActionButton() {
                 )}
             </AnimatePresence>
 
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            {/* Photo Modal */}
+            <Dialog open={isPhotoModalOpen} onOpenChange={setIsPhotoModalOpen}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Add a Progression Photo</DialogTitle>
@@ -105,11 +154,10 @@ export default function FloatingActionButton() {
                         <Button onClick={handleLibraryClick} className="w-full">
                             🖼️ Select from Library
                         </Button>
-                        {/* Hidden input elements to trigger file picker and camera */}
                         <input
                             type="file"
                             accept="image/*"
-                            capture="user" // 'user' for front camera, 'environment' for back
+                            capture="user"
                             ref={cameraInputRef}
                             style={{ display: 'none' }}
                         />
@@ -119,6 +167,25 @@ export default function FloatingActionButton() {
                             ref={fileInputRef}
                             style={{ display: 'none' }}
                         />
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Weigh In Modal */}
+            <Dialog open={isWeightModalOpen} onOpenChange={setIsWeightModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Record Your Weight</DialogTitle>
+                        <DialogDescription>
+                            Your previous weight was <span className="font-bold">{previousWeight}kg</span>.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex flex-col items-center py-4">
+                        <div className="text-4xl font-extrabold mb-4">
+                            {currentWeight.toFixed(1)} <span className="text-base font-normal">kg</span>
+                        </div>
+                        <WeightScroller value={currentWeight} onWeightChange={setCurrentWeight} />
+                        <Button className="mt-6 w-full">Save Weight</Button>
                     </div>
                 </DialogContent>
             </Dialog>
