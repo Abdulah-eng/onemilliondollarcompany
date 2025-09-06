@@ -1,6 +1,6 @@
 // src/components/customer/progress/FloatingActionButton.tsx
 import { useState, useRef } from 'react';
-import { Plus, Weight, Camera, ClipboardCheck } from 'lucide-react';
+import { Plus, Weight, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import DailyCheckIn from '@/components/customer/dashboard/DailyCheckIn';
 
 // Helper component for the weight scroller
 const WeightScroller = ({ onWeightChange, value }) => {
@@ -54,14 +53,12 @@ const WeightScroller = ({ onWeightChange, value }) => {
 const actionItems = [
   { label: 'Weigh In', icon: <Weight className="h-5 w-5" />, action: () => null },
   { label: 'Progression Photo', icon: <Camera className="h-5 w-5" />, action: () => null },
-  { label: 'Daily Check in', icon: <ClipboardCheck className="h-5 w-5" />, action: () => null },
 ];
 
 export default function FloatingActionButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
   const [isWeightModalOpen, setIsWeightModalOpen] = useState(false);
-  const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
   const [previousWeight, setPreviousWeight] = useState(85.5);
   const [currentWeight, setCurrentWeight] = useState(85.5);
 
@@ -76,17 +73,12 @@ export default function FloatingActionButton() {
     setIsOpen(false);
     setIsWeightModalOpen(true);
   };
-  const handleCheckInAction = () => {
-    setIsOpen(false);
-    setIsCheckInModalOpen(true);
-  };
   const handleCameraClick = () => cameraInputRef.current?.click();
   const handleLibraryClick = () => fileInputRef.current?.click();
 
   // Attach handlers
   actionItems[0].action = handleWeighInAction;
   actionItems[1].action = handlePhotoAction;
-  actionItems[2].action = handleCheckInAction;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col-reverse items-end">
@@ -166,16 +158,6 @@ export default function FloatingActionButton() {
             <WeightScroller value={currentWeight} onWeightChange={setCurrentWeight} />
             <Button className="mt-6 w-full">Save Weight</Button>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Daily Check-in Modal */}
-      <Dialog open={isCheckInModalOpen} onOpenChange={setIsCheckInModalOpen}>
-        <DialogContent className="w-full max-w-2xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Daily Check-in</DialogTitle>
-          </DialogHeader>
-          <DailyCheckIn />
         </DialogContent>
       </Dialog>
     </div>
