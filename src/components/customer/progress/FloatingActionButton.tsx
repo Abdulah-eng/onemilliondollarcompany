@@ -171,9 +171,11 @@ export default function FloatingActionButton() {
 
       {/* Daily Check-in Modal */}
       <Dialog open={isCheckInModalOpen} onOpenChange={setIsCheckInModalOpen}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
-          <DailyCheckIn />
-        </DialogContent>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-2xl mx-auto p-6 animate-in fade-in-90 slide-in-from-bottom-10 md:w-3/4">
+            <DailyCheckIn />
+          </div>
+        </div>
       </Dialog>
     </div>
   );
