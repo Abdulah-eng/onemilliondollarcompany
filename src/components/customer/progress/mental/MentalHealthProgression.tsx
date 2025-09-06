@@ -11,8 +11,8 @@ const MENTAL_HEALTH_COLORS = {
     stress: '#ef4444', // Red
     energy: '#fcd34d', // Yellow
     meditation: '#c084fc', // Purple for Meditation bars
-    background: '#ffffff', // Changed to white
-    foreground: '#262626', // Changed to charcoal/dark text
+    background: '#ffffff', // White
+    foreground: '#262626', // Charcoal/dark text
 };
 
 // DUMMY TREND DATA for mental health
@@ -52,11 +52,9 @@ const getMeditationStreak = (data) => {
     return streak;
 };
 
-// Helper to calculate yoga streak (using dummy data for now as not in DUMMY_MENTAL_HEALTH_TREND_DATA)
+// Helper to calculate yoga streak
 const getYogaStreak = () => {
-    // This would typically come from actual yoga session data.
-    // For now, returning a static or simplified value.
-    return 5; // Example streak
+    return 5;
 };
 
 // Helper to calculate journaling streak
@@ -119,7 +117,7 @@ export default function MentalHealthProgression({ mentalHealth, dailyCheckins })
 
     return (
         <motion.div
-            className="w-full bg-white text-gray-900 rounded-2xl p-4 sm:p-8 space-y-8 shadow-xl" // Combined into one container with white background
+            className="w-full bg-white text-gray-900 rounded-2xl p-4 sm:p-8 space-y-8 shadow-xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -253,8 +251,8 @@ export default function MentalHealthProgression({ mentalHealth, dailyCheckins })
                             className={cn(
                                 'text-sm font-semibold px-3 py-1.5 rounded-full transition-all',
                                 activeTrend === timeframe
-                                    ? 'bg-gray-900 text-white' // Dark button for active state
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300' // Lighter button for inactive state
+                                    ? 'bg-gray-900 text-white'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             )}
                         >
                             {timeframe}
@@ -265,7 +263,7 @@ export default function MentalHealthProgression({ mentalHealth, dailyCheckins })
                 <div className="-mx-4 sm:-mx-8 md:mx-0">
                     <div className="h-72 sm:h-72 md:h-80 w-full overflow-visible">
                         <ResponsiveContainer width="100%" height="100%">
-                            <ComposedChart data={trendData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+                            <ComposedChart data={trendData} margin={{ top: 8, right: 0, left: 0, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="sleepGradient" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor={MENTAL_HEALTH_COLORS.sleep} stopOpacity={0.3} />
@@ -342,25 +340,23 @@ export default function MentalHealthProgression({ mentalHealth, dailyCheckins })
                     </div>
                 </div>
 
-                <div className="-mx-4 sm:-mx-8 md:mx-0">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div className="flex flex-wrap items-center gap-4 text-sm">
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: MENTAL_HEALTH_COLORS.sleep }}></div>
-                                <span className="text-gray-500">Sleep (hrs)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: MENTAL_HEALTH_COLORS.stress }}></div>
-                                <span className="text-gray-500">Stress (Level)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: MENTAL_HEALTH_COLORS.energy }}></div>
-                                <span className="text-gray-500">Energy (Level)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-2 rounded-sm" style={{ backgroundColor: MENTAL_HEALTH_COLORS.meditation }}></div>
-                                <span className="text-gray-500">Meditation (min)</span>
-                            </div>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: MENTAL_HEALTH_COLORS.sleep }}></div>
+                            <span className="text-gray-500">Sleep (hrs)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: MENTAL_HEALTH_COLORS.stress }}></div>
+                            <span className="text-gray-500">Stress (Level)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: MENTAL_HEALTH_COLORS.energy }}></div>
+                            <span className="text-gray-500">Energy (Level)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-2 rounded-sm" style={{ backgroundColor: MENTAL_HEALTH_COLORS.meditation }}></div>
+                            <span className="text-gray-500">Meditation (min)</span>
                         </div>
                     </div>
                 </div>
