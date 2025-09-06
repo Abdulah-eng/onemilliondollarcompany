@@ -171,7 +171,10 @@ export default function FloatingActionButton() {
 
       {/* Daily Check-in Modal */}
       <Dialog open={isCheckInModalOpen} onOpenChange={setIsCheckInModalOpen}>
-        <DialogContent className="w-full max-w-2xl">
+        <DialogContent className="w-full max-w-2xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Daily Check-in</DialogTitle>
+          </DialogHeader>
           <DailyCheckIn />
         </DialogContent>
       </Dialog>
