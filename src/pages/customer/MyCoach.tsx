@@ -25,7 +25,7 @@ const MyCoach = () => {
             </div>
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mx-auto">
                 {/* Left Column (2/3 width on desktop) */}
                 <div className="md:col-span-2 space-y-6 min-w-0">
                     <CoachMainHeader onClick={() => setIsDrawerOpen(true)} />
