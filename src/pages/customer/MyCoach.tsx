@@ -26,14 +26,14 @@ const MyCoach = () => {
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column (Main Content) */}
+                {/* Main Content Column */}
                 <div className="lg:col-span-2 space-y-6">
                     <CoachMainHeader onClick={() => setIsDrawerOpen(true)} />
                     <TodaysMessage />
                     <CoachUpdates />
                 </div>
                 
-                {/* Right Column (Shared Files) */}
+                {/* Shared Files Column */}
                 <div className="lg:col-span-1 space-y-6">
                     <SharedFilesCard />
                 </div>
