@@ -1,26 +1,19 @@
 // src/pages/customer/MyCoach.tsx
 import { useState } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import useMediaQuery from '@/hooks/use-media-query';
 import CoachMainHeader from '@/components/customer/mycoach/CoachMainHeader';
 import TodaysMessage from '@/components/customer/mycoach/TodaysMessage';
 import CoachUpdates from '@/components/customer/mycoach/CoachUpdates';
 import SharedFilesCard from '@/components/customer/mycoach/SharedFilesCard';
 import RequestFeedbackFab from '@/components/customer/mycoach/RequestFeedbackFab';
 import CoachBioDrawer from '@/components/customer/mycoach/CoachBioDrawer';
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Drawer, DrawerContent } from '@/components/ui/drawer';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 const MyCoach = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const isMobile = useIsMobile();
-
-  const handleOpenDrawer = () => {
-    setIsDrawerOpen(true);
-  };
-
-  const handleCloseDrawer = () => {
-    setIsDrawerOpen(false);
-  };
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false);
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-8 space-y-8">
@@ -33,15 +26,15 @@ const MyCoach = () => {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left Column (2/3 width on desktop) */}
-        <div className="md:col-span-2 space-y-6">
-          <CoachMainHeader onClick={handleOpenDrawer} />
+        <div className="md:col-span-2 space-y-6 min-w-0">
+          <CoachMainHeader onClick={() => setIsDrawerOpen(true)} />
           <TodaysMessage />
           <CoachUpdates />
         </div>
 
         {/* Right Column (1/3 width on desktop) */}
-        <div className="md:col-span-1 space-y-6">
-          <SharedFilesCard />
+        <div className="md:col-span-1 space-y-6 min-w-0">
+          {!isMobile && <SharedFilesCard />}
         </div>
       </div>
 
@@ -60,8 +53,20 @@ const MyCoach = () => {
         </Sheet>
       )}
 
-      {/* Floating Action Button for Mobile */}
-      <RequestFeedbackFab />
+      {/* Shared Files Drawer for Mobile */}
+      {isMobile && (
+        <Drawer open={isFilesDrawerOpen} onOpenChange={setIsFilesDrawerOpen}>
+          <DrawerContent>
+            <SharedFilesDrawerContent />
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {/* Floating Action Button */}
+      <RequestFeedbackFab
+        isMobile={isMobile}
+        onOpenFilesDrawer={() => setIsFilesDrawerOpen(true)}
+      />
     </div>
   );
 };
