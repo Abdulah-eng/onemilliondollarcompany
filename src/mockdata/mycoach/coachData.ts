@@ -3,10 +3,11 @@ import { File, MessageSquare, Pin, BarChart2, Star } from 'lucide-react';
 
 /*
   TODO: Backend Integration Notes
-  - `coachInfo`: Fetch from a coach profile table.
+  - `coachInfo`: Fetch from a coach profile table. The single coach's data is likely stored here.
   - `feedbackHistory`: Join the `feedback` and `program_logs` tables to pull feedback left by the coach on a client's program entries.
   - `sharedFiles`: Query the `files` table for files shared with the current user.
   - `dailyMessage`: Fetch a specific daily message for the current user from a `daily_messages` table.
+  - `coachStats`, `coachTrainings`, `coachPhotos`: Fetch these from a new `coach_activity` table or similar.
 */
 
 export const coachInfo = {
@@ -74,4 +75,48 @@ export const sharedFiles = [
     date: '2025-08-23',
     icon: File,
   },
+];
+
+export const coachStats = {
+    level: 'Beginner',
+    hours: '120 hrs',
+    caloriesThisWeek: 160.5,
+    timeThisWeek: '1:03:30',
+    weeklyData: [50, 80, 60, 100, 75, 90, 120] // Example data for bar chart
+};
+
+export const coachTrainings = [
+    {
+        id: 1,
+        title: 'Bulgarian Squat',
+        daysAgo: 2,
+        image: 'https://images.unsplash.com/photo-1571019614242-2979f87e35b9?q=80&w=600'
+    },
+    {
+        id: 2,
+        title: 'Keep-fit Exercise',
+        daysAgo: 4,
+        image: 'https://images.unsplash.com/photo-1546483875-cf778c109731?q=80&w=600'
+    },
+    {
+        id: 3,
+        title: 'Weighted Abs',
+        daysAgo: 5,
+        image: 'https://images.unsplash.com/photo-1603517203390-3b6b6d51c72f?q=80&w=600'
+    },
+];
+
+export const coachPhotos = [
+    {
+        id: 1,
+        url: 'https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=600'
+    },
+    {
+        id: 2,
+        url: 'https://images.unsplash.com/photo-1599058917212-d75685827616?q=80&w=600'
+    },
+    {
+        id: 3,
+        url: 'https://images.unsplash.com/photo-1574680096145-af4b574a13e5?q=80&w=600'
+    },
 ];
