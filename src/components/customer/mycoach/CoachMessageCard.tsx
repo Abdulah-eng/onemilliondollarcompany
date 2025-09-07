@@ -2,9 +2,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { feedbackHistory, chatMessages } from '@/mockdata/mycoach/coachData';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
-import { MessageSquare, Pin, BarChart2, SendHorizonal } from 'lucide-react';
+import { MessageSquare, Pin, BarChart2, SendHorizonal, CheckCircle2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const CoachMessageCard = () => {
