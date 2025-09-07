@@ -71,7 +71,7 @@ const getJournalingStreak = (data) => {
 };
 
 // Custom Tooltip for the mental health trend chart
-const MentalHealthTooltip = ({ active, payload, label }) => {
+const MentalHealthTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload;
         return (
@@ -304,7 +304,7 @@ export default function MentalHealthProgression({ mentalHealth, dailyCheckins })
                                     hide
                                     domain={[1, 10]}
                                 />
-                                <Tooltip content={<MentalHealthTooltip />} cursor={{ stroke: 'rgba(200,200,200,0.2)', strokeWidth: 1 }} />
+                                <Tooltip content={(props) => <MentalHealthTooltip {...props} />} cursor={{ stroke: 'rgba(200,200,200,0.2)', strokeWidth: 1 }} />
                                 <Area
                                     yAxisId="sleep"
                                     type="monotone"
