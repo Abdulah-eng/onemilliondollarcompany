@@ -15,27 +15,14 @@ const CoachUpdates = () => {
   const [responses, setResponses] = useState<Record<string, string>>({});
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [submittedIds, setSubmittedIds] = useState<string[]>([]);
-  const [activeResponseId, setActiveResponseId] = useState<string | null>(null);
+  const [successMessageId, setSuccessMessageId] = useState<string | null>(null);
 
-  const handleOpenResponse = (id: string) => setActiveResponseId(id);
   const handleSubmit = (id: string) => {
     setSubmittedIds((prev) => [...prev, id]);
-    setActiveResponseId(null);
+    setSuccessMessageId(id);
 
-    // optional: auto-remove after 2s
-    setTimeout(() => {
-      setSubmittedIds((prev) => prev.filter((s) => s !== id));
-      setResponses((prev) => {
-        const copy = { ...prev };
-        delete copy[id];
-        return copy;
-      });
-      setRatings((prev) => {
-        const copy = { ...prev };
-        delete copy[id];
-        return copy;
-      });
-    }, 2000);
+    // Remove the success message after 2s
+    setTimeout(() => setSuccessMessageId(null), 2000);
   };
 
   if (!isPremiumUser) {
@@ -50,121 +37,124 @@ const CoachUpdates = () => {
   }
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-6">
       <AnimatePresence>
-        {feedbackHistory.map((update) => {
-          if (submittedIds.includes(update.id)) return null;
+        {feedbackHistory
+          .filter((update) => !submittedIds.includes(update.id))
+          .map((update) => {
+            const isFeedback = update.type === 'Program Feedback';
+            const isCheckIn = update.type === 'Check-in';
+            const isInfo = update.type === 'Pinpoint';
 
-          const isFeedback = update.type === 'Program Feedback';
-          const isCheckIn = update.type === 'Check-in';
-          const isInfo = update.type === 'Pinpoint';
-          const isActive = activeResponseId === update.id;
-
-          return (
-            <motion.div
-              key={update.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card className="shadow-md rounded-2xl hover:shadow-lg transition relative">
-                <CardHeader className="pb-2">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-xl">
-                        {isFeedback && '💬'}
-                        {isCheckIn && '📍'}
-                        {isInfo && '📊'}
+            return (
+              <motion.div
+                key={update.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="shadow-md rounded-2xl hover:shadow-lg transition">
+                  <CardHeader className="pb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-xl">
+                          {isFeedback && '💬'}
+                          {isCheckIn && '📍'}
+                          {isInfo && '📊'}
+                        </span>
+                        <CardTitle className="text-base md:text-lg font-semibold truncate">
+                          {update.title}
+                        </CardTitle>
+                      </div>
+                      <span className="text-xs text-muted-foreground shrink-0 whitespace-nowrap">
+                        {update.date}
                       </span>
-                      <CardTitle className="text-base md:text-lg font-semibold truncate">
-                        {update.title}
-                      </CardTitle>
                     </div>
-                    <span className="text-xs text-muted-foreground shrink-0 whitespace-nowrap">
-                      {update.date}
-                    </span>
-                  </div>
-                </CardHeader>
+                  </CardHeader>
 
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">{update.message}</p>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">{update.message}</p>
 
-                  {/* Info card has no response UI */}
-                  {isInfo && null}
-
-                  {/* Show button to open response for Feedback/Check-in */}
-                  {(isFeedback || isCheckIn) && !isActive && (
-                    <Button size="sm" onClick={() => handleOpenResponse(update.id)}>
-                      {isFeedback ? 'Reply' : 'Respond'}
-                    </Button>
-                  )}
-
-                  {/* Modal-like overlay for response */}
-                  <AnimatePresence>
-                    {isActive && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute inset-0 bg-white/95 backdrop-blur-sm p-4 rounded-2xl flex flex-col gap-3 z-10"
-                      >
-                        {isCheckIn && (
-                          <div className="flex flex-wrap gap-2">
-                            {emojiRatings.map((emoji, index) => {
-                              const ratingValue = index + 1;
-                              return (
-                                <button
-                                  key={ratingValue}
-                                  onClick={() =>
-                                    setRatings((prev) => ({ ...prev, [update.id]: ratingValue }))
-                                  }
-                                  className={`text-2xl ${
-                                    ratings[update.id] === ratingValue
-                                      ? 'scale-125'
-                                      : 'opacity-60 hover:opacity-100'
-                                  }`}
-                                >
-                                  {emoji}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-
+                    {/* Feedback card */}
+                    {isFeedback && (
+                      <>
                         <Textarea
                           value={responses[update.id] || ''}
                           onChange={(e) =>
                             setResponses((prev) => ({ ...prev, [update.id]: e.target.value }))
                           }
-                          placeholder={isFeedback ? 'Type your response...' : 'Add a comment...'}
+                          placeholder="Type your response here..."
+                          className="mb-2"
                         />
-
-                        <div className="flex gap-2 justify-end">
-                          <Button size="sm" onClick={() => setActiveResponseId(null)} variant="outline">
-                            Cancel
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => handleSubmit(update.id)}
-                            disabled={
-                              isCheckIn
-                                ? ratings[update.id] === undefined && !responses[update.id]?.trim()
-                                : !responses[update.id]?.trim()
-                            }
-                          >
-                            Submit
-                          </Button>
-                        </div>
-                      </motion.div>
+                        <Button
+                          size="sm"
+                          onClick={() => handleSubmit(update.id)}
+                          disabled={!responses[update.id]?.trim()}
+                        >
+                          Send Response
+                        </Button>
+                        {successMessageId === update.id && (
+                          <p className="text-green-600 mt-2">Response submitted!</p>
+                        )}
+                      </>
                     )}
-                  </AnimatePresence>
-                </CardContent>
-              </Card>
-            </motion.div>
-          );
-        })}
+
+                    {/* Check-in card */}
+                    {isCheckIn && (
+                      <>
+                        <p className="font-medium text-sm mb-2">How are things going?</p>
+                        <div className="flex items-center gap-2 mb-3 flex-wrap">
+                          {emojiRatings.map((emoji, index) => {
+                            const ratingValue = index + 1;
+                            return (
+                              <button
+                                key={ratingValue}
+                                type="button"
+                                onClick={() =>
+                                  setRatings((prev) => ({ ...prev, [update.id]: ratingValue }))
+                                }
+                                className={`text-2xl transition-transform ${
+                                  ratings[update.id] === ratingValue
+                                    ? 'scale-125'
+                                    : 'opacity-60 hover:opacity-100'
+                                }`}
+                              >
+                                {emoji}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <Textarea
+                          value={responses[update.id] || ''}
+                          onChange={(e) =>
+                            setResponses((prev) => ({ ...prev, [update.id]: e.target.value }))
+                          }
+                          placeholder="Add a comment..."
+                          className="mb-2"
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => handleSubmit(update.id)}
+                          disabled={
+                            ratings[update.id] === undefined && !responses[update.id]?.trim()
+                          }
+                        >
+                          Submit Check-in
+                        </Button>
+                        {successMessageId === update.id && (
+                          <p className="text-green-600 mt-2">Check-in submitted!</p>
+                        )}
+                      </>
+                    )}
+
+                    {/* Info card */}
+                    {isInfo && null}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
       </AnimatePresence>
 
       {/* History Button */}
