@@ -21,23 +21,23 @@ const CoachUpdates = () => {
     }
 
     return (
-        <Card className="shadow-lg border-none animate-fade-in min-w-0">
+        <Card className="shadow-lg border-none animate-fade-in">
             <CardHeader className="p-4 md:p-6">
                 <CardTitle className="text-xl font-semibold">Coach Updates</CardTitle>
             </CardHeader>
-            <CardContent className="p-4 md:p-6 pt-0 min-w-0">
+            <CardContent className="p-4 md:p-6 pt-0">
                 {feedbackHistory.length > 0 ? (
                     <div className="space-y-6">
                         {feedbackHistory.map(update => (
-                            <div key={update.id} className="space-y-2 p-4 border rounded-xl bg-secondary/20 min-w-0">
-                                <div className="flex items-start gap-4 min-w-0">
+                            <div key={update.id} className="space-y-2 p-4 border rounded-xl bg-secondary/20">
+                                <div className="flex items-start gap-4">
                                     <div className="flex-shrink-0 mt-1">
                                         {update.type === 'Program Feedback' && <MessageSquare className="w-5 h-5 text-purple-500" />}
                                         {update.type === 'Check-in' && <Pin className="w-5 h-5 text-orange-500" />}
                                         {update.type === 'Pinpoint' && <BarChart2 className="w-5 h-5 text-green-500" />}
                                     </div>
                                     <div className="flex-1 space-y-1 min-w-0">
-                                        <div className="flex items-center justify-between min-w-0">
+                                        <div className="flex items-center justify-between">
                                             <h4 className="font-semibold text-base md:text-lg overflow-hidden whitespace-nowrap text-ellipsis">{update.title}</h4>
                                             <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">{update.date}</span>
                                         </div>
