@@ -1,17 +1,18 @@
 // src/pages/customer/MyCoach.tsx
 import { useState } from 'react';
-import useMediaQuery from '@/hooks/use-media-query'; // Assuming you have or will create this hook
+import { useIsMobile } from '@/hooks/use-mobile';
 import CoachMainHeader from '@/components/customer/mycoach/CoachMainHeader';
 import TodaysMessage from '@/components/customer/mycoach/TodaysMessage';
 import CoachUpdates from '@/components/customer/mycoach/CoachUpdates';
 import SharedFilesCard from '@/components/customer/mycoach/SharedFilesCard';
 import RequestFeedbackFab from '@/components/customer/mycoach/RequestFeedbackFab';
-import SlideInDetail from '@/components/customer/programsoverview/SlideInDetail'; // Reusing your existing component
 import CoachBioDrawer from '@/components/customer/mycoach/CoachBioDrawer';
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const MyCoach = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const isMobile = useMediaQuery('(max-width: 768px)'); // Example breakpoint
+  const isMobile = useIsMobile();
 
   const handleOpenDrawer = () => {
     setIsDrawerOpen(true);
@@ -44,14 +45,20 @@ const MyCoach = () => {
         </div>
       </div>
 
-      {/* Conditional Rendering for Drawer/Side Menu */}
-      <SlideInDetail
-        isMobile={isMobile}
-        task={isDrawerOpen ? { id: 'coach-bio', type: 'bio' } : null} // Simple task object to trigger SlideInDetail
-        onClose={handleCloseDrawer}
-      >
-        <CoachBioDrawer />
-      </SlideInDetail>
+      {/* Coach Bio Modal/Drawer */}
+      {isMobile ? (
+        <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+          <DrawerContent>
+            <CoachBioDrawer />
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+          <SheetContent side="right" className="w-96">
+            <CoachBioDrawer />
+          </SheetContent>
+        </Sheet>
+      )}
 
       {/* Floating Action Button for Mobile */}
       <RequestFeedbackFab />

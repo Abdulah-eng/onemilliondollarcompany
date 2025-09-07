@@ -3,7 +3,7 @@ import { File, MessageSquare, Pin, BarChart2, Star } from 'lucide-react';
 
 /*
   TODO: Backend Integration Notes
-  - `coachInfo`: Fetch from a coach profile table. [cite_start]The single coach's data is likely stored here[cite: 167].
+  - `coachInfo`: Fetch from a coach profile table.
   - `feedbackHistory`: Join the `feedback` and `program_logs` tables to pull feedback left by the coach on a client's program entries.
   - `sharedFiles`: Query the `files` table for files shared with the current user.
   - `dailyMessage`: Fetch a specific daily message for the current user from a `daily_messages` table.
