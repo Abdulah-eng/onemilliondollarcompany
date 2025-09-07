@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { feedbackHistory } from '@/mockdata/mycoach/coachData';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { CheckCircle2, Pin, MessageSquare, BarChart2, Star, History } from 'lucide-react';
+import { CheckCircle2, Star, History } from 'lucide-react';
 
 const CoachUpdates = () => {
   const isPremiumUser = true; // TODO: Fetch from user_roles or plans table
@@ -30,20 +30,15 @@ const CoachUpdates = () => {
           const isInfo = update.type === 'Pinpoint';
 
           return (
-            <Card
-              key={update.id}
-              className={`shadow-lg rounded-2xl transition hover:shadow-xl ${
-                isFeedback ? 'border-blue-300 bg-blue-50/60' : ''
-              } ${isCheckIn ? 'border-orange-300 bg-orange-50/60' : ''} ${
-                isInfo ? 'border-green-300 bg-green-50/60' : ''
-              }`}
-            >
+            <Card key={update.id} className="shadow-md rounded-2xl hover:shadow-lg transition">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {isFeedback && <MessageSquare className="w-5 h-5 text-blue-500" />}
-                    {isCheckIn && <Pin className="w-5 h-5 text-orange-500" />}
-                    {isInfo && <BarChart2 className="w-5 h-5 text-green-500" />}
+                    <span className="text-xl">
+                      {isFeedback && '💬'}
+                      {isCheckIn && '📍'}
+                      {isInfo && '📊'}
+                    </span>
                     <CardTitle className="text-base md:text-lg font-semibold">
                       {update.title}
                     </CardTitle>
@@ -51,22 +46,21 @@ const CoachUpdates = () => {
                   <span className="text-xs text-muted-foreground">{update.date}</span>
                 </div>
               </CardHeader>
+
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">{update.message}</p>
 
                 {/* Feedback card (reply UI) */}
                 {isFeedback && (
-                  <div className="pt-4 border-t border-blue-200">
+                  <div className="pt-4 border-t border-gray-200">
                     <Textarea placeholder="Type your response here..." className="mb-2" />
-                    <Button size="sm" className="bg-blue-500 hover:bg-blue-600 text-white">
-                      Send Response
-                    </Button>
+                    <Button size="sm">Send Response</Button>
                   </div>
                 )}
 
                 {/* Check-in card (rating + comment) */}
                 {isCheckIn && (
-                  <div className="pt-4 border-t border-orange-200">
+                  <div className="pt-4 border-t border-gray-200">
                     <p className="font-medium text-sm mb-2">How are things going?</p>
                     <div className="flex items-center space-x-1 mb-2">
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
@@ -80,15 +74,13 @@ const CoachUpdates = () => {
                       ))}
                     </div>
                     <Textarea placeholder="Add a comment..." className="mb-2" />
-                    <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
-                      Submit Check-in
-                    </Button>
+                    <Button size="sm">Submit Check-in</Button>
                   </div>
                 )}
 
                 {/* Info card (no response UI) */}
                 {isInfo && (
-                  <div className="pt-4 border-t border-green-200">
+                  <div className="pt-4 border-t border-gray-200">
                     <p className="text-sm text-muted-foreground">
                       This is an informational update. No response needed.
                     </p>
