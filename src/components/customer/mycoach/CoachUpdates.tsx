@@ -15,14 +15,9 @@ const CoachUpdates = () => {
   const [responses, setResponses] = useState<Record<string, string>>({});
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [submittedIds, setSubmittedIds] = useState<string[]>([]);
-  const [successMessageId, setSuccessMessageId] = useState<string | null>(null);
 
   const handleSubmit = (id: string) => {
     setSubmittedIds((prev) => [...prev, id]);
-    setSuccessMessageId(id);
-
-    // Remove the success message after 2s
-    setTimeout(() => setSuccessMessageId(null), 2000);
   };
 
   if (!isPremiumUser) {
@@ -36,7 +31,7 @@ const CoachUpdates = () => {
     );
   }
 
-  // Slice to only show the first 3 items
+  // Only show the latest 3 updates
   const recentUpdates = feedbackHistory.slice(0, 3);
 
   return (
@@ -55,7 +50,7 @@ const CoachUpdates = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.25 }}
               >
                 <Card className="shadow-md rounded-2xl hover:shadow-lg transition">
                   <CardHeader className="pb-2">
@@ -97,9 +92,9 @@ const CoachUpdates = () => {
                         >
                           Send Response
                         </Button>
-                        {successMessageId === update.id && (
-                          <p className="text-green-600 mt-2">Response submitted!</p>
-                        )}
+                        <p className="text-green-600 mt-2">
+                          {submittedIds.includes(update.id) ? 'Response submitted!' : ''}
+                        </p>
                       </>
                     )}
 
@@ -145,13 +140,13 @@ const CoachUpdates = () => {
                         >
                           Submit Check-in
                         </Button>
-                        {successMessageId === update.id && (
-                          <p className="text-green-600 mt-2">Check-in submitted!</p>
-                        )}
+                        <p className="text-green-600 mt-2">
+                          {submittedIds.includes(update.id) ? 'Check-in submitted!' : ''}
+                        </p>
                       </>
                     )}
 
-                    {/* Info card */}
+                    {/* Info card: just show message, no response */}
                     {isInfo && null}
                   </CardContent>
                 </Card>
@@ -167,6 +162,13 @@ const CoachUpdates = () => {
           View All Past Updates
         </Button>
       </div>
+
+      {recentUpdates.length === 0 && (
+        <div className="flex flex-col items-center justify-center p-6 text-center text-muted-foreground">
+          <CheckCircle2 size={48} className="mb-4 text-primary" />
+          <p>No recent updates. You're on track!</p>
+        </div>
+      )}
     </div>
   );
 };
