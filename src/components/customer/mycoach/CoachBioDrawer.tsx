@@ -1,11 +1,11 @@
 // src/components/customer/mycoach/CoachBioDrawer.tsx
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { coachInfo, coachStats, coachTrainings, coachPhotos } from '@/mockdata/mycoach/coachData';
-import { CircleUserRound, ChevronRight, BarChart, Clock, Flame } from 'lucide-react';
+import { CircleUserRound } from 'lucide-react';
 
 const CoachBioDrawer = () => {
     return (
-        <div className="p-6 md:p-8 space-y-6">
+        <div className="h-full overflow-y-auto p-6 md:p-8 space-y-6">
             {/* Coach Header Section */}
             <div className="flex items-center space-x-4">
                 <div className="w-24 h-24 rounded-full flex-shrink-0 bg-gray-200 overflow-hidden">
@@ -17,7 +17,7 @@ const CoachBioDrawer = () => {
                 </div>
                 <div className="flex-1 space-y-1">
                     <h2 className="text-2xl font-bold">{coachInfo.name}</h2>
-                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-x-4 text-sm text-muted-foreground">
                         <div className="flex items-center">
                             <span className="font-bold">1,208</span>&nbsp;followers
                         </div>
@@ -43,7 +43,7 @@ const CoachBioDrawer = () => {
                 <Card className="shadow-lg border-none bg-orange-100/50">
                     <CardContent className="p-4 space-y-4">
                         <div className="flex items-center space-x-4">
-                            <div className="space-y-1">
+                            <div className="space-y-1 flex-shrink-0">
                                 <p className="text-lg font-semibold">{coachStats.caloriesThisWeek}kcal</p>
                                 <p className="text-sm font-medium text-muted-foreground">Calories</p>
                                 <p className="text-sm font-medium text-muted-foreground">{coachStats.timeThisWeek}</p>
