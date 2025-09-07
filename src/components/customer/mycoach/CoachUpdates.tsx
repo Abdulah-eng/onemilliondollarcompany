@@ -5,12 +5,22 @@ import { feedbackHistory } from '@/mockdata/mycoach/coachData';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { CheckCircle2, History } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const emojiRatings = ['😞', '😕', '😐', '🙂', '😃', '😁', '🤩'];
 
 const CoachUpdates = () => {
   const isPremiumUser = true; // TODO: Fetch from user_roles or plans table
   const [checkInRating, setCheckInRating] = useState<number | null>(null);
+  const [submittedIds, setSubmittedIds] = useState<string[]>([]);
+
+  const handleSubmit = (id: string) => {
+    setSubmittedIds((prev) => [...prev, id]);
+    // auto remove after 2s
+    setTimeout(() => {
+      setSubmittedIds((prev) => prev.filter((s) => s !== id));
+    }, 2000);
+  };
 
   if (!isPremiumUser) {
     return (
@@ -25,84 +35,101 @@ const CoachUpdates = () => {
 
   return (
     <div className="space-y-6">
-      {feedbackHistory.length > 0 ? (
-        feedbackHistory.map((update) => {
-          const isFeedback = update.type === 'Program Feedback';
-          const isCheckIn = update.type === 'Check-in';
-          const isInfo = update.type === 'Pinpoint';
+      <AnimatePresence>
+        {feedbackHistory.length > 0 ? (
+          feedbackHistory.map((update) => {
+            const isFeedback = update.type === 'Program Feedback';
+            const isCheckIn = update.type === 'Check-in';
+            const isInfo = update.type === 'Pinpoint';
 
-          return (
-            <Card key={update.id} className="shadow-md rounded-2xl hover:shadow-lg transition">
-              <CardHeader className="pb-2">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">
-                      {isFeedback && '💬'}
-                      {isCheckIn && '📍'}
-                      {isInfo && '📊'}
-                    </span>
-                    <CardTitle className="text-base md:text-lg font-semibold truncate">
-                      {update.title}
-                    </CardTitle>
-                  </div>
-                  <span className="text-xs text-muted-foreground shrink-0">{update.date}</span>
-                </div>
-              </CardHeader>
+            const wasSubmitted = submittedIds.includes(update.id);
 
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{update.message}</p>
-
-                {/* Feedback card (reply UI) */}
-                {isFeedback && (
-                  <div className="pt-4 border-t border-gray-200">
-                    <Textarea placeholder="Type your response here..." className="mb-2" />
-                    <Button size="sm">Send Response</Button>
-                  </div>
-                )}
-
-                {/* Check-in card (emoji rating + comment) */}
-                {isCheckIn && (
-                  <div className="pt-4 border-t border-gray-200">
-                    <p className="font-medium text-sm mb-2">How are things going?</p>
-                    <div className="flex items-center gap-2 mb-3 flex-wrap">
-                      {emojiRatings.map((emoji, index) => {
-                        const ratingValue = index + 1;
-                        return (
-                          <button
-                            key={ratingValue}
-                            onClick={() => setCheckInRating(ratingValue)}
-                            className={`text-2xl transition-transform ${
-                              checkInRating === ratingValue ? 'scale-125' : 'opacity-60 hover:opacity-100'
-                            }`}
-                          >
-                            {emoji}
-                          </button>
-                        );
-                      })}
+            return (
+              <motion.div
+                key={update.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="shadow-md rounded-2xl hover:shadow-lg transition">
+                  <CardHeader className="pb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">
+                          {isFeedback && '💬'}
+                          {isCheckIn && '📍'}
+                          {isInfo && '📊'}
+                        </span>
+                        <CardTitle className="text-base md:text-lg font-semibold truncate">
+                          {update.title}
+                        </CardTitle>
+                      </div>
+                      <span className="text-xs text-muted-foreground shrink-0">{update.date}</span>
                     </div>
-                    <Textarea placeholder="Add a comment..." className="mb-2" />
-                    <Button size="sm">Submit Check-in</Button>
-                  </div>
-                )}
+                  </CardHeader>
 
-                {/* Info card (no response UI) */}
-                {isInfo && (
-                  <div className="pt-4 border-t border-gray-200">
-                    <p className="text-sm text-muted-foreground">
-                      This is an informational update. No response needed.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })
-      ) : (
-        <div className="flex flex-col items-center justify-center p-6 text-center text-muted-foreground">
-          <CheckCircle2 size={48} className="mb-4 text-primary" />
-          <p>No recent updates. You're on track!</p>
-        </div>
-      )}
+                  <CardContent className="space-y-4">
+                    {wasSubmitted ? (
+                      <p className="text-green-600 text-sm font-medium flex items-center gap-2">
+                        ✅ Response sent successfully
+                      </p>
+                    ) : (
+                      <>
+                        <p className="text-sm text-muted-foreground">{update.message}</p>
+
+                        {/* Feedback card (reply UI) */}
+                        {isFeedback && (
+                          <div className="pt-4 border-t border-gray-200">
+                            <Textarea placeholder="Type your response here..." className="mb-2" />
+                            <Button size="sm" onClick={() => handleSubmit(update.id)}>
+                              Send Response
+                            </Button>
+                          </div>
+                        )}
+
+                        {/* Check-in card (emoji rating + comment) */}
+                        {isCheckIn && (
+                          <div className="pt-4 border-t border-gray-200">
+                            <p className="font-medium text-sm mb-2">How are things going?</p>
+                            <div className="flex items-center gap-2 mb-3 flex-wrap">
+                              {emojiRatings.map((emoji, index) => {
+                                const ratingValue = index + 1;
+                                return (
+                                  <button
+                                    key={ratingValue}
+                                    onClick={() => setCheckInRating(ratingValue)}
+                                    className={`text-2xl transition-transform ${
+                                      checkInRating === ratingValue
+                                        ? 'scale-125'
+                                        : 'opacity-60 hover:opacity-100'
+                                    }`}
+                                  >
+                                    {emoji}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <Textarea placeholder="Add a comment..." className="mb-2" />
+                            <Button size="sm" onClick={() => handleSubmit(update.id)}>
+                              Submit Check-in
+                            </Button>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })
+        ) : (
+          <div className="flex flex-col items-center justify-center p-6 text-center text-muted-foreground">
+            <CheckCircle2 size={48} className="mb-4 text-primary" />
+            <p>No recent updates. You're on track!</p>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* History Button */}
       <div className="flex justify-center pt-2">
