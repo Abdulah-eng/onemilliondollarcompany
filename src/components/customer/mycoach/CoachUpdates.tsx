@@ -11,11 +11,15 @@ const emojiRatings = ['😞', '😕', '😐', '🙂', '😃', '😁', '🤩'];
 
 const CoachUpdates = () => {
   const isPremiumUser = true; // TODO: Fetch from user_roles or plans table
+
   const [checkInRating, setCheckInRating] = useState<number | null>(null);
   const [submittedIds, setSubmittedIds] = useState<string[]>([]);
+  const [responses, setResponses] = useState<Record<string, string>>({}); // track textarea input
 
   const handleSubmit = (id: string) => {
+    // optional: check if there's some text / rating before submitting
     setSubmittedIds((prev) => [...prev, id]);
+
     // auto remove after 2s
     setTimeout(() => {
       setSubmittedIds((prev) => prev.filter((s) => s !== id));
@@ -81,8 +85,22 @@ const CoachUpdates = () => {
                         {/* Feedback card (reply UI) */}
                         {isFeedback && (
                           <div className="pt-4 border-t border-gray-200">
-                            <Textarea placeholder="Type your response here..." className="mb-2" />
-                            <Button size="sm" onClick={() => handleSubmit(update.id)}>
+                            <Textarea
+                              value={responses[update.id] || ''}
+                              onChange={(e) =>
+                                setResponses((prev) => ({
+                                  ...prev,
+                                  [update.id]: e.target.value,
+                                }))
+                              }
+                              placeholder="Type your response here..."
+                              className="mb-2"
+                            />
+                            <Button
+                              size="sm"
+                              onClick={() => handleSubmit(update.id)}
+                              disabled={!responses[update.id]?.trim()}
+                            >
                               Send Response
                             </Button>
                           </div>
@@ -98,6 +116,7 @@ const CoachUpdates = () => {
                                 return (
                                   <button
                                     key={ratingValue}
+                                    type="button"
                                     onClick={() => setCheckInRating(ratingValue)}
                                     className={`text-2xl transition-transform ${
                                       checkInRating === ratingValue
@@ -110,8 +129,22 @@ const CoachUpdates = () => {
                                 );
                               })}
                             </div>
-                            <Textarea placeholder="Add a comment..." className="mb-2" />
-                            <Button size="sm" onClick={() => handleSubmit(update.id)}>
+                            <Textarea
+                              value={responses[update.id] || ''}
+                              onChange={(e) =>
+                                setResponses((prev) => ({
+                                  ...prev,
+                                  [update.id]: e.target.value,
+                                }))
+                              }
+                              placeholder="Add a comment..."
+                              className="mb-2"
+                            />
+                            <Button
+                              size="sm"
+                              onClick={() => handleSubmit(update.id)}
+                              disabled={checkInRating === null && !responses[update.id]?.trim()}
+                            >
                               Submit Check-in
                             </Button>
                           </div>
