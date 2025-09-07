@@ -1,11 +1,11 @@
 // src/components/customer/mycoach/CoachBioDrawer.tsx
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { coachInfo, coachStats, coachTrainings, coachPhotos } from '@/mockdata/mycoach/coachData';
-import { CircleUserRound } from 'lucide-react';
+import { CircleUserRound, ChevronRight, BarChart, Clock, Flame } from 'lucide-react';
 
 const CoachBioDrawer = () => {
     return (
-        <div className="h-full overflow-y-auto p-6 md:p-8 space-y-6">
+        <div className="h-full overflow-y-auto p-6 md:p-8 space-y-6 flex flex-col">
             {/* Coach Header Section */}
             <div className="flex items-center space-x-4">
                 <div className="w-24 h-24 rounded-full flex-shrink-0 bg-gray-200 overflow-hidden">
@@ -33,6 +33,25 @@ const CoachBioDrawer = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Coach Bio Section */}
+            <section className="space-y-4">
+                <h3 className="text-lg font-bold text-foreground">About Me</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{coachInfo.bio}</p>
+            </section>
+
+            {/* Coach Expertise Section */}
+            <section className="space-y-4">
+                <h3 className="text-lg font-bold text-foreground">Expertise & Certificates</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {coachInfo.specialties.map(specialty => (
+                        <div key={specialty} className="bg-primary/10 text-primary p-3 rounded-lg text-center text-sm font-medium">
+                            {specialty}
+                        </div>
+                    ))}
+                    {/* Placeholder for certificates if you want to add them later */}
+                </div>
+            </section>
 
             {/* Statistics Section */}
             <section className="space-y-4">
