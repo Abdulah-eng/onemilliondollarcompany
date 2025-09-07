@@ -14,7 +14,6 @@ import SharedFilesDrawerContent from '@/components/customer/mycoach/SharedFilesD
 const MyCoach = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const isMobile = useMediaQuery('(max-width: 768px)');
-    const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false);
 
     return (
         <div className="w-full max-w-5xl mx-auto px-4 py-8 space-y-8">
@@ -25,16 +24,16 @@ const MyCoach = () => {
             </div>
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 md:gap-6">
-                {/* Left Column (2/3 width on desktop) */}
-                <div className="md:col-span-2 space-y-6 min-w-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mx-auto">
+                {/* Left Column */}
+                <div className="md:col-span-1 space-y-6 min-w-0">
                     <CoachMainHeader onClick={() => setIsDrawerOpen(true)} />
                     <TodaysMessage />
                     <CoachUpdates />
                 </div>
 
-                {/* Right Column (1/3 width on desktop) */}
-                <div className="md:col-span-1 space-y-6 min-w-0 md:block hidden">
+                {/* Shared Files Section (visible on all screen sizes) */}
+                <div className="md:col-span-1 space-y-6 min-w-0">
                     <SharedFilesCard />
                 </div>
             </div>
@@ -54,20 +53,8 @@ const MyCoach = () => {
                 </Sheet>
             )}
 
-            {/* Shared Files Drawer for Mobile */}
-            {isMobile && (
-                <Drawer open={isFilesDrawerOpen} onOpenChange={setIsFilesDrawerOpen}>
-                    <DrawerContent>
-                        <SharedFilesDrawerContent />
-                    </DrawerContent>
-                </Drawer>
-            )}
-
             {/* Floating Action Button */}
-            <RequestFeedbackFab
-                isMobile={isMobile}
-                onOpenFilesDrawer={() => setIsFilesDrawerOpen(true)}
-            />
+            <RequestFeedbackFab isMobile={isMobile} />
         </div>
     );
 };
