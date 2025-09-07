@@ -7,7 +7,7 @@ import { MessageSquare, CheckCircle2, Pin } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 
 const FeedbackHistory = () => {
-  const isPremiumUser = true; [cite_start]// TODO: Fetch from user_roles or plans table [cite: 147, 159]
+  const isPremiumUser = true; // TODO: Fetch from user_roles or plans table
   const [response, setResponse] = useState('');
 
   if (!isPremiumUser) {

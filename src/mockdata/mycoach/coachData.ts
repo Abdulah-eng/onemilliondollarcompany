@@ -62,7 +62,7 @@ export const sharedFiles = [
   {
     id: 3,
     name: 'Goal Setting Workbook.pdf',
-    [cite_start]description: 'Direct file for setting your long-term goals[cite: 217].',
+    description: 'Direct file for setting your long-term goals.',
     date: '2025-08-23',
     icon: File,
   },
