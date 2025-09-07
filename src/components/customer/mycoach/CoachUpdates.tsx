@@ -36,10 +36,13 @@ const CoachUpdates = () => {
     );
   }
 
+  // Slice to only show the first 3 items
+  const recentUpdates = feedbackHistory.slice(0, 3);
+
   return (
     <div className="space-y-6">
       <AnimatePresence>
-        {feedbackHistory
+        {recentUpdates
           .filter((update) => !submittedIds.includes(update.id))
           .map((update) => {
             const isFeedback = update.type === 'Program Feedback';
