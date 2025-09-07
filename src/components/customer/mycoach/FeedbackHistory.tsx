@@ -1,11 +1,14 @@
 // src/components/customer/mycoach/FeedbackHistory.tsx
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { feedbackHistory } from '@/mockdata/mycoach/coachData';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { MessageSquare, CheckCircle2, Pin } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 const FeedbackHistory = () => {
-  const isPremiumUser = true; // TODO: Fetch from user_roles or plans table [cite: 147, 159]
+  const isPremiumUser = true; [cite_start]// TODO: Fetch from user_roles or plans table [cite: 147, 159]
+  const [response, setResponse] = useState('');
 
   if (!isPremiumUser) {
     return (
@@ -23,18 +26,34 @@ const FeedbackHistory = () => {
       </CardHeader>
       <CardContent>
         {feedbackHistory.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {feedbackHistory.map(feedback => (
-              <div key={feedback.id} className="flex items-start gap-4 p-4 border rounded-xl bg-secondary/20">
-                <div className="flex-shrink-0 mt-1">
-                  <feedback.icon className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-semibold">{feedback.title}</h4>
-                    <span className="text-xs text-muted-foreground">{feedback.date}</span>
+              <div key={feedback.id} className="space-y-2 p-4 border rounded-xl bg-secondary/20">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 mt-1">
+                    {feedback.type === 'Feedback' ? (
+                      <MessageSquare className="w-5 h-5 text-primary" />
+                    ) : (
+                      <Pin className="w-5 h-5 text-orange-500" />
+                    )}
                   </div>
-                  <p className="text-sm text-muted-foreground">{feedback.message}</p>
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">{feedback.title}</h4>
+                      <span className="text-xs text-muted-foreground">{feedback.date}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{feedback.message}</p>
+                  </div>
+                </div>
+                {/* Respond Functionality */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <Textarea 
+                    placeholder="Type your response here..." 
+                    value={response} 
+                    onChange={(e) => setResponse(e.target.value)} 
+                    className="mb-2" 
+                  />
+                  <Button size="sm" disabled={!response}>Send Response</Button>
                 </div>
               </div>
             ))}
