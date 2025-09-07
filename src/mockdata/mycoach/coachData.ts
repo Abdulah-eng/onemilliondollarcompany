@@ -1,12 +1,12 @@
 // src/mockdata/mycoach/coachData.ts
-import { File, MessageSquare, Pin } from 'lucide-react';
+import { File, MessageSquare, Pin, BarChart2, Star } from 'lucide-react';
 
 /*
   TODO: Backend Integration Notes
   - `coachInfo`: Fetch from a coach profile table. [cite_start]The single coach's data is likely stored here[cite: 167].
   - `feedbackHistory`: Join the `feedback` and `program_logs` tables to pull feedback left by the coach on a client's program entries.
   - `sharedFiles`: Query the `files` table for files shared with the current user.
-  - `chatMessages`: Fetch from a new `messages` table filtered by the current user and coach.
+  - `dailyMessage`: Fetch a specific daily message for the current user from a `daily_messages` table.
 */
 
 export const coachInfo = {
@@ -17,30 +17,38 @@ export const coachInfo = {
   email: 'sophia.miller@trainwise.com',
 };
 
+export const dailyMessage = {
+  id: 1,
+  title: 'Morning Motivation',
+  content: "Remember, every small step forward is progress. You've got this! ✨",
+};
+
 export const feedbackHistory = [
   {
     id: 1,
-    date: '2025-08-28',
-    type: 'Feedback',
+    date: '2025-09-05',
+    type: 'Program Feedback',
     title: 'Full Body Strength Session',
-    message: 'Great work on increasing your reps! Keep pushing on the overhead press.',
+    message: 'Great work on increasing your reps! Keep pushing on the overhead press. You’re doing fantastic!',
     icon: MessageSquare,
   },
   {
     id: 2,
-    date: '2025-08-27',
+    date: '2025-09-04',
     type: 'Check-in',
-    title: 'Hydration Check-in',
-    message: "Remember to stay hydrated, especially on days with cardio. It's key to reaching your goals!",
+    title: 'Weekly Program Check-in',
+    message: "Hey Hanna! On a scale of 1-10, how is your program feeling this week? Any feedback on your energy levels or motivation?",
+    rating: null,
+    comment: null,
     icon: Pin,
   },
   {
     id: 3,
-    date: '2025-08-25',
-    type: 'Feedback',
-    title: 'Mindful Morning Routine',
-    message: 'Happy to hear the morning routine is helping! Let me know if you want to try new meditation exercises.',
-    icon: MessageSquare,
+    date: '2025-09-02',
+    type: 'Pinpoint',
+    title: 'Cardio Intervals',
+    message: 'Next week, let’s try increasing the intensity on your interval runs. You can add 15 seconds to each high-intensity sprint. Let me know how it feels!',
+    icon: BarChart2,
   },
 ];
 
@@ -66,25 +74,4 @@ export const sharedFiles = [
     date: '2025-08-23',
     icon: File,
   },
-];
-
-export const chatMessages = [
-    {
-        id: 1,
-        sender: 'coach',
-        text: 'Hey Alex, just checking in on how you felt after the last workout.',
-        timestamp: '2025-09-06T10:00:00Z',
-    },
-    {
-        id: 2,
-        sender: 'customer',
-        text: 'Hey Sophia! The workout felt great, but the squats were tough.',
-        timestamp: '2025-09-06T10:05:00Z',
-    },
-    {
-        id: 3,
-        sender: 'coach',
-        text: 'That’s normal, focus on your form and you’ll get stronger. Let me know if you have any questions.',
-        timestamp: '2025-09-06T10:10:00Z',
-    },
 ];
