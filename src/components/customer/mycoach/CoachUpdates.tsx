@@ -4,11 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { feedbackHistory } from '@/mockdata/mycoach/coachData';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { CheckCircle2, Star, History } from 'lucide-react';
+import { CheckCircle2, History } from 'lucide-react';
+
+const emojiRatings = ['😞', '😕', '😐', '🙂', '😃', '😁', '🤩'];
 
 const CoachUpdates = () => {
   const isPremiumUser = true; // TODO: Fetch from user_roles or plans table
-  const [checkInRating, setCheckInRating] = useState(0);
+  const [checkInRating, setCheckInRating] = useState<number | null>(null);
 
   if (!isPremiumUser) {
     return (
@@ -32,18 +34,18 @@ const CoachUpdates = () => {
           return (
             <Card key={update.id} className="shadow-md rounded-2xl hover:shadow-lg transition">
               <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">
                       {isFeedback && '💬'}
                       {isCheckIn && '📍'}
                       {isInfo && '📊'}
                     </span>
-                    <CardTitle className="text-base md:text-lg font-semibold">
+                    <CardTitle className="text-base md:text-lg font-semibold truncate">
                       {update.title}
                     </CardTitle>
                   </div>
-                  <span className="text-xs text-muted-foreground">{update.date}</span>
+                  <span className="text-xs text-muted-foreground shrink-0">{update.date}</span>
                 </div>
               </CardHeader>
 
@@ -58,20 +60,25 @@ const CoachUpdates = () => {
                   </div>
                 )}
 
-                {/* Check-in card (rating + comment) */}
+                {/* Check-in card (emoji rating + comment) */}
                 {isCheckIn && (
                   <div className="pt-4 border-t border-gray-200">
                     <p className="font-medium text-sm mb-2">How are things going?</p>
-                    <div className="flex items-center space-x-1 mb-2">
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
-                        <Star
-                          key={star}
-                          className={`w-5 h-5 cursor-pointer transition-colors ${
-                            checkInRating >= star ? 'text-yellow-400' : 'text-gray-300'
-                          }`}
-                          onClick={() => setCheckInRating(star)}
-                        />
-                      ))}
+                    <div className="flex items-center gap-2 mb-3 flex-wrap">
+                      {emojiRatings.map((emoji, index) => {
+                        const ratingValue = index + 1;
+                        return (
+                          <button
+                            key={ratingValue}
+                            onClick={() => setCheckInRating(ratingValue)}
+                            className={`text-2xl transition-transform ${
+                              checkInRating === ratingValue ? 'scale-125' : 'opacity-60 hover:opacity-100'
+                            }`}
+                          >
+                            {emoji}
+                          </button>
+                        );
+                      })}
                     </div>
                     <Textarea placeholder="Add a comment..." className="mb-2" />
                     <Button size="sm">Submit Check-in</Button>
