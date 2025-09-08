@@ -32,6 +32,7 @@ const LibraryPage = lazy(() => import("./pages/customer/LibraryPage"));
 const ProgressPage = lazy(() => import("./pages/customer/ProgressPage"));
 const MyCoachPage = lazy(() => import("./pages/customer/MyCoach"));
 const BlogPage = lazy(() => import("./pages/customer/BlogPage"));
+const ProfilePage = lazy(() => import("./pages/customer/Profile"));
 
 
 // ... (LoadingScreen, queryClient, and routing logic components remain unchanged) ...
@@ -172,6 +173,11 @@ const ThemedApp = () => {
                   <Route path="/customer/blog" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <BlogPage />
+                    </Suspense>
+                  } />
+                  <Route path="/customer/settings" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <ProfilePage />
                     </Suspense>
                   } />
                   <Route path="/program/:type/:id" element={
