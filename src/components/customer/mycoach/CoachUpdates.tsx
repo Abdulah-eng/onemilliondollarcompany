@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { feedbackHistory } from '@/mockdata/mycoach/coachData';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { CheckCircle2, History } from 'lucide-react';
+import { CheckCircle2, History, X } from 'lucide-react'; // Import the X icon
 import { AnimatePresence, motion } from 'framer-motion';
+import { cn } from '@/lib/utils'; // Assuming you have a utility for class names
 
 const emojiRatings = ['😞', '😕', '😐', '🙂', '😃', '😁', '🤩'];
 
@@ -16,8 +17,16 @@ const CoachUpdates = () => {
   const [ratings, setRatings] = useState<Record<number, number>>({});
   const [submittedIds, setSubmittedIds] = useState<number[]>([]);
 
+  // We need a separate state to handle dismissing the 'Info' card
+  const [dismissedInfoId, setDismissedInfoId] = useState<number | null>(null);
+
   const handleSubmit = (id: number) => {
     setSubmittedIds((prev) => [...prev, id]);
+  };
+  
+  // New dismiss function for the Info card
+  const handleDismissInfo = (id: number) => {
+      setDismissedInfoId(id);
   };
 
   if (!isPremiumUser) {
@@ -31,8 +40,10 @@ const CoachUpdates = () => {
     );
   }
 
-  // Only show the latest 3 updates
-  const recentUpdates = feedbackHistory.slice(0, 3);
+  // Only show the latest 3 updates, filter out the one that was dismissed
+  const recentUpdates = feedbackHistory
+    .slice(0, 3)
+    .filter((update) => update.id !== dismissedInfoId);
 
   return (
     <div className="space-y-6">
@@ -49,11 +60,21 @@ const CoachUpdates = () => {
                 key={update.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.25 }}
+                // Different exit animation for the Info card
+                exit={isInfo ? { opacity: 0, x: 300, transition: { duration: 0.3 } } : { opacity: 0, y: -10 }}
+                transition={{ duration: isInfo ? 0.3 : 0.25 }}
+                // Apply drag only to the Info card
+                drag={isInfo ? 'x' : false}
+                dragConstraints={{ left: 0, right: 0 }}
+                onDragEnd={(event, info) => {
+                  if (isInfo && Math.abs(info.point.x) > 50) {
+                    handleDismissInfo(update.id);
+                  }
+                }}
+                className={isInfo ? 'relative cursor-pointer' : ''}
               >
                 <Card className="shadow-md rounded-2xl hover:shadow-lg transition">
-                  <CardHeader className="pb-2">
+                  <CardHeader className="relative pb-2">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-xl">
@@ -69,6 +90,20 @@ const CoachUpdates = () => {
                         {update.date}
                       </span>
                     </div>
+                    {/* Add dismiss button for Info card on desktop */}
+                    {isInfo && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={cn(
+                          'absolute top-2 right-2',
+                          'hidden sm:inline-flex'
+                        )}
+                        onClick={() => handleDismissInfo(update.id)}
+                      >
+                        <X className="w-4 h-4 text-muted-foreground" />
+                      </Button>
+                    )}
                   </CardHeader>
 
                   <CardContent className="space-y-4">
@@ -145,9 +180,6 @@ const CoachUpdates = () => {
                         </p>
                       </>
                     )}
-
-                    {/* Info card: just show message, no response */}
-                    {isInfo && null}
                   </CardContent>
                 </Card>
               </motion.div>
