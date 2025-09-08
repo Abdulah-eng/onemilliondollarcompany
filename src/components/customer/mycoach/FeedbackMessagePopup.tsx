@@ -11,7 +11,7 @@ const FeedbackMessagePopup = ({ message, isVisible, onDismiss }) => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 50, scale: 0.8 }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    className="fixed bottom-24 sm:bottom-6 left-1/2 -translate-x-1/2 z-[60] p-4 bg-background text-foreground rounded-lg shadow-2xl border-2 border-green-500 w-11/12 sm:w-80"
+                    className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] p-4 bg-background text-foreground rounded-lg shadow-2xl border-2 border-green-500 w-11/12 max-w-sm"
                 >
                     <div className="flex items-start">
                         <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
