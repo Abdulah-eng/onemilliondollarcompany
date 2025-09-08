@@ -12,11 +12,11 @@ const emojiRatings = ['😞', '😕', '😐', '🙂', '😃', '😁', '🤩'];
 const CoachUpdates = () => {
   const isPremiumUser = true;
 
-  const [responses, setResponses] = useState<Record<string, string>>({});
-  const [ratings, setRatings] = useState<Record<string, number>>({});
-  const [submittedIds, setSubmittedIds] = useState<string[]>([]);
+  const [responses, setResponses] = useState<Record<number, string>>({});
+  const [ratings, setRatings] = useState<Record<number, number>>({});
+  const [submittedIds, setSubmittedIds] = useState<number[]>([]);
 
-  const handleSubmit = (id: string) => {
+  const handleSubmit = (id: number) => {
     setSubmittedIds((prev) => [...prev, id]);
   };
 

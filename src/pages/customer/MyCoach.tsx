@@ -64,10 +64,7 @@ const MyCoach = () => {
             )}
 
             {/* Floating Action Button */}
-            <RequestFeedbackFab
-                isMobile={isMobile}
-                onOpenFilesDrawer={() => setIsFilesDrawerOpen(true)}
-            />
+            <RequestFeedbackFab isMobile={isMobile} />
         </div>
     );
 };
