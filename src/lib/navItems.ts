@@ -8,8 +8,7 @@ import {
   Settings,
   Calendar,
   FileText,
-  FolderOpen,
-  ShoppingBag
+  FolderOpen
 } from 'lucide-react';
 
 export interface NavItem {
@@ -27,7 +26,6 @@ export const customerNavItems: NavItem[] = [
   { name: 'Progress', href: '/customer/progress', icon: TrendingUp },
   { name: 'My Coach', href: '/customer/my-coach', icon: Users },
   { name: 'Blog', href: '/customer/blog', icon: FileText },
-  { name: 'Shop', href: '/customer/shop', icon: ShoppingBag },
 ];
 
 export const customerBottomNavItems: NavItem[] = [
