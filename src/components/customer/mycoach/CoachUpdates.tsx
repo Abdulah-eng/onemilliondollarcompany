@@ -23,10 +23,10 @@ const CoachUpdates = () => {
   const handleSubmit = (id: number) => {
     setSubmittedIds((prev) => [...prev, id]);
   };
-  
+
   // New dismiss function for the Info card
   const handleDismissInfo = (id: number) => {
-      setDismissedInfoId(id);
+    setDismissedInfoId(id);
   };
 
   if (!isPremiumUser) {
@@ -74,7 +74,7 @@ const CoachUpdates = () => {
                 className={isInfo ? 'relative cursor-pointer' : ''}
               >
                 <Card className="shadow-md rounded-2xl hover:shadow-lg transition">
-                  <CardHeader className="relative pb-2">
+                  <CardHeader className="pb-2">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-xl">
@@ -89,21 +89,21 @@ const CoachUpdates = () => {
                       <span className="text-xs text-muted-foreground shrink-0 whitespace-nowrap">
                         {update.date}
                       </span>
+                      {/* Add dismiss button for Info card on desktop */}
+                      {isInfo && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={cn(
+                            'hidden sm:inline-flex',
+                            'ml-2' // Add a little margin to the left
+                          )}
+                          onClick={() => handleDismissInfo(update.id)}
+                        >
+                          <X className="w-4 h-4 text-muted-foreground" />
+                        </Button>
+                      )}
                     </div>
-                    {/* Add dismiss button for Info card on desktop */}
-                    {isInfo && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={cn(
-                          'absolute top-2 right-2',
-                          'hidden sm:inline-flex'
-                        )}
-                        onClick={() => handleDismissInfo(update.id)}
-                      >
-                        <X className="w-4 h-4 text-muted-foreground" />
-                      </Button>
-                    )}
                   </CardHeader>
 
                   <CardContent className="space-y-4">
