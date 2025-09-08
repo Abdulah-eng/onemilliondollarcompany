@@ -22,7 +22,7 @@ const BlogPage = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-8 space-y-12">
+    <div className="w-full max-w-6xl mx-auto px-4 py-8 space-y-8 sm:space-y-12">
       <AnimatePresence mode="wait">
         {selectedPost ? (
           <motion.div
@@ -46,9 +46,9 @@ const BlogPage = () => {
             <TodaysPostHero post={latestPost} onReadMore={handleReadMore} />
 
             {/* Timeline for Previous Posts */}
-            <div className="mt-12 text-center">
-              <h2 className="text-3xl font-bold tracking-tight mb-2">Previous Posts</h2>
-              <p className="text-muted-foreground">Catch up on past articles and tips.</p>
+            <div className="mt-8 sm:mt-12 text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2">Previous Posts</h2>
+              <p className="text-muted-foreground text-sm sm:text-base">Catch up on past articles and tips.</p>
             </div>
             <BlogTimeline posts={previousPosts} onReadMore={handleReadMore} />
           </motion.div>
