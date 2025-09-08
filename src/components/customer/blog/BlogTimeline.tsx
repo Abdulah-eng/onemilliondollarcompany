@@ -4,9 +4,10 @@ import { ArrowRight } from 'lucide-react';
 
 const BlogTimeline = ({ posts, onReadMore }) => {
   return (
-    <div className="relative border-l border-gray-200 dark:border-gray-700 space-y-12 py-4 sm:py-8">
+    <div className="relative border-l border-gray-200 dark:border-gray-700 space-y-8 sm:space-y-12 py-4 sm:py-8">
       {posts.map((post, index) => (
         <div key={post.id} className="relative pl-6 sm:pl-10">
+          {/* Timeline circle */}
           <div className="absolute -left-2 sm:-left-4 top-1 sm:top-2 w-4 h-4 rounded-full bg-primary-600 dark:bg-primary-500 z-10"></div>
           <Card className="rounded-2xl transition-all duration-300 hover:shadow-lg dark:bg-gray-800">
             <CardHeader className="pb-2 px-4 sm:px-6 pt-4">
@@ -24,7 +25,7 @@ const BlogTimeline = ({ posts, onReadMore }) => {
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-3">
                 {post.excerpt}
               </p>
-              <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex flex-wrap items-center justify-between text-sm text-gray-500 dark:text-gray-400">
                 <div className="flex items-center gap-2">
                   <img
                     src={post.author.avatarUrl}
@@ -33,10 +34,10 @@ const BlogTimeline = ({ posts, onReadMore }) => {
                   />
                   <span>{post.author.name}</span>
                 </div>
-                <span>•</span>
-                <span>{post.date}</span>
-                <span>•</span>
-                <span>{post.readTime}</span>
+                <span className="hidden sm:inline-block">•</span>
+                <span className="hidden sm:inline-block">{post.date}</span>
+                <span className="hidden sm:inline-block">•</span>
+                <span className="hidden sm:inline-block">{post.readTime}</span>
                 <Button
                   variant="link"
                   className="p-0 h-auto text-primary-600 dark:text-primary-500 ml-auto"
