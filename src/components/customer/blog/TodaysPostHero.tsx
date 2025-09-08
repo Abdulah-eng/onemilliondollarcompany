@@ -19,11 +19,11 @@ const TodaysPostHero = ({ post, onReadMore }) => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
       </div>
-      <div className="absolute bottom-0 left-0 p-6 sm:p-10 w-full text-white space-y-4">
-        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+      <div className="absolute bottom-0 left-0 p-6 sm:p-10 w-full text-white space-y-3 sm:space-y-4">
+        <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
           {post.title}
         </h1>
-        <p className="text-sm sm:text-base max-w-xl text-gray-200">
+        <p className="text-xs sm:text-sm md:text-base max-w-xl text-gray-200">
           {post.excerpt}
         </p>
         <div className="flex items-center gap-4 text-xs sm:text-sm text-gray-300 font-medium">
@@ -31,7 +31,7 @@ const TodaysPostHero = ({ post, onReadMore }) => {
             <img
               src={post.author.avatarUrl}
               alt={post.author.name}
-              className="w-8 h-8 rounded-full"
+              className="w-6 h-6 rounded-full"
             />
             <span>{post.author.name}</span>
           </div>
@@ -42,7 +42,7 @@ const TodaysPostHero = ({ post, onReadMore }) => {
         </div>
         <Button
           variant="secondary"
-          className="mt-4 px-6 py-3 rounded-full text-lg font-semibold"
+          className="mt-4 px-6 py-3 rounded-full text-sm sm:text-base font-semibold"
           onClick={() => onReadMore(post.slug)}
         >
           Read Full Article
