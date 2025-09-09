@@ -29,7 +29,7 @@ export const MORE_THAN_PLAN_CARDS = [
   {
     title: 'Visualize Your Success',
     description:
-      'Log your workouts, meals, and reflections with ease. Our intuitive tracking tools help you see how far you’ve come, identify patterns, and stay focused on your long-term goals.',
+      'Log your workouts, meals, and reflections with ease. Our intuitive tracking tools help you see how far you\'ve come, identify patterns, and stay focused on your long-term goals.',
     points: [
       'Log reps, sets, weights, and meal portions',
       'Review your history and trends over time',
