@@ -11,28 +11,31 @@ import { Loader2 } from "lucide-react";
 import AppShell from "@/components/layouts/AppShell";
 import RoleGate from "@/components/routing/RoleGate";
 
-// --- PAGES (Lazy Loaded) ---
+// --- PAGES (Eager and Lazy Loaded) ---
 import LandingPage from "./pages/public/LandingPage";
-import { lazy, Suspense } from "react";
+// Eager load critical dashboards
+import CustomerDashboardPage from "./pages/customer/CustomerDashboard";
+import CoachDashboardPage from "./pages/coach/CoachDashboard";
 
-const GetStartedPage = lazy(() => import("./pages/auth/GetStartedPage"));
-const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
-const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const GoalSelectionStep = lazy(() => import("./pages/onboarding/GoalSelectionStep"));
-const PersonalInfoStep = lazy(() => import("./pages/onboarding/PersonalInfoStep"));
-const PreferencesStep = lazy(() => import("./pages/onboarding/PreferencesStep"));
-const ContactStep = lazy(() => import("./pages/onboarding/ContactStep"));
-const OnboardingSuccess = lazy(() => import("./pages/onboarding/OnboardingSuccess"));
-const CustomerDashboardPage = lazy(() => import("./pages/customer/CustomerDashboard"));
-const CoachDashboardPage = lazy(() => import("./pages/coach/CoachDashboard"));
-const MyProgramsPage = lazy(() => import("./pages/customer/MyProgramsPage"));
-const ViewProgramPage = lazy(() => import("./pages/customer/ViewProgramPage"));
-const LibraryPage = lazy(() => import("./pages/customer/LibraryPage"));
-const ProgressPage = lazy(() => import("./pages/customer/ProgressPage"));
-const MyCoachPage = lazy(() => import("./pages/customer/MyCoach"));
-const BlogPage = lazy(() => import("./pages/customer/BlogPage"));
-const ProfilePage = lazy(() => import("./pages/customer/Profile"));
+import { lazy, Suspense } from "react";
+import { lazyWithRetry } from "./utils/lazyWithRetry";
+
+const GetStartedPage = lazyWithRetry(() => import("./pages/auth/GetStartedPage"));
+const LoginPage = lazyWithRetry(() => import("./pages/auth/LoginPage"));
+const ForgotPasswordPage = lazyWithRetry(() => import("./pages/auth/ForgotPasswordPage"));
+const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
+const GoalSelectionStep = lazyWithRetry(() => import("./pages/onboarding/GoalSelectionStep"));
+const PersonalInfoStep = lazyWithRetry(() => import("./pages/onboarding/PersonalInfoStep"));
+const PreferencesStep = lazyWithRetry(() => import("./pages/onboarding/PreferencesStep"));
+const ContactStep = lazyWithRetry(() => import("./pages/onboarding/ContactStep"));
+const OnboardingSuccess = lazyWithRetry(() => import("./pages/onboarding/OnboardingSuccess"));
+const MyProgramsPage = lazyWithRetry(() => import("./pages/customer/MyProgramsPage"));
+const ViewProgramPage = lazyWithRetry(() => import("./pages/customer/ViewProgramPage"));
+const LibraryPage = lazyWithRetry(() => import("./pages/customer/LibraryPage"));
+const ProgressPage = lazyWithRetry(() => import("./pages/customer/ProgressPage"));
+const MyCoachPage = lazyWithRetry(() => import("./pages/customer/MyCoach"));
+const BlogPage = lazyWithRetry(() => import("./pages/customer/BlogPage"));
+const ProfilePage = lazyWithRetry(() => import("./pages/customer/Profile"));
 
 
 // ... (LoadingScreen, queryClient, and routing logic components remain unchanged) ...
@@ -130,11 +133,7 @@ const ThemedApp = () => {
                     </RoleGate>
                   }
                 >
-                  <Route path="/coach/dashboard" element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <CoachDashboardPage />
-                    </Suspense>
-                  } />
+                  <Route path="/coach/dashboard" element={<CoachDashboardPage />} />
                 </Route>
 
                 {/* Customer Routes */}
@@ -145,11 +144,7 @@ const ThemedApp = () => {
                     </RoleGate>
                   }
                 >
-                  <Route path="/customer/dashboard" element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <CustomerDashboardPage />
-                    </Suspense>
-                  } />
+                  <Route path="/customer/dashboard" element={<CustomerDashboardPage />} />
                   <Route path="/customer/programs" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <MyProgramsPage />
