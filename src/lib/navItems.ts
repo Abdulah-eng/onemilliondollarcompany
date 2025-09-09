@@ -34,6 +34,11 @@ export const customerBottomNavItems: NavItem[] = [
 
 export const coachNavItems: NavItem[] = [
   { name: 'Dashboard', href: '/coach/dashboard', icon: Home },
+  { name: 'Clients', href: '/coach/clients', icon: Users },
+  { name: 'Programs', href: '/coach/programs', icon: Calendar },
+  { name: 'Library', href: '/coach/library', icon: Library },
+  { name: 'Blog', href: '/coach/blog', icon: FileText },
+  { name: 'Files', href: '/coach/files', icon: FolderOpen },
 ];
 
 export const coachBottomNavItems: NavItem[] = [
