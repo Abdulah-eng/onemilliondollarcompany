@@ -75,7 +75,7 @@ export default function CTASection() {
                 />
                 <Button
                   type="submit"
-                  className="text-base px-8 py-3 whitespace-nowrap rounded-xl h-12"
+                  className="btn-wellness-primary text-base px-8 py-3 whitespace-nowrap rounded-xl h-12"
                   disabled={submitting}
                 >
                   {submitting ? 'Submitting…' : 'Get Started'}

@@ -20,7 +20,7 @@ const PaymentHistoryTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(payment.history ?? []).map((item) => (
+            {payment.history.map((item) => (
               <TableRow key={item.id}>
                 <TableCell>{item.date}</TableCell>
                 <TableCell>{item.description}</TableCell>

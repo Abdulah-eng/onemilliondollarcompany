@@ -1,3 +1,4 @@
+import { customerProfile } from '@/mockdata/profile/profileData';
 import ProfileHeader from '@/components/customer/profile/ProfileHeader';
 import ContactAndGoals from '@/components/customer/profile/ContactAndGoals';
 import PaymentAndLegal from '@/components/customer/profile/PaymentAndLegal';

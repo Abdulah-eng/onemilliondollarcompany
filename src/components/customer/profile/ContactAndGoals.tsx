@@ -33,7 +33,7 @@ const ContactAndGoals = () => {
       <Card className="shadow-md rounded-2xl p-6">
         <h3 className="text-xl font-semibold mb-4">Your Goals</h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
-          {(goals ?? []).map((goal, index) => (
+          {goals.map((goal, index) => (
             <li key={index} className="flex items-start gap-2">
               <span className="text-green-500 mt-1 shrink-0">●</span>
               <span>{goal}</span>
