@@ -135,6 +135,11 @@ const ThemedApp = () => {
                       <CoachDashboardPage />
                     </Suspense>
                   } />
+                  <Route path="/coach/settings" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <ProfilePage />
+                    </Suspense>
+                  } />
                 </Route>
 
                 {/* Customer Routes */}

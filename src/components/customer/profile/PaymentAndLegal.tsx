@@ -59,7 +59,7 @@ const PaymentAndLegal = () => {
             <AccordionContent className="p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <Label htmlFor="theme-select">Theme</Label>
-                <Select>
+                <Select defaultValue={preferences.theme} onValueChange={() => {}}>
                   <SelectTrigger id="theme-select" className="w-[120px]">
                     <SelectValue placeholder={preferences.theme} />
                   </SelectTrigger>
@@ -72,11 +72,11 @@ const PaymentAndLegal = () => {
               </div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="new-messages">New Messages</Label>
-                <Switch checked={preferences.notifications.newMessages} />
+                <Switch checked={preferences.notifications.newMessages} disabled />
               </div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="coach-feedback">Coach Feedback</Label>
-                <Switch checked={preferences.notifications.coachFeedback} />
+                <Switch checked={preferences.notifications.coachFeedback} disabled />
               </div>
             </AccordionContent>
           </AccordionItem>

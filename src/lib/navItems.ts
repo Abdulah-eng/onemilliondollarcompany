@@ -42,5 +42,5 @@ export const coachNavItems: NavItem[] = [
 ];
 
 export const coachBottomNavItems: NavItem[] = [
-  { name: 'Settings', href: '/coach/settings', icon: Settings },
+  { name: 'Settings', href: '/customer/settings', icon: Settings },
 ];
