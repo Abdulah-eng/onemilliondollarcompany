@@ -42,7 +42,7 @@ const TopNav = ({ title }: TopNavProps) => {
     return user?.email?.charAt(0).toUpperCase() || 'U';
   };
 
-  const settingsHref = '/customer/settings';
+  const settingsHref = profile?.role === 'coach' ? '/coach/settings' : '/customer/settings';
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

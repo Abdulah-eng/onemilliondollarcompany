@@ -185,6 +185,7 @@ const ThemedApp = () => {
                       <ProfilePage />
                     </Suspense>
                   } />
+                  <Route path="/settings" element={<Navigate to="/customer/settings" replace />} />
                   <Route path="/program/:type/:id" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <ViewProgramPage />
