@@ -30,6 +30,7 @@ const ContactStep = lazy(() => import("./pages/onboarding/ContactStep"));
 const OnboardingSuccess = lazy(() => import("./pages/onboarding/OnboardingSuccess"));
 const CustomerDashboardPage = lazy(() => import("./pages/customer/CustomerDashboard"));
 const CoachDashboardPage = lazy(() => import("./pages/coach/CoachDashboard"));
+const ClientOverviewPage = lazy(() => import("./pages/coach/ClientOverviewPage"));
 const MyProgramsPage = lazy(() => import("./pages/customer/MyProgramsPage"));
 const ViewProgramPage = lazy(() => import("./pages/customer/ViewProgramPage"));
 const LibraryPage = lazy(() => import("./pages/customer/LibraryPage"));
@@ -151,6 +152,11 @@ const ThemedApp = () => {
                   <Route path="/coach/dashboard" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <CoachDashboardPage />
+                    </Suspense>
+                  } />
+                  <Route path="/coach/clients" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <ClientOverviewPage />
                     </Suspense>
                   } />
                 </Route>
