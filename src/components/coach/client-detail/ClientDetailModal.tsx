@@ -33,7 +33,7 @@ export default function ClientDetailModal({
     return (
       <Drawer open={!!client} onOpenChange={(open) => !open && onClose()} closeThreshold={0.4}>
         <DrawerContent className="h-[90%] rounded-t-3xl border-none bg-background pt-4">
-          <ClientDetailView client={client} />
+          <ClientDetailView client={client} onClose={onClose} />
         </DrawerContent>
       </Drawer>
     );
@@ -57,7 +57,7 @@ export default function ClientDetailModal({
           isVisible ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <ClientDetailView client={client} />
+        <ClientDetailView client={client} onClose={onClose} />
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors"
