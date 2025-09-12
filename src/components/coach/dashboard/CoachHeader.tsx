@@ -2,11 +2,11 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Users, BookOpenCheck, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 
 /*
 TODO: Backend Integration Notes
-- [cite_start]`coachName`: This is a static value ("Train Wise") as there is only one coach[cite: 167].
+- [cite_start]`coachName`: This is a static value ("Train Wise") as there is only one coach[cite: 4].
 - All metrics should be fetched and dynamically updated.
 */
 const mockData = {
