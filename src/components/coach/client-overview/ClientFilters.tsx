@@ -3,18 +3,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Filter, SortAsc } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const TOP_NAV_HEIGHT = 65; // TopNav height (64px) + border (1px)
+const TOP_NAV_HEIGHT = 64; // TopNav height (64px)
 
 const ClientFilters = () => {
   return (
-    <motion.div
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.4 }}
-      className={`w-full z-30`} // stays below TopNav (z-40)
-      style={{ position: 'sticky', top: TOP_NAV_HEIGHT }}
+    <div 
+      className="w-full z-30 sticky backdrop-blur-sm bg-background/95" 
+      style={{ top: TOP_NAV_HEIGHT }}
     >
-      <Card className="rounded-xl shadow-md bg-white border mx-4 max-w-7xl mx-auto">
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Card className="rounded-xl shadow-md bg-white border mx-4 max-w-7xl mx-auto">
         <CardContent className="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Filter by Status */}
           <div className="flex flex-col w-full md:w-auto">
@@ -55,7 +57,8 @@ const ClientFilters = () => {
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 };
 
