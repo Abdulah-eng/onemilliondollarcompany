@@ -6,7 +6,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, AlertTriangle, CheckCircle } from 'lucide-react';
 import CancellationSurvey from '@/components/customer/payment/CancellationSurvey';
 import { customerProfile } from '@/mockdata/profile/profileData';
-import { toast } from 'sonner';
 
 const CancelSubscriptionPage = () => {
   const navigate = useNavigate();
@@ -23,10 +22,7 @@ const CancelSubscriptionPage = () => {
 
   const handleFinalCancel = async () => {
     setIsProcessing(true);
-    
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 3000));
-    
     setIsProcessing(false);
     setStep('success');
   };
@@ -37,22 +33,23 @@ const CancelSubscriptionPage = () => {
 
   if (step === 'success') {
     return (
-      <div className="w-full max-w-2xl mx-auto px-4 py-8">
+      <div className="w-full max-w-2xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
         <Card className="text-center">
           <CardHeader>
-            <CheckCircle className="h-16 w-16 text-primary mx-auto mb-4" />
-            <CardTitle className="text-2xl">Subscription Cancelled</CardTitle>
+            <CheckCircle className="h-14 w-14 sm:h-16 sm:w-16 text-primary mx-auto mb-3 sm:mb-4" />
+            <CardTitle className="text-xl sm:text-2xl">Subscription Cancelled</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-muted-foreground">
-              Your subscription has been cancelled successfully. You'll continue to have access to your account until {payment.currentPlan.nextBillingDate}.
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Your subscription has been cancelled. You’ll still have access until{' '}
+              {payment.currentPlan.nextBillingDate}.
             </p>
             <Alert>
               <AlertDescription>
-                We've sent a confirmation email to your registered email address with the cancellation details.
+                We’ve sent a confirmation email with the cancellation details.
               </AlertDescription>
             </Alert>
-            <div className="pt-4">
+            <div className="pt-3 sm:pt-4">
               <Button onClick={() => navigate('/customer/dashboard')} className="w-full">
                 Return to Dashboard
               </Button>
@@ -65,23 +62,18 @@ const CancelSubscriptionPage = () => {
 
   if (step === 'confirmation') {
     return (
-      <div className="w-full max-w-2xl mx-auto px-4 py-8 space-y-6">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            onClick={() => setStep('survey')}
-          >
+      <div className="w-full max-w-2xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <Button variant="ghost" onClick={() => setStep('survey')} className="w-fit">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-destructive">Final Confirmation</h1>
-          </div>
+          <h1 className="text-xl sm:text-2xl font-bold text-destructive">Final Confirmation</h1>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
+            <CardTitle className="flex items-center gap-2 text-destructive text-lg sm:text-xl">
               <AlertTriangle className="h-5 w-5" />
               Are you sure you want to cancel?
             </CardTitle>
@@ -90,17 +82,17 @@ const CancelSubscriptionPage = () => {
             <Alert>
               <AlertDescription>
                 <strong>What happens when you cancel:</strong>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Your subscription will end on {payment.currentPlan.nextBillingDate}</li>
-                  <li>You'll lose access to all premium features</li>
-                  <li>Your data will be preserved for 30 days in case you want to reactivate</li>
-                  <li>No refunds will be issued for the current billing period</li>
+                <ul className="list-disc list-inside mt-2 space-y-1 text-sm sm:text-base">
+                  <li>Ends on {payment.currentPlan.nextBillingDate}</li>
+                  <li>Lose access to premium features</li>
+                  <li>Data preserved for 30 days</li>
+                  <li>No refunds for current billing period</li>
                 </ul>
               </AlertDescription>
             </Alert>
 
-            <div className="p-4 bg-muted rounded-lg">
-              <h4 className="font-medium mb-2">Your cancellation reason:</h4>
+            <div className="p-3 sm:p-4 bg-muted rounded-lg">
+              <h4 className="font-medium mb-2 text-sm sm:text-base">Your cancellation reason:</h4>
               <p className="text-sm text-muted-foreground capitalize">
                 {surveyData?.reason.replace('-', ' ')}
               </p>
@@ -113,22 +105,26 @@ const CancelSubscriptionPage = () => {
             </div>
 
             <div className="border-t pt-4">
-              <div className="text-center space-y-4">
+              <div className="text-center space-y-3 sm:space-y-4">
                 <h4 className="font-semibold text-primary">Wait! Before you go...</h4>
                 <p className="text-sm text-muted-foreground">
-                  Would you like to pause your subscription instead? You can resume anytime within 6 months.
+                  You can pause your subscription instead and resume within 6 months.
                 </p>
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={handleKeepSubscription} className="flex-1">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={handleKeepSubscription}
+                    className="w-full sm:flex-1"
+                  >
                     Pause Instead
                   </Button>
-                  <Button 
-                    variant="destructive" 
+                  <Button
+                    variant="destructive"
                     onClick={handleFinalCancel}
                     disabled={isProcessing}
-                    className="flex-1"
+                    className="w-full sm:flex-1"
                   >
-                    {isProcessing ? 'Cancelling...' : 'Yes, Cancel Subscription'}
+                    {isProcessing ? 'Cancelling...' : 'Yes, Cancel'}
                   </Button>
                 </div>
               </div>
@@ -140,25 +136,19 @@ const CancelSubscriptionPage = () => {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-8 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/customer/settings')}
-        >
+    <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        <Button variant="ghost" onClick={() => navigate('/customer/settings')} className="w-fit">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Settings
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-destructive">Cancel Subscription</h1>
-          <p className="text-muted-foreground">We're sorry to see you go</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-destructive">Cancel Subscription</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">We’re sorry to see you go</p>
         </div>
       </div>
 
-      <CancellationSurvey 
-        onSubmit={handleSurveySubmit}
-        onCancel={handleKeepSubscription}
-      />
+      <CancellationSurvey onSubmit={handleSurveySubmit} onCancel={handleKeepSubscription} />
     </div>
   );
 };
