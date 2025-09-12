@@ -1,7 +1,7 @@
 // src/components/coach/dashboard/ClientOverview.tsx
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -52,7 +52,7 @@ const ClientOverview = () => {
         {mockClients.map((client) => (
           <Card key={client.id} className="hover:shadow-lg transition-shadow duration-300 rounded-xl">
             <CardContent className="p-4 flex items-center justify-between gap-4">
-              <Link href={`/coach/clients/${client.id}`} className="flex items-center flex-1 gap-3">
+              <Link to={`/coach/clients/${client.id}`} className="flex items-center flex-1 gap-3">
                 <span className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full border">
                   <img className="aspect-square h-full w-full" src={`https://i.pravatar.cc/150?u=${client.id}`} alt={client.name} />
                 </span>
