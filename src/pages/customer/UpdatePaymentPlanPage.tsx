@@ -28,77 +28,71 @@ const UpdatePaymentPlanPage = () => {
     }
 
     setIsProcessing(true);
-    
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
     setIsProcessing(false);
+
     toast.success('Plan updated successfully!');
     navigate('/customer/settings');
   };
 
   if (showPaymentForm) {
     return (
-      <div className="w-full max-w-6xl mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => setShowPaymentForm(false)}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Plan Selection
-          </Button>
-        </div>
+      <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        <Button
+          variant="ghost"
+          onClick={() => setShowPaymentForm(false)}
+          className="mb-6"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Plan Selection
+        </Button>
         <UpdatePaymentMethodForm />
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-8 space-y-8">
-      <div className="flex items-center gap-4">
-        <Button 
-          variant="ghost" 
+    <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        <Button
+          variant="ghost"
           onClick={() => navigate('/customer/settings')}
+          className="w-fit"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Settings
+          Back
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Update Plan</h1>
-          <p className="text-muted-foreground">Choose a new plan that fits your needs</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Update Plan</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Choose a new plan that fits your needs
+          </p>
         </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <PlanSelectionCard 
+          <PlanSelectionCard
             onSelectPlan={handlePlanSelect}
             selectedPlan={selectedPlan}
           />
         </div>
-        
-        <div className="space-y-6">
-          <PaymentMethodCard 
-            onUpdate={handleUpdatePaymentMethod}
-          />
-          
+
+        <div className="space-y-6 lg:sticky lg:top-4">
+          <PaymentMethodCard onUpdate={handleUpdatePaymentMethod} />
           {selectedPlan && (
-            <div className="sticky top-4">
-              <div className="p-4 bg-muted rounded-lg space-y-4">
-                <h3 className="font-semibold">Plan Update Summary</h3>
-                <p className="text-sm text-muted-foreground">
-                  Your new plan will take effect immediately and you'll be charged the prorated amount.
-                </p>
-                <Button 
-                  onClick={handleConfirmUpdate}
-                  disabled={isProcessing}
-                  className="w-full"
-                >
-                  {isProcessing ? 'Processing...' : 'Confirm Plan Update'}
-                </Button>
-              </div>
+            <div className="p-3 sm:p-4 bg-muted rounded-lg space-y-3 sm:space-y-4">
+              <h3 className="text-base sm:text-lg font-semibold">Plan Update Summary</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Your new plan will take effect immediately and you’ll be charged the prorated amount.
+              </p>
+              <Button
+                onClick={handleConfirmUpdate}
+                disabled={isProcessing}
+                className="w-full"
+              >
+                {isProcessing ? 'Processing...' : 'Confirm Plan Update'}
+              </Button>
             </div>
           )}
         </div>
