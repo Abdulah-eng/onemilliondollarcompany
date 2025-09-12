@@ -1,4 +1,3 @@
-// src/components/coach/client-overview/ClientList.tsx
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
@@ -6,77 +5,15 @@ import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
-// Mapped from system logic
-/*
-TODO: Backend Integration Notes
-- `clients`: Fetch from a 'profiles' table where 'role' is 'customer'.
-- The statuses and colors are derived from the 'Customer Status Tags' logic.
-*/
 const mockClients = [
-  {
-    id: 1,
-    name: 'Sarah Jenkins',
-    plan: 'Trial',
-    status: 'Missing Program',
-    color: 'bg-red-500',
-    link: '/coach/clients/sarah-jenkins'
-  },
-  {
-    id: 2,
-    name: 'Mark Robertson',
-    plan: 'Premium',
-    status: 'Needs Feedback',
-    color: 'bg-orange-500',
-    link: '/coach/clients/mark-robertson'
-  },
-  {
-    id: 3,
-    name: 'Emily Chen',
-    plan: 'Standard',
-    status: 'Off Track',
-    color: 'bg-orange-500',
-    link: '/coach/clients/emily-chen'
-  },
-  {
-    id: 4,
-    name: 'Chris Miller',
-    plan: 'Standard',
-    status: 'Soon to Expire',
-    color: 'bg-orange-500',
-    link: '/coach/clients/chris-miller'
-  },
-  {
-    id: 5,
-    name: 'Jessica Lee',
-    plan: 'Premium',
-    status: 'On Track',
-    color: 'bg-green-500',
-    link: '/coach/clients/jessica-lee'
-  },
-  {
-    id: 6,
-    name: 'Tom Green',
-    plan: 'Standard',
-    status: 'On Track',
-    color: 'bg-green-500',
-    link: '/coach/clients/tom-green'
-  },
-  {
-    id: 7,
-    name: 'Linda Scott',
-    plan: 'Premium',
-    status: 'On Track',
-    color: 'bg-green-500',
-    link: '/coach/clients/linda-scott'
-  },
-  {
-    id: 8,
-    name: 'Paul Wilson',
-    plan: 'OTP',
-    status: 'Program Expired',
-    color: 'bg-red-500',
-    link: '/coach/clients/paul-wilson'
-  },
+  { id: 1, name: 'Sarah Jenkins', plan: 'Trial', status: 'Missing Program', color: 'bg-red-500', link: '/coach/clients/sarah-jenkins' },
+  { id: 2, name: 'Mark Robertson', plan: 'Premium', status: 'Needs Feedback', color: 'bg-orange-500', link: '/coach/clients/mark-robertson' },
+  { id: 3, name: 'Emily Chen', plan: 'Standard', status: 'Off Track', color: 'bg-orange-500', link: '/coach/clients/emily-chen' },
+  { id: 4, name: 'Chris Miller', plan: 'Standard', status: 'Soon to Expire', color: 'bg-orange-500', link: '/coach/clients/chris-miller' },
+  { id: 5, name: 'Jessica Lee', plan: 'Premium', status: 'On Track', color: 'bg-green-500', link: '/coach/clients/jessica-lee' },
+  { id: 6, name: 'Tom Green', plan: 'Standard', status: 'On Track', color: 'bg-green-500', link: '/coach/clients/tom-green' },
+  { id: 7, name: 'Linda Scott', plan: 'Premium', status: 'On Track', color: 'bg-green-500', link: '/coach/clients/linda-scott' },
+  { id: 8, name: 'Paul Wilson', plan: 'OTP', status: 'Program Expired', color: 'bg-red-500', link: '/coach/clients/paul-wilson' },
 ];
 
 const ClientList = () => {
