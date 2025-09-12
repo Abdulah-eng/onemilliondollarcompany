@@ -1,7 +1,6 @@
 // src/components/coach/clientCard/ClientProgress/ProgramFill.tsx
 import React from 'react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
-import 'react-circular-progressbar/dist/styles.css';
 
 interface ProgramFillProps {
   programFill: { fitness: number; nutrition: number; wellness: number };

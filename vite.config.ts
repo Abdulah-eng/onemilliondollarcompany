@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom']
+    include: ['react', 'react-dom', 'react-router-dom', 'chart.js', 'react-chartjs-2', 'react-circular-progressbar']
   },
   build: {
     rollupOptions: {
@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => ({
           router: ['react-router-dom'],
           ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
           supabase: ['@supabase/supabase-js'],
-          charts: ['recharts'],
+          charts: ['recharts', 'chart.js', 'react-chartjs-2', 'react-circular-progressbar'],
           motion: ['framer-motion']
         }
       },
