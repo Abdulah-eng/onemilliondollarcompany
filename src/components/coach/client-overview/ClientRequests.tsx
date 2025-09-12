@@ -3,16 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle, XCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const mockRequests = [
-  { id: 1, clientName: 'Emily Clark', plan: 'Trial', goals: ['Weight Loss', 'Energy'], link: '/coach/requests/1' },
-  { id: 2, clientName: 'David Rodriguez', plan: 'Standard', goals: ['Muscle Gain', 'Nutrition'], link: '/coach/requests/2' },
-  { id: 3, clientName: 'Jessica Williams', plan: 'Trial', goals: ['Better Sleep', 'Stress Reduction'], link: '/coach/requests/3' },
+  { id: '1', clientName: 'Emily Clark', plan: 'Trial', goals: ['Weight Loss', 'Energy'] },
+  { id: '2', clientName: 'David Rodriguez', plan: 'Standard', goals: ['Muscle Gain', 'Nutrition'] },
+  { id: '3', clientName: 'Jessica Williams', plan: 'Trial', goals: ['Better Sleep', 'Stress Reduction'] },
 ];
 
-const ClientRequests = () => {
+interface ClientRequestsProps {
+  onClientClick: (clientId: string) => void;
+}
+
+const ClientRequests = ({ onClientClick }: ClientRequestsProps) => {
   if (!mockRequests.length) return null;
 
   return (
@@ -28,7 +31,7 @@ const ClientRequests = () => {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
           >
-            <Link to={request.link} className="block">
+            <div onClick={() => onClientClick(request.id)} className="block">
               <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-xl cursor-pointer">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-md font-semibold text-primary">
@@ -58,7 +61,7 @@ const ClientRequests = () => {
                   </div>
                 </CardContent>
               </Card>
-            </Link>
+            </div>
           </motion.div>
         ))}
       </div>
