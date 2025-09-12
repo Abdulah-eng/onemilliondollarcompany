@@ -1,40 +1,33 @@
-// src/components/coach/clientCard/ClientProgress.tsx
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
-import DailyCheckIn from './ClientProgress/DailyCheckIn';
-import ProgramFill from './ClientProgress/ProgramFill';
-import WeightTrend from './ClientProgress/WeightTrend';
+import { useParams } from 'react-router-dom';
+import ClientHeader from '@/components/coach/clientCard/ClientHeader';
+import ClientPersonalInfo from '@/components/coach/clientCard/ClientPersonalInfo';
+import ClientKeyMetrics from '@/components/coach/clientCard/ClientKeyMetrics';
+import CurrentProgram from '@/components/coach/clientCard/CurrentProgram';
+import { mockClientData } from '@/mockdata/clientCard/mockClientData';
 
-interface ClientProgressProps {
-  insights: {
-    dailyCheckIn: { water: number[]; energy: number[]; sleep: number[]; mood: number[] };
-    programFill: { fitness: number; nutrition: number; wellness: number };
-    weightTrend: number[];
-    nextFollowUp: string;
-  };
-}
+const ClientCard = () => {
+  const { clientId } = useParams();
+  
+  // For now, we'll use the mock data regardless of clientId
+  // In a real app, you'd fetch the client data based on clientId
+  const client = mockClientData;
 
-const ClientProgress: React.FC<ClientProgressProps> = ({ insights }) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-    >
-      <Card className="shadow-lg rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700">
-        <CardContent className="p-6 space-y-6">
-          <h3 className="text-xl sm:text-2xl font-bold text-foreground">Progress & Insights 📈</h3>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <ProgramFill programFill={insights.programFill} />
-            <DailyCheckIn dailyCheckIn={insights.dailyCheckIn} />
-            <WeightTrend weightTrend={insights.weightTrend} nextFollowUp={insights.nextFollowUp} />
+    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <ClientHeader client={client} />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <ClientPersonalInfo personalInfo={client.personalInfo} />
+          <ClientKeyMetrics stats={client.stats} />
+          <div className="lg:col-span-2 xl:col-span-1">
+            <CurrentProgram />
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default ClientProgress;
+export default ClientCard;
