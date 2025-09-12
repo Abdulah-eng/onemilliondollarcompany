@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Heart, Droplet, Sun, Moon } from 'lucide-react';
+import { TimeRange } from './TimeRangeSelector';
 
 interface DailyCheckInProps {
   dailyCheckIn: {
@@ -20,6 +21,7 @@ interface DailyCheckInProps {
     sleep: number;
     mood: number;
   }[];
+  timeRange: TimeRange;
 }
 
 // Custom Tooltip for the chart
@@ -51,7 +53,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const DailyCheckIn: React.FC<DailyCheckInProps> = ({ dailyCheckIn }) => {
+const DailyCheckIn: React.FC<DailyCheckInProps> = ({ dailyCheckIn, timeRange }) => {
   if (!dailyCheckIn || dailyCheckIn.length === 0) {
     return (
       <Card className="shadow-lg rounded-xl h-64 flex flex-col items-center justify-center p-6 bg-card">
@@ -73,11 +75,11 @@ const DailyCheckIn: React.FC<DailyCheckInProps> = ({ dailyCheckIn }) => {
         </div>
       </div>
       
-      <div className="h-60 w-full overflow-hidden -mx-6 sm:-mx-8">
+      <div className="h-60 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={dailyCheckIn}
-            margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
+            margin={{ top: 10, right: 20, left: 20, bottom: 10 }}
           >
             <defs>
               <linearGradient id="colorWater" x1="0" y1="0" x2="0" y2="1">

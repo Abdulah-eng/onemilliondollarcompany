@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Scale } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { TimeRange } from './TimeRangeSelector';
 
 interface WeightTrendProps {
   weightTrend: {
@@ -18,6 +19,7 @@ interface WeightTrendProps {
     weight: number;
   }[];
   nextFollowUp: string;
+  timeRange: TimeRange;
 }
 
 // Custom Tooltip for the chart
@@ -43,7 +45,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const WeightTrend: React.FC<WeightTrendProps> = ({ weightTrend, nextFollowUp }) => {
+const WeightTrend: React.FC<WeightTrendProps> = ({ weightTrend, nextFollowUp, timeRange }) => {
   if (!weightTrend || weightTrend.length === 0) {
     return (
       <Card className="shadow-lg rounded-xl h-64 flex flex-col items-center justify-center p-6 bg-card">
@@ -59,10 +61,28 @@ const WeightTrend: React.FC<WeightTrendProps> = ({ weightTrend, nextFollowUp }) 
     timestamp: new Date(d.date).getTime(),
   }));
 
-  const timestamps = chartData.map(d => d.timestamp);
-  const minTs = Math.min(...timestamps);
-  const maxTs = Math.max(...timestamps);
-  const padding = (maxTs - minTs) * 0.1;
+  const getTickCount = () => {
+    switch (timeRange) {
+      case '1week': return 4;
+      case '1month': return 5;
+      case '6months': return 6;
+      default: return 5;
+    }
+  };
+
+  const formatTick = (timestamp: number) => {
+    const date = new Date(timestamp);
+    switch (timeRange) {
+      case '1week':
+        return date.toLocaleDateString('en-US', { weekday: 'short' });
+      case '1month':
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      case '6months':
+        return date.toLocaleDateString('en-US', { month: 'short' });
+      default:
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+  };
 
   return (
     <Card className="shadow-lg rounded-xl bg-card p-6 space-y-4">
@@ -76,11 +96,11 @@ const WeightTrend: React.FC<WeightTrendProps> = ({ weightTrend, nextFollowUp }) 
         </div>
       </div>
       
-      <div className="h-60 w-full overflow-hidden -mx-6 sm:-mx-8">
+      <div className="h-60 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
-            margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
+            margin={{ top: 10, right: 20, left: 20, bottom: 10 }}
           >
             <defs>
               <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
@@ -91,20 +111,15 @@ const WeightTrend: React.FC<WeightTrendProps> = ({ weightTrend, nextFollowUp }) 
             <XAxis
               dataKey="timestamp"
               type="number"
-              domain={[minTs - padding, maxTs + padding]}
+              domain={['dataMin', 'dataMax']}
               stroke="hsl(var(--muted-foreground))"
               fontSize={12}
               tick={{ fill: 'hsl(var(--muted-foreground))' }}
               tickLine={false}
               axisLine={false}
               allowDuplicatedCategory={false}
-              interval="preserveEnd"
-              tickFormatter={(ts) =>
-                new Date(ts).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                })
-              }
+              tickCount={getTickCount()}
+              tickFormatter={formatTick}
             />
             <Tooltip
               content={<CustomTooltip />}
