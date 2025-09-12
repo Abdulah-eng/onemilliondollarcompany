@@ -6,7 +6,6 @@ import {
   XAxis,
   Tooltip,
   ResponsiveContainer,
-  TooltipProps,
 } from 'recharts';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -22,7 +21,7 @@ interface WeightTrendProps {
 }
 
 // Custom Tooltip for the chart
-const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const dateLabel = new Date(label).toLocaleDateString('en-US', {
       month: 'short',
