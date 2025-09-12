@@ -1,7 +1,7 @@
 // src/components/coach/dashboard/ActionShortcuts.tsx
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { Plus, Users, BookMarked, Settings, FileText, LayoutList } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -49,7 +49,7 @@ const ActionShortcuts = () => {
               </div>
               <h3 className="text-lg font-semibold">{shortcut.title}</h3>
               <p className="text-sm text-muted-foreground">{shortcut.description}</p>
-              <Link href={shortcut.href} passHref>
+              <Link to={shortcut.href}>
                 <Button variant="ghost" className="p-0 h-auto text-primary">
                   Go to <LayoutList size={16} className="ml-2" />
                 </Button>
