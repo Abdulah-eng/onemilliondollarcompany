@@ -3,42 +3,49 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Weight, Heart, Ruler, Calendar, MapPin, Target,
-  Flame, Salad, BrainCircuit,
-  Dumbbell, Utensils, Zap, Bed, Droplet,
+  Dumbbell, Utensils, XCircle, CheckCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
+// Mock data representing an incoming client request from the onboarding flow
 const mockClientData = {
-  name: 'Mark Robertson',
-  plan: 'Premium',
-  status: 'Needs Feedback',
-  color: 'bg-orange-500',
-  profilePicture: 'https://i.pravatar.cc/150?u=mark-robertson',
+  id: 'request_123',
+  name: 'Emily Clark',
+  plan: 'Trial',
+  profilePicture: 'https://i.pravatar.cc/150?u=emily-clark',
   personalInfo: {
-    age: 28,
-    gender: 'Male',
-    height: '180 cm',
-    weight: '85 kg',
-    location: 'Oslo, Norway',
+    age: 25,
+    gender: 'Female',
+    height: '165 cm',
+    weight: '68 kg',
   },
-  goals: ['Muscle Gain', 'Increase Strength'],
+  goals: ['Weight Loss', 'Increased Energy'],
   preferences: {
-    injuries: ['Knee (old injury)'],
-    allergies: ['Peanuts'],
-    likes: ['Spicy food', 'HIIT workouts'],
-    dislikes: ['Running', 'Boring exercises'],
+    injuries: ['None'],
+    allergies: ['Shellfish'],
+    dislikes: ['Heavy lifting'],
     preferredProgramType: ['Fitness'],
-  },
-  vitalStats: {
-    avgHeartRate: '75 bpm',
-    avgSleep: '7.2 hours',
-    avgHydration: '2.5 L',
-    avgMood: 'Great',
   },
 };
 
-const ClientDetailView = ({ client = mockClientData }) => {
+const ClientDetailView = ({ client = mockClientData, onClose }) => {
+
+  const handleAccept = () => {
+    // TODO: Implement logic to accept the client request
+    // This should update the database (e.g., set request status to 'accepted')
+    // and trigger a welcome PDF and 3-day countdown for program assignment. [cite: 195, 198]
+    console.log(`Accepted client: ${client.name}`);
+    onClose();
+  };
+
+  const handleDecline = () => {
+    // TODO: Implement logic to decline the client request
+    // This might set the request status to 'declined' and notify the user.
+    console.log(`Declined client: ${client.name}`);
+    onClose();
+  };
+
   return (
     <div className="flex flex-col h-full overflow-y-auto p-6 space-y-6">
       <div className="flex flex-col items-center text-center space-y-4">
@@ -46,12 +53,7 @@ const ClientDetailView = ({ client = mockClientData }) => {
           <img className="aspect-square h-full w-full" src={client.profilePicture} alt={client.name} />
         </span>
         <h1 className="text-3xl font-bold">{client.name}</h1>
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold text-muted-foreground">{client.plan} Plan</p>
-          <span className={cn("px-3 py-1 text-xs font-semibold rounded-full text-white", client.color)}>
-            {client.status}
-          </span>
-        </div>
+        <p className="text-sm font-semibold text-muted-foreground">{client.plan} Plan</p>
       </div>
 
       <motion.div
@@ -95,39 +97,25 @@ const ClientDetailView = ({ client = mockClientData }) => {
               <StatItem icon={Calendar} label="Age" value={client.personalInfo.age} />
               <StatItem icon={Ruler} label="Height" value={client.personalInfo.height} />
               <StatItem icon={Weight} label="Weight" value={client.personalInfo.weight} />
-              <StatItem icon={MapPin} label="Location" value={client.personalInfo.location} />
             </div>
             <div className="space-y-2">
               <p className="font-semibold text-muted-foreground">Injuries: <span className="text-foreground">{client.preferences.injuries.join(', ') || 'None'}</span></p>
               <p className="font-semibold text-muted-foreground">Allergies: <span className="text-foreground">{client.preferences.allergies.join(', ') || 'None'}</span></p>
+              <p className="font-semibold text-muted-foreground">Dislikes: <span className="text-foreground">{client.preferences.dislikes.join(', ') || 'None'}</span></p>
               <p className="font-semibold text-muted-foreground">Preferred Programs: <span className="text-foreground">{client.preferences.preferredProgramType.join(', ')}</span></p>
             </div>
           </CardContent>
         </Card>
       </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
-        <Card className="shadow-lg rounded-xl">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Heart size={20} className="text-primary" />
-              Vital Stats
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <StatItem icon={Heart} label="Heart Rate" value={client.vitalStats.avgHeartRate} />
-              <StatItem icon={Bed} label="Sleep" value={client.vitalStats.avgSleep} />
-              <StatItem icon={Droplet} label="Hydration" value={client.vitalStats.avgHydration} />
-              <StatItem icon={Zap} label="Mood" value={client.vitalStats.avgMood} />
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+      <div className="flex gap-4 mt-8 pt-4 border-t border-border">
+        <Button onClick={handleAccept} className="w-full bg-green-500 hover:bg-green-600 text-white font-bold text-base">
+          <CheckCircle className="h-5 w-5 mr-2" /> Accept
+        </Button>
+        <Button onClick={handleDecline} variant="outline" className="w-full text-red-600 border-red-600 font-bold text-base hover:bg-red-50">
+          <XCircle className="h-5 w-5 mr-2" /> Decline
+        </Button>
+      </div>
     </div>
   );
 };
