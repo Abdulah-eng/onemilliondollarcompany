@@ -1,45 +1,16 @@
-// src/components/coach/client-overview/ClientRequests.tsx
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle, XCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
-// Mapped from system logic and notifications
-/*
-TODO: Backend Integration Notes
-- `newRequests`: Fetch from a 'requests' table where 'status' is 'pending'.
-- `goals`: These should be linked to the onboarding flow and stored in the database.
-*/
 const mockRequests = [
-  {
-    id: 1,
-    clientName: 'Emily Clark',
-    plan: 'Trial',
-    goals: ['Weight Loss', 'Increased Energy'],
-    link: '/coach/requests/1',
-  },
-  {
-    id: 2,
-    clientName: 'David Rodriguez',
-    plan: 'Standard',
-    goals: ['Muscle Gain', 'Improve Nutrition'],
-    link: '/coach/requests/2',
-  },
-  {
-    id: 3,
-    clientName: 'Jessica Williams',
-    plan: 'Trial',
-    goals: ['Better Sleep', 'Stress Reduction'],
-    link: '/coach/requests/3',
-  },
+  { id: 1, clientName: 'Emily Clark', plan: 'Trial', goals: ['Weight Loss', 'Energy'], link: '/coach/requests/1' },
+  { id: 2, clientName: 'David Rodriguez', plan: 'Standard', goals: ['Muscle Gain', 'Nutrition'], link: '/coach/requests/2' },
+  { id: 3, clientName: 'Jessica Williams', plan: 'Trial', goals: ['Better Sleep', 'Stress Reduction'], link: '/coach/requests/3' },
 ];
 
 const ClientRequests = () => {
-  if (mockRequests.length === 0) {
-    return null;
-  }
+  if (!mockRequests.length) return null;
 
   return (
     <div className="space-y-4">
