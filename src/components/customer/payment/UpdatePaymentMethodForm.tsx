@@ -23,11 +23,10 @@ const UpdatePaymentMethodForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API call
+
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
     setIsLoading(false);
+
     toast.success('Payment method updated successfully!');
     navigate('/customer/settings');
   };
@@ -47,9 +46,9 @@ const UpdatePaymentMethodForm = () => {
   });
 
   return (
-    <Card className="max-w-md mx-auto">
+    <Card className="max-w-md mx-auto w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
           <CreditCard className="h-5 w-5 text-primary" />
           Update Payment Method
         </CardTitle>
@@ -67,7 +66,7 @@ const UpdatePaymentMethodForm = () => {
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="space-y-2">
               <Label htmlFor="expiryMonth">Month</Label>
               <Select value={formData.expiryMonth} onValueChange={(value) => handleInputChange('expiryMonth', value)}>
@@ -141,21 +140,21 @@ const UpdatePaymentMethodForm = () => {
             </Select>
           </div>
 
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-4 p-3 bg-muted rounded-lg">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mt-4 p-3 bg-muted rounded-lg">
             <Lock className="h-4 w-4" />
             <span>Your payment information is encrypted and secure</span>
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => navigate('/customer/settings')}
-              className="flex-1"
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading} className="flex-1">
+            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
               {isLoading ? 'Saving...' : 'Save Payment Method'}
             </Button>
           </div>
