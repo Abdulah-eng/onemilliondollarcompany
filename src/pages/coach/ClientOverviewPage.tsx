@@ -1,4 +1,3 @@
-// src/pages/coach/ClientOverviewPage.tsx
 import ClientRequests from '@/components/coach/client-overview/ClientRequests';
 import ClientFilters from '@/components/coach/client-overview/ClientFilters';
 import ClientList from '@/components/coach/client-overview/ClientList';
