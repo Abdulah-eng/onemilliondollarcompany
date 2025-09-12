@@ -5,16 +5,16 @@ import ProgramFill from './ProgramFill';
 import DailyCheckIn from './DailyCheckIn';
 import WeightTrend from './WeightTrend';
 import TimeRangeSelector, { TimeRange } from './TimeRangeSelector';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import { mockClientData } from '@/mockdata/clientCard/mockClientData';
 
 interface ClientProgressProps {
-  client: any; // Using 'any' for now since we're using mock data
+  client: typeof mockClientData;
 }
 
 const ClientProgress: React.FC<ClientProgressProps> = ({ client }) => {
   const [timeRange, setTimeRange] = useState<TimeRange>('1month');
   
-  // Use data from client prop
   const dailyCheckIn = client.dailyCheckIn || [];
   const weightTrend = client.weightTrend || [];
   const programFill = client.programFill || { fitness: 0, nutrition: 0, mentalHealth: 0 };
@@ -55,7 +55,7 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ client }) => {
         <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="shadow-lg rounded-xl bg-card p-6">
           <ProgramFill programFill={programFill} />
         </Card>
