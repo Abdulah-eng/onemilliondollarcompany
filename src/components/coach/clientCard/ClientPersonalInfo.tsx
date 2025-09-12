@@ -4,7 +4,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { User, Calendar, Ruler, Weight, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// Reusable component for displaying a single stat item
 const StatItem = ({ icon: Icon, label, value }) => (
   <div className="flex items-center gap-2">
     <div className="flex-shrink-0">
@@ -24,7 +23,7 @@ const ClientPersonalInfo = ({ personalInfo }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.4 }}
     >
-      <Card className="shadow-lg rounded-xl">
+      <Card className="shadow-lg rounded-xl bg-card">
         <CardContent className="p-6 space-y-4">
           <h3 className="text-lg font-bold flex items-center gap-2">Client Details <User size={20} className="text-primary" /></h3>
           <div className="grid grid-cols-2 gap-4">
