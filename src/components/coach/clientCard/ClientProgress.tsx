@@ -11,7 +11,7 @@ const ClientProgress = ({ insights }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
-      <Card className="shadow-lg rounded-xl">
+      <Card className="shadow-lg rounded-xl bg-card">
         <CardContent className="p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold">Progress & Insights 📈</h3>
