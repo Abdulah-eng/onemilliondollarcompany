@@ -1,5 +1,4 @@
 import ClientRequests from '@/components/coach/client-overview/ClientRequests';
-import ClientFilters from '@/components/coach/client-overview/ClientFilters';
 import ClientList from '@/components/coach/client-overview/ClientList';
 
 const ClientOverviewPage = () => {
@@ -15,8 +14,6 @@ const ClientOverviewPage = () => {
 
         <ClientRequests />
       </div>
-
-      <ClientFilters />
       
       <div className="w-full max-w-7xl mx-auto px-4 space-y-6">
         <ClientList />
