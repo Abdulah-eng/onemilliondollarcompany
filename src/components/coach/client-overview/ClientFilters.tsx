@@ -14,7 +14,7 @@ const ClientFilters = () => {
       className={`w-full z-30`} // stays below TopNav (z-40)
       style={{ position: 'sticky', top: TOP_NAV_HEIGHT }}
     >
-      <Card className="rounded-xl shadow-md bg-white border">
+      <Card className="rounded-xl shadow-md bg-white border mx-4 max-w-7xl mx-auto">
         <CardContent className="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Filter by Status */}
           <div className="flex flex-col w-full md:w-auto">
