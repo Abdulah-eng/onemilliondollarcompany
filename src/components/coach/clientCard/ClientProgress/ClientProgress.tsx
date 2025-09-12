@@ -6,9 +6,6 @@ import DailyCheckIn from './DailyCheckIn';
 import WeightTrend from './WeightTrend';
 import TimeRangeSelector, { TimeRange } from './TimeRangeSelector';
 import { Card } from '@/components/ui/card';
-import { mockDailyCheckIn } from '@/mockdata/clientCard/mockDailyCheckIn';
-import { mockWeightTrend } from '@/mockdata/clientCard/mockWeightTrend';
-import { mockProgramFill } from '@/mockdata/clientCard/mockProgramFill';
 
 interface ClientProgressProps {
   client: any; // Using 'any' for now since we're using mock data
@@ -17,10 +14,11 @@ interface ClientProgressProps {
 const ClientProgress: React.FC<ClientProgressProps> = ({ client }) => {
   const [timeRange, setTimeRange] = useState<TimeRange>('1month');
   
-  // Use mock data directly
-  const dailyCheckIn = mockDailyCheckIn;
-  const weightTrend = mockWeightTrend;
-  const programFill = mockProgramFill;
+  // Use data from client prop
+  const dailyCheckIn = client.dailyCheckIn || [];
+  const weightTrend = client.weightTrend || [];
+  const programFill = client.programFill || { fitness: 0, nutrition: 0, mentalHealth: 0 };
+  const nextFollowUp = client.insights?.nextFollowUp;
 
   const filterDataByTimeRange = (data: any[], dateField: string = 'date') => {
     const now = new Date();
@@ -68,7 +66,7 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ client }) => {
 
       <div className="grid grid-cols-1 gap-6">
         <Card className="shadow-lg rounded-xl bg-card p-6">
-          <WeightTrend weightTrend={filteredWeightTrend} timeRange={timeRange} />
+          <WeightTrend weightTrend={filteredWeightTrend} nextFollowUp={nextFollowUp} timeRange={timeRange} />
         </Card>
         <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 h-96 rounded-xl shadow-lg flex items-center justify-center text-muted-foreground">
           [Detailed Insights Graph goes here]
