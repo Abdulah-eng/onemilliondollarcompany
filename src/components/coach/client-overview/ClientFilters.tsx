@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Filter, SortAsc } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const TOP_NAV_HEIGHT = 64; // adjust this to your actual top nav height in px
+const TOP_NAV_HEIGHT = 64; // adjust to your actual top nav height
 
 const ClientFilters = () => {
   return (
@@ -14,7 +14,7 @@ const ClientFilters = () => {
       className={`w-full z-40`} // spans full width, stays above other content
       style={{ position: 'sticky', top: TOP_NAV_HEIGHT }}
     >
-      <Card className="rounded-xl shadow-md border bg-gradient-to-r from-primary/5 via-background to-primary/5 backdrop-blur">
+      <Card className="rounded-xl shadow-md bg-white border">
         <CardContent className="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Filter by Status */}
           <div className="flex flex-col w-full md:w-auto">
@@ -22,7 +22,7 @@ const ClientFilters = () => {
             <div className="flex items-center gap-2">
               <Filter size={18} className="text-primary" />
               <Select>
-                <SelectTrigger className="w-full md:w-[180px] bg-background/80 border shadow-sm">
+                <SelectTrigger className="w-full md:w-[180px] bg-white border shadow-sm">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -42,7 +42,7 @@ const ClientFilters = () => {
             <div className="flex items-center gap-2">
               <SortAsc size={18} className="text-primary" />
               <Select>
-                <SelectTrigger className="w-full md:w-[180px] bg-background/80 border shadow-sm">
+                <SelectTrigger className="w-full md:w-[180px] bg-white border shadow-sm">
                   <SelectValue placeholder="Last Active" />
                 </SelectTrigger>
                 <SelectContent>
