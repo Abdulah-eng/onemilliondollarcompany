@@ -1,21 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, AlertTriangle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, CheckCircle, PauseCircle } from 'lucide-react';
 import CancellationSurvey from '@/components/customer/payment/CancellationSurvey';
 import { customerProfile } from '@/mockdata/profile/profileData';
 
 const steps = [
   { id: 'survey', label: 'Survey' },
+  { id: 'pause-prompt', label: 'Consider Pausing' },
   { id: 'confirmation', label: 'Confirmation' },
   { id: 'success', label: 'Success' },
 ];
 
 const CancelSubscriptionPage = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState<'survey' | 'confirmation' | 'success'>('survey');
+  const [step, setStep] = useState<'survey' | 'pause-prompt' | 'confirmation' | 'success'>('survey');
   const [surveyData, setSurveyData] = useState<{ reason: string; feedback: string } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -23,7 +25,7 @@ const CancelSubscriptionPage = () => {
 
   const handleSurveySubmit = (data: { reason: string; feedback: string }) => {
     setSurveyData(data);
-    setStep('confirmation');
+    setStep('pause-prompt');
   };
 
   const handleFinalCancel = async () => {
@@ -37,24 +39,29 @@ const CancelSubscriptionPage = () => {
     navigate('/customer/settings');
   };
 
-  // --- Progress Bar Component ---
+  // --- Animated Progress Bar ---
   const ProgressBar = () => {
     const activeIndex = steps.findIndex((s) => s.id === step);
 
     return (
-      <div className="flex justify-between items-center w-full max-w-2xl mx-auto px-2 sm:px-0 mb-6">
+      <div className="relative flex justify-between items-center w-full max-w-2xl mx-auto px-2 sm:px-0 mb-6">
+        <div className="absolute top-1/2 left-0 w-full h-1 bg-muted -translate-y-1/2 rounded" />
+        <motion.div
+          className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded"
+          initial={{ width: 0 }}
+          animate={{ width: `${(activeIndex / (steps.length - 1)) * 100}%` }}
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+        />
         {steps.map((s, index) => (
-          <div key={s.id} className="flex-1 flex flex-col items-center">
-            {/* Circle */}
+          <div key={s.id} className="relative flex flex-col items-center z-10 flex-1">
             <div
-              className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-semibold 
+              className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-semibold transition-colors duration-300 
               ${index <= activeIndex ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}
             >
               {index + 1}
             </div>
-            {/* Label */}
             <span
-              className={`mt-1 text-[10px] sm:text-xs ${
+              className={`mt-1 text-[10px] sm:text-xs transition-colors duration-300 ${
                 index <= activeIndex ? 'text-primary font-medium' : 'text-muted-foreground'
               }`}
             >
@@ -66,6 +73,52 @@ const CancelSubscriptionPage = () => {
     );
   };
 
+  // --- Pause Prompt Step (Retention) ---
+  if (step === 'pause-prompt') {
+    return (
+      <div className="w-full max-w-2xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        <ProgressBar />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <Card className="text-center p-6 sm:p-8">
+            <CardHeader>
+              <PauseCircle className="h-14 w-14 sm:h-16 sm:w-16 text-primary mx-auto mb-3 sm:mb-4" />
+              <CardTitle className="text-xl sm:text-2xl text-primary">
+                Wait! Before you cancel…
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Many members choose to <strong>pause their subscription</strong> instead of cancelling.
+                You won’t be charged while paused, and you can come back anytime in the next 6 months.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={handleKeepSubscription}
+                  className="w-full sm:flex-1"
+                >
+                  Yes, Pause Instead
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => setStep('confirmation')}
+                  className="w-full sm:flex-1"
+                >
+                  Continue to Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // --- Success step ---
   if (step === 'success') {
     return (
       <div className="w-full max-w-2xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
@@ -96,12 +149,13 @@ const CancelSubscriptionPage = () => {
     );
   }
 
+  // --- Confirmation step ---
   if (step === 'confirmation') {
     return (
       <div className="w-full max-w-2xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-6">
         <ProgressBar />
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-          <Button variant="ghost" onClick={() => setStep('survey')} className="w-fit">
+          <Button variant="ghost" onClick={() => setStep('pause-prompt')} className="w-fit">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
@@ -143,9 +197,10 @@ const CancelSubscriptionPage = () => {
 
             <div className="border-t pt-4">
               <div className="text-center space-y-3 sm:space-y-4">
-                <h4 className="font-semibold text-primary">Wait! Before you go...</h4>
+                <h4 className="font-semibold text-primary">Still want to cancel?</h4>
                 <p className="text-sm text-muted-foreground">
-                  You can pause your subscription instead and resume within 6 months.
+                  We’d love to have you back anytime, but just know your premium access ends on{' '}
+                  {payment.currentPlan.nextBillingDate}.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button
@@ -153,7 +208,7 @@ const CancelSubscriptionPage = () => {
                     onClick={handleKeepSubscription}
                     className="w-full sm:flex-1"
                   >
-                    Pause Instead
+                    Keep My Subscription
                   </Button>
                   <Button
                     variant="destructive"
@@ -172,6 +227,7 @@ const CancelSubscriptionPage = () => {
     );
   }
 
+  // --- Survey step ---
   return (
     <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-6">
       <ProgressBar />
