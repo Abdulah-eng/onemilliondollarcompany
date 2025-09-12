@@ -15,6 +15,10 @@ import RoleGate from "@/components/routing/RoleGate";
 import LandingPage from "./pages/public/LandingPage";
 import { lazy, Suspense } from "react";
 
+// Legal pages
+const TermsPage = lazy(() => import("./pages/legal/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/legal/PrivacyPage"));
+
 const GetStartedPage = lazy(() => import("./pages/auth/GetStartedPage"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage"));
@@ -98,6 +102,18 @@ const ThemedApp = () => {
       <Routes>
         {/* 1. Landing Page (Outside AuthProvider for performance) */}
         <Route path="/" element={<LandingPage />} />
+
+        {/* Legal pages - accessible without authentication */}
+        <Route path="/terms" element={
+          <Suspense fallback={<LoadingScreen />}>
+            <TermsPage />
+          </Suspense>
+        } />
+        <Route path="/privacy" element={
+          <Suspense fallback={<LoadingScreen />}>
+            <PrivacyPage />
+          </Suspense>
+        } />
 
         {/* 2. All other routes inside AuthProvider */}
         <Route path="*" element={

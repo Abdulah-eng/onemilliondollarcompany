@@ -98,13 +98,38 @@ const PaymentAndLegal = () => {
           <AccordionItem value="item-3">
             <AccordionTrigger className="text-base font-medium">Privacy Policy & Terms</AccordionTrigger>
             <AccordionContent className="p-4 space-y-4">
-              <div className="text-sm text-muted-foreground">
-                <p>Your privacy is important to us. Our Privacy Policy explains how we collect, use, and protect your personal information.</p>
-                <a href="#" className="text-primary-500 font-medium mt-2 block">Read Privacy Policy</a>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                <p>By using our services, you agree to our Terms & Conditions. These terms govern your use of the platform.</p>
-                <a href="#" className="text-primary-500 font-medium mt-2 block">Read Terms & Conditions</a>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h4 className="font-medium">Privacy Policy</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Learn how we protect and use your data
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate('/privacy')}
+                  >
+                    Read Policy
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h4 className="font-medium">Terms of Service</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Review our terms and conditions
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate('/terms')}
+                  >
+                    Read Terms
+                  </Button>
+                </div>
               </div>
             </AccordionContent>
           </AccordionItem>
