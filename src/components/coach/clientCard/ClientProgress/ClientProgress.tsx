@@ -1,7 +1,6 @@
 // src/components/coach/clientCard/ClientProgress/ClientProgress.tsx
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
 import ProgramFill from './ProgramFill';
 import DailyCheckIn from './DailyCheckIn';
 import WeightTrend from './WeightTrend';
@@ -22,7 +21,7 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ insights }) => {
   const filterDataByTimeRange = (data: any[], dateField: string = 'date') => {
     const now = new Date();
     const cutoffDate = new Date();
-    
+
     switch (timeRange) {
       case '1week':
         cutoffDate.setDate(now.getDate() - 7);
@@ -34,7 +33,7 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ insights }) => {
         cutoffDate.setMonth(now.getMonth() - 6);
         break;
     }
-    
+
     return data.filter(item => new Date(item[dateField]) >= cutoffDate);
   };
 
@@ -46,21 +45,26 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ insights }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
+      className="space-y-6"
     >
-      <Card className="shadow-lg rounded-2xl bg-background border-border">
-        <CardContent className="p-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl sm:text-2xl font-bold text-foreground">Progress & Insights 📈</h3>
-            <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
-          </div>
+      {/* Header row */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-xl sm:text-2xl font-bold text-foreground">
+          Progress & Insights 📈
+        </h3>
+        <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
+      </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <ProgramFill programFill={insights.programFill} />
-            <DailyCheckIn dailyCheckIn={filteredDailyCheckIn} timeRange={timeRange} />
-            <WeightTrend weightTrend={filteredWeightTrend} nextFollowUp={insights.nextFollowUp} timeRange={timeRange} />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Main grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <ProgramFill programFill={insights.programFill} />
+        <DailyCheckIn dailyCheckIn={filteredDailyCheckIn} timeRange={timeRange} />
+        <WeightTrend
+          weightTrend={filteredWeightTrend}
+          nextFollowUp={insights.nextFollowUp}
+          timeRange={timeRange}
+        />
+      </div>
     </motion.div>
   );
 };
