@@ -11,7 +11,7 @@ const ClientKeyMetrics = ({ stats }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.5 }}
     >
-      <Card className="shadow-lg rounded-xl">
+      <Card className="shadow-lg rounded-xl bg-card">
         <CardContent className="p-6 space-y-4">
           <h3 className="text-lg font-bold flex items-center gap-2">Actionable Insights <BarChart size={20} className="text-primary" /></h3>
           <div className="grid grid-cols-1 gap-4">
@@ -34,7 +34,7 @@ const ClientKeyMetrics = ({ stats }) => {
                 <Dumbbell size={20} className="text-indigo-500" />
                 <p className="font-semibold">Minutes Meditated</p>
               </div>
-              <p className="font-bold">{stats.minutesMedicated}</p>
+              <p className="font-bold">{stats.minutesMeditated}</p>
             </div>
           </div>
         </CardContent>
