@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockClientData } from '@/mockdata/clientCard/mockClientData';
 import ClientHeader from '@/components/coach/clientCard/ClientHeader';
-import ClientProgress from '@/components/coach/clientCard/ClientProgress'; // Corrected import path
+import ClientProgress from '@/components/coach/clientCard/ClientProgress/ClientProgress'; // Corrected import path
 import CurrentProgram from '@/components/coach/clientCard/CurrentProgram';
 import ClientPersonalInfo from '@/components/coach/clientCard/ClientPersonalInfo';
 import ClientKeyMetrics from '@/components/coach/clientCard/ClientKeyMetrics';

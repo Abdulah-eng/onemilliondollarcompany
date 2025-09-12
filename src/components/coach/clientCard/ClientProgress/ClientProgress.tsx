@@ -8,9 +8,9 @@ import WeightTrend from './WeightTrend';
 
 interface ClientProgressProps {
   insights: {
-    dailyCheckIn: { water: number[]; energy: number[]; sleep: number[]; mood: number[] };
+    dailyCheckIn: { date: string; water: number; energy: number; sleep: number; mood: number }[];
     programFill: { fitness: number; nutrition: number; wellness: number };
-    weightTrend: number[];
+    weightTrend: { date: string; weight: number }[];
     nextFollowUp: string;
   };
 }
