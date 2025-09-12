@@ -4,12 +4,13 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { customerProfile } from '@/mockdata/profile/profileData';
+import { useNavigate } from 'react-router-dom';
 
 const PaymentAndLegal = () => {
+  const navigate = useNavigate();
   const { payment, preferences } = customerProfile;
   return (
     <div className="space-y-6">
@@ -48,8 +49,21 @@ const PaymentAndLegal = () => {
                 </Dialog>
               </div>
               <div className="space-y-2 text-sm">
-                <Button variant="outline" size="sm">Update Plan</Button>
-                <Button variant="destructive" size="sm" className="ml-2">Cancel Subscription</Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigate('/customer/payment/update-plan')}
+                >
+                  Update Plan
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  className="ml-2"
+                  onClick={() => navigate('/customer/payment/cancel-subscription')}
+                >
+                  Cancel Subscription
+                </Button>
               </div>
             </AccordionContent>
           </AccordionItem>

@@ -33,6 +33,8 @@ const ProgressPage = lazy(() => import("./pages/customer/ProgressPage"));
 const MyCoachPage = lazy(() => import("./pages/customer/MyCoach"));
 const BlogPage = lazy(() => import("./pages/customer/BlogPage"));
 const ProfilePage = lazy(() => import("./pages/customer/Profile"));
+const UpdatePaymentPlanPage = lazy(() => import("./pages/customer/UpdatePaymentPlanPage"));
+const CancelSubscriptionPage = lazy(() => import("./pages/customer/CancelSubscriptionPage"));
 
 
 // ... (LoadingScreen, queryClient, and routing logic components remain unchanged) ...
@@ -178,6 +180,16 @@ const ThemedApp = () => {
                   <Route path="/customer/settings" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <ProfilePage />
+                    </Suspense>
+                  } />
+                  <Route path="/customer/payment/update-plan" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <UpdatePaymentPlanPage />
+                    </Suspense>
+                  } />
+                  <Route path="/customer/payment/cancel-subscription" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <CancelSubscriptionPage />
                     </Suspense>
                   } />
                   <Route path="/program/:type/:id" element={
