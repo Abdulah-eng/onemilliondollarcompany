@@ -49,7 +49,7 @@ const ActionShortcuts = () => {
               </div>
               <h3 className="text-lg font-semibold">{shortcut.title}</h3>
               <p className="text-sm text-muted-foreground">{shortcut.description}</p>
-              <Link href={shortcut.href}>
+              <Link href={shortcut.href} passHref>
                 <Button variant="ghost" className="p-0 h-auto text-primary">
                   Go to <LayoutList size={16} className="ml-2" />
                 </Button>
