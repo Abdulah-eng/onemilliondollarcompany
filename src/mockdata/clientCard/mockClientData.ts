@@ -13,6 +13,13 @@ export const mockClientData = {
     weight: '65 kg',
   },
   goals: ['Fat Reduce', 'Increased Energy'],
+  preferences: {
+    injuries: ['Knee (old injury)'],
+    allergies: ['Peanuts'],
+    likes: ['Spicy food', 'HIIT workouts'],
+    dislikes: ['Running', 'Boring exercises'],
+    preferredProgramType: ['Fitness'],
+  },
   insights: {
     programProgress: '75%',
     avgDailyCheckIn: '95%',
