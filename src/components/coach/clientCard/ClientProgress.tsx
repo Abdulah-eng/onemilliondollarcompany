@@ -1,7 +1,6 @@
 // src/components/coach/clientCard/ClientProgress.tsx
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
 const ClientProgress = ({ insights }) => {
@@ -15,7 +14,7 @@ const ClientProgress = ({ insights }) => {
         <CardContent className="p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold">Progress & Insights 📈</h3>
-            <Button variant="ghost" className="text-primary">View All</Button>
+            {/* The "View All" button is removed */}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
