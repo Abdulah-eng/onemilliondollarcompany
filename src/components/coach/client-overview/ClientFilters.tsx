@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Filter, SortAsc } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const TOP_NAV_HEIGHT = 64; // adjust to your actual top nav height
+const TOP_NAV_HEIGHT = 65; // TopNav height (64px) + border (1px)
 
 const ClientFilters = () => {
   return (
@@ -11,7 +11,7 @@ const ClientFilters = () => {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className={`w-full z-40`} // spans full width, stays above other content
+      className={`w-full z-30`} // stays below TopNav (z-40)
       style={{ position: 'sticky', top: TOP_NAV_HEIGHT }}
     >
       <Card className="rounded-xl shadow-md bg-white border">
