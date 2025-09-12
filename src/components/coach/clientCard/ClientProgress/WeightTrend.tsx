@@ -18,7 +18,7 @@ interface WeightTrendProps {
     date: string;
     weight: number;
   }[];
-  nextFollowUp: string;
+  nextFollowUp?: string;
   timeRange: TimeRange;
 }
 
@@ -137,7 +137,9 @@ const WeightTrend: React.FC<WeightTrendProps> = ({ weightTrend, nextFollowUp, ti
         </ResponsiveContainer>
       </div>
 
-      <p className="text-sm text-muted-foreground mt-2 text-center">Next Follow-up: <span className="font-semibold text-foreground">{nextFollowUp}</span></p>
+      {nextFollowUp && (
+        <p className="text-sm text-muted-foreground mt-2 text-center">Next Follow-up: <span className="font-semibold text-foreground">{nextFollowUp}</span></p>
+      )}
     </div>
   );
 };
