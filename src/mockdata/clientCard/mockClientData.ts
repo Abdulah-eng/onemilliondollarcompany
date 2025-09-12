@@ -25,18 +25,6 @@ export const mockClientData = {
     avgDailyCheckIn: '95%',
     adherence: '92%',
     nextFollowUp: 'Sep 25',
-    dailyCheckIn: {
-      water: [8, 7, 9, 6, 8, 7, 9],
-      energy: [7, 8, 6, 9, 7, 8, 8],
-      sleep: [6, 7, 8, 7, 6, 8, 7],
-      mood: [8, 7, 9, 8, 7, 8, 9]
-    },
-    programFill: {
-      fitness: 75,
-      nutrition: 82,
-      wellness: 68
-    },
-    weightTrend: [68, 67.5, 67, 66.8, 66.5, 66.2, 66]
   },
   stats: {
     caloriesBurned: '2100 kcal',
