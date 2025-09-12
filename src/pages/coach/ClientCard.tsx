@@ -2,6 +2,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 import { mockClientData } from '@/mockdata/clientCard/mockClientData';
 
 import ClientHeader from '@/components/coach/clientCard/ClientHeader';
