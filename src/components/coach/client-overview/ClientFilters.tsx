@@ -11,7 +11,7 @@ TODO: Backend Integration Notes
 */
 const ClientFilters = () => {
   return (
-    <Card className="shadow-lg rounded-xl">
+    <Card className="shadow-lg rounded-xl sticky top-0 z-10 bg-background">
       <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
         <div className="flex-1 w-full md:w-auto">
           <p className="font-semibold text-sm text-muted-foreground mb-2">Filter Clients</p>
