@@ -7,10 +7,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-
-import { Heart, Droplet, Sun, Moon } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { TimeRange } from './TimeRangeSelector';
 
 interface DailyCheckInProps {
@@ -58,23 +55,29 @@ const DailyCheckIn: React.FC<DailyCheckInProps> = ({ dailyCheckIn, timeRange }) 
     return (
       <div className="h-64 flex flex-col items-center justify-center p-6">
         <Heart size={48} className="text-muted-foreground mb-4" />
-        <p className="text-sm text-muted-foreground text-center">No daily check-in data available yet.</p>
+        <p className="text-sm text-muted-foreground text-center">
+          No daily check-in data available yet.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
+    <>
+      <div className="flex items-center gap-2 mb-4">
         <div className="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center">
           <Heart className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h4 className="text-xl font-bold tracking-tight text-foreground">Daily Check-ins ❤️</h4>
-          <p className="text-sm text-muted-foreground mt-1">Consistency and trends in self-reported data</p>
+          <h4 className="text-xl font-bold tracking-tight text-foreground">
+            Daily Check-ins ❤️
+          </h4>
+          <p className="text-sm text-muted-foreground mt-1">
+            Consistency and trends in self-reported data
+          </p>
         </div>
       </div>
-      
+
       <div className="h-60 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
@@ -106,7 +109,12 @@ const DailyCheckIn: React.FC<DailyCheckInProps> = ({ dailyCheckIn, timeRange }) 
               tick={{ fill: 'hsl(var(--muted-foreground))' }}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(str) => new Date(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              tickFormatter={(str) =>
+                new Date(str).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                })
+              }
             />
             <Tooltip
               content={<CustomTooltip />}
@@ -119,7 +127,7 @@ const DailyCheckIn: React.FC<DailyCheckInProps> = ({ dailyCheckIn, timeRange }) 
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </>
   );
 };
 
