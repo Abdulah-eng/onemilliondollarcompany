@@ -1,40 +1,124 @@
 // src/components/coach/clientCard/ClientProgress/DailyCheckIn.tsx
 import React from 'react';
-import { Line } from 'react-chartjs-2';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
+  AreaChart,
+  Area,
+  XAxis,
   Tooltip,
-  Legend,
-} from 'chart.js';
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
+  ResponsiveContainer,
+  TooltipProps,
+} from 'recharts';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
+import { Heart, Droplet, Sun, Moon } from 'lucide-react';
 
 interface DailyCheckInProps {
-  dailyCheckIn: { water: number[]; energy: number[]; sleep: number[]; mood: number[] };
+  dailyCheckIn: {
+    date: string;
+    water: number;
+    energy: number;
+    sleep: number;
+    mood: number;
+  }[];
 }
 
-const DailyCheckIn: React.FC<DailyCheckInProps> = ({ dailyCheckIn }) => {
-  const labels = dailyCheckIn.water.map((_, i) => `Day ${i + 1}`);
+// Custom Tooltip for the chart
+const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    const dateLabel = new Date(label).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
 
-  const data = {
-    labels,
-    datasets: [
-      { label: 'Water', data: dailyCheckIn.water, borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3 },
-      { label: 'Energy', data: dailyCheckIn.energy, borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3 },
-      { label: 'Sleep', data: dailyCheckIn.sleep, borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.3 },
-      { label: 'Mood', data: dailyCheckIn.mood, borderColor: '#8b5cf6', backgroundColor: '#8b5cf6', tension: 0.3 },
-    ],
-  };
+    return (
+      <div className="bg-gray-800/95 dark:bg-white/95 backdrop-blur-sm p-3 rounded-lg border border-gray-600/50 dark:border-gray-300/50 shadow-lg min-w-[150px] text-white dark:text-gray-900">
+        <p className="text-sm font-bold">{dateLabel}</p>
+        <div className="mt-1 space-y-1">
+          {payload.map((p, index) => (
+            <div key={index} className="flex justify-between items-center text-xs">
+              <span className="text-gray-400 dark:text-gray-600" style={{ color: p.stroke }}>
+                {p.name}:
+              </span>
+              <span className="font-semibold" style={{ color: p.stroke }}>
+                {p.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+const DailyCheckIn: React.FC<DailyCheckInProps> = ({ dailyCheckIn }) => {
+  if (!dailyCheckIn || dailyCheckIn.length === 0) {
+    return (
+      <Card className="shadow-lg rounded-xl h-64 flex flex-col items-center justify-center p-6 bg-card">
+        <Heart size={48} className="text-muted-foreground mb-4" />
+        <p className="text-sm text-muted-foreground text-center">No daily check-in data available yet.</p>
+      </Card>
+    );
+  }
 
   return (
-    <div className="p-4 rounded-xl bg-green-50 dark:bg-green-900/20">
-      <h4 className="font-semibold text-md text-foreground mb-2 text-center">Daily Check-ins</h4>
-      <Line data={data} options={{ responsive: true, plugins: { legend: { position: 'bottom' } } }} />
-    </div>
+    <Card className="shadow-lg rounded-xl bg-card p-6 space-y-4">
+      <div className="flex items-center gap-2">
+        <div className="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center">
+          <Heart className="w-6 h-6 text-white" />
+        </div>
+        <div>
+          <h4 className="text-xl font-bold tracking-tight text-foreground">Daily Check-ins ❤️</h4>
+          <p className="text-sm text-muted-foreground mt-1">Consistency and trends in self-reported data</p>
+        </div>
+      </div>
+      
+      <div className="h-60 w-full overflow-hidden -mx-6 sm:-mx-8">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart
+            data={dailyCheckIn}
+            margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
+          >
+            <defs>
+              <linearGradient id="colorWater" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="colorEnergy" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="colorSleep" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="colorMood" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <XAxis
+              dataKey="date"
+              stroke="hsl(var(--muted-foreground))"
+              fontSize={12}
+              tick={{ fill: 'hsl(var(--muted-foreground))' }}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(str) => new Date(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            />
+            <Tooltip
+              content={<CustomTooltip />}
+              cursor={{ stroke: 'rgba(100,100,100,0.2)', strokeWidth: 1 }}
+            />
+            <Area type="monotone" dataKey="water" name="Water" stroke="#3b82f6" fill="url(#colorWater)" />
+            <Area type="monotone" dataKey="energy" name="Energy" stroke="#10b981" fill="url(#colorEnergy)" />
+            <Area type="monotone" dataKey="sleep" name="Sleep" stroke="#f59e0b" fill="url(#colorSleep)" />
+            <Area type="monotone" dataKey="mood" name="Mood" stroke="#8b5cf6" fill="url(#colorMood)" />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </Card>
   );
 };
 
