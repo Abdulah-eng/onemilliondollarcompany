@@ -1,7 +1,7 @@
 // src/components/coach/dashboard/TaskBoard.tsx
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -62,12 +62,12 @@ const TaskBoard = () => {
                   <p className="text-xs text-muted-foreground mt-1">{task.details}</p>
                 </div>
               </div>
-              <Link href={task.link} passHref>
-                <Button size="sm" variant="outline" className="shrink-0 mt-3 sm:mt-0">
+              <Button asChild size="sm" variant="outline" className="shrink-0 mt-3 sm:mt-0">
+                <Link to={task.link}>
                   View Details
                   <ArrowRight size={16} className="ml-2" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         ))}
