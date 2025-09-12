@@ -1,40 +1,86 @@
-// src/components/coach/clientCard/ClientProgress.tsx
+// src/pages/coach/ClientCard.tsx
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
-import DailyCheckIn from './ClientProgress/DailyCheckIn';
-import ProgramFill from './ClientProgress/ProgramFill';
-import WeightTrend from './ClientProgress/WeightTrend';
+import { useLocation } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { mockClientData } from '@/mockdata/clientCard/mockClientData';
+import ClientHeader from '@/components/coach/clientCard/ClientHeader';
+import ClientProgress from '@/components/coach/clientCard/ClientProgress/ClientProgress';
+import CurrentProgram from '@/components/coach/clientCard/CurrentProgram';
+import ClientPersonalInfo from '@/components/coach/clientCard/ClientPersonalInfo';
+import ClientKeyMetrics from '@/components/coach/clientCard/ClientKeyMetrics';
 
-interface ClientProgressProps {
-  insights: {
-    dailyCheckIn: { water: number[]; energy: number[]; sleep: number[]; mood: number[] };
-    programFill: { fitness: number; nutrition: number; wellness: number };
-    weightTrend: number[];
-    nextFollowUp: string;
-  };
-}
+const ClientCard = () => {
+  const location = useLocation();
+  const client = location.state?.client || mockClientData;
 
-const ClientProgress: React.FC<ClientProgressProps> = ({ insights }) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-    >
-      <Card className="shadow-lg rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700">
-        <CardContent className="p-6 space-y-6">
-          <h3 className="text-xl sm:text-2xl font-bold text-foreground">Progress & Insights 📈</h3>
+    <div className="w-full max-w-7xl mx-auto px-4 py-8 space-y-10">
+      <ClientHeader client={client} />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <ProgramFill programFill={insights.programFill} />
-            <DailyCheckIn dailyCheckIn={insights.dailyCheckIn} />
-            <WeightTrend weightTrend={insights.weightTrend} nextFollowUp={insights.nextFollowUp} />
+      <Tabs defaultValue="insights" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="insights">Insights</TabsTrigger>
+          <TabsTrigger value="programs">Programs</TabsTrigger>
+          <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="actions">Actions</TabsTrigger>
+        </TabsList>
+
+        {/* Insights Tab */}
+        <TabsContent value="insights" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left: Progress Components */}
+            <div className="lg:col-span-2 space-y-8">
+              <ClientProgress insights={client.insights} />
+              <div className="bg-muted h-96 rounded-xl flex items-center justify-center text-muted-foreground">
+                [Detailed Insights Graph goes here]
+              </div>
+            </div>
+
+            {/* Right: Key Metrics */}
+            <div className="lg:col-span-1 space-y-8">
+              <ClientKeyMetrics stats={client.stats} />
+            </div>
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+        </TabsContent>
+
+        {/* Programs Tab */}
+        <TabsContent value="programs" className="mt-6">
+          <CurrentProgram />
+        </TabsContent>
+
+        {/* Details Tab */}
+        <TabsContent value="details" className="mt-6">
+          <ClientPersonalInfo personalInfo={client.personalInfo} />
+        </TabsContent>
+
+        {/* Actions Tab */}
+        <TabsContent value="actions" className="mt-6">
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">Client Actions ⚙️</h2>
+            <p className="text-muted-foreground">
+              Quickly manage client check-ins, program assignment, and communication.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-6 bg-card rounded-xl shadow-lg">
+                <h3 className="text-lg font-semibold">Respond to Feedback</h3>
+                <p className="text-muted-foreground text-sm mt-1">
+                  Review and reply to recent client feedback.
+                </p>
+                <div className="mt-4">[Feedback Response UI]</div>
+              </div>
+              <div className="p-6 bg-card rounded-xl shadow-lg">
+                <h3 className="text-lg font-semibold">Assign New Program</h3>
+                <p className="text-muted-foreground text-sm mt-1">
+                  Schedule or assign a new program to this client.
+                </p>
+                <div className="mt-4">[Program Assignment UI]</div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
-export default ClientProgress;
+export default ClientCard;
