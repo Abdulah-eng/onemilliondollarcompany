@@ -11,6 +11,7 @@ import {
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Scale } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface WeightTrendProps {
   weightTrend: {
@@ -46,10 +47,10 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 const WeightTrend: React.FC<WeightTrendProps> = ({ weightTrend, nextFollowUp }) => {
   if (!weightTrend || weightTrend.length === 0) {
     return (
-      <div className="p-4 rounded-xl bg-gray-100 dark:bg-gray-800 flex flex-col items-center justify-center h-64">
+      <Card className="shadow-lg rounded-xl h-64 flex flex-col items-center justify-center p-6 bg-card">
         <Scale size={48} className="text-muted-foreground mb-4" />
         <p className="text-sm text-muted-foreground text-center">No weight data available yet.</p>
-      </div>
+      </Card>
     );
   }
 
@@ -65,7 +66,7 @@ const WeightTrend: React.FC<WeightTrendProps> = ({ weightTrend, nextFollowUp }) 
   const padding = (maxTs - minTs) * 0.1;
 
   return (
-    <div className="bg-white dark:bg-[#1f2937] rounded-3xl p-6 sm:p-8 flex flex-col gap-6 shadow-lg dark:shadow-none">
+    <Card className="shadow-lg rounded-xl bg-card p-6 space-y-4">
       <div className="flex items-center gap-2">
         <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center">
           <Scale className="w-6 h-6 text-white" />
@@ -123,7 +124,7 @@ const WeightTrend: React.FC<WeightTrendProps> = ({ weightTrend, nextFollowUp }) 
       </div>
 
       <p className="text-sm text-muted-foreground mt-2 text-center">Next Follow-up: <span className="font-semibold text-foreground">{nextFollowUp}</span></p>
-    </div>
+    </Card>
   );
 };
 
