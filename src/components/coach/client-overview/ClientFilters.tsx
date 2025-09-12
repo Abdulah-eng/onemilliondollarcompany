@@ -3,13 +3,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Filter, SortAsc } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const TOP_NAV_HEIGHT = 64; // adjust this to your actual top nav height in px
+
 const ClientFilters = () => {
   return (
     <motion.div
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="sticky top-0 z-50"
+      className={`w-full z-40`} // spans full width, stays above other content
+      style={{ position: 'sticky', top: TOP_NAV_HEIGHT }}
     >
       <Card className="rounded-xl shadow-md border bg-gradient-to-r from-primary/5 via-background to-primary/5 backdrop-blur">
         <CardContent className="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
