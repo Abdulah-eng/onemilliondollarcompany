@@ -10,7 +10,7 @@ import {
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Scale } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+
 import { TimeRange } from './TimeRangeSelector';
 
 interface WeightTrendProps {
@@ -48,10 +48,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const WeightTrend: React.FC<WeightTrendProps> = ({ weightTrend, nextFollowUp, timeRange }) => {
   if (!weightTrend || weightTrend.length === 0) {
     return (
-      <Card className="shadow-lg rounded-xl h-64 flex flex-col items-center justify-center p-6 bg-card">
+      <div className="h-64 flex flex-col items-center justify-center p-6">
         <Scale size={48} className="text-muted-foreground mb-4" />
         <p className="text-sm text-muted-foreground text-center">No weight data available yet.</p>
-      </Card>
+      </div>
     );
   }
 
@@ -85,7 +85,7 @@ const WeightTrend: React.FC<WeightTrendProps> = ({ weightTrend, nextFollowUp, ti
   };
 
   return (
-    <Card className="shadow-lg rounded-xl bg-card p-6 space-y-4">
+    <div className="space-y-4">
       <div className="flex items-center gap-2">
         <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center">
           <Scale className="w-6 h-6 text-white" />
@@ -138,7 +138,7 @@ const WeightTrend: React.FC<WeightTrendProps> = ({ weightTrend, nextFollowUp, ti
       </div>
 
       <p className="text-sm text-muted-foreground mt-2 text-center">Next Follow-up: <span className="font-semibold text-foreground">{nextFollowUp}</span></p>
-    </Card>
+    </div>
   );
 };
 

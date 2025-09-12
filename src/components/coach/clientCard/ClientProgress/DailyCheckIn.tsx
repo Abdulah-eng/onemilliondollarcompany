@@ -9,7 +9,7 @@ import {
 } from 'recharts';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
+
 import { Heart, Droplet, Sun, Moon } from 'lucide-react';
 import { TimeRange } from './TimeRangeSelector';
 
@@ -56,15 +56,15 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const DailyCheckIn: React.FC<DailyCheckInProps> = ({ dailyCheckIn, timeRange }) => {
   if (!dailyCheckIn || dailyCheckIn.length === 0) {
     return (
-      <Card className="shadow-lg rounded-xl h-64 flex flex-col items-center justify-center p-6 bg-card">
+      <div className="h-64 flex flex-col items-center justify-center p-6">
         <Heart size={48} className="text-muted-foreground mb-4" />
         <p className="text-sm text-muted-foreground text-center">No daily check-in data available yet.</p>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="shadow-lg rounded-xl bg-card p-6 space-y-4">
+    <div className="space-y-4">
       <div className="flex items-center gap-2">
         <div className="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center">
           <Heart className="w-6 h-6 text-white" />
@@ -119,7 +119,7 @@ const DailyCheckIn: React.FC<DailyCheckInProps> = ({ dailyCheckIn, timeRange }) 
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </Card>
+    </div>
   );
 };
 
