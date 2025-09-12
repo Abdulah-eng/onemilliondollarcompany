@@ -1,27 +1,35 @@
+// src/components/coach/clientCard/ClientProgress/ClientProgress.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
-import ProgramFill from './ClientProgress/ProgramFill';
-import DailyCheckIn from './ClientProgress/DailyCheckIn';
-import WeightTrend from './ClientProgress/WeightTrend';
 import { Card, CardContent } from '@/components/ui/card';
+import ProgramFill from './ProgramFill';
+import DailyCheckIn from './DailyCheckIn';
+import WeightTrend from './WeightTrend';
 
-const ClientProgress = ({ insights }) => {
+interface ClientProgressProps {
+  insights: {
+    dailyCheckIn: { water: number[]; energy: number[]; sleep: number[]; mood: number[] };
+    programFill: { fitness: number; nutrition: number; wellness: number };
+    weightTrend: number[];
+    nextFollowUp: string;
+  };
+}
+
+const ClientProgress: React.FC<ClientProgressProps> = ({ insights }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
-      <Card className="shadow-lg rounded-xl bg-white dark:bg-gray-900">
+      <Card className="shadow-lg rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700">
         <CardContent className="p-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-foreground">Progress & Insights 📈</h3>
-          </div>
+          <h3 className="text-xl sm:text-2xl font-bold text-foreground">Progress & Insights 📈</h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <DailyCheckIn dailyCheckIn={insights.dailyCheckIn} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <ProgramFill programFill={insights.programFill} />
-            <WeightTrend weightTrend={insights.weight} />
+            <DailyCheckIn dailyCheckIn={insights.dailyCheckIn} />
+            <WeightTrend weightTrend={insights.weightTrend} nextFollowUp={insights.nextFollowUp} />
           </div>
         </CardContent>
       </Card>
