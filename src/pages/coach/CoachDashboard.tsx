@@ -1,26 +1,30 @@
 // src/pages/coach/CoachDashboard.tsx
+import CoachHeader from '@/components/coach/dashboard/CoachHeader';
+import ActionShortcuts from '@/components/coach/dashboard/ActionShortcuts';
+import ClientOverview from '@/components/coach/dashboard/ClientOverview';
+import TaskBoard from '@/components/coach/dashboard/TaskBoard';
+import KeyMetrics from '@/components/coach/dashboard/KeyMetrics';
 
 const CoachDashboard = () => {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">Coach Dashboard</h1>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-card p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-foreground mb-2">Your Clients</h3>
-          <p className="text-muted-foreground">Manage your client relationships</p>
+    <div className="w-full max-w-7xl mx-auto px-4 py-8 space-y-10">
+      {/* Header with Welcome and quick stats */}
+      <CoachHeader />
+
+      {/* Primary Call-to-Actions and Shortcuts */}
+      <ActionShortcuts />
+
+      {/* Main content area with a two-column layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Left Column (Task Board and Metrics) */}
+        <div className="md:col-span-2 space-y-8">
+          <TaskBoard />
+          <KeyMetrics />
         </div>
-        
-        <div className="bg-card p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-foreground mb-2">Programs</h3>
-          <p className="text-muted-foreground">Create and manage training programs</p>
-        </div>
-        
-        <div className="bg-card p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-foreground mb-2">Analytics</h3>
-          <p className="text-muted-foreground">Track client progress and engagement</p>
+
+        {/* Right Column (Client Overview and Statuses) */}
+        <div className="md:col-span-1">
+          <ClientOverview />
         </div>
       </div>
     </div>
