@@ -79,7 +79,7 @@ const ClientInsights: React.FC<ClientInsightsProps> = ({ client }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Daily Check-in Chart */}
         <Card className={`${sectionCard} p-6`}>
-          <DailyCheckIn dailyCheckIn={filteredDailyCheckIn} />
+          <DailyCheckIn dailyCheckIn={filteredDailyCheckIn} timeRange={timeRange} />
         </Card>
         {/* Weight Trend Chart */}
         <Card className={`${sectionCard} p-6`}>

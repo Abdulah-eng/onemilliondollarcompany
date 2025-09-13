@@ -1,69 +1,74 @@
-// src/pages/coach/ClientCard.tsx
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockClientData } from '@/mockdata/clientCard/mockClientData';
 import ClientHeader from '@/components/coach/clientCard/ClientHeader';
-import ClientInsights from '@/components/coach/clientCard/ClientInsights/ClientInsights'; // NEW: Insights component
-import CurrentProgram from '@/components/coach/clientCard/CurrentProgram';
-import ClientPersonalInfo from '@/components/coach/clientCard/ClientPersonalInfo';
-import ClientKeyMetrics from '@/components/coach/clientCard/ClientKeyMetrics';
+import OverviewTab from '@/components/coach/clientCard/tabs/OverviewTab';
+import InsightsTab from '@/components/coach/clientCard/tabs/InsightsTab';
+import ProgramsTab from '@/components/coach/clientCard/tabs/ProgramsTab';
+import DetailsTab from '@/components/coach/clientCard/tabs/DetailsTab';
+import CommunicationTab from '@/components/coach/clientCard/tabs/CommunicationTab';
 
 const ClientCard = () => {
   const location = useLocation();
   const client = location.state?.client || mockClientData;
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8 space-y-10">
+    <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-6">
       <ClientHeader client={client} />
 
-      <Tabs defaultValue="insights" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-200 dark:bg-gray-800 rounded-xl">
-          <TabsTrigger value="insights" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 rounded-lg shadow-sm transition-all">Insights</TabsTrigger>
-          <TabsTrigger value="programs" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 rounded-lg shadow-sm transition-all">Programs</TabsTrigger>
-          <TabsTrigger value="details" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 rounded-lg shadow-sm transition-all">Details</TabsTrigger>
-          <TabsTrigger value="actions" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 rounded-lg shadow-sm transition-all">Actions</TabsTrigger>
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-5 rounded-2xl bg-muted p-1">
+          <TabsTrigger 
+            value="overview" 
+            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger 
+            value="insights" 
+            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
+          >
+            Insights
+          </TabsTrigger>
+          <TabsTrigger 
+            value="programs" 
+            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
+          >
+            Programs
+          </TabsTrigger>
+          <TabsTrigger 
+            value="details" 
+            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
+          >
+            Details
+          </TabsTrigger>
+          <TabsTrigger 
+            value="communication" 
+            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
+          >
+            Communication
+          </TabsTrigger>
         </TabsList>
         
-        {/* Insights Tab - NEW structure */}
+        <TabsContent value="overview" className="mt-6">
+          <OverviewTab client={client} />
+        </TabsContent>
+
         <TabsContent value="insights" className="mt-6">
-          <ClientInsights client={client} />
+          <InsightsTab client={client} />
         </TabsContent>
 
-        {/* Programs Tab */}
         <TabsContent value="programs" className="mt-6">
-          <CurrentProgram />
+          <ProgramsTab client={client} />
         </TabsContent>
 
-        {/* Details Tab */}
         <TabsContent value="details" className="mt-6">
-          <ClientPersonalInfo />
+          <DetailsTab client={client} />
         </TabsContent>
 
-        {/* Actions Tab */}
-        <TabsContent value="actions" className="mt-6">
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">Client Actions ⚙️</h2>
-            <p className="text-muted-foreground">
-              Quickly manage client check-ins, program assignment, and communication.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-6 bg-card rounded-xl shadow-lg">
-                <h3 className="text-lg font-semibold">Respond to Feedback</h3>
-                <p className="text-muted-foreground text-sm mt-1">
-                  Review and reply to recent client feedback.
-                </p>
-                <div className="mt-4">[Feedback Response UI]</div>
-              </div>
-              <div className="p-6 bg-card rounded-xl shadow-lg">
-                <h3 className="text-lg font-semibold">Assign New Program</h3>
-                <p className="text-muted-foreground text-sm mt-1">
-                  Schedule or assign a new program to this client.
-                </p>
-                <div className="mt-4">[Program Assignment UI]</div>
-              </div>
-            </div>
-          </div>
+        <TabsContent value="communication" className="mt-6">
+          <CommunicationTab client={client} />
         </TabsContent>
       </Tabs>
     </div>
