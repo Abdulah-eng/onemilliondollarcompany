@@ -1,8 +1,7 @@
 // src/components/coach/clientCard/ClientHeader.tsx
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, ClipboardCheck, Award, Clock, Calendar } from 'lucide-react';
+import { Award, Clock, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface ClientHeaderProps {
@@ -35,7 +34,6 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ client }) => {
     >
       {/* Top Section */}
       <div className="flex flex-col sm:flex-row sm:items-center w-full justify-between gap-4">
-        {/* Profile & Name */}
         <div className="flex items-center gap-4 flex-1">
           <motion.img
             className="h-16 w-16 sm:h-18 sm:w-18 rounded-full object-cover border border-border shadow-sm"
@@ -63,32 +61,9 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ client }) => {
             </div>
           </div>
         </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-row gap-2">
-          <motion.div whileTap={{ scale: 0.92 }} whileHover={{ scale: 1.05 }}>
-            <Button
-              size="sm"
-              className="rounded-full text-xs sm:text-sm h-8 sm:h-9 px-3 flex items-center gap-1 shadow-sm"
-            >
-              <MessageCircle className="h-4 w-4" />
-              Feedback
-            </Button>
-          </motion.div>
-          <motion.div whileTap={{ scale: 0.92 }} whileHover={{ scale: 1.05 }}>
-            <Button
-              size="sm"
-              variant="outline"
-              className="rounded-full text-xs sm:text-sm h-8 sm:h-9 px-3 flex items-center gap-1 shadow-sm"
-            >
-              <ClipboardCheck className="h-4 w-4" />
-              Check In
-            </Button>
-          </motion.div>
-        </div>
       </div>
 
-      {/* Quick Stats - responsive */}
+      {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center">
         {[
           { icon: Calendar, label: 'Last Check-in', value: lastCheckIn },
