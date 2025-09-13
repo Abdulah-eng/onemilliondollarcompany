@@ -23,15 +23,264 @@ import {
   Dumbbell,
   Utensils
 } from 'lucide-react';
-import DailyCheckIn from '@/components/coach/clientCard/ClientInsights/DailyCheckIn';
-import WeightTrend from '@/components/coach/clientCard/ClientInsights/WeightTrend';
-import ProgramCompletion from '@/components/coach/clientCard/ClientInsights/ProgramCompletion';
-import NutritionInsights from '@/components/coach/clientCard/ClientInsights/NutritionInsights';
-import MentalWellness from '@/components/coach/clientCard/ClientInsights/MentalWellness';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 
 interface ProgressProgramsTabProps {
   client: any;
 }
+
+// Internal Components
+const DailyCheckIn: React.FC<{ dailyCheckIn: any[]; timeRange: '1week' | '1month' | '6months' }> = ({ dailyCheckIn, timeRange }) => {
+  const filteredData = React.useMemo(() => {
+    if (!dailyCheckIn || dailyCheckIn.length === 0) return [];
+    
+    const now = new Date();
+    let cutoffDate = new Date();
+    
+    switch (timeRange) {
+      case '1week':
+        cutoffDate.setDate(now.getDate() - 7);
+        break;
+      case '1month':
+        cutoffDate.setMonth(now.getMonth() - 1);
+        break;
+      case '6months':
+        cutoffDate.setMonth(now.getMonth() - 6);
+        break;
+    }
+    
+    return dailyCheckIn
+      .filter((entry) => new Date(entry.date) >= cutoffDate)
+      .map((entry) => ({
+        date: new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        mood: entry.mood || 0,
+        energy: entry.energy || 0,
+        sleep: entry.sleep || 0,
+        water: entry.water || 0,
+      }))
+      .slice(-10);
+  }, [dailyCheckIn, timeRange]);
+
+  if (filteredData.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p className="text-sm">No check-in data available for this period</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-64 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={filteredData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+          <XAxis 
+            dataKey="date" 
+            tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} 
+            axisLine={false} 
+            tickLine={false} 
+          />
+          <YAxis 
+            tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} 
+            axisLine={false} 
+            tickLine={false}
+            domain={[0, 10]}
+          />
+          <Tooltip 
+            contentStyle={{
+              backgroundColor: 'hsl(var(--card))',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '8px',
+              fontSize: '12px'
+            }}
+          />
+          <Line 
+            type="monotone" 
+            dataKey="mood" 
+            stroke="hsl(var(--primary))" 
+            strokeWidth={2}
+            dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 3 }}
+            name="Mood"
+          />
+          <Line 
+            type="monotone" 
+            dataKey="energy" 
+            stroke="hsl(var(--destructive))" 
+            strokeWidth={2}
+            dot={{ fill: 'hsl(var(--destructive))', strokeWidth: 2, r: 3 }}
+            name="Energy"
+          />
+          <Line 
+            type="monotone" 
+            dataKey="sleep" 
+            stroke="hsl(var(--secondary))" 
+            strokeWidth={2}
+            dot={{ fill: 'hsl(var(--secondary))', strokeWidth: 2, r: 3 }}
+            name="Sleep"
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
+const WeightTrend: React.FC<{ weightTrend: Array<{ date: string; weight: number }> }> = ({ weightTrend }) => {
+  const chartData = weightTrend.map(item => ({
+    date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    weight: item.weight
+  }));
+
+  return (
+    <div className="h-64">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+          <XAxis 
+            dataKey="date" 
+            className="text-muted-foreground"
+            fontSize={12}
+          />
+          <YAxis 
+            className="text-muted-foreground"
+            fontSize={12}
+            domain={['dataMin - 5', 'dataMax + 5']}
+          />
+          <Tooltip 
+            contentStyle={{
+              backgroundColor: 'hsl(var(--card))',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '8px'
+            }}
+            formatter={(value) => [`${value} lbs`, 'Weight']}
+          />
+          <Line 
+            type="monotone" 
+            dataKey="weight" 
+            stroke="hsl(var(--primary))" 
+            strokeWidth={3}
+            dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
+            name="Weight"
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
+const ProgramCompletion: React.FC<{ programFill: any }> = ({ programFill }) => {
+  const sections = [
+    { label: 'Fitness', value: programFill.fitness, color: '#2563eb' },
+    { label: 'Nutrition', value: programFill.nutrition, color: '#f59e0b' },
+    { label: 'Mental Health', value: programFill.mentalHealth, color: '#10b981' },
+  ];
+
+  return (
+    <div className="flex flex-col md:flex-row gap-8 items-center justify-around">
+      {sections.map((section, index) => (
+        <motion.div
+          key={section.label}
+          className="w-24 h-24 flex flex-col items-center"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
+        >
+          <CircularProgressbar
+            value={section.value}
+            text={`${section.value}%`}
+            strokeWidth={8}
+            styles={buildStyles({
+              pathColor: section.color,
+              trailColor: 'hsl(var(--muted))',
+              textColor: 'hsl(var(--foreground))',
+              textSize: '18px',
+            })}
+          />
+          <p className="text-sm font-semibold text-center mt-3 text-foreground">
+            {section.label}
+          </p>
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
+const NutritionInsights: React.FC<{ nutritionData: any }> = ({ nutritionData }) => {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-6">
+        <div className="flex flex-col items-center">
+          <span className="text-3xl font-bold text-foreground">{nutritionData.adherence}%</span>
+          <span className="text-sm text-muted-foreground">Meal Adherence</span>
+          <p className="text-xs text-center text-muted-foreground mt-1">
+            {nutritionData.adherenceMessage}
+          </p>
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-3xl font-bold text-foreground">
+            <span className="text-xl">~</span>{nutritionData.portionsPerDay}
+          </span>
+          <span className="text-sm text-muted-foreground">Portions/Day</span>
+          <p className="text-xs text-center text-muted-foreground mt-1">
+            {nutritionData.portionMessage}
+          </p>
+        </div>
+      </div>
+      <div className="space-y-3">
+        <h4 className="font-semibold text-sm text-muted-foreground">Micronutrient Status:</h4>
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(nutritionData.micronutrientStatus).map(([key, value]) => (
+            <div key={key} className="flex items-center gap-2 bg-muted/50 rounded-full px-3 py-1 text-sm">
+              <span className={`text-lg ${value === 'adequate' ? 'text-green-500' : 'text-orange-500'}`}>
+                {value === 'adequate' ? '✅' : '⚠️'}
+              </span>
+              <span className="text-foreground capitalize">{key}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MentalWellness: React.FC<{ mentalHealthData: any }> = ({ mentalHealthData }) => {
+  const sections = [
+    { label: 'Avg. Stress', value: mentalHealthData.avgStress, trend: mentalHealthData.stressTrend, unit: '/5' },
+    { label: 'Avg. Anxiety', value: mentalHealthData.avgAnxiety, trend: mentalHealthData.anxietyTrend, unit: '/5' },
+    { label: 'Meditation', value: mentalHealthData.meditationTime, trend: mentalHealthData.meditationTrend, unit: ' min' },
+    { label: 'Yoga', value: mentalHealthData.yogaTime, trend: mentalHealthData.yogaTrend, unit: ' min' },
+  ];
+
+  const getTrendColor = (trend: string) => {
+    if (trend === '↑') return 'text-rose-500';
+    if (trend === '↓') return 'text-emerald-500';
+    return 'text-muted-foreground';
+  };
+
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      {sections.map((section, index) => (
+        <div key={index} className="space-y-1">
+          <div className="text-sm text-muted-foreground">{section.label}</div>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-bold text-foreground">
+              {section.value}
+              <span className="text-sm font-normal text-muted-foreground">{section.unit}</span>
+            </span>
+            <span className={`text-lg font-bold ${getTrendColor(section.trend)}`}>{section.trend}</span>
+          </div>
+          {section.label === 'Meditation' && (
+            <p className="text-xs text-muted-foreground">{mentalHealthData.meditationValue}</p>
+          )}
+          {section.label === 'Yoga' && (
+            <p className="text-xs text-muted-foreground">{mentalHealthData.yogaValue}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const ProgressProgramsTab: React.FC<ProgressProgramsTabProps> = ({ client }) => {
   const [timeRange, setTimeRange] = useState<'1week' | '1month' | '6months'>('1month');
