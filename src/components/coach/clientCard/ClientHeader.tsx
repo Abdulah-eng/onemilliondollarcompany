@@ -19,12 +19,10 @@ interface ClientHeaderProps {
 }
 
 const ClientHeader: React.FC<ClientHeaderProps> = ({ client }) => {
-  // Use current date for mock data to make it feel fresh
   const lastCheckInDate = new Date();
   lastCheckInDate.setDate(lastCheckInDate.getDate() - 1);
   const lastCheckIn = lastCheckInDate.toLocaleDateString('en-GB');
 
-  // Mock booleans for feedback and status
   const hasNewFeedback = true;
   const onTrack = true;
 
@@ -79,18 +77,18 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ client }) => {
       </div>
       
       {/* Quick Stats Grid */}
-      <div className="grid grid-cols-3 gap-2 mt-6 p-4 rounded-xl bg-card/50">
-        <div className="flex flex-col items-center justify-center text-center p-2">
+      <div className="flex flex-col sm:flex-row gap-4 mt-6 p-4 rounded-xl bg-card/50">
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-2">
           <Calendar className="h-6 w-6 text-primary mb-1" />
           <div className="text-xs text-muted-foreground font-medium">Last Check-in</div>
           <div className="text-sm font-bold text-foreground mt-1">{lastCheckIn}</div>
         </div>
-        <div className="flex flex-col items-center justify-center text-center p-2">
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-2">
           <Award className="h-6 w-6 text-primary mb-1" />
           <div className="text-xs text-muted-foreground font-medium">Adherence</div>
           <div className="text-sm font-bold text-foreground mt-1">{client.insights.adherence}</div>
         </div>
-        <div className="flex flex-col items-center justify-center text-center p-2">
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-2">
           <Clock className="h-6 w-6 text-primary mb-1" />
           <div className="text-xs text-muted-foreground font-medium">Program Days</div>
           <div className="text-sm font-bold text-foreground mt-1">28 remaining</div>
