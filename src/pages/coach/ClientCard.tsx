@@ -37,7 +37,7 @@ const ClientCard = () => {
 
         {/* Details Tab */}
         <TabsContent value="details" className="mt-6">
-          <ClientPersonalInfo personalInfo={client.personalInfo} />
+          <ClientPersonalInfo />
         </TabsContent>
 
         {/* Actions Tab */}

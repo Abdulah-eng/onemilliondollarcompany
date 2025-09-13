@@ -78,7 +78,7 @@ const ClientPersonalInfo = () => {
         <p><strong>Meditation Experience:</strong> {mockPersonalInfo.meditation_experience}</p>
         <div className="flex flex-wrap gap-2">
           <strong>Goals:</strong>
-          {mockPersonalInfo.goals.map(g => <Badge key={g} variant="primary">{g}</Badge>)}
+          {mockPersonalInfo.goals.map(g => <Badge key={g} variant="secondary">{g}</Badge>)}
         </div>
       </div>
 

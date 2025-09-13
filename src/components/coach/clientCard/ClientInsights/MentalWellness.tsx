@@ -16,7 +16,7 @@ const MentalWellness: React.FC<MentalWellnessProps> = ({ mentalHealthData }) => 
     { label: 'Yoga', value: mentalHealthData.yogaTime, trend: mentalHealthData.yogaTrend, unit: ' min' },
   ];
 
-  const getTrendColor = (trend: '↑' | '↓' | '→') => {
+  const getTrendColor = (trend: string) => {
     if (trend === '↑') return 'text-rose-500';
     if (trend === '↓') return 'text-emerald-500';
     return 'text-muted-foreground';
