@@ -46,15 +46,15 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ client }) => {
             transition={{ duration: 0.4, delay: 0.1 }}
           />
           <div>
-            <h1 className="text-lg sm:text-xl font-semibold text-foreground">{client.name}</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-foreground">{client.name}</h1>
             <div className="flex flex-wrap items-center gap-2 mt-1">
               {onTrack && (
-                <Badge className="rounded-full px-2 py-0.5 text-[10px] font-medium bg-green-500/10 text-green-600 border-green-500/20">
+                <Badge className="rounded-full px-2 py-0.5 text-xs font-medium bg-green-500/10 text-green-600 border-green-500/20">
                   On Track
                 </Badge>
               )}
               {hasNewFeedback && (
-                <Badge className="rounded-full px-2 py-0.5 text-[10px] font-medium bg-yellow-500/10 text-yellow-600 border-yellow-500/20 animate-pulse">
+                <Badge className="rounded-full px-2 py-0.5 text-xs font-medium bg-yellow-500/10 text-yellow-600 border-yellow-500/20 animate-pulse">
                   💬 New Feedback
                 </Badge>
               )}
@@ -86,8 +86,8 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ client }) => {
         </div>
       </div>
 
-      {/* Quick Stats Grid */}
-      <div className="grid grid-cols-3 gap-3 sm:gap-5 w-full">
+      {/* Quick Stats - cleaner, no containers */}
+      <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center">
         {[
           { icon: Calendar, label: 'Last Check-in', value: lastCheckIn },
           { icon: Award, label: 'Adherence', value: client.insights.adherence },
@@ -95,12 +95,12 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ client }) => {
         ].map((stat, i) => (
           <motion.div
             key={i}
-            className="flex flex-col items-center justify-center bg-muted/30 rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-md transition"
+            className="flex flex-col items-center justify-center"
             whileHover={{ y: -2 }}
           >
-            <stat.icon className="h-4 w-4 text-green-500 mb-1.5" />
-            <div className="text-[11px] text-muted-foreground">{stat.label}</div>
-            <div className="font-semibold text-sm">{stat.value}</div>
+            <stat.icon className="h-5 w-5 text-green-500 mb-1" />
+            <div className="text-sm text-muted-foreground">{stat.label}</div>
+            <div className="font-semibold text-base">{stat.value}</div>
           </motion.div>
         ))}
       </div>
