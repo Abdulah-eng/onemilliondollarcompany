@@ -8,49 +8,52 @@ import InsightsTab from '@/components/coach/clientCard/tabs/InsightsTab';
 import ProgramsTab from '@/components/coach/clientCard/tabs/ProgramsTab';
 import DetailsTab from '@/components/coach/clientCard/tabs/DetailsTab';
 import CommunicationTab from '@/components/coach/clientCard/tabs/CommunicationTab';
+import ClientActionButton from '@/components/coach/clientCard/ClientActionButton';
 
 const ClientCard = () => {
   const location = useLocation();
   const client = location.state?.client || mockClientData;
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <div className="relative w-full max-w-7xl mx-auto px-4 py-6 space-y-6">
+      {/* Header */}
       <ClientHeader client={client} />
 
+      {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-5 rounded-2xl bg-muted p-1">
-          <TabsTrigger 
-            value="overview" 
+          <TabsTrigger
+            value="overview"
             className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
           >
             Overview
           </TabsTrigger>
-          <TabsTrigger 
-            value="insights" 
+          <TabsTrigger
+            value="insights"
             className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
           >
             Insights
           </TabsTrigger>
-          <TabsTrigger 
-            value="programs" 
+          <TabsTrigger
+            value="programs"
             className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
           >
             Programs
           </TabsTrigger>
-          <TabsTrigger 
-            value="details" 
+          <TabsTrigger
+            value="details"
             className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
           >
             Details
           </TabsTrigger>
-          <TabsTrigger 
-            value="communication" 
+          <TabsTrigger
+            value="communication"
             className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
           >
             Communication
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="overview" className="mt-6">
           <OverviewTab client={client} />
         </TabsContent>
@@ -71,6 +74,9 @@ const ClientCard = () => {
           <CommunicationTab client={client} />
         </TabsContent>
       </Tabs>
+
+      {/* Floating Action Button */}
+      <ClientActionButton />
     </div>
   );
 };
