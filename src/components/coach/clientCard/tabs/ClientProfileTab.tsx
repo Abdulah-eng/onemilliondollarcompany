@@ -16,7 +16,8 @@ import {
   Activity,
   TrendingUp, 
   TrendingDown, 
-  Minus
+  Minus,
+  Crown
 } from 'lucide-react';
 
 interface ClientProfileTabProps {
@@ -41,7 +42,7 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Activity className="h-5 w-5" />
-            Quick Trends (7 days)
+            Daily Check-in Trends (7 days)
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -49,7 +50,7 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
             <TrendPill label="Mood" value={client.trends?.mood || '↑'} />
             <TrendPill label="Sleep" value={client.trends?.sleep || '→'} />
             <TrendPill label="Energy" value={client.trends?.energy || '↓'} />
-            <TrendPill label="Water" value={client.trends?.water || '↓'} />
+            <TrendPill label="Hydration" value={client.trends?.water || '↓'} />
           </div>
         </CardContent>
       </Card>
@@ -77,6 +78,16 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
             <InfoItem icon={Weight} label="Weight" value="72 kg" />
             <InfoItem icon={Phone} label="Phone" value="+47 12345678" />
             <InfoItem icon={Mail} label="Email" value="john@example.com" />
+            {/* Premium Plan Info */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Crown className="h-4 w-4 text-yellow-500" />
+                Membership
+              </div>
+              <Badge className="rounded-full px-3 py-1 text-xs bg-yellow-100 text-yellow-700 border-yellow-200">
+                {client.plan || 'Premium'} • {client.daysRemaining || 28} days left
+              </Badge>
+            </div>
           </div>
         </CardContent>
       </Card>
