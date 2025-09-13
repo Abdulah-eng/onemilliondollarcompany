@@ -14,14 +14,28 @@ import {
   AlertTriangle,
   Heart,
   Copy,
-  Edit
+  Edit,
+  Award,
+  Clock,
+  Activity,
+  TrendingUp, 
+  TrendingDown, 
+  Minus
 } from 'lucide-react';
 
-interface DetailsTabProps {
+interface ClientProfileTabProps {
   client: any;
 }
 
-const DetailsTab: React.FC<DetailsTabProps> = ({ client }) => {
+const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
+  // Calculate overview metrics
+  const overviewMetrics = {
+    programAdherence: parseInt(client.insights.adherence),
+    checkInStreak: Math.floor(Math.random() * 14) + 1,
+    weeklyGoalProgress: Math.floor(Math.random() * 100) + 1,
+    lastActivity: '2 hours ago'
+  };
+
   const handleCopyInfo = () => {
     const info = `Client: ${client.name}\nAge: 28\nHeight: 180cm\nWeight: 72kg\nGoals: Build muscle, Lose fat`;
     navigator.clipboard.writeText(info);
@@ -34,6 +48,75 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ client }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="rounded-2xl border bg-card">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Program Adherence</p>
+                <p className="text-2xl font-bold text-primary">{overviewMetrics.programAdherence}%</p>
+              </div>
+              <Award className="h-8 w-8 text-primary/60" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl border bg-card">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Check-in Streak</p>
+                <p className="text-2xl font-bold text-emerald-600">{overviewMetrics.checkInStreak} days</p>
+              </div>
+              <Calendar className="h-8 w-8 text-emerald-600/60" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl border bg-card">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Weekly Goals</p>
+                <p className="text-2xl font-bold text-orange-600">{overviewMetrics.weeklyGoalProgress}%</p>
+              </div>
+              <Target className="h-8 w-8 text-orange-600/60" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl border bg-card">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Last Activity</p>
+                <p className="text-lg font-bold text-muted-foreground">{overviewMetrics.lastActivity}</p>
+              </div>
+              <Clock className="h-8 w-8 text-muted-foreground/60" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Quick Trends */}
+      <Card className="rounded-2xl border bg-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Activity className="h-5 w-5" />
+            Quick Trends (7 days)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <TrendPill label="Mood" value={client.trends?.mood || '↑'} />
+            <TrendPill label="Sleep" value={client.trends?.sleep || '→'} />
+            <TrendPill label="Energy" value={client.trends?.energy || '↑'} />
+            <TrendPill label="Water" value={client.trends?.water || '↓'} />
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Personal Information */}
       <Card className="rounded-2xl border bg-card">
         <CardHeader className="pb-3">
@@ -117,6 +200,27 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ client }) => {
             <h4 className="text-sm font-medium text-muted-foreground mb-2">Meditation Experience</h4>
             <p className="text-sm">2 years of daily practice</p>
           </div>
+
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground mb-2">Current Focus</h4>
+            <div className="flex flex-wrap gap-2">
+              {(client.goals || ['Weight Loss', 'Muscle Gain']).slice(0, 2).map((goal: string, index: number) => (
+                <Badge key={index} className="rounded-full px-3 py-1 text-xs bg-primary/10 text-primary border-primary/20">
+                  {goal}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground mb-2">Plan Details</h4>
+            <p className="text-sm">
+              <Badge className="rounded-full px-3 py-1 text-xs bg-secondary/10 text-secondary-foreground border-secondary/20">
+                {client.plan || 'Premium'} Plan
+              </Badge>
+              <span className="ml-2 text-muted-foreground">• 28 days remaining</span>
+            </p>
+          </div>
         </CardContent>
       </Card>
 
@@ -181,6 +285,24 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ client }) => {
   );
 };
 
+function TrendPill({ label, value }: { label: string; value: string }) {
+  const getIcon = () => {
+    if (value === '↑') return <TrendingUp className="h-4 w-4 text-emerald-600" />;
+    if (value === '↓') return <TrendingDown className="h-4 w-4 text-rose-600" />;
+    return <Minus className="h-4 w-4 text-muted-foreground" />;
+  };
+
+  return (
+    <div className="flex items-center justify-between rounded-xl bg-muted/30 px-3 py-2">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <div className="flex items-center gap-1">
+        {getIcon()}
+        <span className="text-sm font-medium">{value}</span>
+      </div>
+    </div>
+  );
+}
+
 function InfoItem({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
   return (
     <div className="space-y-1">
@@ -193,4 +315,4 @@ function InfoItem({ icon: Icon, label, value }: { icon: any; label: string; valu
   );
 }
 
-export default DetailsTab;
+export default ClientProfileTab;

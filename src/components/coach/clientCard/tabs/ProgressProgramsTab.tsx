@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion } from 'framer-motion';
 import { 
   Play, 
@@ -12,14 +13,29 @@ import {
   Edit, 
   MessageSquare,
   Award,
-  Target
+  Target,
+  Activity,
+  TrendingUp,
+  Heart,
+  Apple,
+  Brain,
+  Camera,
+  Dumbbell,
+  Utensils
 } from 'lucide-react';
+import DailyCheckIn from '@/components/coach/clientCard/ClientInsights/DailyCheckIn';
+import WeightTrend from '@/components/coach/clientCard/ClientInsights/WeightTrend';
+import ProgramCompletion from '@/components/coach/clientCard/ClientInsights/ProgramCompletion';
+import NutritionInsights from '@/components/coach/clientCard/ClientInsights/NutritionInsights';
+import MentalWellness from '@/components/coach/clientCard/ClientInsights/MentalWellness';
 
-interface ProgramsTabProps {
+interface ProgressProgramsTabProps {
   client: any;
 }
 
-const ProgramsTab: React.FC<ProgramsTabProps> = ({ client }) => {
+const ProgressProgramsTab: React.FC<ProgressProgramsTabProps> = ({ client }) => {
+  const [timeRange, setTimeRange] = useState<'1week' | '1month' | '6months'>('1month');
+
   // Mock program data
   const currentProgram = {
     id: 'prog_001',
@@ -69,6 +85,21 @@ const ProgramsTab: React.FC<ProgramsTabProps> = ({ client }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
+      {/* Time Range Selector */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Progress & Programs</h2>
+        <Select value={timeRange} onValueChange={(value: any) => setTimeRange(value)}>
+          <SelectTrigger className="w-48 rounded-xl">
+            <SelectValue placeholder="Select time range" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1week">Last Week</SelectItem>
+            <SelectItem value="1month">Last Month</SelectItem>
+            <SelectItem value="6months">Last 6 Months</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Current Program */}
       <Card className="rounded-2xl border bg-card">
         <CardHeader className="pb-3">
@@ -140,6 +171,101 @@ const ProgramsTab: React.FC<ProgramsTabProps> = ({ client }) => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Insights Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Daily Check-ins */}
+        <Card className="rounded-2xl border bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Activity className="h-5 w-5 text-blue-500" />
+              Daily Check-ins
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DailyCheckIn dailyCheckIn={client.dailyCheckIn} timeRange={timeRange} />
+          </CardContent>
+        </Card>
+
+        {/* Weight Trend */}
+        <Card className="rounded-2xl border bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TrendingUp className="h-5 w-5 text-emerald-500" />
+              Weight Trend
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <WeightTrend weightTrend={client.weightTrend} />
+          </CardContent>
+        </Card>
+
+        {/* Program Completion */}
+        <Card className="rounded-2xl border bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Dumbbell className="h-5 w-5 text-purple-500" />
+              Program Completion
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ProgramCompletion programFill={client.programFill} />
+          </CardContent>
+        </Card>
+
+        {/* Nutrition Insights */}
+        <Card className="rounded-2xl border bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Utensils className="h-5 w-5 text-orange-500" />
+              Nutrition Insights
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <NutritionInsights nutritionData={client.nutrition} />
+          </CardContent>
+        </Card>
+
+        {/* Mental Wellness */}
+        <Card className="rounded-2xl border bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Brain className="h-5 w-5 text-indigo-500" />
+              Mental Wellness
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <MentalWellness mentalHealthData={client.mentalHealth} />
+          </CardContent>
+        </Card>
+
+        {/* Progress Photos */}
+        <Card className="rounded-2xl border bg-card">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Camera className="h-5 w-5 text-pink-500" />
+              Progress Photos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {client.progressPhotos && client.progressPhotos.length > 0 ? (
+              <div className="grid grid-cols-3 gap-2">
+                {client.progressPhotos.slice(0, 6).map((photo: string, index: number) => (
+                  <div key={index} className="aspect-square rounded-lg overflow-hidden bg-muted">
+                    <img
+                      src={photo}
+                      alt={`Progress photo ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No progress photos available</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Scheduled Program */}
       <Card className="rounded-2xl border bg-card">
@@ -241,4 +367,4 @@ const ProgramsTab: React.FC<ProgramsTabProps> = ({ client }) => {
   );
 };
 
-export default ProgramsTab;
+export default ProgressProgramsTab;

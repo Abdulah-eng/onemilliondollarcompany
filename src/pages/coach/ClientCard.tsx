@@ -3,10 +3,8 @@ import { useLocation } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockClientData } from '@/mockdata/clientCard/mockClientData';
 import ClientHeader from '@/components/coach/clientCard/ClientHeader';
-import OverviewTab from '@/components/coach/clientCard/tabs/OverviewTab';
-import InsightsTab from '@/components/coach/clientCard/tabs/InsightsTab';
-import ProgramsTab from '@/components/coach/clientCard/tabs/ProgramsTab';
-import DetailsTab from '@/components/coach/clientCard/tabs/DetailsTab';
+import ClientProfileTab from '@/components/coach/clientCard/tabs/ClientProfileTab';
+import ProgressProgramsTab from '@/components/coach/clientCard/tabs/ProgressProgramsTab';
 import CommunicationTab from '@/components/coach/clientCard/tabs/CommunicationTab';
 import ClientActionButton from '@/components/coach/clientCard/ClientActionButton';
 
@@ -20,31 +18,19 @@ const ClientCard = () => {
       <ClientHeader client={client} />
 
       {/* Tabs */}
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 rounded-2xl bg-muted p-1">
+      <Tabs defaultValue="profile" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-muted p-1">
           <TabsTrigger
-            value="overview"
+            value="profile"
             className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
           >
-            Overview
+            Client Profile
           </TabsTrigger>
           <TabsTrigger
-            value="insights"
+            value="progress"
             className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
           >
-            Insights
-          </TabsTrigger>
-          <TabsTrigger
-            value="programs"
-            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
-          >
-            Programs
-          </TabsTrigger>
-          <TabsTrigger
-            value="details"
-            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
-          >
-            Details
+            Progress & Programs
           </TabsTrigger>
           <TabsTrigger
             value="communication"
@@ -54,20 +40,12 @@ const ClientCard = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="mt-6">
-          <OverviewTab client={client} />
+        <TabsContent value="profile" className="mt-6">
+          <ClientProfileTab client={client} />
         </TabsContent>
 
-        <TabsContent value="insights" className="mt-6">
-          <InsightsTab client={client} />
-        </TabsContent>
-
-        <TabsContent value="programs" className="mt-6">
-          <ProgramsTab client={client} />
-        </TabsContent>
-
-        <TabsContent value="details" className="mt-6">
-          <DetailsTab client={client} />
+        <TabsContent value="progress" className="mt-6">
+          <ProgressProgramsTab client={client} />
         </TabsContent>
 
         <TabsContent value="communication" className="mt-6">
