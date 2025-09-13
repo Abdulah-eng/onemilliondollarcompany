@@ -1,4 +1,66 @@
 // src/mockdata/clientCard/mockClientData.ts
+import { format, subDays, subMonths } from 'date-fns';
+
+const generateMockData = (days: number) => {
+  const data = [];
+  const today = new Date();
+  for (let i = 0; i < days; i++) {
+    const date = subDays(today, days - 1 - i);
+    data.push({
+      date: format(date, 'yyyy-MM-dd'),
+      water: Math.random() * 1.5 + 1.5, // 1.5 to 3.0 liters
+      energy: Math.floor(Math.random() * 5) + 1, // 1-5 scale
+      sleep: Math.random() * 2 + 6, // 6.0 to 8.0 hours
+      mood: Math.floor(Math.random() * 5) + 1, // 1-5 scale
+      stress: Math.floor(Math.random() * 5) + 1, // 1-5 scale
+      anxiety: Math.floor(Math.random() * 5) + 1, // 1-5 scale
+      meditationTime: Math.random() > 0.5 ? Math.floor(Math.random() * 20) + 5 : 0, // 5-25 min
+      yogaTime: Math.random() > 0.7 ? Math.floor(Math.random() * 30) + 15 : 0, // 15-45 min
+      portionTracked: Math.random() * 10 + 5, // 5-15 portions
+      ateElse: Math.random() > 0.3,
+    });
+  }
+  return data;
+};
+
+const generateWeightData = (months: number) => {
+  const data = [];
+  const today = new Date();
+  let currentWeight = 68.8; // Starting weight
+  for (let i = 0; i < months * 4; i++) {
+    const date = subDays(today, (months * 4 - 1 - i) * 7); // weekly data points
+    currentWeight -= Math.random() * 0.2 + 0.1; // simulate slight weight loss
+    data.push({
+      date: format(date, 'yyyy-MM-dd'),
+      weight: parseFloat(currentWeight.toFixed(1)),
+    });
+  }
+  return data;
+};
+
+// Simplified function to calculate trends
+const calculateTrends = (data: any[]) => {
+  const latestData = data.slice(-14);
+  const getTrend = (key: string) => {
+    if (latestData.length < 2) return '—';
+    const firstHalfAvg = latestData.slice(0, Math.floor(latestData.length / 2)).reduce((sum, d) => sum + d[key], 0) / Math.floor(latestData.length / 2);
+    const secondHalfAvg = latestData.slice(Math.ceil(latestData.length / 2)).reduce((sum, d) => sum + d[key], 0) / Math.ceil(latestData.length / 2);
+    const diff = secondHalfAvg - firstHalfAvg;
+    if (Math.abs(diff) < 0.3) return '→';
+    return diff > 0 ? '↑' : '↓';
+  };
+  return {
+    mood: getTrend('mood'),
+    sleep: getTrend('sleep'),
+    energy: getTrend('energy'),
+    stress: getTrend('stress'),
+  };
+};
+
+const allDailyData = generateMockData(180);
+const allWeightData = generateWeightData(6);
+const trends = calculateTrends(allDailyData);
+
 export const mockClientData = {
   id: 'client_123',
   name: 'Jessica Lee',
@@ -31,86 +93,40 @@ export const mockClientData = {
     macros: 'P: 120g, C: 200g, F: 55g',
     minutesMeditated: '30 min',
   },
-  dailyCheckIn: [
-    // 6 months of daily check-in data (simplified to show key dates)
-    { date: '2025-03-15', water: 2.1, energy: 3, sleep: 6.5, mood: 3 },
-    { date: '2025-03-20', water: 2.3, energy: 3, sleep: 7.0, mood: 3 },
-    { date: '2025-03-25', water: 2.2, energy: 4, sleep: 6.8, mood: 4 },
-    { date: '2025-03-30', water: 2.4, energy: 4, sleep: 7.2, mood: 4 },
-    { date: '2025-04-05', water: 2.3, energy: 3, sleep: 6.9, mood: 3 },
-    { date: '2025-04-10', water: 2.5, energy: 4, sleep: 7.1, mood: 4 },
-    { date: '2025-04-15', water: 2.4, energy: 4, sleep: 7.3, mood: 4 },
-    { date: '2025-04-20', water: 2.6, energy: 4, sleep: 7.5, mood: 4 },
-    { date: '2025-04-25', water: 2.5, energy: 4, sleep: 7.2, mood: 4 },
-    { date: '2025-04-30', water: 2.7, energy: 4, sleep: 7.4, mood: 4 },
-    { date: '2025-05-05', water: 2.6, energy: 4, sleep: 7.6, mood: 4 },
-    { date: '2025-05-10', water: 2.8, energy: 5, sleep: 7.8, mood: 5 },
-    { date: '2025-05-15', water: 2.7, energy: 4, sleep: 7.5, mood: 4 },
-    { date: '2025-05-20', water: 2.9, energy: 5, sleep: 8.0, mood: 5 },
-    { date: '2025-05-25', water: 2.8, energy: 5, sleep: 7.9, mood: 5 },
-    { date: '2025-05-30', water: 3.0, energy: 5, sleep: 8.1, mood: 5 },
-    { date: '2025-06-05', water: 2.9, energy: 5, sleep: 8.0, mood: 5 },
-    { date: '2025-06-10', water: 3.1, energy: 5, sleep: 8.2, mood: 5 },
-    { date: '2025-06-15', water: 3.0, energy: 5, sleep: 8.1, mood: 5 },
-    { date: '2025-06-20', water: 2.8, energy: 4, sleep: 7.8, mood: 4 },
-    { date: '2025-06-25', water: 2.9, energy: 5, sleep: 8.0, mood: 5 },
-    { date: '2025-06-30', water: 3.0, energy: 5, sleep: 8.1, mood: 5 },
-    { date: '2025-07-05', water: 2.8, energy: 4, sleep: 7.9, mood: 4 },
-    { date: '2025-07-10', water: 2.9, energy: 5, sleep: 8.0, mood: 5 },
-    { date: '2025-07-15', water: 3.1, energy: 5, sleep: 8.2, mood: 5 },
-    { date: '2025-07-20', water: 2.7, energy: 4, sleep: 7.6, mood: 4 },
-    { date: '2025-07-25', water: 2.8, energy: 4, sleep: 7.8, mood: 4 },
-    { date: '2025-07-30', water: 3.0, energy: 5, sleep: 8.0, mood: 5 },
-    { date: '2025-08-05', water: 2.9, energy: 5, sleep: 7.9, mood: 5 },
-    { date: '2025-08-10', water: 2.8, energy: 4, sleep: 7.8, mood: 4 },
-    { date: '2025-08-15', water: 3.0, energy: 5, sleep: 8.1, mood: 5 },
-    { date: '2025-08-20', water: 2.9, energy: 5, sleep: 8.0, mood: 5 },
-    { date: '2025-08-25', water: 2.7, energy: 4, sleep: 7.7, mood: 4 },
-    { date: '2025-08-30', water: 2.8, energy: 4, sleep: 7.8, mood: 4 },
-    { date: '2025-09-01', water: 2.9, energy: 5, sleep: 7.9, mood: 5 },
-    { date: '2025-09-03', water: 2.8, energy: 4, sleep: 7.8, mood: 4 },
-    { date: '2025-09-05', water: 3.0, energy: 5, sleep: 8.0, mood: 5 },
-    { date: '2025-09-06', water: 2.4, energy: 4, sleep: 7.0, mood: 4 },
-    { date: '2025-09-07', water: 2.1, energy: 4, sleep: 6.5, mood: 3 },
-    { date: '2025-09-08', water: 2.7, energy: 4, sleep: 7.2, mood: 4 },
-    { date: '2025-09-09', water: 2.4, energy: 3, sleep: 7.1, mood: 3 },
-    { date: '2025-09-10', water: 2.9, energy: 5, sleep: 8.2, mood: 5 },
-    { date: '2025-09-11', water: 2.8, energy: 5, sleep: 8.0, mood: 4 },
-    { date: '2025-09-12', water: 3.0, energy: 5, sleep: 7.8, mood: 5 },
-  ],
   programFill: {
     fitness: 85,
     nutrition: 78,
     mentalHealth: 92
   },
-  weightTrend: [
-    // 6 months of weight data (weekly measurements)
-    { date: '2025-03-15', weight: 68.8 },
-    { date: '2025-03-22', weight: 68.6 },
-    { date: '2025-03-29', weight: 68.4 },
-    { date: '2025-04-05', weight: 68.2 },
-    { date: '2025-04-12', weight: 68.0 },
-    { date: '2025-04-19', weight: 67.9 },
-    { date: '2025-04-26', weight: 67.8 },
-    { date: '2025-05-03', weight: 67.6 },
-    { date: '2025-05-10', weight: 67.5 },
-    { date: '2025-05-17', weight: 67.4 },
-    { date: '2025-05-24', weight: 67.3 },
-    { date: '2025-05-31', weight: 67.2 },
-    { date: '2025-06-07', weight: 67.1 },
-    { date: '2025-06-14', weight: 67.0 },
-    { date: '2025-06-21', weight: 66.9 },
-    { date: '2025-06-28', weight: 66.8 },
-    { date: '2025-07-05', weight: 66.7 },
-    { date: '2025-07-12', weight: 66.6 },
-    { date: '2025-07-19', weight: 66.5 },
-    { date: '2025-07-26', weight: 66.4 },
-    { date: '2025-08-02', weight: 66.3 },
-    { date: '2025-08-09', weight: 66.2 },
-    { date: '2025-08-16', weight: 66.1 },
-    { date: '2025-08-23', weight: 66.0 },
-    { date: '2025-08-30', weight: 65.9 },
-    { date: '2025-09-06', weight: 65.8 },
-    { date: '2025-09-12', weight: 65.7 },
+  dailyCheckIn: allDailyData,
+  weightTrend: allWeightData,
+  progressPhotos: [
+    { url: 'https://images.unsplash.com/photo-1549476317-09f19318b76c?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', date: '2025-07-01', isNewest: false },
+    { url: 'https://images.unsplash.com/photo-1549476317-09f19318b76c?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', date: '2025-08-01', isNewest: false },
+    { url: 'https://images.unsplash.com/photo-1549476317-09f19318b76c?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', date: '2025-09-01', isNewest: true },
   ],
+  trends: trends,
+  nutrition: {
+    adherence: 85,
+    adherenceMessage: 'Maintains consistent meal tracking.',
+    portionsPerDay: 7.2,
+    portionMessage: 'Average portions tracked daily.',
+    micronutrientStatus: {
+      fiber: 'adequate',
+      iron: 'low',
+      vitamin_d: 'adequate',
+    },
+  },
+  mentalHealth: {
+    avgStress: 2.5,
+    stressTrend: trends.stress,
+    avgAnxiety: 2.1,
+    anxietyTrend: trends.stress, // Using stress trend for anxiety for mock data
+    meditationTime: 15,
+    meditationTrend: '↑',
+    meditationValue: 'Consistent daily practice.',
+    yogaTime: 30,
+    yogaTrend: '→',
+    yogaValue: 'Occasional sessions, consistent duration.',
+  },
 };
