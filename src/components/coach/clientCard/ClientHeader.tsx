@@ -67,12 +67,12 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ client }) => {
 
         {/* Action Buttons Section */}
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <Button size="lg" className="flex-1 rounded-full text-base py-6">
-            <MessageCircle className="h-5 w-5 mr-2" />
+          <Button className="flex-1 rounded-full text-sm h-10 px-4 py-2">
+            <MessageCircle className="h-4 w-4 mr-2" />
             Give Feedback
           </Button>
-          <Button size="lg" variant="outline" className="flex-1 rounded-full text-base py-6">
-            <ClipboardCheck className="h-5 w-5 mr-2" />
+          <Button variant="outline" className="flex-1 rounded-full text-sm h-10 px-4 py-2">
+            <ClipboardCheck className="h-4 w-4 mr-2" />
             Check In
           </Button>
         </div>
