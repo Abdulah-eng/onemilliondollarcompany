@@ -22,79 +22,79 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ client }) => {
   // Use current date for mock data to make it feel fresh
   const lastCheckInDate = new Date();
   lastCheckInDate.setDate(lastCheckInDate.getDate() - 1);
-  const lastCheckIn = lastCheckInDate.toLocaleDateString('en-GB'); // Formats as 8.9.2025
+  const lastCheckIn = lastCheckInDate.toLocaleDateString('en-GB');
 
-  // Mock booleans for feedback and status, as per your request
+  // Mock booleans for feedback and status
   const hasNewFeedback = true;
   const onTrack = true;
 
   return (
     <motion.div
-      className="rounded-2xl border bg-card/60 shadow-sm backdrop-blur-sm p-6 overflow-hidden space-y-6"
+      className="bg-card/70 backdrop-blur-md rounded-2xl border-b border-border shadow-lg p-6 overflow-hidden"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="flex flex-col items-center text-center">
-        {/* Profile Picture */}
-        <div className="relative mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 sm:gap-4">
+        {/* Profile Info and Badges Section */}
+        <div className="flex items-center gap-4 flex-1">
+          {/* Profile Picture */}
           <motion.img
-            className="h-24 w-24 rounded-full object-cover border-2 border-primary shadow-lg"
+            className="h-20 w-20 rounded-full object-cover border-2 border-primary shadow-lg"
             src={client.profilePicture}
             alt={client.name}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           />
+          {/* Name and Badges */}
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold text-foreground">{client.name}</h1>
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              {onTrack && (
+                <Badge className="rounded-full px-3 py-1 text-xs font-semibold bg-green-500/10 text-green-500 border-green-500/20">
+                  On Track
+                </Badge>
+              )}
+              {hasNewFeedback && (
+                <Badge className="rounded-full px-3 py-1 text-xs font-semibold bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
+                  💬 New Feedback
+                </Badge>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Name and Badges */}
-        <h1 className="text-3xl font-bold text-foreground">
-          {client.name}
-        </h1>
-        <div className="flex flex-wrap justify-center items-center gap-2 mt-2">
-          {onTrack && (
-            <Badge className="rounded-full px-3 py-1 text-xs font-semibold bg-green-500/10 text-green-500 border-green-500/20">
-              On Track
-            </Badge>
-          )}
-          {hasNewFeedback && (
-            <Badge className="rounded-full px-3 py-1 text-xs font-semibold bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
-              💬 New Feedback
-            </Badge>
-          )}
+        {/* Action Buttons Section */}
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <Button size="lg" className="flex-1 rounded-full text-base py-6">
+            <MessageCircle className="h-5 w-5 mr-2" />
+            Give Feedback
+          </Button>
+          <Button size="lg" variant="outline" className="flex-1 rounded-full text-base py-6">
+            <ClipboardCheck className="h-5 w-5 mr-2" />
+            Check In
+          </Button>
         </div>
       </div>
-
-      {/* Quick Stats Card */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-b py-4 sm:border-t-0 sm:border-b-0 sm:py-0">
-        <div className="flex flex-col items-center justify-center text-center">
-          <Calendar className="h-6 w-6 text-primary mb-2" />
-          <div className="text-sm text-muted-foreground">Last Check-in</div>
-          <div className="text-lg font-bold">{lastCheckIn}</div>
+      
+      {/* Quick Stats Grid */}
+      <div className="grid grid-cols-3 gap-2 mt-6 p-4 rounded-xl bg-card/50">
+        <div className="flex flex-col items-center justify-center text-center p-2">
+          <Calendar className="h-6 w-6 text-primary mb-1" />
+          <div className="text-xs text-muted-foreground font-medium">Last Check-in</div>
+          <div className="text-sm font-bold text-foreground mt-1">{lastCheckIn}</div>
         </div>
-        <div className="flex flex-col items-center justify-center text-center">
-          <Award className="h-6 w-6 text-primary mb-2" />
-          <div className="text-sm text-muted-foreground">Adherence</div>
-          <div className="text-lg font-bold">{client.insights.adherence}</div>
+        <div className="flex flex-col items-center justify-center text-center p-2">
+          <Award className="h-6 w-6 text-primary mb-1" />
+          <div className="text-xs text-muted-foreground font-medium">Adherence</div>
+          <div className="text-sm font-bold text-foreground mt-1">{client.insights.adherence}</div>
         </div>
-        <div className="flex flex-col items-center justify-center text-center">
-          <Clock className="h-6 w-6 text-primary mb-2" />
-          <div className="text-sm text-muted-foreground">Program Days</div>
-          <div className="text-lg font-bold">28 remaining</div>
+        <div className="flex flex-col items-center justify-center text-center p-2">
+          <Clock className="h-6 w-6 text-primary mb-1" />
+          <div className="text-xs text-muted-foreground font-medium">Program Days</div>
+          <div className="text-sm font-bold text-foreground mt-1">28 remaining</div>
         </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full">
-        <Button size="lg" className="flex-1 rounded-full text-base py-6">
-          <MessageCircle className="h-5 w-5 mr-2" />
-          Give Feedback
-        </Button>
-        <Button size="lg" variant="outline" className="flex-1 rounded-full text-base py-6">
-          <ClipboardCheck className="h-5 w-5 mr-2" />
-          Check In
-        </Button>
       </div>
     </motion.div>
   );
