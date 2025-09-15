@@ -41,11 +41,7 @@ interface WeightData {
 }
 
 interface DashboardProps {
-  dailyCheckIns: DailyCheckInData[];
-  fitness: FitnessData;
-  nutrition: NutritionData[];
-  mentalHealth: MentalHealthData[];
-  weight: WeightData[];
+  client: any;
 }
 
 // Utility for trend arrows
@@ -58,7 +54,25 @@ const Trend = ({ value }: { value: number }) => {
 };
 
 // Main dashboard component
-const ClientDashboard: React.FC<DashboardProps> = ({ dailyCheckIns, fitness, nutrition, mentalHealth, weight }) => {
+const ClientDashboard: React.FC<DashboardProps> = ({ client }) => {
+  // Extract and transform data from client object
+  const dailyCheckIns = client.dailyCheckIn || [];
+  const fitness = client.fitness || { adherence: 0, progression: [] };
+  const weight = client.weightTrend || [];
+  
+  // Transform nutrition object to array format if needed
+  const nutrition = Array.isArray(client.nutrition) 
+    ? client.nutrition 
+    : client.nutrition 
+      ? [client.nutrition] 
+      : [];
+  
+  // Transform mental health object to array format if needed  
+  const mentalHealth = Array.isArray(client.mentalHealth)
+    ? client.mentalHealth
+    : client.mentalHealth
+      ? [client.mentalHealth]
+      : [];
   return (
     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Daily Check-ins */}
