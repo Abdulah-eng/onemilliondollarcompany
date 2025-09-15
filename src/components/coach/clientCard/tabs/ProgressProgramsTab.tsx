@@ -59,8 +59,8 @@ const Trend = ({ value }: { value: number }) => {
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-white/70 p-3 rounded-lg shadow-lg backdrop-blur-sm border border-gray-200/50 text-gray-800 animate-fade-in">
-                <p className="font-semibold text-sm mb-1">{label}</p>
+            <div className="bg-white/70 p-2 rounded-lg shadow-lg backdrop-blur-sm border border-gray-200/50 text-gray-800 animate-fade-in">
+                <p className="font-semibold text-xs mb-1">{label}</p>
                 {payload.map((p: any) => (
                     <p key={p.name} className="text-xs flex items-center" style={{ color: p.color }}>
                         <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ backgroundColor: p.color }}></span>
@@ -92,8 +92,8 @@ const RadialProgressCard: React.FC<{
     <Card className="rounded-3xl shadow-lg bg-white/40 backdrop-blur-md border-none p-4 flex flex-col items-center justify-center text-center transition-transform transform hover:scale-105 duration-300">
       <div className="flex items-center justify-center text-lg font-semibold text-gray-700 mb-2">
         {emoji && <span className="mr-2 text-xl">{emoji}</span>}
-        <Icon className="w-6 h-6 mr-2" style={{ color }} />
-        {title}
+        <Icon className="w-5 h-5 mr-1" style={{ color }} />
+        <p className="text-sm">{title}</p>
       </div>
       <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
         <ResponsiveContainer width="100%" height="100%">
@@ -133,12 +133,12 @@ const MiniSparklineCard: React.FC<{
   emoji?: string;
 }> = ({ title, value, unit, data, dataKey, color, icon: Icon, emoji }) => (
   <Card className="rounded-3xl shadow-lg bg-white/40 backdrop-blur-md border-none p-4 transition-transform transform hover:scale-105 duration-300">
-    <div className="flex items-center space-x-2 mb-2">
-      {emoji && <span className="mr-1 text-xl">{emoji}</span>}
-      <Icon className="w-5 h-5" style={{ color }} />
-      <h3 className="text-md font-semibold text-gray-700">{title}</h3>
+    <div className="flex items-center space-x-1 mb-2">
+      {emoji && <span className="mr-1 text-lg">{emoji}</span>}
+      <Icon className="w-4 h-4" style={{ color }} />
+      <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
     </div>
-    <p className="text-3xl font-bold text-gray-900 mb-2">{value} <span className="text-sm text-gray-500">{unit}</span></p>
+    <p className="text-2xl font-bold text-gray-900 mb-1">{value} <span className="text-sm text-gray-500">{unit}</span></p>
     <ResponsiveContainer width="100%" height={60}>
       <AreaChart data={data} margin={{ top: 5, right: 0, left: 0, bottom: 5 }}>
         <defs>
@@ -221,16 +221,13 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
 
   return (
     <div className="min-h-screen p-6 md:p-10 font-sans antialiased bg-gray-50 text-gray-900">
-      
-      <h1 className="text-4xl font-extrabold mb-8 text-gray-800 animate-fade-in-down">Welcome Back, Coach! 🚀</h1>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
 
         {/* Featured Card: Daily Check-ins - Larger span */}
         <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-2 lg:col-span-3 xl:col-span-4 animate-fade-in">
           <CardHeader className="p-0 mb-4 flex-row items-center justify-between">
-            <CardTitle className="text-2xl font-bold text-gray-800 flex items-center">Daily Vitals 🌟</CardTitle>
-            <CalendarDays className="w-6 h-6 text-gray-500" />
+            <CardTitle className="text-xl font-bold text-gray-800 flex items-center">Daily Vitals 🌟</CardTitle>
+            <CalendarDays className="w-5 h-5 text-gray-500" />
           </CardHeader>
           <CardContent className="p-0 h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -240,10 +237,10 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                 <YAxis className="text-xs text-gray-500" />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px' }} />
-                <Line type="monotone" dataKey="water" stroke={colors.water} strokeWidth={3} name="💧 Water (L)" dot={{ r: 4 }} activeDot={{ r: 8 }} />
-                <Line type="monotone" dataKey="sleep" stroke={colors.sleep} strokeWidth={3} name="😴 Sleep (hrs)" dot={{ r: 4 }} activeDot={{ r: 8 }} />
-                <Line type="monotone" dataKey="mood" stroke={colors.mood} strokeWidth={3} name="😊 Mood (1-10)" dot={{ r: 4 }} activeDot={{ r: 8 }} />
-                <Line type="monotone" dataKey="energy" stroke={colors.energy} strokeWidth={3} name="⚡ Energy (1-10)" dot={{ r: 4 }} activeDot={{ r: 8 }} />
+                <Line type="monotone" dataKey="water" stroke={colors.water} strokeWidth={3} name="💧 Water (L)" dot={{ r: 3 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="sleep" stroke={colors.sleep} strokeWidth={3} name="😴 Sleep (hrs)" dot={{ r: 3 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="mood" stroke={colors.mood} strokeWidth={3} name="😊 Mood (1-10)" dot={{ r: 3 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="energy" stroke={colors.energy} strokeWidth={3} name="⚡ Energy (1-10)" dot={{ r: 3 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -311,7 +308,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
         {/* Nutrition Insights - More detailed graph */}
         <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-2 lg:col-span-2 animate-fade-in-up">
           <CardHeader className="p-0 mb-4">
-            <CardTitle className="text-2xl font-bold text-gray-800 flex items-center">Nutrition Fuel 🍎</CardTitle>
+            <CardTitle className="text-xl font-bold text-gray-800 flex items-center">Nutrition Fuel 🍎</CardTitle>
           </CardHeader>
           <CardContent className="p-0 h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -332,7 +329,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
         {/* Mental Health - Area Chart for trends */}
         <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-2 lg:col-span-2 animate-fade-in-up">
           <CardHeader className="p-0 mb-4">
-            <CardTitle className="text-2xl font-bold text-gray-800 flex items-center">Mind Matters 🧠</CardTitle>
+            <CardTitle className="text-xl font-bold text-gray-800 flex items-center">Mind Matters 🧠</CardTitle>
           </CardHeader>
           <CardContent className="p-0 h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -347,14 +344,13 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                 <Area type="monotone" dataKey="meditation" stroke={colors.mentalMeditation} fill={colors.mentalMeditation} fillOpacity={0.3} strokeWidth={3} name="Meditation (min)" />
                 <Area type="monotone" dataKey="yoga" stroke={colors.mentalYoga} fill={colors.mentalYoga} fillOpacity={0.3} strokeWidth={3} name="Yoga (min)" />
               </AreaChart>
-            </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Weight Trend - Prominent line chart with fill */}
         <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-full lg:col-span-full xl:col-span-full animate-fade-in-up">
           <CardHeader className="p-0 mb-4">
-            <CardTitle className="text-2xl font-bold text-gray-800 flex items-center">Weight Journey ⚖️</CardTitle>
+            <CardTitle className="text-xl font-bold text-gray-800 flex items-center">Weight Journey ⚖️</CardTitle>
           </CardHeader>
           <CardContent className="p-0 h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -369,9 +365,8 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                     <stop offset="95%" stopColor={colors.weight} stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <Area type="monotone" dataKey="weight" stroke={colors.weight} fill="url(#colorWeightGradient)" fillOpacity={1} strokeWidth={3} name="Weight (lbs)" dot={{ r: 5 }} activeDot={{ r: 8 }} />
-              </AreaChart>
-            </ResponsiveContainer>
+                <Area type="monotone" dataKey="weight" stroke={colors.weight} fill="url(#colorWeightGradient)" fillOpacity={1} strokeWidth={3} name="Weight (lbs)" dot={{ r: 5 }} activeDot={{ r: 8 }} />
+              </AreaChart>
           </CardContent>
         </Card>
 
