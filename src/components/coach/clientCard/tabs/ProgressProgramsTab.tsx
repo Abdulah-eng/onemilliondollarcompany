@@ -320,70 +320,67 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                 <MentalHealthTrendChart data={mentalHealth} selectedRange={selectedRange} />
 
                 {/* Nutrition Insights - Simplified with calories as bars */}
-                <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-2 lg:col-span-2">
-                    <div className="flex items-center space-x-2 mb-4">
-                         <h3 className="text-xl font-bold text-gray-800">Nutrition Fuel 🍎</h3>
+                <Card className="rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl bg-white/40 backdrop-blur-md border-none p-3 sm:p-4 lg:p-6 md:col-span-2 lg:col-span-3">
+                    <div className="flex items-center space-x-2 mb-3 sm:mb-4">
+                         <h3 className="text-lg sm:text-xl font-bold text-gray-800">Nutrition Fuel 🍎</h3>
                     </div>
-                    <CardContent className="p-0 h-64">
+                    <CardContent className="p-0 h-48 sm:h-56 lg:h-64">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={nutrition.length > 0 ? nutrition : dummyNutrition}>
+                            <BarChart data={nutrition.length > 0 ? nutrition : dummyNutrition} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                                 <XAxis 
                                     dataKey="date" 
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: '#6b7280', fontSize: 12 }}
-                                    className="text-xs"
+                                    className="text-xs text-gray-500" 
+                                    tick={{ fontSize: 10 }}
                                 />
                                 <YAxis 
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: '#6b7280', fontSize: 12 }}
-                                    className="text-xs"
+                                    className="text-xs text-gray-500" 
+                                    tick={{ fontSize: 10 }}
                                 />
                                 <Tooltip 
                                     content={({ active, payload, label }) => {
                                         if (active && payload && payload.length) {
                                             const data = payload[0].payload;
                                             return (
-                                                <div className="rounded-2xl shadow-2xl bg-white/95 backdrop-blur-md border border-gray-200/50 p-5 min-w-[250px]">
-                                                    <div className="flex items-center gap-3 mb-4">
-                                                        <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-                                                            <span className="text-lg">🍎</span>
-                                                        </div>
-                                                        <div>
-                                                            <h4 className="font-bold text-gray-800">{label}</h4>
-                                                            <p className="text-sm text-gray-500">Nutrition Overview</p>
-                                                        </div>
+                                                <div className="bg-white/95 p-4 rounded-xl shadow-xl backdrop-blur-md border border-gray-200/50 text-gray-800 min-w-[280px]">
+                                                    <div className="border-b border-gray-200/50 pb-2 mb-3">
+                                                        <p className="font-bold text-sm text-gray-800">{label}</p>
+                                                        <p className="text-xs text-gray-600">Nutrition Overview</p>
                                                     </div>
                                                     
-                                                    <div className="space-y-3">
-                                                        <div className="flex items-center justify-between p-2 bg-orange-50 rounded-lg">
-                                                            <span className="text-sm font-medium text-gray-700">Calories</span>
-                                                            <span className="font-bold text-orange-600">{data.calories} kcal</span>
+                                                    <div className="space-y-2">
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs text-gray-600">🔥 Calories:</span>
+                                                            <span className="font-semibold text-sm text-orange-600">{data.calories} kcal</span>
                                                         </div>
-                                                        
-                                                        <div className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
-                                                            <span className="text-sm font-medium text-gray-700">Protein</span>
-                                                            <span className="font-bold text-purple-600">{data.protein}g</span>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs text-gray-600">🥩 Protein:</span>
+                                                            <span className="font-semibold text-sm text-blue-600">{data.protein}g</span>
                                                         </div>
-                                                        
-                                                        <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
-                                                            <span className="text-sm font-medium text-gray-700">Carbs</span>
-                                                            <span className="font-bold text-blue-600">{data.carbs}g</span>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs text-gray-600">🍞 Carbs:</span>
+                                                            <span className="font-semibold text-sm text-green-600">{data.carbs}g</span>
                                                         </div>
-                                                        
-                                                        <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
-                                                            <span className="text-sm font-medium text-gray-700">Fat</span>
-                                                            <span className="font-bold text-green-600">{data.fat}g</span>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs text-gray-600">🥑 Fats:</span>
+                                                            <span className="font-semibold text-sm text-purple-600">{data.fat}g</span>
                                                         </div>
-                                                        
-                                                        <div className="bg-gray-50 rounded-lg p-2">
-                                                            <p className="text-xs text-gray-600 text-center">
-                                                                {data.adherence >= 90 ? '🎯 Excellent adherence!' : 
-                                                                 data.adherence >= 70 ? '💪 Good progress!' : 
-                                                                 '📈 Keep improving!'}
-                                                            </p>
+                                                    </div>
+
+                                                    <div className="mt-3 pt-2 border-t border-gray-200/50">
+                                                        <div className="flex justify-between items-center mb-1">
+                                                            <span className="text-xs text-gray-600">📊 Goal Progress:</span>
+                                                            <span className="font-semibold text-sm text-primary">{Math.round((data.calories / 2200) * 100)}%</span>
                                                         </div>
+                                                        {data.calories >= 2000 && data.calories <= 2400 && (
+                                                            <p className="text-xs text-green-600 font-medium">🎯 Perfect calorie range!</p>
+                                                        )}
+                                                        {data.calories > 2400 && (
+                                                            <p className="text-xs text-orange-600 font-medium">⚠️ Slightly over target</p>
+                                                        )}
+                                                        {data.calories < 2000 && (
+                                                            <p className="text-xs text-blue-600 font-medium">📈 Room for more fuel</p>
+                                                        )}
                                                     </div>
                                                 </div>
                                             );
@@ -393,17 +390,10 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                                 />
                                 <Bar 
                                     dataKey="calories" 
-                                    fill="url(#nutritionBarGradient)" 
-                                    radius={[8, 8, 0, 0]} 
-                                    stroke="#f97316"
-                                    strokeWidth={1}
+                                    fill="#FBBF24" 
+                                    radius={[6, 6, 0, 0]}
+                                    cursor="pointer"
                                 />
-                                <defs>
-                                    <linearGradient id="nutritionBarGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#fb923c" stopOpacity={0.9} />
-                                        <stop offset="100%" stopColor="#f97316" stopOpacity={0.7} />
-                                    </linearGradient>
-                                </defs>
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -481,20 +471,25 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                                 />
                                 <Bar 
                                     dataKey="weight" 
-                                    fill="url(#weightBarGradient)" 
-                                    radius={[8, 8, 0, 0]} 
-                                    stroke="#8b5cf6"
-                                    strokeWidth={1}
+                                    fill="#A855F7" 
+                                    radius={[6, 6, 0, 0]}
+                                    cursor="pointer"
                                 />
-                                <defs>
-                                    <linearGradient id="weightBarGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.9} />
-                                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.7} />
-                                    </linearGradient>
-                                </defs>
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
+                    
+                    {/* Quick stats */}
+                    <div className="grid grid-cols-2 gap-2 sm:gap-4 mt-3 sm:mt-4">
+                        <div className="text-center">
+                            <p className="text-sm sm:text-lg font-bold text-gray-800">-10 lbs</p>
+                            <p className="text-xs text-gray-500">Total Progress</p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-sm sm:text-lg font-bold text-gray-800">175 lbs</p>
+                            <p className="text-xs text-gray-500">Current Weight</p>
+                        </div>
+                    </div>
                 </Card>
             </div>
         </div>
