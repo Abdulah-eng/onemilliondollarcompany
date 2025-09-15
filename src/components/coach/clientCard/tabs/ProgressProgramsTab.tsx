@@ -325,15 +325,15 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
         <>
             {/* Time Range Selector for Fitness & Mental Health */}
             <div className="flex justify-center sm:justify-end mb-4 sm:mb-6">
-                <div className="bg-white/40 backdrop-blur-md rounded-full border border-gray-200/50 p-1 flex shadow-sm">
+                <div className="bg-card/80 backdrop-blur-md rounded-full border border-border p-1 flex shadow-sm">
                     {['4w', '12w', '24w'].map(range => (
                         <button
                             key={range}
                             onClick={() => setSelectedRange(range)}
                             className={`text-xs sm:text-sm font-medium px-2 sm:px-3 lg:px-4 py-1 rounded-full transition-all duration-300 ${
                                 selectedRange === range
-                                    ? 'bg-gray-800 text-white shadow-md'
-                                    : 'text-gray-600 hover:bg-gray-200'
+                                    ? 'bg-primary text-primary-foreground shadow-md'
+                                    : 'text-muted-foreground hover:bg-muted'
                             }`}
                         >
                             {range === '4w' ? '4 Weeks' : range === '12w' ? '12 Weeks' : '24 Weeks'}
@@ -381,9 +381,9 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                 <MentalHealthTrendChart data={mentalHealth} selectedRange={selectedRange} />
 
                 {/* Nutrition Insights - Simplified with calories as bars */}
-                <Card className="rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl bg-white/40 backdrop-blur-md border-none p-3 sm:p-4 lg:p-6 md:col-span-2 lg:col-span-3">
+                <Card className="rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl bg-card border border-border p-3 sm:p-4 lg:p-6 md:col-span-2 lg:col-span-3">
                     <div className="flex items-center space-x-2 mb-3 sm:mb-4">
-                         <h3 className="text-lg sm:text-xl font-bold text-gray-800">Nutrition Fuel 🍎</h3>
+                         <h3 className="text-lg sm:text-xl font-bold text-foreground">Nutrition Fuel 🍎</h3>
                     </div>
                     <CardContent className="p-0 h-48 sm:h-56 lg:h-64">
                         <ResponsiveContainer width="100%" height="100%">
@@ -391,11 +391,11 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                                 <XAxis 
                                     dataKey="date" 
-                                    className="text-xs text-gray-500" 
+                                    className="text-xs text-muted-foreground" 
                                     tick={{ fontSize: 10 }}
                                 />
                                 <YAxis 
-                                    className="text-xs text-gray-500" 
+                                    className="text-xs text-muted-foreground" 
                                     tick={{ fontSize: 10 }}
                                 />
                                 <Tooltip 
@@ -403,34 +403,34 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                                         if (active && payload && payload.length) {
                                             const data = payload[0].payload;
                                             return (
-                                                <div className="bg-white/95 p-4 rounded-xl shadow-xl backdrop-blur-md border border-gray-200/50 text-gray-800 min-w-[280px]">
-                                                    <div className="border-b border-gray-200/50 pb-2 mb-3">
-                                                        <p className="font-bold text-sm text-gray-800">{label}</p>
-                                                        <p className="text-xs text-gray-600">Nutrition Overview</p>
+                                                <div className="bg-card/95 p-4 rounded-xl shadow-xl backdrop-blur-md border border-border text-foreground min-w-[280px]">
+                                                    <div className="border-b border-border pb-2 mb-3">
+                                                        <p className="font-bold text-sm text-foreground">{label}</p>
+                                                        <p className="text-xs text-muted-foreground">Nutrition Overview</p>
                                                     </div>
                                                     
                                                     <div className="space-y-2">
                                                         <div className="flex justify-between items-center">
-                                                            <span className="text-xs text-gray-600">🔥 Calories:</span>
+                                                            <span className="text-xs text-muted-foreground">🔥 Calories:</span>
                                                             <span className="font-semibold text-sm text-orange-600">{data.calories} kcal</span>
                                                         </div>
                                                         <div className="flex justify-between items-center">
-                                                            <span className="text-xs text-gray-600">🥩 Protein:</span>
+                                                            <span className="text-xs text-muted-foreground">🥩 Protein:</span>
                                                             <span className="font-semibold text-sm text-blue-600">{data.protein}g</span>
                                                         </div>
                                                         <div className="flex justify-between items-center">
-                                                            <span className="text-xs text-gray-600">🍞 Carbs:</span>
+                                                            <span className="text-xs text-muted-foreground">🍞 Carbs:</span>
                                                             <span className="font-semibold text-sm text-green-600">{data.carbs}g</span>
                                                         </div>
                                                         <div className="flex justify-between items-center">
-                                                            <span className="text-xs text-gray-600">🥑 Fats:</span>
+                                                            <span className="text-xs text-muted-foreground">🥑 Fats:</span>
                                                             <span className="font-semibold text-sm text-purple-600">{data.fat}g</span>
                                                         </div>
                                                     </div>
 
-                                                    <div className="mt-3 pt-2 border-t border-gray-200/50">
+                                                    <div className="mt-3 pt-2 border-t border-border">
                                                         <div className="flex justify-between items-center mb-1">
-                                                            <span className="text-xs text-gray-600">📊 Goal Progress:</span>
+                                                            <span className="text-xs text-muted-foreground">📊 Goal Progress:</span>
                                                             <span className="font-semibold text-sm text-primary">{Math.round((data.calories / 2200) * 100)}%</span>
                                                         </div>
                                                         {data.calories >= 2000 && data.calories <= 2400 && (
@@ -461,9 +461,9 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                 </Card>
 
                 {/* Weight Journey with Monthly Time Ranges */}
-                <Card className="rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl bg-white/40 backdrop-blur-md border-none p-3 sm:p-4 lg:p-6 md:col-span-full lg:col-span-full xl:col-span-full">
+                <Card className="rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl bg-card border border-border p-3 sm:p-4 lg:p-6 md:col-span-full lg:col-span-full xl:col-span-full">
                     <div className="flex items-center justify-between mb-3 sm:mb-4">
-                        <h3 className="text-lg sm:text-xl font-bold text-gray-800">Weight Journey ⚖️</h3>
+                        <h3 className="text-lg sm:text-xl font-bold text-foreground">Weight Journey ⚖️</h3>
                         {/* Weight Range Selector */}
                         <div className="flex gap-1">
                             {['1m', '3m', '6m', '12m'].map((range) => (
@@ -491,11 +491,11 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                                 <XAxis 
                                     dataKey="label" 
-                                    className="text-xs text-gray-500" 
+                                    className="text-xs text-muted-foreground" 
                                     tick={{ fontSize: 10 }}
                                 />
                                 <YAxis 
-                                    className="text-xs text-gray-500" 
+                                    className="text-xs text-muted-foreground" 
                                     tick={{ fontSize: 10 }}
                                     domain={['dataMin - 2', 'dataMax + 2']}
                                 />
@@ -524,32 +524,32 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                                             };
                                             
                                             return (
-                                                <div className="bg-white/95 p-4 rounded-xl shadow-xl backdrop-blur-md border border-gray-200/50 text-gray-800 min-w-[280px]">
-                                                    <div className="border-b border-gray-200/50 pb-2 mb-3">
-                                                        <p className="font-bold text-sm text-gray-800">{getPeriodDescription()}</p>
-                                                        <p className="text-xs text-gray-600">Average Weight</p>
+                                                <div className="bg-card/95 p-4 rounded-xl shadow-xl backdrop-blur-md border border-border text-foreground min-w-[280px]">
+                                                    <div className="border-b border-border pb-2 mb-3">
+                                                        <p className="font-bold text-sm text-foreground">{getPeriodDescription()}</p>
+                                                        <p className="text-xs text-muted-foreground">Average Weight</p>
                                                     </div>
                                                     
                                                     <div className="space-y-2">
                                                         <div className="flex justify-between items-center">
-                                                            <span className="text-xs text-gray-600">⚖️ Average:</span>
+                                                            <span className="text-xs text-muted-foreground">⚖️ Average:</span>
                                                             <span className="font-semibold text-sm text-purple-600">{data.weight.toFixed(1)} lbs</span>
                                                         </div>
                                                         <div className="flex justify-between items-center">
-                                                            <span className="text-xs text-gray-600">🎯 Goal:</span>
+                                                            <span className="text-xs text-muted-foreground">🎯 Goal:</span>
                                                             <span className="font-semibold text-sm text-blue-600">{goalWeight} lbs</span>
                                                         </div>
                                                         <div className="flex justify-between items-center">
-                                                            <span className="text-xs text-gray-600">📉 Lost:</span>
+                                                            <span className="text-xs text-muted-foreground">📉 Lost:</span>
                                                             <span className="font-semibold text-sm text-green-600">{weightLoss.toFixed(1)} lbs</span>
                                                         </div>
                                                         <div className="flex justify-between items-center">
-                                                            <span className="text-xs text-gray-600">📊 Progress:</span>
+                                                            <span className="text-xs text-muted-foreground">📊 Progress:</span>
                                                             <span className="font-semibold text-sm text-green-600">{progress}%</span>
                                                         </div>
                                                     </div>
 
-                                                    <div className="mt-3 pt-2 border-t border-gray-200/50">
+                                                    <div className="mt-3 pt-2 border-t border-border">
                                                         <p className="text-xs text-center font-medium">
                                                             {data.weight <= goalWeight ? '🎉 Goal achieved! Amazing work!' : 
                                                              progress >= 80 ? '💪 So close to your goal!' : 
