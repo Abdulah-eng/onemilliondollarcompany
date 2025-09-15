@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area, RadialBarChart, RadialBar, Legend } from "recharts";
-import { ArrowUpRight, ArrowDownRight, Droplet, Moon, Smile, Zap, Dumbbell, Heart, Brain, Scale } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Droplet, Moon, Smile, Zap, Dumbbell, Heart, Brain, Scale, Sparkles, Flame } from "lucide-react";
 
 // --- Types (remain the same) ---
 interface DailyCheckInData {
@@ -323,7 +323,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                     maxValue={500}
                     unit="Kcal"
                     color={colors.caloriesBurned}
-                    icon={SunDim}
+                    icon={Flame}
                     emoji="🔥"
                     subText="Today"
                     size={120}
