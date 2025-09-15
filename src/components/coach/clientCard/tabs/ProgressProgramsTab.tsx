@@ -69,7 +69,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 // Main dashboard component
-const ClientDashboard: React.FC<DashboardProps> = ({ client }) => {
+const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
   // Extract and transform data from client object
   const dailyCheckIns = client.dailyCheckIn || [];
   const fitness = client.fitness || { adherence: 0, progression: [] };
@@ -199,4 +199,4 @@ const ClientDashboard: React.FC<DashboardProps> = ({ client }) => {
   );
 };
 
-export default ClientDashboard;
+export default ProgressProgramsTab;
