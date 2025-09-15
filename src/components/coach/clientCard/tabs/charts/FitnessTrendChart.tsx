@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface FitnessTrendChartProps {
   data: any[];
@@ -148,49 +148,49 @@ const FitnessTrendChart: React.FC<FitnessTrendChartProps> = ({ data, selectedRan
   };
 
   return (
-    <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-2 lg:col-span-3">
-      <div className="flex items-center space-x-2 mb-4">
-        <h3 className="text-xl font-bold text-gray-800">Fitness Trend 💪</h3>
+    <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-3 sm:p-4 lg:p-6 md:col-span-2 lg:col-span-3">
+      <div className="flex items-center space-x-2 mb-3 sm:mb-4">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-800">Fitness Trend 💪</h3>
       </div>
-      <CardContent className="p-0 h-64">
+      <CardContent className="p-0 h-48 sm:h-56 lg:h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <ComposedChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-            <XAxis dataKey="date" className="text-xs text-gray-500" />
-            <YAxis yAxisId="left" className="text-xs text-gray-500" />
-            <YAxis yAxisId="right" orientation="right" className="text-xs text-gray-500" />
+            <XAxis 
+              dataKey="date" 
+              className="text-xs text-gray-500" 
+              tick={{ fontSize: 10 }}
+              interval="preserveStartEnd"
+            />
+            <YAxis 
+              className="text-xs text-gray-500" 
+              tick={{ fontSize: 10 }}
+            />
             <Tooltip content={<EnhancedFitnessTooltip />} />
-            <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px' }} />
             
             {/* Adherence as interactive bars with hover effects */}
             <Bar 
-              yAxisId="left" 
               dataKey="adherence" 
               fill={colors.adherence} 
-              name="Adherence %" 
               radius={[6, 6, 0, 0]}
               cursor="pointer"
             />
-            
-            {/* Exercise progression as lines */}
-            <Line yAxisId="right" type="monotone" dataKey="benchPressWeight" stroke={colors.benchPress} strokeWidth={2} name="Bench Press Weight" dot={{ r: 3 }} />
-            <Line yAxisId="right" type="monotone" dataKey="squatWeight" stroke={colors.squat} strokeWidth={2} name="Squat Weight" dot={{ r: 3 }} />
           </ComposedChart>
         </ResponsiveContainer>
       </CardContent>
       
       {/* Quick stats */}
-      <div className="grid grid-cols-3 gap-4 mt-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:gap-4 mt-3 sm:mt-4">
         <div className="text-center">
-          <p className="text-lg font-bold text-gray-800">{Math.round(chartData.reduce((acc, d) => acc + d.adherence, 0) / chartData.length)}%</p>
+          <p className="text-sm sm:text-lg font-bold text-gray-800">{Math.round(chartData.reduce((acc, d) => acc + d.adherence, 0) / chartData.length)}%</p>
           <p className="text-xs text-gray-500">Avg Adherence</p>
         </div>
         <div className="text-center">
-          <p className="text-lg font-bold text-gray-800">{chartData.filter(d => d.adherence === 100).length}</p>
+          <p className="text-sm sm:text-lg font-bold text-gray-800">{chartData.filter(d => d.adherence === 100).length}</p>
           <p className="text-xs text-gray-500">Perfect Days</p>
         </div>
         <div className="text-center">
-          <p className="text-lg font-bold text-gray-800">{chartData.filter(d => d.adherence === 0).length}</p>
+          <p className="text-sm sm:text-lg font-bold text-gray-800">{chartData.filter(d => d.adherence === 0).length}</p>
           <p className="text-xs text-gray-500">Skipped Days</p>
         </div>
       </div>

@@ -262,26 +262,26 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
     const dailyData = dailyCheckIns.length > 0 ? dailyCheckIns : dummyDailyCheckIns;
 
     return (
-        <div className="min-h-screen p-2 md:p-4 font-sans antialiased bg-gray-50 text-gray-900">
-            <div className="flex justify-end mb-6">
-                <div className="bg-white/40 backdrop-blur-md rounded-full border border-gray-200/50 p-1 space-x-1 shadow-sm">
+        <div className="min-h-screen p-2 sm:p-3 md:p-4 font-sans antialiased bg-gray-50 text-gray-900">
+            <div className="flex justify-center sm:justify-end mb-4 sm:mb-6">
+                <div className="bg-white/40 backdrop-blur-md rounded-full border border-gray-200/50 p-1 flex shadow-sm">
                     {['7d', '1m', '6m'].map(range => (
                         <button
                             key={range}
                             onClick={() => setSelectedRange(range)}
-                            className={`text-sm font-medium px-4 py-1 rounded-full transition-all duration-300 ${
+                            className={`text-xs sm:text-sm font-medium px-2 sm:px-3 lg:px-4 py-1 rounded-full transition-all duration-300 ${
                                 selectedRange === range
                                     ? 'bg-gray-800 text-white shadow-md'
                                     : 'text-gray-600 hover:bg-gray-200'
                             }`}
                         >
-                            {range === '7d' ? '7 days' : range === '1m' ? '1 month' : '6 months'}
+                            {range === '7d' ? '7d' : range === '1m' ? '1m' : '6m'}
                         </button>
                     ))}
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-6">
 
                 {/* Daily Trend Cards */}
                 <DailyTrendCard title="Water Intake" data={dailyData} dataKey="water" color={colors.water} emoji="💧" unit="L" selectedRange={selectedRange} />
