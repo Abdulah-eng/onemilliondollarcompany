@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area, RadialBarChart, RadialBar, Legend } from "recharts";
-import { ArrowUpRight, ArrowDownRight, Droplet, Moon, Smile, Zap, Dumbbell, Heart, Brain, Scale, Sparkles, Flame } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
 // --- Types (remain the same) ---
 interface DailyCheckInData {
@@ -82,11 +82,10 @@ const RadialProgressCard: React.FC<{
     maxValue?: number;
     unit: string;
     color: string;
-    icon: React.ElementType;
     emoji?: string;
     subText?: string;
     size?: number;
-}> = ({ title, value, maxValue = 100, unit, color, icon: Icon, emoji, subText, size = 100 }) => {
+}> = ({ title, value, maxValue = 100, unit, color, emoji, subText, size = 100 }) => {
     const data = [{ name: title, value: (value / maxValue) * 100 }];
     const percentage = Math.round((value / maxValue) * 100);
 
@@ -94,7 +93,6 @@ const RadialProgressCard: React.FC<{
         <Card className="rounded-3xl shadow-lg bg-white/40 backdrop-blur-md border-none p-4 flex flex-col items-center justify-center text-center transition-transform transform hover:scale-105 duration-300">
             <div className="flex items-center justify-center text-lg font-semibold text-gray-700 mb-2">
                 {emoji && <span className="mr-2 text-xl">{emoji}</span>}
-                <Icon className="w-5 h-5 mr-1" style={{ color }} />
                 <p className="text-sm">{title}</p>
             </div>
             <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
@@ -129,11 +127,10 @@ const DailyTrendCard: React.FC<{
     data: any[];
     dataKey: string;
     color: string;
-    icon: React.ElementType;
     emoji?: string;
     unit?: string;
     selectedRange: string;
-}> = ({ title, data, dataKey, color, icon: Icon, emoji, unit = '', selectedRange }) => {
+}> = ({ title, data, dataKey, color, emoji, unit = '', selectedRange }) => {
 
     const filteredData = useMemo(() => {
         const now = new Date();
@@ -163,7 +160,6 @@ const DailyTrendCard: React.FC<{
         <Card className="rounded-3xl shadow-lg bg-white/40 backdrop-blur-md border-none p-4 flex flex-col justify-between transition-transform transform hover:scale-105 duration-300">
             <div className="flex items-center space-x-2 mb-2">
                 {emoji && <span className="mr-1 text-lg">{emoji}</span>}
-                <Icon className="w-5 h-5" style={{ color }} />
                 <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
             </div>
             <div className="flex justify-between items-end mb-2">
@@ -286,34 +282,21 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
 
                 {/* Daily Trend Cards */}
-                <DailyTrendCard title="Water Intake" data={dailyData} dataKey="water" color={colors.water} icon={Droplet} emoji="💧" unit="L" selectedRange={selectedRange} />
-                <DailyTrendCard title="Energy" data={dailyData} dataKey="energy" color={colors.energy} icon={Zap} emoji="⚡" selectedRange={selectedRange} />
-                <DailyTrendCard title="Mood" data={dailyData} dataKey="mood" color={colors.mood} icon={Smile} emoji="😊" selectedRange={selectedRange} />
-                <DailyTrendCard title="Stress" data={dailyData} dataKey="stress" color={colors.mentalStress} icon={Brain} emoji="🧠" selectedRange={selectedRange} />
-                <DailyTrendCard title="Sleep" data={dailyData} dataKey="sleep" color={colors.sleep} icon={Moon} emoji="😴" unit="hrs" selectedRange={selectedRange} />
-                <DailyTrendCard title="Anxiety" data={dailyData} dataKey="anxiety" color={colors.mentalAnxiety} icon={Heart} emoji="💔" selectedRange={selectedRange} />
+                <DailyTrendCard title="Water Intake" data={dailyData} dataKey="water" color={colors.water} emoji="💧" unit="L" selectedRange={selectedRange} />
+                <DailyTrendCard title="Energy" data={dailyData} dataKey="energy" color={colors.energy} emoji="⚡" selectedRange={selectedRange} />
+                <DailyTrendCard title="Mood" data={dailyData} dataKey="mood" color={colors.mood} emoji="😊" selectedRange={selectedRange} />
+                <DailyTrendCard title="Stress" data={dailyData} dataKey="stress" color={colors.mentalStress} emoji="🧠" selectedRange={selectedRange} />
+                <DailyTrendCard title="Sleep" data={dailyData} dataKey="sleep" color={colors.sleep} emoji="😴" unit="hrs" selectedRange={selectedRange} />
+                <DailyTrendCard title="Anxiety" data={dailyData} dataKey="anxiety" color={colors.mentalAnxiety} emoji="💔" selectedRange={selectedRange} />
 
-                {/* Small Radial Progress Cards (e.g., Fitness Adherence, Calories, Steps) */}
+                {/* Small Radial Progress Cards (e.g., Fitness Adherence, Calories) */}
                 <RadialProgressCard
                     title="Fitness Adherence"
                     value={fitness.adherence || 75}
                     unit="%"
                     color={colors.fitness}
-                    icon={Dumbbell}
                     emoji="💪"
                     subText="Last 7 days"
-                    size={120}
-                />
-
-                <RadialProgressCard
-                    title="Daily Steps"
-                    value={7235}
-                    maxValue={10000}
-                    unit="Steps"
-                    color={colors.steps}
-                    icon={Sparkles}
-                    emoji="🚶"
-                    subText="Goal: 10,000"
                     size={120}
                 />
 
@@ -323,7 +306,6 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                     maxValue={500}
                     unit="Kcal"
                     color={colors.caloriesBurned}
-                    icon={Flame}
                     emoji="🔥"
                     subText="Today"
                     size={120}
