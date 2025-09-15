@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useMemo } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area, RadialBarChart, RadialBar, Legend } from "recharts";
-import { ArrowUpRight, ArrowDownRight, Droplet, Moon, Smile, Zap, Dumbbell, Apple, Heart, Brain, Scale, CalendarDays, TrendingUp, Sparkles, SunDim, Snowflake } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Droplet, Moon, Smile, Zap, Dumbbell, Heart, Brain, Scale } from "lucide-react";
 
 // --- Types (remain the same) ---
 interface DailyCheckInData {
@@ -61,7 +61,7 @@ const Trend = ({ value }: { value: number }) => {
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-white/70 p-2 rounded-lg shadow-lg backdrop-blur-sm border border-gray-200/50 text-gray-800 animate-fade-in">
+            <div className="bg-white/70 p-2 rounded-lg shadow-lg backdrop-blur-sm border border-gray-200/50 text-gray-800">
                 <p className="font-semibold text-xs mb-1">{label}</p>
                 {payload.map((p: any) => (
                     <p key={p.name} className="text-xs flex items-center" style={{ color: p.color }}>
@@ -78,8 +78,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 // Radial Progress Card (for Adherence, Steps, Calories)
 const RadialProgressCard: React.FC<{
     title: string;
-    value: number; // percentage or main value
-    maxValue?: number; // for percentage calculation if value is raw
+    value: number;
+    maxValue?: number;
     unit: string;
     color: string;
     icon: React.ElementType;
@@ -123,8 +123,8 @@ const RadialProgressCard: React.FC<{
     );
 };
 
-// Custom Card for displaying a trend with a dropdown
-const CustomTrendCard: React.FC<{
+// New Daily Trend Card for a consistent style
+const DailyTrendCard: React.FC<{
     title: string;
     data: any[];
     dataKey: string;
@@ -132,62 +132,46 @@ const CustomTrendCard: React.FC<{
     icon: React.ElementType;
     emoji?: string;
     unit?: string;
-}> = ({ title, data, dataKey, color, icon: Icon, emoji, unit = '' }) => {
-    const [selectedRange, setSelectedRange] = useState('7d');
-    const [filteredData, setFilteredData] = useState(data);
-    const [trendChange, setTrendChange] = useState(0);
+    selectedRange: string;
+}> = ({ title, data, dataKey, color, icon: Icon, emoji, unit = '', selectedRange }) => {
 
-    useEffect(() => {
+    const filteredData = useMemo(() => {
         const now = new Date();
         let rangeInDays = 7;
         if (selectedRange === '1m') rangeInDays = 30;
         if (selectedRange === '6m') rangeInDays = 180;
 
-        const filtered = data.filter(d => {
+        return data.filter(d => {
             const date = new Date(d.date);
             const diffInTime = now.getTime() - date.getTime();
             const diffInDays = diffInTime / (1000 * 3600 * 24);
             return diffInDays <= rangeInDays;
         });
+    }, [selectedRange, data]);
 
-        setFilteredData(filtered);
-
-        if (filtered.length >= 2) {
-            const startValue = filtered[0][dataKey];
-            const endValue = filtered[filtered.length - 1][dataKey];
-            const change = ((endValue - startValue) / startValue) * 100;
-            setTrendChange(change);
-        } else {
-            setTrendChange(0);
-        }
-    }, [selectedRange, data, dataKey]);
+    const trendChange = useMemo(() => {
+        if (filteredData.length < 2) return 0;
+        const startValue = filteredData[0][dataKey] || 0;
+        const endValue = filteredData[filteredData.length - 1][dataKey] || 0;
+        if (startValue === 0) return 0;
+        return ((endValue - startValue) / startValue) * 100;
+    }, [filteredData, dataKey]);
 
     const currentValue = filteredData.length > 0 ? filteredData[filteredData.length - 1][dataKey] : 0;
 
     return (
-        <Card className="rounded-3xl shadow-lg bg-white/40 backdrop-blur-md border-none p-4 flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                    {emoji && <span className="mr-1 text-lg">{emoji}</span>}
-                    <Icon className="w-5 h-5" style={{ color }} />
-                    <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
-                </div>
-                <select
-                    value={selectedRange}
-                    onChange={(e) => setSelectedRange(e.target.value)}
-                    className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full border-none focus:outline-none transition-colors hover:bg-gray-200"
-                >
-                    <option value="7d">7 days</option>
-                    <option value="1m">1 month</option>
-                    <option value="6m">6 months</option>
-                </select>
+        <Card className="rounded-3xl shadow-lg bg-white/40 backdrop-blur-md border-none p-4 flex flex-col justify-between transition-transform transform hover:scale-105 duration-300">
+            <div className="flex items-center space-x-2 mb-2">
+                {emoji && <span className="mr-1 text-lg">{emoji}</span>}
+                <Icon className="w-5 h-5" style={{ color }} />
+                <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
             </div>
-            <div className="flex justify-between items-end">
-                <p className="text-3xl font-bold text-gray-900">{currentValue} <span className="text-sm text-gray-500">{unit}</span></p>
+            <div className="flex justify-between items-end mb-2">
+                <p className="text-2xl font-bold text-gray-900">{currentValue} <span className="text-sm text-gray-500">{unit}</span></p>
                 <Trend value={trendChange} />
             </div>
             <ResponsiveContainer width="100%" height={80}>
-                <LineChart data={filteredData}>
+                <AreaChart data={filteredData} margin={{ top: 5, right: 0, left: 0, bottom: 5 }}>
                     <defs>
                         <linearGradient id={`color${dataKey}`} x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor={color} stopOpacity={0.8} />
@@ -198,7 +182,7 @@ const CustomTrendCard: React.FC<{
                     <YAxis hide domain={['dataMin - 1', 'dataMax + 1']} />
                     <Tooltip content={<CustomTooltip />} />
                     <Area type="monotone" dataKey={dataKey} stroke={color} fill={`url(#color${dataKey})`} fillOpacity={0.5} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
-                </LineChart>
+                </AreaChart>
             </ResponsiveContainer>
         </Card>
     );
@@ -206,6 +190,8 @@ const CustomTrendCard: React.FC<{
 
 // Main dashboard component
 const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
+    const [selectedRange, setSelectedRange] = useState('7d');
+
     // Extract and transform data
     const dailyCheckIns = client.dailyCheckIn || [];
     const fitness = client.fitness || { adherence: 0, progression: [] };
@@ -232,10 +218,6 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
         }
         return data.reverse();
     }, []);
-
-    const dummyFitnessProgression = [
-        { week: 'W1', val: 60 }, { week: 'W2', val: 65 }, { week: 'W3', val: 70 }, { week: 'W4', val: 72 }, { week: 'W5', val: 75 },
-    ];
 
     const dummyNutrition = [
         { date: 'Mon', protein: 50, carbs: 150, fat: 30, calories: 1800 },
@@ -282,118 +264,116 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
     const dailyData = dailyCheckIns.length > 0 ? dailyCheckIns : dummyDailyCheckIns;
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6 min-h-screen p-6 md:p-10 font-sans antialiased bg-gray-50 text-gray-900">
+        <div className="min-h-screen p-6 md:p-10 font-sans antialiased bg-gray-50 text-gray-900">
+            <div className="flex justify-end mb-6">
+                <div className="bg-white/40 backdrop-blur-md rounded-full border border-gray-200/50 p-1 space-x-1 shadow-sm">
+                    {['7d', '1m', '6m'].map(range => (
+                        <button
+                            key={range}
+                            onClick={() => setSelectedRange(range)}
+                            className={`text-sm font-medium px-4 py-1 rounded-full transition-all duration-300 ${
+                                selectedRange === range
+                                    ? 'bg-gray-800 text-white shadow-md'
+                                    : 'text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            {range === '7d' ? '7 days' : range === '1m' ? '1 month' : '6 months'}
+                        </button>
+                    ))}
+                </div>
+            </div>
 
-            {/* Daily Trend Cards */}
-            <CustomTrendCard title="Water Intake" data={dailyData} dataKey="water" color={colors.water} icon={Droplet} emoji="💧" unit="L" />
-            <CustomTrendCard title="Energy" data={dailyData} dataKey="energy" color={colors.energy} icon={Zap} emoji="⚡" />
-            <CustomTrendCard title="Mood" data={dailyData} dataKey="mood" color={colors.mood} icon={Smile} emoji="😊" />
-            <CustomTrendCard title="Stress" data={dailyData} dataKey="stress" color={colors.mentalStress} icon={Brain} emoji="🧠" />
-            <CustomTrendCard title="Sleep" data={dailyData} dataKey="sleep" color={colors.sleep} icon={Moon} emoji="😴" unit="hrs" />
-            
-            {/* Small Radial Progress Cards (e.g., Fitness Adherence, Calories, Steps) */}
-            <RadialProgressCard
-                title="Fitness Adherence"
-                value={fitness.adherence || 75}
-                unit="%"
-                color={colors.fitness}
-                icon={Dumbbell}
-                emoji="💪"
-                subText="Last 7 days"
-                size={120}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
 
-            <RadialProgressCard
-                title="Daily Steps"
-                value={client.steps || 7235}
-                maxValue={10000}
-                unit="Steps"
-                color={colors.steps}
-                icon={Sparkles}
-                emoji="🚶"
-                subText="Goal: 10,000"
-                size={120}
-            />
-            
-            <RadialProgressCard
-                title="Calories Burned"
-                value={client.caloriesBurned || 245}
-                maxValue={500}
-                unit="Kcal"
-                color={colors.caloriesBurned}
-                icon={SunDim}
-                emoji="🔥"
-                subText="Today"
-                size={120}
-            />
+                {/* Daily Trend Cards */}
+                <DailyTrendCard title="Water Intake" data={dailyData} dataKey="water" color={colors.water} icon={Droplet} emoji="💧" unit="L" selectedRange={selectedRange} />
+                <DailyTrendCard title="Energy" data={dailyData} dataKey="energy" color={colors.energy} icon={Zap} emoji="⚡" selectedRange={selectedRange} />
+                <DailyTrendCard title="Mood" data={dailyData} dataKey="mood" color={colors.mood} icon={Smile} emoji="😊" selectedRange={selectedRange} />
+                <DailyTrendCard title="Stress" data={dailyData} dataKey="stress" color={colors.mentalStress} icon={Brain} emoji="🧠" selectedRange={selectedRange} />
+                <DailyTrendCard title="Sleep" data={dailyData} dataKey="sleep" color={colors.sleep} icon={Moon} emoji="😴" unit="hrs" selectedRange={selectedRange} />
+                <DailyTrendCard title="Anxiety" data={dailyData} dataKey="anxiety" color={colors.mentalAnxiety} icon={Heart} emoji="💔" selectedRange={selectedRange} />
 
-            {/* Nutrition Insights - More detailed graph */}
-            <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-2 lg:col-span-2 animate-fade-in-up">
-                <CardHeader className="p-0 mb-4">
-                    <CardTitle className="text-xl font-bold text-gray-800 flex items-center">Nutrition Fuel 🍎</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0 h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={nutrition.length > 0 ? nutrition : dummyNutrition}>
-                            <CartesianGrid strokeDashArray="3 3" stroke="#e5e7eb" vertical={false} />
-                            <XAxis dataKey="date" className="text-xs text-gray-500" />
-                            <YAxis className="text-xs text-gray-500" />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px' }} />
-                            <Bar dataKey="protein" fill={colors.nutritionProtein} name="Protein (g)" radius={[10, 10, 0, 0]} />
-                            <Bar dataKey="carbs" fill={colors.nutritionCarbs} name="Carbs (g)" radius={[10, 10, 0, 0]} />
-                            <Bar dataKey="fat" fill={colors.nutritionFat} name="Fat (g)" radius={[10, 10, 0, 0]} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </CardContent>
-            </Card>
+                {/* Small Radial Progress Cards (e.g., Fitness Adherence, Calories, Steps) */}
+                <RadialProgressCard
+                    title="Fitness Adherence"
+                    value={fitness.adherence || 75}
+                    unit="%"
+                    color={colors.fitness}
+                    icon={Dumbbell}
+                    emoji="💪"
+                    subText="Last 7 days"
+                    size={120}
+                />
 
-            {/* Mental Health - Area Chart for trends */}
-            <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-2 lg:col-span-2 animate-fade-in-up">
-                <CardHeader className="p-0 mb-4">
-                    <CardTitle className="text-xl font-bold text-gray-800 flex items-center">Mind Matters 🧠</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0 h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={mentalHealth.length > 0 ? mentalHealth : dummyMentalHealth}>
-                            <CartesianGrid strokeDashArray="3 3" stroke="#e5e7eb" vertical={false} />
-                            <XAxis dataKey="date" className="text-xs text-gray-500" />
-                            <YAxis className="text-xs text-gray-500" />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px' }} />
-                            <Area type="monotone" dataKey="stress" stroke={colors.mentalStress} fill={colors.mentalStress} fillOpacity={0.3} strokeWidth={3} name="Stress (1-10)" />
-                            <Area type="monotone" dataKey="anxiety" stroke={colors.mentalAnxiety} fill={colors.mentalAnxiety} fillOpacity={0.3} strokeWidth={3} name="Anxiety (1-10)" />
-                            <Area type="monotone" dataKey="meditation" stroke={colors.mentalMeditation} fill={colors.mentalMeditation} fillOpacity={0.3} strokeWidth={3} name="Meditation (min)" />
-                            <Area type="monotone" dataKey="yoga" stroke={colors.mentalYoga} fill={colors.mentalYoga} fillOpacity={0.3} strokeWidth={3} name="Yoga (min)" />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </CardContent>
-            </Card>
+                <RadialProgressCard
+                    title="Daily Steps"
+                    value={client.steps || 7235}
+                    maxValue={10000}
+                    unit="Steps"
+                    color={colors.steps}
+                    icon={Sparkles}
+                    emoji="🚶"
+                    subText="Goal: 10,000"
+                    size={120}
+                />
 
-            {/* Weight Trend - Prominent line chart with fill */}
-            <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-full lg:col-span-full xl:col-span-full animate-fade-in-up">
-                <CardHeader className="p-0 mb-4">
-                    <CardTitle className="text-xl font-bold text-gray-800 flex items-center">Weight Journey ⚖️</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0 h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={weight.length > 0 ? weight : dummyWeightTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                            <CartesianGrid strokeDashArray="3 3" stroke="#e5e7eb" vertical={false} />
-                            <XAxis dataKey="date" className="text-xs text-gray-500" />
-                            <YAxis className="text-xs text-gray-500" />
-                            <Tooltip content={<CustomTooltip />} />
-                            <defs>
-                                <linearGradient id="colorWeightGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor={colors.weight} stopOpacity={0.8} />
-                                    <stop offset="95%" stopColor={colors.weight} stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <Area type="monotone" dataKey="weight" stroke={colors.weight} fill="url(#colorWeightGradient)" fillOpacity={1} strokeWidth={3} name="Weight (lbs)" dot={{ r: 5 }} activeDot={{ r: 8 }} />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </CardContent>
-            </Card>
+                <RadialProgressCard
+                    title="Calories Burned"
+                    value={client.caloriesBurned || 245}
+                    maxValue={500}
+                    unit="Kcal"
+                    color={colors.caloriesBurned}
+                    icon={SunDim}
+                    emoji="🔥"
+                    subText="Today"
+                    size={120}
+                />
 
+                {/* Nutrition Insights - More detailed graph */}
+                <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-2 lg:col-span-2">
+                    <div className="flex items-center space-x-2 mb-4">
+                         <h3 className="text-xl font-bold text-gray-800">Nutrition Fuel 🍎</h3>
+                    </div>
+                    <CardContent className="p-0 h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={nutrition}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                                <XAxis dataKey="date" className="text-xs text-gray-500" />
+                                <YAxis className="text-xs text-gray-500" />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px' }} />
+                                <Bar dataKey="protein" fill={colors.nutritionProtein} name="Protein (g)" radius={[10, 10, 0, 0]} />
+                                <Bar dataKey="carbs" fill={colors.nutritionCarbs} name="Carbs (g)" radius={[10, 10, 0, 0]} />
+                                <Bar dataKey="fat" fill={colors.nutritionFat} name="Fat (g)" radius={[10, 10, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+
+                {/* Weight Trend - Prominent line chart with fill */}
+                <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-full lg:col-span-full xl:col-span-full">
+                    <div className="flex items-center space-x-2 mb-4">
+                        <h3 className="text-xl font-bold text-gray-800">Weight Journey ⚖️</h3>
+                    </div>
+                    <CardContent className="p-0 h-80">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={weight}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                                <XAxis dataKey="date" className="text-xs text-gray-500" />
+                                <YAxis className="text-xs text-gray-500" />
+                                <Tooltip content={<CustomTooltip />} />
+                                <defs>
+                                    <linearGradient id="colorWeightGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor={colors.weight} stopOpacity={0.8} />
+                                        <stop offset="95%" stopColor={colors.weight} stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <Area type="monotone" dataKey="weight" stroke={colors.weight} fill="url(#colorWeightGradient)" fillOpacity={1} strokeWidth={3} name="Weight (lbs)" dot={{ r: 5 }} activeDot={{ r: 8 }} />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 };
