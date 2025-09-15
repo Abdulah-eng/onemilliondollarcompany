@@ -2,6 +2,8 @@ import React, { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area, RadialBarChart, RadialBar, Legend } from "recharts";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import FitnessTrendChart from "./charts/FitnessTrendChart";
+import MentalHealthTrendChart from "./charts/MentalHealthTrendChart";
 
 // --- Types (remain the same) ---
 interface DailyCheckInData {
@@ -310,6 +312,12 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                     subText="Today"
                     size={120}
                 />
+
+                {/* Fitness Trend Chart */}
+                <FitnessTrendChart data={fitness.progression || []} selectedRange={selectedRange} />
+
+                {/* Mental Health Trend Chart */}
+                <MentalHealthTrendChart data={mentalHealth} selectedRange={selectedRange} />
 
                 {/* Nutrition Insights - More detailed graph */}
                 <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-2 lg:col-span-2">
