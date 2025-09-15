@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, RadialBarChart, RadialBar, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area, RadialBarChart, RadialBar, Legend } from "recharts";
 import { ArrowUpRight, ArrowDownRight, Droplet, Moon, Smile, Zap, Dumbbell, Apple, Heart, Brain, Scale, CalendarDays, TrendingUp, Sparkles, SunDim, Snowflake } from "lucide-react";
 
 // --- Types (remain the same) ---
@@ -10,6 +10,8 @@ interface DailyCheckInData {
     sleep: number;
     mood: number;
     energy: number;
+    stress?: number;
+    anxiety?: number;
 }
 
 interface FitnessData {
@@ -49,9 +51,9 @@ interface DashboardProps {
 // Utility for simple trend arrows
 const Trend = ({ value }: { value: number }) => {
     if (value > 0)
-        return <span className="text-green-500 flex items-center text-xs font-medium"><ArrowUpRight className="w-3 h-3" />{value}%</span>;
+        return <span className="text-green-500 flex items-center text-xs font-medium"><ArrowUpRight className="w-3 h-3" />{value.toFixed(1)}%</span>;
     if (value < 0)
-        return <span className="text-red-500 flex items-center text-xs font-medium"><ArrowDownRight className="w-3 h-3" />{Math.abs(value)}%</span>;
+        return <span className="text-red-500 flex items-center text-xs font-medium"><ArrowDownRight className="w-3 h-3" />{Math.abs(value).toFixed(1)}%</span>;
     return <span className="text-gray-400 text-xs">0%</span>;
 };
 
@@ -121,37 +123,86 @@ const RadialProgressCard: React.FC<{
     );
 };
 
-// Mini Sparkline Card (for quick trends like heart rate)
-const MiniSparklineCard: React.FC<{
+// Custom Card for displaying a trend with a dropdown
+const CustomTrendCard: React.FC<{
     title: string;
-    value: string | number;
-    unit: string;
     data: any[];
     dataKey: string;
     color: string;
     icon: React.ElementType;
     emoji?: string;
-}> = ({ title, value, unit, data, dataKey, color, icon: Icon, emoji }) => (
-    <Card className="rounded-3xl shadow-lg bg-white/40 backdrop-blur-md border-none p-4 transition-transform transform hover:scale-105 duration-300">
-        <div className="flex items-center space-x-1 mb-2">
-            {emoji && <span className="mr-1 text-lg">{emoji}</span>}
-            <Icon className="w-4 h-4" style={{ color }} />
-            <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
-        </div>
-        <p className="text-2xl font-bold text-gray-900 mb-1">{value} <span className="text-sm text-gray-500">{unit}</span></p>
-        <ResponsiveContainer width="100%" height={60}>
-            <AreaChart data={data} margin={{ top: 5, right: 0, left: 0, bottom: 5 }}>
-                <defs>
-                    <linearGradient id={`color${title.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={color} stopOpacity={0.8} />
-                        <stop offset="95%" stopColor={color} stopOpacity={0} />
-                    </linearGradient>
-                </defs>
-                <Area type="monotone" dataKey={dataKey} stroke={color} fill={`url(#color${title.replace(/\s/g, '')})`} fillOpacity={0.5} strokeWidth={2} />
-            </AreaChart>
-        </ResponsiveContainer>
-    </Card>
-);
+    unit?: string;
+}> = ({ title, data, dataKey, color, icon: Icon, emoji, unit = '' }) => {
+    const [selectedRange, setSelectedRange] = useState('7d');
+    const [filteredData, setFilteredData] = useState(data);
+    const [trendChange, setTrendChange] = useState(0);
+
+    useEffect(() => {
+        const now = new Date();
+        let rangeInDays = 7;
+        if (selectedRange === '1m') rangeInDays = 30;
+        if (selectedRange === '6m') rangeInDays = 180;
+
+        const filtered = data.filter(d => {
+            const date = new Date(d.date);
+            const diffInTime = now.getTime() - date.getTime();
+            const diffInDays = diffInTime / (1000 * 3600 * 24);
+            return diffInDays <= rangeInDays;
+        });
+
+        setFilteredData(filtered);
+
+        if (filtered.length >= 2) {
+            const startValue = filtered[0][dataKey];
+            const endValue = filtered[filtered.length - 1][dataKey];
+            const change = ((endValue - startValue) / startValue) * 100;
+            setTrendChange(change);
+        } else {
+            setTrendChange(0);
+        }
+    }, [selectedRange, data, dataKey]);
+
+    const currentValue = filteredData.length > 0 ? filteredData[filteredData.length - 1][dataKey] : 0;
+
+    return (
+        <Card className="rounded-3xl shadow-lg bg-white/40 backdrop-blur-md border-none p-4 flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                    {emoji && <span className="mr-1 text-lg">{emoji}</span>}
+                    <Icon className="w-5 h-5" style={{ color }} />
+                    <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
+                </div>
+                <select
+                    value={selectedRange}
+                    onChange={(e) => setSelectedRange(e.target.value)}
+                    className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full border-none focus:outline-none transition-colors hover:bg-gray-200"
+                >
+                    <option value="7d">7 days</option>
+                    <option value="1m">1 month</option>
+                    <option value="6m">6 months</option>
+                </select>
+            </div>
+            <div className="flex justify-between items-end">
+                <p className="text-3xl font-bold text-gray-900">{currentValue} <span className="text-sm text-gray-500">{unit}</span></p>
+                <Trend value={trendChange} />
+            </div>
+            <ResponsiveContainer width="100%" height={80}>
+                <LineChart data={filteredData}>
+                    <defs>
+                        <linearGradient id={`color${dataKey}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={color} stopOpacity={0.8} />
+                            <stop offset="95%" stopColor={color} stopOpacity={0} />
+                        </linearGradient>
+                    </defs>
+                    <XAxis dataKey="date" hide />
+                    <YAxis hide domain={['dataMin - 1', 'dataMax + 1']} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area type="monotone" dataKey={dataKey} stroke={color} fill={`url(#color${dataKey})`} fillOpacity={0.5} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+                </LineChart>
+            </ResponsiveContainer>
+        </Card>
+    );
+};
 
 // Main dashboard component
 const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
@@ -163,15 +214,24 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
     const mentalHealth = Array.isArray(client.mentalHealth) ? client.mentalHealth : client.mentalHealth ? [client.mentalHealth] : [];
 
     // Dummy data for visualization if client data is sparse/empty
-    const dummyDailyCheckIns = [
-        { date: 'Mon', water: 3, sleep: 7, mood: 4, energy: 6 },
-        { date: 'Tue', water: 5, sleep: 6, mood: 5, energy: 7 },
-        { date: 'Wed', water: 4, sleep: 8, mood: 6, energy: 5 },
-        { date: 'Thu', water: 6, sleep: 7, mood: 7, energy: 8 },
-        { date: 'Fri', water: 7, sleep: 7, mood: 6, energy: 7 },
-        { date: 'Sat', water: 6, sleep: 8, mood: 5, energy: 6 },
-        { date: 'Sun', water: 5, sleep: 7, mood: 4, energy: 5 },
-    ].map((d, i) => ({ ...d, date: `${i + 1}/${new Date().getMonth() + 1}` }));
+    const dummyDailyCheckIns = useMemo(() => {
+        const data = [];
+        const today = new Date();
+        for (let i = 0; i < 180; i++) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            data.push({
+                date: d.toISOString().split('T')[0],
+                water: Math.floor(Math.random() * 6) + 1, // 1-6 L
+                sleep: parseFloat((Math.random() * (9 - 6) + 6).toFixed(1)), // 6-9 hours
+                mood: Math.floor(Math.random() * 10) + 1, // 1-10
+                energy: Math.floor(Math.random() * 10) + 1, // 1-10
+                stress: Math.floor(Math.random() * 10) + 1, // 1-10
+                anxiety: Math.floor(Math.random() * 10) + 1, // 1-10
+            });
+        }
+        return data.reverse();
+    }, []);
 
     const dummyFitnessProgression = [
         { week: 'W1', val: 60 }, { week: 'W2', val: 65 }, { week: 'W3', val: 70 }, { week: 'W4', val: 72 }, { week: 'W5', val: 75 },
@@ -219,93 +279,17 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
         caloriesBurned: '#FCD34D', // Yellow
     };
 
+    const dailyData = dailyCheckIns.length > 0 ? dailyCheckIns : dummyDailyCheckIns;
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6 min-h-screen p-6 md:p-10 font-sans antialiased bg-gray-50 text-gray-900">
 
-            {/* Featured Card: Daily Check-ins - Now a grid of mini-charts */}
-            <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-2 lg:col-span-3 xl:col-span-4 animate-fade-in">
-                <CardHeader className="p-0 mb-4 flex-row items-center justify-between">
-                    <CardTitle className="text-xl font-bold text-gray-800 flex items-center">Daily Vitals 🌟</CardTitle>
-                    <CalendarDays className="w-5 h-5 text-gray-500" />
-                </CardHeader>
-                <CardContent className="p-0 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Water Chart */}
-                    <div className="flex flex-col space-y-2">
-                        <div className="flex items-center space-x-2">
-                            <Droplet className="w-5 h-5" style={{ color: colors.water }} />
-                            <h4 className="text-md font-semibold text-gray-700">Water Intake</h4>
-                        </div>
-                        <ResponsiveContainer width="100%" height={100}>
-                            <BarChart data={dailyCheckIns.length > 0 ? dailyCheckIns : dummyDailyCheckIns} margin={{ top: 5, right: 0, left: 0, bottom: 5 }}>
-                                <XAxis dataKey="date" hide />
-                                <YAxis hide />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Bar dataKey="water" fill={colors.water} radius={[5, 5, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-
-                    {/* Sleep Chart */}
-                    <div className="flex flex-col space-y-2">
-                        <div className="flex items-center space-x-2">
-                            <Moon className="w-5 h-5" style={{ color: colors.sleep }} />
-                            <h4 className="text-md font-semibold text-gray-700">Sleep Quality</h4>
-                        </div>
-                        <ResponsiveContainer width="100%" height={100}>
-                            <BarChart data={dailyCheckIns.length > 0 ? dailyCheckIns : dummyDailyCheckIns} margin={{ top: 5, right: 0, left: 0, bottom: 5 }}>
-                                <XAxis dataKey="date" hide />
-                                <YAxis hide />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Bar dataKey="sleep" fill={colors.sleep} radius={[5, 5, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-
-                    {/* Mood Chart */}
-                    <div className="flex flex-col space-y-2">
-                        <div className="flex items-center space-x-2">
-                            <Smile className="w-5 h-5" style={{ color: colors.mood }} />
-                            <h4 className="text-md font-semibold text-gray-700">Mood</h4>
-                        </div>
-                        <ResponsiveContainer width="100%" height={100}>
-                            <AreaChart data={dailyCheckIns.length > 0 ? dailyCheckIns : dummyDailyCheckIns} margin={{ top: 5, right: 0, left: 0, bottom: 5 }}>
-                                <defs>
-                                    <linearGradient id="colorMood" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor={colors.mood} stopOpacity={0.8} />
-                                        <stop offset="95%" stopColor={colors.mood} stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <XAxis dataKey="date" hide />
-                                <YAxis hide />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Area type="monotone" dataKey="mood" stroke={colors.mood} fill="url(#colorMood)" strokeWidth={2} />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-
-                    {/* Energy Chart */}
-                    <div className="flex flex-col space-y-2">
-                        <div className="flex items-center space-x-2">
-                            <Zap className="w-5 h-5" style={{ color: colors.energy }} />
-                            <h4 className="text-md font-semibold text-gray-700">Energy</h4>
-                        </div>
-                        <ResponsiveContainer width="100%" height={100}>
-                            <AreaChart data={dailyCheckIns.length > 0 ? dailyCheckIns : dummyDailyCheckIns} margin={{ top: 5, right: 0, left: 0, bottom: 5 }}>
-                                <defs>
-                                    <linearGradient id="colorEnergy" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor={colors.energy} stopOpacity={0.8} />
-                                        <stop offset="95%" stopColor={colors.energy} stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <XAxis dataKey="date" hide />
-                                <YAxis hide />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Area type="monotone" dataKey="energy" stroke={colors.energy} fill="url(#colorEnergy)" strokeWidth={2} />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                </CardContent>
-            </Card>
+            {/* Daily Trend Cards */}
+            <CustomTrendCard title="Water Intake" data={dailyData} dataKey="water" color={colors.water} icon={Droplet} emoji="💧" unit="L" />
+            <CustomTrendCard title="Energy" data={dailyData} dataKey="energy" color={colors.energy} icon={Zap} emoji="⚡" />
+            <CustomTrendCard title="Mood" data={dailyData} dataKey="mood" color={colors.mood} icon={Smile} emoji="😊" />
+            <CustomTrendCard title="Stress" data={dailyData} dataKey="stress" color={colors.mentalStress} icon={Brain} emoji="🧠" />
+            <CustomTrendCard title="Sleep" data={dailyData} dataKey="sleep" color={colors.sleep} icon={Moon} emoji="😴" unit="hrs" />
             
             {/* Small Radial Progress Cards (e.g., Fitness Adherence, Calories, Steps) */}
             <RadialProgressCard
@@ -321,7 +305,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
 
             <RadialProgressCard
                 title="Daily Steps"
-                value={client.steps || 7235} // Example from your image
+                value={client.steps || 7235}
                 maxValue={10000}
                 unit="Steps"
                 color={colors.steps}
@@ -333,7 +317,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
             
             <RadialProgressCard
                 title="Calories Burned"
-                value={client.caloriesBurned || 245} // Example from your image
+                value={client.caloriesBurned || 245}
                 maxValue={500}
                 unit="Kcal"
                 color={colors.caloriesBurned}
@@ -341,29 +325,6 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                 emoji="🔥"
                 subText="Today"
                 size={120}
-            />
-
-            {/* Mini Sparkline Cards (e.g., Sleep, Heart Rate) */}
-            <MiniSparklineCard
-                title="Sleep Quality"
-                value={client.sleepHours || 7.4} // Example from your image
-                unit="Hours"
-                data={dailyCheckIns.length > 0 ? dailyCheckIns : dummyDailyCheckIns}
-                dataKey="sleep"
-                color={colors.sleep}
-                icon={Moon}
-                emoji="😴"
-            />
-
-            <MiniSparklineCard
-                title="Heart Rate"
-                value={client.heartRate || 73} // Example from your image
-                unit="bpm"
-                data={dailyCheckIns.length > 0 ? dailyCheckIns.map(d => ({ date: d.date, heart: Math.floor(Math.random() * 20) + 60 })) : dummyDailyCheckIns.map(d => ({ date: d.date, heart: Math.floor(Math.random() * 20) + 60 }))} // Dummy heart rate
-                dataKey="heart"
-                color={colors.heartRate}
-                icon={Heart}
-                emoji="❤️"
             />
 
             {/* Nutrition Insights - More detailed graph */}
@@ -374,7 +335,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                 <CardContent className="p-0 h-64">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={nutrition.length > 0 ? nutrition : dummyNutrition}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                            <CartesianGrid strokeDashArray="3 3" stroke="#e5e7eb" vertical={false} />
                             <XAxis dataKey="date" className="text-xs text-gray-500" />
                             <YAxis className="text-xs text-gray-500" />
                             <Tooltip content={<CustomTooltip />} />
@@ -395,7 +356,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                 <CardContent className="p-0 h-64">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={mentalHealth.length > 0 ? mentalHealth : dummyMentalHealth}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                            <CartesianGrid strokeDashArray="3 3" stroke="#e5e7eb" vertical={false} />
                             <XAxis dataKey="date" className="text-xs text-gray-500" />
                             <YAxis className="text-xs text-gray-500" />
                             <Tooltip content={<CustomTooltip />} />
@@ -417,7 +378,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                 <CardContent className="p-0 h-80">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={weight.length > 0 ? weight : dummyWeightTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                            <CartesianGrid strokeDashArray="3 3" stroke="#e5e7eb" vertical={false} />
                             <XAxis dataKey="date" className="text-xs text-gray-500" />
                             <YAxis className="text-xs text-gray-500" />
                             <Tooltip content={<CustomTooltip />} />
