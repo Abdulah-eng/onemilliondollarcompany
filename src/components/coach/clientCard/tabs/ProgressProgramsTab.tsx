@@ -243,17 +243,87 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
         { date: 'Fri', stress: 6, anxiety: 5, meditation: 45, yoga: 0 },
     ].map((d, i) => ({ ...d, date: `${i + 1}/${new Date().getMonth() + 1}` }));
 
-    // Extended weight data for 12+ months
+    // Extended weight data for 12+ months (daily data for aggregation)
     const dummyWeightTrend = useMemo(() => {
-        return Array.from({ length: 52 }, (_, i) => {
+        return Array.from({ length: 365 }, (_, i) => {
             const date = new Date();
-            date.setDate(date.getDate() - (i * 7)); // Weekly data points
+            date.setDate(date.getDate() - i);
             return {
                 date: date.toISOString().split('T')[0],
-                weight: 180 - (i * 0.2) + (Math.random() * 0.8 - 0.4), // Gradual weight loss with fluctuation
+                weight: 180 - (i * 0.03) + (Math.random() * 1.5 - 0.75), // Gradual weight loss with daily fluctuation
             };
         }).reverse();
     }, []);
+
+    // Aggregate weight data based on selected range
+    const aggregateWeightData = useMemo(() => {
+        const rawData = weight.length > 0 ? weight : dummyWeightTrend;
+        const now = new Date();
+        
+        // Get data within range
+        const filteredData = rawData.filter(d => {
+            const date = new Date(d.date);
+            const diffInDays = (now.getTime() - date.getTime()) / (1000 * 3600 * 24);
+            const rangeInDays = weightRange === '1m' ? 30 : weightRange === '3m' ? 90 : weightRange === '6m' ? 180 : 365;
+            return diffInDays <= rangeInDays && diffInDays >= 0;
+        });
+
+        const aggregateData = (data, periods, periodLength, labelFormat) => {
+            const result = [];
+            for (let i = 0; i < periods; i++) {
+                const startIdx = i * Math.floor(data.length / periods);
+                const endIdx = (i + 1) * Math.floor(data.length / periods);
+                const chunk = data.slice(startIdx, endIdx);
+                
+                if (chunk.length > 0) {
+                    const avgWeight = chunk.reduce((sum, item) => sum + item.weight, 0) / chunk.length;
+                    const startDate = new Date(chunk[0].date);
+                    const endDate = new Date(chunk[chunk.length - 1].date);
+                    
+                    let label;
+                    switch (labelFormat) {
+                        case 'week':
+                            label = `W${i + 1}`;
+                            break;
+                        case 'biweek':
+                            label = `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}-${endDate.toLocaleDateString('en-US', { day: 'numeric' })}`;
+                            break;
+                        case 'triweek':
+                            label = `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}-${endDate.toLocaleDateString('en-US', { day: 'numeric' })}`;
+                            break;
+                        case 'month':
+                            label = startDate.toLocaleDateString('en-US', { month: 'short' });
+                            break;
+                        default:
+                            label = `Period ${i + 1}`;
+                    }
+                    
+                    result.push({
+                        date: chunk[Math.floor(chunk.length / 2)].date, // Middle date for reference
+                        weight: parseFloat(avgWeight.toFixed(1)),
+                        label,
+                        periodStart: startDate,
+                        periodEnd: endDate,
+                        periodType: labelFormat
+                    });
+                }
+            }
+            return result;
+        };
+
+        switch (weightRange) {
+            case '1m':
+                return aggregateData(filteredData, 4, 7, 'week'); // 4 weeks
+            case '3m':
+                return aggregateData(filteredData, 6, 14, 'biweek'); // 6 bi-weekly periods
+            case '6m':
+                return aggregateData(filteredData, 8, 21, 'triweek'); // 8 tri-weekly periods
+            case '12m':
+                return aggregateData(filteredData, 12, 30, 'month'); // 12 monthly periods
+            default:
+                return aggregateData(filteredData, 4, 7, 'week');
+        }
+    }, [weight, dummyWeightTrend, weightRange]);
 
     // Modern, soft color palette
     const colors = {
@@ -441,24 +511,12 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                     </div>
                     <CardContent className="p-0 h-64 sm:h-72 lg:h-80">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={(weight.length > 0 ? weight : dummyWeightTrend).filter(d => {
-                                const now = new Date();
-                                const date = new Date(d.date);
-                                const diffInDays = (now.getTime() - date.getTime()) / (1000 * 3600 * 24);
-                                const rangeInDays = weightRange === '1m' ? 30 : weightRange === '3m' ? 90 : weightRange === '6m' ? 180 : 365;
-                                return diffInDays <= rangeInDays;
-                            })} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                            <BarChart data={aggregateWeightData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                                 <XAxis 
-                                    dataKey="date" 
+                                    dataKey="label" 
                                     className="text-xs text-gray-500" 
                                     tick={{ fontSize: 10 }}
-                                    tickFormatter={(value) => {
-                                        const date = new Date(value);
-                                        return weightRange === '12m' ? date.toLocaleDateString('en-US', { month: 'short' }) : 
-                                               weightRange === '6m' ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) :
-                                               date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                                    }}
                                 />
                                 <YAxis 
                                     className="text-xs text-gray-500" 
@@ -473,16 +531,32 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                                             const progress = Math.round(((180 - data.weight) / (180 - goalWeight)) * 100);
                                             const weightLoss = 180 - data.weight;
                                             
+                                            // Determine period description
+                                            const getPeriodDescription = () => {
+                                                switch (data.periodType) {
+                                                    case 'week':
+                                                        return `Week ${label}`;
+                                                    case 'biweek':
+                                                        return `2-Week Period: ${data.periodStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${data.periodEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+                                                    case 'triweek':
+                                                        return `3-Week Period: ${data.periodStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${data.periodEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+                                                    case 'month':
+                                                        return `${data.periodStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+                                                    default:
+                                                        return label;
+                                                }
+                                            };
+                                            
                                             return (
                                                 <div className="bg-white/95 p-4 rounded-xl shadow-xl backdrop-blur-md border border-gray-200/50 text-gray-800 min-w-[280px]">
                                                     <div className="border-b border-gray-200/50 pb-2 mb-3">
-                                                        <p className="font-bold text-sm text-gray-800">{new Date(label).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
-                                                        <p className="text-xs text-gray-600">Weight Tracking</p>
+                                                        <p className="font-bold text-sm text-gray-800">{getPeriodDescription()}</p>
+                                                        <p className="text-xs text-gray-600">Average Weight</p>
                                                     </div>
                                                     
                                                     <div className="space-y-2">
                                                         <div className="flex justify-between items-center">
-                                                            <span className="text-xs text-gray-600">⚖️ Current:</span>
+                                                            <span className="text-xs text-gray-600">⚖️ Average:</span>
                                                             <span className="font-semibold text-sm text-purple-600">{data.weight.toFixed(1)} lbs</span>
                                                         </div>
                                                         <div className="flex justify-between items-center">
