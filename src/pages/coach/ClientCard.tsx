@@ -19,24 +19,27 @@ const ClientCard = () => {
 
       {/* Tabs */}
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-muted p-1">
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 rounded-2xl bg-muted p-1 gap-1 sm:gap-0">
           <TabsTrigger
             value="profile"
-            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
+            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-xs sm:text-sm font-medium py-2 sm:py-3 px-2 sm:px-4"
           >
-            Client Profile
+            <span className="hidden sm:inline">Client Profile</span>
+            <span className="sm:hidden">Profile</span>
           </TabsTrigger>
           <TabsTrigger
             value="progress"
-            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
+            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-xs sm:text-sm font-medium py-2 sm:py-3 px-2 sm:px-4"
           >
-            Progress & Programs
+            <span className="hidden sm:inline">Progress & Programs</span>
+            <span className="sm:hidden">Progress</span>
           </TabsTrigger>
           <TabsTrigger
             value="communication"
-            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-sm font-medium"
+            className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all text-xs sm:text-sm font-medium py-2 sm:py-3 px-2 sm:px-4"
           >
-            Communication
+            <span className="hidden sm:inline">Communication</span>
+            <span className="sm:hidden">Messages</span>
           </TabsTrigger>
         </TabsList>
 
