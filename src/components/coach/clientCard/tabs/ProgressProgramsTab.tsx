@@ -79,13 +79,13 @@ const Trend = ({ value }: { value: number }) => {
         {Math.abs(value).toFixed(1)}%
       </span>
     );
-  return <span className="text-gray-400 text-xs">0%</span>;
+  return <span className="text-muted-foreground text-xs">0%</span>;
 };
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/70 p-2 rounded-lg shadow-lg backdrop-blur-sm border border-gray-200/50 text-gray-800">
+      <div className="bg-background/90 p-2 rounded-lg shadow-lg backdrop-blur-sm border border-border text-foreground">
         <p className="font-semibold text-xs mb-1">{label}</p>
         {payload.map((p: any) => (
           <p
@@ -130,8 +130,8 @@ const RadialProgressCard: React.FC<{
   const percentage = Math.round((value / maxValue) * 100);
 
   return (
-    <Card className="rounded-3xl shadow-lg bg-white/40 backdrop-blur-md border-none p-4 flex flex-col items-center justify-center text-center transition-transform transform hover:scale-105 duration-300">
-      <div className="flex items-center justify-center text-lg font-semibold text-gray-700 mb-2">
+    <Card className="rounded-3xl shadow-lg bg-card/50 backdrop-blur-md border-border p-4 flex flex-col items-center justify-center text-center transition-transform transform hover:scale-105 duration-300">
+      <div className="flex items-center justify-center text-lg font-semibold text-foreground mb-2">
         {emoji && <span className="mr-2 text-xl">{emoji}</span>}
         <p className="text-sm">{title}</p>
       </div>
@@ -160,11 +160,11 @@ const RadialProgressCard: React.FC<{
           </RadialBarChart>
         </ResponsiveContainer>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-xl font-bold text-gray-900 leading-none">{value}</p>
-          <span className="text-xs text-gray-500">{unit}</span>
+          <p className="text-xl font-bold text-foreground leading-none">{value}</p>
+          <span className="text-xs text-muted-foreground">{unit}</span>
         </div>
       </div>
-      {subText && <p className="text-xs text-gray-500 mt-2">{subText}</p>}
+      {subText && <p className="text-xs text-muted-foreground mt-2">{subText}</p>}
     </Card>
   );
 };
@@ -205,14 +205,14 @@ const DailyTrendCard: React.FC<{
     filteredData.length > 0 ? filteredData[filteredData.length - 1][dataKey] : 0;
 
   return (
-    <Card className="rounded-3xl shadow-lg bg-white/40 backdrop-blur-md border-none p-4 flex flex-col justify-between transition-transform transform hover:scale-105 duration-300">
+    <Card className="rounded-3xl shadow-lg bg-card/50 backdrop-blur-md border-border p-4 flex flex-col justify-between transition-transform transform hover:scale-105 duration-300">
       <div className="flex items-center space-x-2 mb-2">
         {emoji && <span className="mr-1 text-lg">{emoji}</span>}
-        <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       </div>
       <div className="flex justify-between items-end mb-2">
-        <p className="text-2xl font-bold text-gray-900">
-          {currentValue} <span className="text-sm text-gray-500">{unit}</span>
+        <p className="text-2xl font-bold text-foreground">
+          {currentValue} <span className="text-sm text-muted-foreground">{unit}</span>
         </p>
         <Trend value={trendChange} />
       </div>
@@ -285,8 +285,8 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
     dailyCheckIns.length > 0 ? dailyCheckIns : /* dummyDailyCheckIns */ [];
 
   return (
-    <div className="min-h-screen font-sans antialiased bg-transparent text-gray-900">
-      {/* Keep rest of your code unchanged (time range selector, cards, charts, etc.) */}
+    <div className="font-sans antialiased bg-transparent">
+      {/* Component content will be added here in future updates */}
     </div>
   );
 };
