@@ -307,7 +307,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
 
                 <RadialProgressCard
                     title="Daily Steps"
-                    value={client.steps || 7235}
+                    value={7235}
                     maxValue={10000}
                     unit="Steps"
                     color={colors.steps}
@@ -319,7 +319,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
 
                 <RadialProgressCard
                     title="Calories Burned"
-                    value={client.caloriesBurned || 245}
+                    value={client.stats?.caloriesBurned ? parseInt(client.stats.caloriesBurned.split(' ')[0]) : 245}
                     maxValue={500}
                     unit="Kcal"
                     color={colors.caloriesBurned}
