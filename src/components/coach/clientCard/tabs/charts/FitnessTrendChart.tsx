@@ -7,17 +7,72 @@ interface FitnessTrendChartProps {
   selectedRange: string;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const EnhancedFitnessTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
+    const data = payload[0]?.payload;
+    if (!data) return null;
+
     return (
-      <div className="bg-white/70 p-2 rounded-lg shadow-lg backdrop-blur-sm border border-gray-200/50 text-gray-800">
-        <p className="font-semibold text-xs mb-1">{label}</p>
-        {payload.map((p: any) => (
-          <p key={p.name} className="text-xs flex items-center" style={{ color: p.color }}>
-            <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ backgroundColor: p.color }}></span>
-            {`${p.name}: `} <span className="font-medium ml-1">{p.value}{p.name.includes('Weight') ? 'kg' : p.name.includes('Reps') ? '' : '%'}</span>
-          </p>
-        ))}
+      <div className="bg-white/90 p-4 rounded-xl shadow-xl backdrop-blur-md border border-gray-200/50 text-gray-800 max-w-xs">
+        <p className="font-bold text-sm mb-3 text-gray-900 border-b border-gray-200 pb-2">{label}</p>
+        
+        {/* Adherence Status */}
+        <div className="mb-3">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-medium text-gray-600">Workout Status:</span>
+            <span className={`text-xs font-bold ${data.adherence === 100 ? 'text-green-600' : data.adherence > 0 ? 'text-amber-600' : 'text-red-600'}`}>
+              {data.adherence === 100 ? '✅ Completed' : data.adherence > 0 ? '⚠️ Partial' : '❌ Skipped'}
+            </span>
+          </div>
+          <div className="text-xs text-gray-500">Adherence: {data.adherence}%</div>
+        </div>
+
+        {/* Exercise Improvements */}
+        {data.adherence > 0 && (
+          <div className="space-y-2">
+            {data.benchPressWeight > 0 && (
+              <div className="bg-green-50 p-2 rounded-lg">
+                <div className="text-xs font-semibold text-green-800">💪 Bench Press</div>
+                <div className="text-xs text-green-700">
+                  {data.benchPressReps} reps × {data.benchPressWeight}kg
+                  {data.progression > 0 && (
+                    <span className="ml-2 text-green-600 font-bold">
+                      +{data.progression}% improvement!
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {data.squatWeight > 0 && (
+              <div className="bg-blue-50 p-2 rounded-lg">
+                <div className="text-xs font-semibold text-blue-800">🏋️ Squat</div>
+                <div className="text-xs text-blue-700">
+                  {data.squatReps} reps × {data.squatWeight}kg
+                  {data.progression > 0 && (
+                    <span className="ml-2 text-blue-600 font-bold">
+                      Max reps achieved!
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {data.workoutDuration > 0 && (
+              <div className="bg-purple-50 p-2 rounded-lg">
+                <div className="text-xs font-semibold text-purple-800">⏱️ Duration</div>
+                <div className="text-xs text-purple-700">{data.workoutDuration} minutes</div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Motivational Message */}
+        {data.adherence === 0 && (
+          <div className="mt-2 p-2 bg-red-50 rounded-lg">
+            <div className="text-xs text-red-700">Rest day or missed workout</div>
+          </div>
+        )}
       </div>
     );
   }
@@ -50,17 +105,34 @@ const FitnessTrendChart: React.FC<FitnessTrendChartProps> = ({ data, selectedRan
       d.setDate(today.getDate() - i);
       const dayName = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
       
-      // Simulate workout data
+      // Simulate workout data with realistic progression
       const hasWorkout = Math.random() > 0.3; // 70% chance of workout
+      const isFullWorkout = hasWorkout && Math.random() > 0.2; // 80% of workouts are complete
+      
+      const benchPress = hasWorkout ? {
+        reps: Math.floor(Math.random() * 4) + 8, // 8-11 reps
+        weight: Math.floor(Math.random() * 15) + 80 + (i % 10 === 0 ? 5 : 0), // Progressive overload every 10 days
+        improvement: i % 7 === 0 && hasWorkout ? Math.floor(Math.random() * 15) + 5 : 0 // Weekly improvements
+      } : { reps: 0, weight: 0, improvement: 0 };
+
+      const squat = hasWorkout ? {
+        reps: Math.floor(Math.random() * 4) + 8, // 8-11 reps  
+        weight: Math.floor(Math.random() * 20) + 100 + (i % 14 === 0 ? 10 : 0), // Progressive overload every 2 weeks
+        improvement: i % 5 === 0 && hasWorkout ? Math.floor(Math.random() * 12) + 3 : 0 // Bi-weekly improvements
+      } : { reps: 0, weight: 0, improvement: 0 };
+
       fitnessData.push({
         date: dayName,
-        adherence: hasWorkout ? (Math.random() > 0.2 ? 100 : Math.floor(Math.random() * 50) + 50) : 0, // 100% or partial/skipped
-        benchPressReps: hasWorkout ? Math.floor(Math.random() * 5) + 8 : 0, // 8-12 reps
-        benchPressWeight: hasWorkout ? Math.floor(Math.random() * 20) + 80 : 0, // 80-100kg
-        squatReps: hasWorkout ? Math.floor(Math.random() * 5) + 8 : 0,
-        squatWeight: hasWorkout ? Math.floor(Math.random() * 30) + 100 : 0, // 100-130kg
-        workoutDuration: hasWorkout ? Math.floor(Math.random() * 30) + 45 : 0, // 45-75 min
-        progression: hasWorkout && Math.random() > 0.7 ? Math.floor(Math.random() * 10) + 1 : 0, // Occasional progression
+        adherence: hasWorkout ? (isFullWorkout ? 100 : Math.floor(Math.random() * 40) + 50) : 0,
+        benchPressReps: benchPress.reps,
+        benchPressWeight: benchPress.weight,
+        squatReps: squat.reps,
+        squatWeight: squat.weight,
+        workoutDuration: hasWorkout ? Math.floor(Math.random() * 25) + 45 : 0, // 45-70 min
+        progression: Math.max(benchPress.improvement, squat.improvement),
+        // Additional achievement flags
+        newPR: i % 21 === 0 && hasWorkout, // Personal record every 3 weeks
+        perfectForm: hasWorkout && Math.random() > 0.7, // Good form 30% of time
       });
     }
     return fitnessData.reverse();
@@ -87,11 +159,18 @@ const FitnessTrendChart: React.FC<FitnessTrendChartProps> = ({ data, selectedRan
             <XAxis dataKey="date" className="text-xs text-gray-500" />
             <YAxis yAxisId="left" className="text-xs text-gray-500" />
             <YAxis yAxisId="right" orientation="right" className="text-xs text-gray-500" />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<EnhancedFitnessTooltip />} />
             <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px' }} />
             
-            {/* Adherence as area/bar */}
-            <Bar yAxisId="left" dataKey="adherence" fill={colors.adherence} name="Adherence %" radius={[4, 4, 0, 0]} />
+            {/* Adherence as interactive bars with hover effects */}
+            <Bar 
+              yAxisId="left" 
+              dataKey="adherence" 
+              fill={colors.adherence} 
+              name="Adherence %" 
+              radius={[6, 6, 0, 0]}
+              cursor="pointer"
+            />
             
             {/* Exercise progression as lines */}
             <Line yAxisId="right" type="monotone" dataKey="benchPressWeight" stroke={colors.benchPress} strokeWidth={2} name="Bench Press Weight" dot={{ r: 3 }} />

@@ -13,7 +13,7 @@ const ClientCard = () => {
   const client = location.state?.client || mockClientData;
 
   return (
-    <div className="relative w-full max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <div className="relative w-full px-4 py-6 space-y-6">
       {/* Header */}
       <ClientHeader client={client} />
 

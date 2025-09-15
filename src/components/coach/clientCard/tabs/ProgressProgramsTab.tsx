@@ -262,7 +262,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
     const dailyData = dailyCheckIns.length > 0 ? dailyCheckIns : dummyDailyCheckIns;
 
     return (
-        <div className="min-h-screen p-6 md:p-10 font-sans antialiased bg-gray-50 text-gray-900">
+        <div className="min-h-screen p-2 md:p-4 font-sans antialiased bg-gray-50 text-gray-900">
             <div className="flex justify-end mb-6">
                 <div className="bg-white/40 backdrop-blur-md rounded-full border border-gray-200/50 p-1 space-x-1 shadow-sm">
                     {['7d', '1m', '6m'].map(range => (
