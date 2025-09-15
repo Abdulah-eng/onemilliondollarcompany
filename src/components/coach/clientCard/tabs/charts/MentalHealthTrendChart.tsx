@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface MentalHealthTrendChartProps {
   data: any[];
@@ -9,15 +9,41 @@ interface MentalHealthTrendChartProps {
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
+    const data = payload[0]?.payload;
+    if (!data) return null;
+
     return (
-      <div className="bg-white/70 p-2 rounded-lg shadow-lg backdrop-blur-sm border border-gray-200/50 text-gray-800">
-        <p className="font-semibold text-xs mb-1">{label}</p>
-        {payload.map((p: any) => (
-          <p key={p.name} className="text-xs flex items-center" style={{ color: p.color }}>
-            <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ backgroundColor: p.color }}></span>
-            {`${p.name}: `} <span className="font-medium ml-1">{p.value}{p.name.includes('Meditation') ? 'min' : p.name.includes('Sleep') ? 'hrs' : ''}</span>
-          </p>
-        ))}
+      <div className="bg-white/95 p-4 rounded-xl shadow-xl backdrop-blur-md border border-gray-200/50 text-gray-800 min-w-[280px]">
+        <div className="border-b border-gray-200/50 pb-2 mb-3">
+          <p className="font-bold text-sm text-gray-800">{label}</p>
+          <p className="text-xs text-gray-600">Mental Health Overview</p>
+        </div>
+        
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-600">🧘‍♀️ Meditation:</span>
+            <span className="font-semibold text-sm text-primary">{data.meditation}min</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-600">😴 Sleep Quality:</span>
+            <span className="font-semibold text-sm text-blue-600">{data.sleep}hrs</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-600">⚡ Energy Level:</span>
+            <span className="font-semibold text-sm text-green-600">{data.energy}/10</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-600">😰 Stress Level:</span>
+            <span className="font-semibold text-sm text-orange-500">{data.stress}/10</span>
+          </div>
+        </div>
+
+        {data.meditation > 0 && (
+          <div className="mt-3 pt-2 border-t border-gray-200/50">
+            <p className="text-xs text-gray-600">🎯 Daily Progress</p>
+            <p className="text-xs text-green-600 font-medium">Meditation goal achieved!</p>
+          </div>
+        )}
       </div>
     );
   }
@@ -73,48 +99,54 @@ const MentalHealthTrendChart: React.FC<MentalHealthTrendChartProps> = ({ data, s
   };
 
   return (
-    <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-2 lg:col-span-3">
-      <div className="flex items-center space-x-2 mb-4">
-        <h3 className="text-xl font-bold text-gray-800">Mental Health Trend 🧠</h3>
+    <Card className="rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl bg-white/40 backdrop-blur-md border-none p-3 sm:p-4 lg:p-6 md:col-span-2 lg:col-span-3">
+      <div className="flex items-center space-x-2 mb-3 sm:mb-4">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-800">Mental Health Trend 🧠</h3>
       </div>
-      <CardContent className="p-0 h-64">
+      <CardContent className="p-0 h-48 sm:h-56 lg:h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-            <XAxis dataKey="date" className="text-xs text-gray-500" />
-            <YAxis yAxisId="left" className="text-xs text-gray-500" domain={[0, 10]} />
-            <YAxis yAxisId="right" orientation="right" className="text-xs text-gray-500" />
+            <XAxis 
+              dataKey="date" 
+              className="text-xs text-gray-500" 
+              tick={{ fontSize: 10 }}
+            />
+            <YAxis 
+              className="text-xs text-gray-500" 
+              tick={{ fontSize: 10 }}
+              domain={[0, 'dataMax']}
+            />
             <Tooltip content={<CustomTooltip />} />
-            <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px' }} />
             
             {/* Meditation time as bars */}
-            <Bar yAxisId="right" dataKey="meditation" fill={colors.meditation} name="Meditation (min)" radius={[4, 4, 0, 0]} />
-            
-            {/* Stress and anxiety as lines */}
-            <Line yAxisId="left" type="monotone" dataKey="stress" stroke={colors.stress} strokeWidth={2} name="Stress Level" dot={{ r: 3 }} />
-            <Line yAxisId="left" type="monotone" dataKey="anxiety" stroke={colors.anxiety} strokeWidth={2} name="Anxiety Level" dot={{ r: 3 }} />
-            <Line yAxisId="left" type="monotone" dataKey="energy" stroke={colors.energy} strokeWidth={2} name="Energy Level" dot={{ r: 3 }} />
-          </ComposedChart>
+            <Bar 
+              dataKey="meditation" 
+              fill={colors.meditation} 
+              radius={[6, 6, 0, 0]}
+              cursor="pointer"
+            />
+          </BarChart>
         </ResponsiveContainer>
       </CardContent>
       
       {/* Quick stats */}
-      <div className="grid grid-cols-4 gap-4 mt-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mt-3 sm:mt-4">
         <div className="text-center">
-          <p className="text-lg font-bold text-gray-800">{Math.round(chartData.reduce((acc, d) => acc + d.stress, 0) / chartData.length)}</p>
-          <p className="text-xs text-gray-500">Avg Stress</p>
+          <p className="text-sm sm:text-lg font-bold text-gray-800">{Math.round(chartData.reduce((acc, d) => acc + d.meditation, 0) / chartData.filter(d => d.meditation > 0).length) || 0}</p>
+          <p className="text-xs text-gray-500">Avg Minutes</p>
         </div>
         <div className="text-center">
-          <p className="text-lg font-bold text-gray-800">{Math.round(chartData.reduce((acc, d) => acc + d.anxiety, 0) / chartData.length)}</p>
-          <p className="text-xs text-gray-500">Avg Anxiety</p>
+          <p className="text-sm sm:text-lg font-bold text-gray-800">{chartData.filter(d => d.meditation > 0).length}</p>
+          <p className="text-xs text-gray-500">Active Days</p>
         </div>
         <div className="text-center">
-          <p className="text-lg font-bold text-gray-800">{Math.round(chartData.reduce((acc, d) => acc + d.meditation, 0) / chartData.filter(d => d.meditation > 0).length) || 0}</p>
-          <p className="text-xs text-gray-500">Avg Meditation</p>
+          <p className="text-sm sm:text-lg font-bold text-gray-800">{Math.round(chartData.reduce((acc, d) => acc + d.sleep, 0) / chartData.length * 10) / 10}</p>
+          <p className="text-xs text-gray-500">Avg Sleep</p>
         </div>
         <div className="text-center">
-          <p className="text-lg font-bold text-gray-800">{chartData.filter(d => d.meditation > 0).length}</p>
-          <p className="text-xs text-gray-500">Meditation Days</p>
+          <p className="text-sm sm:text-lg font-bold text-gray-800">{Math.round(chartData.reduce((acc, d) => acc + d.energy, 0) / chartData.length)}</p>
+          <p className="text-xs text-gray-500">Avg Energy</p>
         </div>
       </div>
     </Card>
