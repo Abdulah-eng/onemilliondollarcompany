@@ -4,7 +4,45 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
 // Types (same as before)
-// ...
+interface DailyCheckInData {
+  date: string;
+  water: number;
+  sleep: number;
+  mood: number;
+  energy: number;
+}
+
+interface FitnessData {
+  week: string;
+  adherence: number;
+  progression: number[];
+}
+
+interface NutritionData {
+  date: string;
+  protein: number;
+  carbs: number;
+  fat: number;
+  calories: number;
+  adherence: number;
+}
+
+interface MentalHealthData {
+  date: string;
+  stress: number;
+  anxiety: number;
+  meditation: number;
+  yoga: number;
+}
+
+interface WeightData {
+  date: string;
+  weight: number;
+}
+
+interface DashboardProps {
+  client: any;
+}
 
 interface DashboardProps {
   client: any;
