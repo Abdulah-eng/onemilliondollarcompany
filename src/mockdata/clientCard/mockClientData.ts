@@ -1,22 +1,23 @@
 // src/mockdata/clientCard/mockClientData.ts
-import { format, subDays, subMonths } from 'date-fns';
+import { format, subDays } from 'date-fns';
 
-const generateMockData = (days: number) => {
+// ---------- Generators ----------
+const generateDailyData = (days: number) => {
   const data = [];
   const today = new Date();
   for (let i = 0; i < days; i++) {
     const date = subDays(today, days - 1 - i);
     data.push({
       date: format(date, 'yyyy-MM-dd'),
-      water: Math.random() * 1.5 + 1.5, // 1.5 to 3.0 liters
-      energy: Math.floor(Math.random() * 5) + 1, // 1-5 scale
-      sleep: Math.random() * 2 + 6, // 6.0 to 8.0 hours
-      mood: Math.floor(Math.random() * 5) + 1, // 1-5 scale
-      stress: Math.floor(Math.random() * 5) + 1, // 1-5 scale
-      anxiety: Math.floor(Math.random() * 5) + 1, // 1-5 scale
-      meditationTime: Math.random() > 0.5 ? Math.floor(Math.random() * 20) + 5 : 0, // 5-25 min
-      yogaTime: Math.random() > 0.7 ? Math.floor(Math.random() * 30) + 15 : 0, // 15-45 min
-      portionTracked: Math.random() * 10 + 5, // 5-15 portions
+      water: +(Math.random() * 1.5 + 1.5).toFixed(1), // 1.5–3.0 L
+      energy: Math.floor(Math.random() * 5) + 1, // 1–5
+      sleep: +(Math.random() * 2 + 6).toFixed(1), // 6–8 h
+      mood: Math.floor(Math.random() * 5) + 1, // 1–5
+      stress: Math.floor(Math.random() * 5) + 1, // 1–5
+      anxiety: Math.floor(Math.random() * 5) + 1, // 1–5
+      meditationTime: Math.random() > 0.5 ? Math.floor(Math.random() * 20) + 5 : 0,
+      yogaTime: Math.random() > 0.7 ? Math.floor(Math.random() * 30) + 15 : 0,
+      portionsTracked: +(Math.random() * 10 + 5).toFixed(1), // 5–15
       ateElse: Math.random() > 0.3,
     });
   }
@@ -26,27 +27,45 @@ const generateMockData = (days: number) => {
 const generateWeightData = (months: number) => {
   const data = [];
   const today = new Date();
-  let currentWeight = 68.8; // Starting weight
+  let currentWeight = 68.8;
   for (let i = 0; i < months * 4; i++) {
-    const date = subDays(today, (months * 4 - 1 - i) * 7); // weekly data points
-    currentWeight -= Math.random() * 0.2 + 0.1; // simulate slight weight loss
+    const date = subDays(today, (months * 4 - 1 - i) * 7);
+    currentWeight += (Math.random() - 0.5) * 0.4; // +/- 0.2 kg per week
     data.push({
       date: format(date, 'yyyy-MM-dd'),
-      weight: parseFloat(currentWeight.toFixed(1)),
+      weight: +currentWeight.toFixed(1),
     });
   }
   return data;
 };
 
-// Simplified function to calculate trends
+const generateFitnessData = (weeks: number) => {
+  const progression = [];
+  let adherence = 80;
+  for (let i = 0; i < weeks; i++) {
+    adherence += (Math.random() - 0.5) * 5; // +/- 2.5%
+    adherence = Math.min(100, Math.max(60, adherence));
+    progression.push({
+      week: i + 1,
+      adherence: +adherence.toFixed(1),
+    });
+  }
+  return {
+    adherence: +(adherence.toFixed(1)),
+    progression,
+  };
+};
+
+// ---------- Trend Calculation ----------
 const calculateTrends = (data: any[]) => {
-  const latestData = data.slice(-14);
+  const latest = data.slice(-14);
   const getTrend = (key: string) => {
-    if (latestData.length < 2) return '—';
-    const firstHalfAvg = latestData.slice(0, Math.floor(latestData.length / 2)).reduce((sum, d) => sum + d[key], 0) / Math.floor(latestData.length / 2);
-    const secondHalfAvg = latestData.slice(Math.ceil(latestData.length / 2)).reduce((sum, d) => sum + d[key], 0) / Math.ceil(latestData.length / 2);
-    const diff = secondHalfAvg - firstHalfAvg;
-    if (Math.abs(diff) < 0.3) return '→';
+    if (latest.length < 2) return '→';
+    const mid = Math.floor(latest.length / 2);
+    const first = latest.slice(0, mid).reduce((sum, d) => sum + d[key], 0) / mid;
+    const second = latest.slice(mid).reduce((sum, d) => sum + d[key], 0) / (latest.length - mid);
+    const diff = second - first;
+    if (Math.abs(diff) < 0.2) return '→';
     return diff > 0 ? '↑' : '↓';
   };
   return {
@@ -57,8 +76,10 @@ const calculateTrends = (data: any[]) => {
   };
 };
 
-const allDailyData = generateMockData(180);
+// ---------- Data Assembly ----------
+const allDailyData = generateDailyData(180);
 const allWeightData = generateWeightData(6);
+const fitnessData = generateFitnessData(12);
 const trends = calculateTrends(allDailyData);
 
 export const mockClientData = {
@@ -74,7 +95,7 @@ export const mockClientData = {
     height: '170 cm',
     weight: '65 kg',
   },
-  goals: ['Fat Reduce', 'Increased Energy'],
+  goals: ['Fat Reduction', 'Increased Energy'],
   preferences: {
     injuries: ['Knee (old injury)'],
     allergies: ['Peanuts'],
@@ -96,16 +117,29 @@ export const mockClientData = {
   programFill: {
     fitness: 85,
     nutrition: 78,
-    mentalHealth: 92
+    mentalHealth: 92,
   },
   dailyCheckIn: allDailyData,
   weightTrend: allWeightData,
+  fitness: fitnessData,
   progressPhotos: [
-    { url: 'https://images.unsplash.com/photo-1549476317-09f19318b76c?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', date: '2025-07-01', isNewest: false },
-    { url: 'https://images.unsplash.com/photo-1549476317-09f19318b76c?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', date: '2025-08-01', isNewest: false },
-    { url: 'https://images.unsplash.com/photo-1549476317-09f19318b76c?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', date: '2025-09-01', isNewest: true },
+    {
+      url: 'https://images.unsplash.com/photo-1549476317-09f19318b76c?q=80&w=1974&auto=format&fit=crop',
+      date: '2025-07-01',
+      isNewest: false,
+    },
+    {
+      url: 'https://images.unsplash.com/photo-1549476317-09f19318b76c?q=80&w=1974&auto=format&fit=crop',
+      date: '2025-08-01',
+      isNewest: false,
+    },
+    {
+      url: 'https://images.unsplash.com/photo-1549476317-09f19318b76c?q=80&w=1974&auto=format&fit=crop',
+      date: '2025-09-01',
+      isNewest: true,
+    },
   ],
-  trends: trends,
+  trends,
   nutrition: {
     adherence: 85,
     adherenceMessage: 'Maintains consistent meal tracking.',
@@ -121,7 +155,7 @@ export const mockClientData = {
     avgStress: 2.5,
     stressTrend: trends.stress,
     avgAnxiety: 2.1,
-    anxietyTrend: trends.stress, // Using stress trend for anxiety for mock data
+    anxietyTrend: trends.stress,
     meditationTime: 15,
     meditationTrend: '↑',
     meditationValue: 'Consistent daily practice.',
