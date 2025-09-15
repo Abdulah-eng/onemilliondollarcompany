@@ -188,7 +188,9 @@ const DailyTrendCard: React.FC<{
 
 // Main dashboard component
 const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
-    const [selectedRange, setSelectedRange] = useState('7d');
+    // State for time range selectors
+    const [selectedRange, setSelectedRange] = useState('4w'); // For fitness and mental health (weekly)
+    const [weightRange, setWeightRange] = useState('1m'); // For weight journey (monthly)
 
     // Extract and transform data
     const dailyCheckIns = client.dailyCheckIn || [];
@@ -217,13 +219,21 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
         return data.reverse();
     }, []);
 
-    const dummyNutrition = [
-        { date: 'Mon', protein: 50, carbs: 150, fat: 30, calories: 1800 },
-        { date: 'Tue', protein: 60, carbs: 160, fat: 35, calories: 1950 },
-        { date: 'Wed', protein: 55, carbs: 140, fat: 28, calories: 1750 },
-        { date: 'Thu', protein: 70, carbs: 180, fat: 40, calories: 2100 },
-        { date: 'Fri', protein: 65, carbs: 170, fat: 32, calories: 2000 },
-    ].map((d, i) => ({ ...d, date: `${i + 1}/${new Date().getMonth() + 1}` }));
+    // Extended nutrition data for 30+ days
+    const dummyNutrition = useMemo(() => {
+        return Array.from({ length: 35 }, (_, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+            return {
+                date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                protein: isWeekend ? 100 + Math.random() * 40 : 110 + Math.random() * 30,
+                carbs: isWeekend ? 250 + Math.random() * 60 : 270 + Math.random() * 40,
+                fat: isWeekend ? 60 + Math.random() * 20 : 65 + Math.random() * 15,
+                calories: isWeekend ? 2100 + Math.random() * 400 : 2000 + Math.random() * 300,
+            };
+        }).reverse();
+    }, []);
 
     const dummyMentalHealth = [
         { date: 'Mon', stress: 7, anxiety: 6, meditation: 30, yoga: 0 },
@@ -233,9 +243,17 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
         { date: 'Fri', stress: 6, anxiety: 5, meditation: 45, yoga: 0 },
     ].map((d, i) => ({ ...d, date: `${i + 1}/${new Date().getMonth() + 1}` }));
 
-    const dummyWeightTrend = [
-        { date: 'Jan', weight: 180 }, { date: 'Feb', weight: 178 }, { date: 'Mar', weight: 175 }, { date: 'Apr', weight: 176 }, { date: 'May', weight: 174 },
-    ];
+    // Extended weight data for 12+ months
+    const dummyWeightTrend = useMemo(() => {
+        return Array.from({ length: 52 }, (_, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() - (i * 7)); // Weekly data points
+            return {
+                date: date.toISOString().split('T')[0],
+                weight: 180 - (i * 0.2) + (Math.random() * 0.8 - 0.4), // Gradual weight loss with fluctuation
+            };
+        }).reverse();
+    }, []);
 
     // Modern, soft color palette
     const colors = {
@@ -263,9 +281,10 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
 
     return (
         <div className="min-h-screen p-2 sm:p-3 md:p-4 font-sans antialiased bg-gray-50 text-gray-900">
+            {/* Time Range Selector for Fitness & Mental Health */}
             <div className="flex justify-center sm:justify-end mb-4 sm:mb-6">
                 <div className="bg-white/40 backdrop-blur-md rounded-full border border-gray-200/50 p-1 flex shadow-sm">
-                    {['7d', '1m', '6m'].map(range => (
+                    {['4w', '12w', '24w'].map(range => (
                         <button
                             key={range}
                             onClick={() => setSelectedRange(range)}
@@ -275,7 +294,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                                     : 'text-gray-600 hover:bg-gray-200'
                             }`}
                         >
-                            {range === '7d' ? '7d' : range === '1m' ? '1m' : '6m'}
+                            {range === '4w' ? '4 Weeks' : range === '12w' ? '12 Weeks' : '24 Weeks'}
                         </button>
                     ))}
                 </div>
@@ -399,26 +418,52 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                     </CardContent>
                 </Card>
 
-                {/* Weight Journey - Simplified with bars */}
-                <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-full lg:col-span-full xl:col-span-full">
-                    <div className="flex items-center space-x-2 mb-4">
-                        <h3 className="text-xl font-bold text-gray-800">Weight Journey ⚖️</h3>
+                {/* Weight Journey with Monthly Time Ranges */}
+                <Card className="rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl bg-white/40 backdrop-blur-md border-none p-3 sm:p-4 lg:p-6 md:col-span-full lg:col-span-full xl:col-span-full">
+                    <div className="flex items-center justify-between mb-3 sm:mb-4">
+                        <h3 className="text-lg sm:text-xl font-bold text-gray-800">Weight Journey ⚖️</h3>
+                        {/* Weight Range Selector */}
+                        <div className="flex gap-1">
+                            {['1m', '3m', '6m', '12m'].map((range) => (
+                                <button
+                                    key={range}
+                                    onClick={() => setWeightRange(range)}
+                                    className={`px-2 py-1 rounded-full text-xs transition-colors ${
+                                        weightRange === range
+                                            ? 'bg-primary text-primary-foreground'
+                                            : 'bg-muted hover:bg-muted/80'
+                                    }`}
+                                >
+                                    {range === '1m' ? '1M' : range === '3m' ? '3M' : range === '6m' ? '6M' : '12M'}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                    <CardContent className="p-0 h-80">
+                    <CardContent className="p-0 h-64 sm:h-72 lg:h-80">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={weight.length > 0 ? weight : dummyWeightTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                            <BarChart data={(weight.length > 0 ? weight : dummyWeightTrend).filter(d => {
+                                const now = new Date();
+                                const date = new Date(d.date);
+                                const diffInDays = (now.getTime() - date.getTime()) / (1000 * 3600 * 24);
+                                const rangeInDays = weightRange === '1m' ? 30 : weightRange === '3m' ? 90 : weightRange === '6m' ? 180 : 365;
+                                return diffInDays <= rangeInDays;
+                            })} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                                 <XAxis 
                                     dataKey="date" 
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: '#6b7280', fontSize: 12 }}
-                                    className="text-xs"
+                                    className="text-xs text-gray-500" 
+                                    tick={{ fontSize: 10 }}
+                                    tickFormatter={(value) => {
+                                        const date = new Date(value);
+                                        return weightRange === '12m' ? date.toLocaleDateString('en-US', { month: 'short' }) : 
+                                               weightRange === '6m' ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) :
+                                               date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                    }}
                                 />
                                 <YAxis 
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: '#6b7280', fontSize: 12 }}
-                                    className="text-xs"
+                                    className="text-xs text-gray-500" 
+                                    tick={{ fontSize: 10 }}
+                                    domain={['dataMin - 2', 'dataMax + 2']}
                                 />
                                 <Tooltip 
                                     content={({ active, payload, label }) => {
@@ -426,42 +471,41 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                                             const data = payload[0].payload;
                                             const goalWeight = 160; // You can make this dynamic
                                             const progress = Math.round(((180 - data.weight) / (180 - goalWeight)) * 100);
+                                            const weightLoss = 180 - data.weight;
                                             
                                             return (
-                                                <div className="rounded-2xl shadow-2xl bg-white/95 backdrop-blur-md border border-gray-200/50 p-5 min-w-[250px]">
-                                                    <div className="flex items-center gap-3 mb-4">
-                                                        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                                                            <span className="text-lg">⚖️</span>
-                                                        </div>
-                                                        <div>
-                                                            <h4 className="font-bold text-gray-800">{label}</h4>
-                                                            <p className="text-sm text-gray-500">Weight Progress</p>
-                                                        </div>
+                                                <div className="bg-white/95 p-4 rounded-xl shadow-xl backdrop-blur-md border border-gray-200/50 text-gray-800 min-w-[280px]">
+                                                    <div className="border-b border-gray-200/50 pb-2 mb-3">
+                                                        <p className="font-bold text-sm text-gray-800">{new Date(label).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                                                        <p className="text-xs text-gray-600">Weight Tracking</p>
                                                     </div>
                                                     
-                                                    <div className="space-y-3">
-                                                        <div className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
-                                                            <span className="text-sm font-medium text-gray-700">Current Weight</span>
-                                                            <span className="font-bold text-purple-600">{data.weight} lbs</span>
+                                                    <div className="space-y-2">
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs text-gray-600">⚖️ Current:</span>
+                                                            <span className="font-semibold text-sm text-purple-600">{data.weight.toFixed(1)} lbs</span>
                                                         </div>
-                                                        
-                                                        <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
-                                                            <span className="text-sm font-medium text-gray-700">Goal Weight</span>
-                                                            <span className="font-bold text-blue-600">{goalWeight} lbs</span>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs text-gray-600">🎯 Goal:</span>
+                                                            <span className="font-semibold text-sm text-blue-600">{goalWeight} lbs</span>
                                                         </div>
-                                                        
-                                                        <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
-                                                            <span className="text-sm font-medium text-gray-700">Progress</span>
-                                                            <span className="font-bold text-green-600">{progress}%</span>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs text-gray-600">📉 Lost:</span>
+                                                            <span className="font-semibold text-sm text-green-600">{weightLoss.toFixed(1)} lbs</span>
                                                         </div>
-                                                        
-                                                        <div className="bg-gray-50 rounded-lg p-2">
-                                                            <p className="text-xs text-gray-600 text-center">
-                                                                {data.weight <= goalWeight ? '🎯 Goal achieved!' : 
-                                                                 progress >= 80 ? '💪 Almost there!' : 
-                                                                 '📈 Keep going!'}
-                                                            </p>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs text-gray-600">📊 Progress:</span>
+                                                            <span className="font-semibold text-sm text-green-600">{progress}%</span>
                                                         </div>
+                                                    </div>
+
+                                                    <div className="mt-3 pt-2 border-t border-gray-200/50">
+                                                        <p className="text-xs text-center font-medium">
+                                                            {data.weight <= goalWeight ? '🎉 Goal achieved! Amazing work!' : 
+                                                             progress >= 80 ? '💪 So close to your goal!' : 
+                                                             progress >= 50 ? '🔥 Halfway there, keep going!' :
+                                                             '📈 Every step counts!'}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             );

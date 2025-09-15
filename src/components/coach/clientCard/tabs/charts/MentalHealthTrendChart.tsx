@@ -16,32 +16,50 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <div className="bg-white/95 p-4 rounded-xl shadow-xl backdrop-blur-md border border-gray-200/50 text-gray-800 min-w-[280px]">
         <div className="border-b border-gray-200/50 pb-2 mb-3">
           <p className="font-bold text-sm text-gray-800">{label}</p>
-          <p className="text-xs text-gray-600">Mental Health Overview</p>
+          <p className="text-xs text-gray-600">{data.fullDate}</p>
+          <p className="text-xs text-gray-500">Weekly Mental Health Summary</p>
         </div>
         
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-xs text-gray-600">🧘‍♀️ Meditation:</span>
+            <span className="text-xs text-gray-600">🧘‍♀️ Total Meditation:</span>
             <span className="font-semibold text-sm text-primary">{data.meditation}min</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-xs text-gray-600">😴 Sleep Quality:</span>
+            <span className="text-xs text-gray-600">📅 Meditation Days:</span>
+            <span className="font-semibold text-sm text-primary">{data.meditationDays}/7 days</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-600">😴 Avg Sleep:</span>
             <span className="font-semibold text-sm text-blue-600">{data.sleep}hrs</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-xs text-gray-600">⚡ Energy Level:</span>
+            <span className="text-xs text-gray-600">⚡ Avg Energy:</span>
             <span className="font-semibold text-sm text-green-600">{data.energy}/10</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-xs text-gray-600">😰 Stress Level:</span>
+            <span className="text-xs text-gray-600">😰 Avg Stress:</span>
             <span className="font-semibold text-sm text-orange-500">{data.stress}/10</span>
           </div>
         </div>
 
         {data.meditation > 0 && (
           <div className="mt-3 pt-2 border-t border-gray-200/50">
-            <p className="text-xs text-gray-600">🎯 Daily Progress</p>
-            <p className="text-xs text-green-600 font-medium">Meditation goal achieved!</p>
+            <div className="space-y-1">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-600">💪 Weekly Streak:</span>
+                <span className="font-semibold text-xs text-green-600">{data.weeklyStreak} days</span>
+              </div>
+              {data.moodImprovement > 0 && (
+                <p className="text-xs text-green-600 font-medium">🎯 {data.moodImprovement}% mood improvement this week!</p>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {data.meditation === 0 && (
+          <div className="mt-3 pt-2 border-t border-gray-200/50">
+            <p className="text-xs text-orange-600">💭 Consider adding meditation to boost weekly wellness</p>
           </div>
         )}
       </div>
@@ -53,36 +71,50 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const MentalHealthTrendChart: React.FC<MentalHealthTrendChartProps> = ({ data, selectedRange }) => {
   const filteredData = useMemo(() => {
     const now = new Date();
-    let rangeInDays = 7;
-    if (selectedRange === '1m') rangeInDays = 30;
-    if (selectedRange === '6m') rangeInDays = 180;
+    let rangeInWeeks = 4;
+    if (selectedRange === '12w') rangeInWeeks = 12;
+    if (selectedRange === '24w') rangeInWeeks = 24;
 
     return data.filter(d => {
       const date = new Date(d.date);
       const diffInTime = now.getTime() - date.getTime();
-      const diffInDays = diffInTime / (1000 * 3600 * 24);
-      return diffInDays <= rangeInDays;
+      const diffInWeeks = diffInTime / (1000 * 3600 * 24 * 7);
+      return diffInWeeks <= rangeInWeeks;
     });
   }, [selectedRange, data]);
 
-  // Dummy mental health data for visualization
+  // Weekly aggregated mental health data for visualization
   const dummyMentalHealthData = useMemo(() => {
     const mentalData = [];
     const today = new Date();
-    const days = selectedRange === '7d' ? 7 : selectedRange === '1m' ? 30 : 180;
+    const weeks = selectedRange === '4w' ? 4 : selectedRange === '12w' ? 12 : 24;
     
-    for (let i = 0; i < days; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const dayName = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    for (let i = 0; i < weeks; i++) {
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - (i * 7));
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() - 6);
+      
+      const weekLabel = `Week ${weeks - i}`;
+      const dateLabel = `${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}-${weekStart.toLocaleDateString('en-US', { day: 'numeric' })}`;
+      
+      // Simulate weekly averages with realistic patterns
+      const weeklyMeditationDays = Math.floor(Math.random() * 4) + 3; // 3-6 days of meditation
+      const avgMeditationTime = weeklyMeditationDays > 0 ? Math.floor(Math.random() * 25) + 20 : 0; // 20-45 min average
+      const totalMeditationTime = avgMeditationTime * weeklyMeditationDays;
       
       mentalData.push({
-        date: dayName,
-        stress: Math.floor(Math.random() * 10) + 1, // 1-10 scale
-        anxiety: Math.floor(Math.random() * 10) + 1, // 1-10 scale
-        meditation: Math.random() > 0.4 ? Math.floor(Math.random() * 45) + 15 : 0, // 15-60 min or 0
-        sleep: parseFloat((Math.random() * (9 - 6) + 6).toFixed(1)), // 6-9 hours
-        energy: Math.floor(Math.random() * 10) + 1, // 1-10 scale
+        date: weekLabel,
+        fullDate: dateLabel,
+        stress: Math.floor(Math.random() * 6) + 2, // 2-7 average weekly stress
+        anxiety: Math.floor(Math.random() * 6) + 2, // 2-7 average weekly anxiety
+        meditation: totalMeditationTime, // Total weekly meditation minutes
+        avgMeditation: avgMeditationTime, // Average per session
+        meditationDays: weeklyMeditationDays,
+        sleep: parseFloat((Math.random() * (8.5 - 6.5) + 6.5).toFixed(1)), // 6.5-8.5 hours average
+        energy: Math.floor(Math.random() * 4) + 6, // 6-9 average weekly energy
+        weeklyStreak: i < 2 ? weeklyMeditationDays : Math.floor(Math.random() * 4) + 2, // Recent weeks better
+        moodImprovement: i % 3 === 0 ? Math.floor(Math.random() * 15) + 5 : 0, // Periodic improvements
       });
     }
     return mentalData.reverse();

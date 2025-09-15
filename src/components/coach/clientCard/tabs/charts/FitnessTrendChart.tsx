@@ -14,30 +14,35 @@ const EnhancedFitnessTooltip = ({ active, payload, label }: any) => {
 
     return (
       <div className="bg-white/90 p-4 rounded-xl shadow-xl backdrop-blur-md border border-gray-200/50 text-gray-800 max-w-xs">
-        <p className="font-bold text-sm mb-3 text-gray-900 border-b border-gray-200 pb-2">{label}</p>
+        <div className="border-b border-gray-200/50 pb-2 mb-3">
+          <p className="font-bold text-sm text-gray-900">{label}</p>
+          <p className="text-xs text-gray-600">{data.fullDate}</p>
+        </div>
         
-        {/* Adherence Status */}
+        {/* Weekly Summary */}
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-medium text-gray-600">Workout Status:</span>
-            <span className={`text-xs font-bold ${data.adherence === 100 ? 'text-green-600' : data.adherence > 0 ? 'text-amber-600' : 'text-red-600'}`}>
-              {data.adherence === 100 ? '✅ Completed' : data.adherence > 0 ? '⚠️ Partial' : '❌ Skipped'}
+            <span className="text-xs font-medium text-gray-600">Weekly Progress:</span>
+            <span className={`text-xs font-bold ${data.adherence === 100 ? 'text-green-600' : data.adherence >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
+              {data.adherence === 100 ? '🔥 Perfect Week!' : data.adherence >= 80 ? '💪 Strong Week' : '⚡ Room to Improve'}
             </span>
           </div>
-          <div className="text-xs text-gray-500">Adherence: {data.adherence}%</div>
+          <div className="text-xs text-gray-500">
+            {data.weeklyWorkouts}/{data.plannedWorkouts} workouts completed ({data.adherence}%)
+          </div>
         </div>
 
-        {/* Exercise Improvements */}
+        {/* Exercise Progress */}
         {data.adherence > 0 && (
           <div className="space-y-2">
             {data.benchPressWeight > 0 && (
               <div className="bg-green-50 p-2 rounded-lg">
-                <div className="text-xs font-semibold text-green-800">💪 Bench Press</div>
+                <div className="text-xs font-semibold text-green-800">💪 Bench Press (Avg)</div>
                 <div className="text-xs text-green-700">
                   {data.benchPressReps} reps × {data.benchPressWeight}kg
                   {data.progression > 0 && (
                     <span className="ml-2 text-green-600 font-bold">
-                      +{data.progression}% improvement!
+                      +{data.progression}% from last week!
                     </span>
                   )}
                 </div>
@@ -46,12 +51,12 @@ const EnhancedFitnessTooltip = ({ active, payload, label }: any) => {
             
             {data.squatWeight > 0 && (
               <div className="bg-blue-50 p-2 rounded-lg">
-                <div className="text-xs font-semibold text-blue-800">🏋️ Squat</div>
+                <div className="text-xs font-semibold text-blue-800">🏋️ Squat (Avg)</div>
                 <div className="text-xs text-blue-700">
                   {data.squatReps} reps × {data.squatWeight}kg
                   {data.progression > 0 && (
                     <span className="ml-2 text-blue-600 font-bold">
-                      Max reps achieved!
+                      Weekly improvement achieved!
                     </span>
                   )}
                 </div>
@@ -60,17 +65,24 @@ const EnhancedFitnessTooltip = ({ active, payload, label }: any) => {
 
             {data.workoutDuration > 0 && (
               <div className="bg-purple-50 p-2 rounded-lg">
-                <div className="text-xs font-semibold text-purple-800">⏱️ Duration</div>
-                <div className="text-xs text-purple-700">{data.workoutDuration} minutes</div>
+                <div className="text-xs font-semibold text-purple-800">⏱️ Avg Duration</div>
+                <div className="text-xs text-purple-700">{data.workoutDuration} minutes per session</div>
+              </div>
+            )}
+
+            {data.newPR && (
+              <div className="bg-yellow-50 p-2 rounded-lg">
+                <div className="text-xs font-semibold text-yellow-800">🏆 Personal Record!</div>
+                <div className="text-xs text-yellow-700">New milestone achieved this week</div>
               </div>
             )}
           </div>
         )}
 
-        {/* Motivational Message */}
-        {data.adherence === 0 && (
-          <div className="mt-2 p-2 bg-red-50 rounded-lg">
-            <div className="text-xs text-red-700">Rest day or missed workout</div>
+        {/* Weekly Goals */}
+        {data.perfectWeek && (
+          <div className="mt-2 p-2 bg-green-50 rounded-lg">
+            <div className="text-xs text-green-700 font-medium">🎯 Perfect week completed!</div>
           </div>
         )}
       </div>
@@ -82,57 +94,67 @@ const EnhancedFitnessTooltip = ({ active, payload, label }: any) => {
 const FitnessTrendChart: React.FC<FitnessTrendChartProps> = ({ data, selectedRange }) => {
   const filteredData = useMemo(() => {
     const now = new Date();
-    let rangeInDays = 7;
-    if (selectedRange === '1m') rangeInDays = 30;
-    if (selectedRange === '6m') rangeInDays = 180;
+    let rangeInWeeks = 4;
+    if (selectedRange === '12w') rangeInWeeks = 12;
+    if (selectedRange === '24w') rangeInWeeks = 24;
 
     return data.filter(d => {
       const date = new Date(d.date);
       const diffInTime = now.getTime() - date.getTime();
-      const diffInDays = diffInTime / (1000 * 3600 * 24);
-      return diffInDays <= rangeInDays;
+      const diffInWeeks = diffInTime / (1000 * 3600 * 24 * 7);
+      return diffInWeeks <= rangeInWeeks;
     });
   }, [selectedRange, data]);
 
-  // Dummy fitness data for visualization
+  // Weekly aggregated fitness data for visualization
   const dummyFitnessData = useMemo(() => {
     const fitnessData = [];
     const today = new Date();
-    const days = selectedRange === '7d' ? 7 : selectedRange === '1m' ? 30 : 180;
+    const weeks = selectedRange === '4w' ? 4 : selectedRange === '12w' ? 12 : 24;
     
-    for (let i = 0; i < days; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const dayName = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    for (let i = 0; i < weeks; i++) {
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - (i * 7));
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() - 6);
       
-      // Simulate workout data with realistic progression
-      const hasWorkout = Math.random() > 0.3; // 70% chance of workout
-      const isFullWorkout = hasWorkout && Math.random() > 0.2; // 80% of workouts are complete
+      const weekLabel = `Week ${weeks - i}`;
+      const dateLabel = `${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}-${weekStart.toLocaleDateString('en-US', { day: 'numeric' })}`;
       
-      const benchPress = hasWorkout ? {
-        reps: Math.floor(Math.random() * 4) + 8, // 8-11 reps
-        weight: Math.floor(Math.random() * 15) + 80 + (i % 10 === 0 ? 5 : 0), // Progressive overload every 10 days
-        improvement: i % 7 === 0 && hasWorkout ? Math.floor(Math.random() * 15) + 5 : 0 // Weekly improvements
-      } : { reps: 0, weight: 0, improvement: 0 };
+      // Simulate weekly workout data with realistic progression
+      const weeklyWorkouts = Math.floor(Math.random() * 3) + 3; // 3-5 workouts per week
+      const completedWorkouts = Math.floor(weeklyWorkouts * (0.7 + Math.random() * 0.3)); // 70-100% completion
+      const weeklyAdherence = Math.round((completedWorkouts / weeklyWorkouts) * 100);
+      
+      // Progressive overload simulation
+      const baseWeight = 80 + (weeks - i) * 2; // Progressive increase over weeks
+      const benchPress = {
+        reps: Math.floor(Math.random() * 3) + 8, // 8-10 reps average
+        weight: baseWeight + Math.floor(Math.random() * 10),
+        improvement: i % 2 === 0 ? Math.floor(Math.random() * 10) + 2 : 0 // Bi-weekly improvements
+      };
 
-      const squat = hasWorkout ? {
-        reps: Math.floor(Math.random() * 4) + 8, // 8-11 reps  
-        weight: Math.floor(Math.random() * 20) + 100 + (i % 14 === 0 ? 10 : 0), // Progressive overload every 2 weeks
-        improvement: i % 5 === 0 && hasWorkout ? Math.floor(Math.random() * 12) + 3 : 0 // Bi-weekly improvements
-      } : { reps: 0, weight: 0, improvement: 0 };
+      const squat = {
+        reps: Math.floor(Math.random() * 3) + 8, // 8-10 reps average
+        weight: baseWeight + 20 + Math.floor(Math.random() * 15),
+        improvement: i % 3 === 0 ? Math.floor(Math.random() * 8) + 3 : 0 // Every 3 weeks improvements
+      };
 
       fitnessData.push({
-        date: dayName,
-        adherence: hasWorkout ? (isFullWorkout ? 100 : Math.floor(Math.random() * 40) + 50) : 0,
+        date: weekLabel,
+        fullDate: dateLabel,
+        adherence: weeklyAdherence,
         benchPressReps: benchPress.reps,
         benchPressWeight: benchPress.weight,
         squatReps: squat.reps,
         squatWeight: squat.weight,
-        workoutDuration: hasWorkout ? Math.floor(Math.random() * 25) + 45 : 0, // 45-70 min
+        workoutDuration: Math.floor(Math.random() * 20) + 50, // 50-70 min average
         progression: Math.max(benchPress.improvement, squat.improvement),
-        // Additional achievement flags
-        newPR: i % 21 === 0 && hasWorkout, // Personal record every 3 weeks
-        perfectForm: hasWorkout && Math.random() > 0.7, // Good form 30% of time
+        weeklyWorkouts: completedWorkouts,
+        plannedWorkouts: weeklyWorkouts,
+        // Weekly achievement flags
+        newPR: i % 4 === 0, // Personal record every 4 weeks
+        perfectWeek: weeklyAdherence === 100, // Perfect adherence
       });
     }
     return fitnessData.reverse();
