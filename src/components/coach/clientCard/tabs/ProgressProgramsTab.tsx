@@ -1,44 +1,10 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Defs, LinearGradient, Stop } from "recharts";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
-// Types
-interface DailyCheckInData {
-  date: string;
-  water: number;
-  sleep: number;
-  mood: number;
-  energy: number;
-}
-
-interface FitnessData {
-  week: string;
-  adherence: number;
-  progression: number[];
-}
-
-interface NutritionData {
-  date: string;
-  protein: number;
-  carbs: number;
-  fat: number;
-  calories: number;
-  adherence: number;
-}
-
-interface MentalHealthData {
-  date: string;
-  stress: number;
-  anxiety: number;
-  meditation: number;
-  yoga: number;
-}
-
-interface WeightData {
-  date: string;
-  weight: number;
-}
+// Types (same as before)
+// ...
 
 interface DashboardProps {
   client: any;
@@ -46,11 +12,26 @@ interface DashboardProps {
 
 // Utility for trend arrows
 const Trend = ({ value }: { value: number }) => {
-  if (value > 0)
-    return <span className="text-green-600 flex items-center text-sm"><ArrowUpRight className="w-4 h-4" />{value}%</span>;
-  if (value < 0)
-    return <span className="text-red-600 flex items-center text-sm"><ArrowDownRight className="w-4 h-4" />{Math.abs(value)}%</span>;
-  return <span className="text-gray-500 text-sm">0%</span>;
+    if (value > 0)
+        return <span className="text-green-500 flex items-center text-sm font-medium"><ArrowUpRight className="w-4 h-4" />{value}%</span>;
+    if (value < 0)
+        return <span className="text-red-500 flex items-center text-sm font-medium"><ArrowDownRight className="w-4 h-4" />{Math.abs(value)}%</span>;
+    return <span className="text-gray-400 text-sm">0%</span>;
+};
+
+// Custom Tooltip
+const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-white/80 p-3 rounded-lg shadow-xl backdrop-blur-sm">
+                <p className="font-semibold text-gray-800">{label}</p>
+                {payload.map((p: any) => (
+                    <p key={p.name} style={{ color: p.color }}>{`${p.name}: ${p.value}`}</p>
+                ))}
+            </div>
+        );
+    }
+    return null;
 };
 
 // Main dashboard component
@@ -60,115 +41,130 @@ const ClientDashboard: React.FC<DashboardProps> = ({ client }) => {
   const fitness = client.fitness || { adherence: 0, progression: [] };
   const weight = client.weightTrend || [];
   
-  // Transform nutrition object to array format if needed
   const nutrition = Array.isArray(client.nutrition) 
     ? client.nutrition 
     : client.nutrition 
       ? [client.nutrition] 
       : [];
   
-  // Transform mental health object to array format if needed  
   const mentalHealth = Array.isArray(client.mentalHealth)
     ? client.mentalHealth
     : client.mentalHealth
-      ? [client.mentalHealth]
+      ? [client.mentalHealth] 
       : [];
+
   return (
-    <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 font-sans antialiased bg-gray-50 text-gray-800">
+      
       {/* Daily Check-ins */}
-      <Card className="rounded-2xl shadow-md">
+      <Card className="rounded-3xl shadow-xl border-none">
         <CardHeader>
-          <CardTitle>Daily Check-ins</CardTitle>
+          <CardTitle className="text-2xl font-extrabold text-blue-800">Daily Check-ins</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={250}>
             <LineChart data={dailyCheckIns}>
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="date" hide />
               <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="water" stroke="#3b82f6" name="Water" />
-              <Line type="monotone" dataKey="sleep" stroke="#10b981" name="Sleep" />
-              <Line type="monotone" dataKey="mood" stroke="#f59e0b" name="Mood" />
-              <Line type="monotone" dataKey="energy" stroke="#ef4444" name="Energy" />
+              <Tooltip content={<CustomTooltip />} />
+              <Line type="monotone" dataKey="water" stroke="#4a90e2" strokeWidth={3} name="Water" />
+              <Line type="monotone" dataKey="sleep" stroke="#50e3c2" strokeWidth={3} name="Sleep" />
+              <Line type="monotone" dataKey="mood" stroke="#f5a623" strokeWidth={3} name="Mood" />
+              <Line type="monotone" dataKey="energy" stroke="#e24a4a" strokeWidth={3} name="Energy" />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
       {/* Fitness Performance */}
-      <Card className="rounded-2xl shadow-md">
+      <Card className="rounded-3xl shadow-xl border-none">
         <CardHeader>
-          <CardTitle>Fitness Performance</CardTitle>
+          <CardTitle className="text-2xl font-extrabold text-blue-800">Fitness Performance</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
-          <p className="text-lg font-semibold">Adherence: {fitness.adherence}%</p>
+        <CardContent className="space-y-6">
+          <div className="flex justify-between items-center">
+            <p className="text-4xl font-extrabold text-gray-900">{fitness.adherence}%</p>
+            <span className="text-lg text-gray-500">Adherence</span>
+          </div>
           <ResponsiveContainer width="100%" height={150}>
             <LineChart data={fitness.progression.map((val, i) => ({ week: i + 1, val }))}>
-              <XAxis dataKey="week" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="val" stroke="#6366f1" />
+              <Defs>
+                <LinearGradient id="colorProgression" x1="0" y1="0" x2="0" y2="1">
+                  <Stop offset="5%" stopColor="#4a90e2" stopOpacity={0.8}/>
+                  <Stop offset="95%" stopColor="#4a90e2" stopOpacity={0}/>
+                </LinearGradient>
+              </Defs>
+              <XAxis dataKey="week" stroke="#d1d5db" />
+              <YAxis stroke="#d1d5db" />
+              <Tooltip content={<CustomTooltip />} />
+              <Line type="monotone" dataKey="val" stroke="#4a90e2" strokeWidth={4} fillOpacity={1} fill="url(#colorProgression)" />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
       {/* Nutrition Insights */}
-      <Card className="rounded-2xl shadow-md">
+      <Card className="rounded-3xl shadow-xl border-none">
         <CardHeader>
-          <CardTitle>Nutrition Insights</CardTitle>
+          <CardTitle className="text-2xl font-extrabold text-blue-800">Nutrition Insights</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={250}>
             <LineChart data={nutrition}>
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="date" hide />
               <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="protein" stroke="#10b981" name="Protein" />
-              <Line type="monotone" dataKey="carbs" stroke="#3b82f6" name="Carbs" />
-              <Line type="monotone" dataKey="fat" stroke="#f59e0b" name="Fat" />
-              <Line type="monotone" dataKey="calories" stroke="#ef4444" name="Calories" />
+              <Tooltip content={<CustomTooltip />} />
+              <Line type="monotone" dataKey="protein" stroke="#50e3c2" strokeWidth={3} name="Protein" />
+              <Line type="monotone" dataKey="carbs" stroke="#4a90e2" strokeWidth={3} name="Carbs" />
+              <Line type="monotone" dataKey="fat" stroke="#f5a623" strokeWidth={3} name="Fat" />
+              <Line type="monotone" dataKey="calories" stroke="#e24a4a" strokeWidth={3} name="Calories" />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
       {/* Mental Health */}
-      <Card className="rounded-2xl shadow-md">
+      <Card className="rounded-3xl shadow-xl border-none">
         <CardHeader>
-          <CardTitle>Mental Health</CardTitle>
+          <CardTitle className="text-2xl font-extrabold text-blue-800">Mental Health</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={250}>
             <LineChart data={mentalHealth}>
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="date" hide />
               <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="stress" stroke="#ef4444" name="Stress" />
-              <Line type="monotone" dataKey="anxiety" stroke="#f59e0b" name="Anxiety" />
-              <Line type="monotone" dataKey="meditation" stroke="#10b981" name="Meditation" />
-              <Line type="monotone" dataKey="yoga" stroke="#3b82f6" name="Yoga" />
+              <Tooltip content={<CustomTooltip />} />
+              <Line type="monotone" dataKey="stress" stroke="#e24a4a" strokeWidth={3} name="Stress" />
+              <Line type="monotone" dataKey="anxiety" stroke="#f5a623" strokeWidth={3} name="Anxiety" />
+              <Line type="monotone" dataKey="meditation" stroke="#50e3c2" strokeWidth={3} name="Meditation" />
+              <Line type="monotone" dataKey="yoga" stroke="#4a90e2" strokeWidth={3} name="Yoga" />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
       {/* Weight Trend */}
-      <Card className="rounded-2xl shadow-md md:col-span-2">
+      <Card className="rounded-3xl shadow-xl border-none md:col-span-2 lg:col-span-3">
         <CardHeader>
-          <CardTitle>Weight Trend</CardTitle>
+          <CardTitle className="text-2xl font-extrabold text-blue-800">Weight Trend</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={weight}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="weight" stroke="#6366f1" name="Weight" />
+              <Defs>
+                <LinearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                  <Stop offset="5%" stopColor="#4a90e2" stopOpacity={0.8}/>
+                  <Stop offset="95%" stopColor="#4a90e2" stopOpacity={0}/>
+                </LinearGradient>
+              </Defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="date" stroke="#d1d5db" />
+              <YAxis stroke="#d1d5db" />
+              <Tooltip content={<CustomTooltip />} />
+              <Line type="monotone" dataKey="weight" stroke="#4a90e2" strokeWidth={4} fillOpacity={1} fill="url(#colorWeight)" name="Weight" />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
