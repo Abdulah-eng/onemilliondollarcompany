@@ -141,20 +141,20 @@ const MiniSparklineCard: React.FC<{
     <p className="text-3xl font-bold text-gray-900 mb-2">{value} <span className="text-sm text-gray-500">{unit}</span></p>
     <ResponsiveContainer width="100%" height={60}>
       <AreaChart data={data} margin={{ top: 5, right: 0, left: 0, bottom: 5 }}>
+        <defs>
+          <linearGradient id={`color${title.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor={color} stopOpacity={0.8}/>
+            <stop offset="95%" stopColor={color} stopOpacity={0}/>
+          </linearGradient>
+        </defs>
         <Area type="monotone" dataKey={dataKey} stroke={color} fill={`url(#color${title.replace(/\s/g, '')})`} fillOpacity={0.5} strokeWidth={2} />
       </AreaChart>
     </ResponsiveContainer>
-    <Defs>
-        <linearGradient id={`color${title.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="5%" stopColor={color} stopOpacity={0.8}/>
-            <Stop offset="95%" stopColor={color} stopOpacity={0}/>
-        </linearGradient>
-    </Defs>
   </Card>
 );
 
 // Main dashboard component
-const ClientDashboard: React.FC<DashboardProps> = ({ client }) => {
+const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
   // Extract and transform data
   const dailyCheckIns = client.dailyCheckIn || [];
   const fitness = client.fitness || { adherence: 0, progression: [] };
@@ -365,8 +365,8 @@ const ClientDashboard: React.FC<DashboardProps> = ({ client }) => {
                 <Tooltip content={<CustomTooltip />} />
                 <defs>
                   <linearGradient id="colorWeightGradient" x1="0" y1="0" x2="0" y2="1">
-                    <Stop offset="5%" stopColor={colors.weight} stopOpacity={0.8}/>
-                    <Stop offset="95%" stopColor={colors.weight} stopOpacity={0}/>
+                    <stop offset="5%" stopColor={colors.weight} stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor={colors.weight} stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <Area type="monotone" dataKey="weight" stroke={colors.weight} fill="url(#colorWeightGradient)" fillOpacity={1} strokeWidth={3} name="Weight (lbs)" dot={{ r: 5 }} activeDot={{ r: 8 }} />
@@ -380,4 +380,4 @@ const ClientDashboard: React.FC<DashboardProps> = ({ client }) => {
   );
 };
 
-export default ClientDashboard;
+export default ProgressProgramsTab;
