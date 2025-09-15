@@ -319,7 +319,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                 {/* Mental Health Trend Chart */}
                 <MentalHealthTrendChart data={mentalHealth} selectedRange={selectedRange} />
 
-                {/* Nutrition Insights - More detailed graph */}
+                {/* Nutrition Insights - Simplified with calories as bars */}
                 <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-2 lg:col-span-2">
                     <div className="flex items-center space-x-2 mb-4">
                          <h3 className="text-xl font-bold text-gray-800">Nutrition Fuel 🍎</h3>
@@ -327,39 +327,172 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                     <CardContent className="p-0 h-64">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={nutrition.length > 0 ? nutrition : dummyNutrition}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                                <XAxis dataKey="date" className="text-xs text-gray-500" />
-                                <YAxis className="text-xs text-gray-500" />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px' }} />
-                                <Bar dataKey="protein" fill={colors.nutritionProtein} name="Protein (g)" radius={[10, 10, 0, 0]} />
-                                <Bar dataKey="carbs" fill={colors.nutritionCarbs} name="Carbs (g)" radius={[10, 10, 0, 0]} />
-                                <Bar dataKey="fat" fill={colors.nutritionFat} name="Fat (g)" radius={[10, 10, 0, 0]} />
+                                <XAxis 
+                                    dataKey="date" 
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                                    className="text-xs"
+                                />
+                                <YAxis 
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                                    className="text-xs"
+                                />
+                                <Tooltip 
+                                    content={({ active, payload, label }) => {
+                                        if (active && payload && payload.length) {
+                                            const data = payload[0].payload;
+                                            return (
+                                                <div className="rounded-2xl shadow-2xl bg-white/95 backdrop-blur-md border border-gray-200/50 p-5 min-w-[250px]">
+                                                    <div className="flex items-center gap-3 mb-4">
+                                                        <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                                                            <span className="text-lg">🍎</span>
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-bold text-gray-800">{label}</h4>
+                                                            <p className="text-sm text-gray-500">Nutrition Overview</p>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="space-y-3">
+                                                        <div className="flex items-center justify-between p-2 bg-orange-50 rounded-lg">
+                                                            <span className="text-sm font-medium text-gray-700">Calories</span>
+                                                            <span className="font-bold text-orange-600">{data.calories} kcal</span>
+                                                        </div>
+                                                        
+                                                        <div className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
+                                                            <span className="text-sm font-medium text-gray-700">Protein</span>
+                                                            <span className="font-bold text-purple-600">{data.protein}g</span>
+                                                        </div>
+                                                        
+                                                        <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                                                            <span className="text-sm font-medium text-gray-700">Carbs</span>
+                                                            <span className="font-bold text-blue-600">{data.carbs}g</span>
+                                                        </div>
+                                                        
+                                                        <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
+                                                            <span className="text-sm font-medium text-gray-700">Fat</span>
+                                                            <span className="font-bold text-green-600">{data.fat}g</span>
+                                                        </div>
+                                                        
+                                                        <div className="bg-gray-50 rounded-lg p-2">
+                                                            <p className="text-xs text-gray-600 text-center">
+                                                                {data.adherence >= 90 ? '🎯 Excellent adherence!' : 
+                                                                 data.adherence >= 70 ? '💪 Good progress!' : 
+                                                                 '📈 Keep improving!'}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+                                        return null;
+                                    }}
+                                />
+                                <Bar 
+                                    dataKey="calories" 
+                                    fill="url(#nutritionBarGradient)" 
+                                    radius={[8, 8, 0, 0]} 
+                                    stroke="#f97316"
+                                    strokeWidth={1}
+                                />
+                                <defs>
+                                    <linearGradient id="nutritionBarGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#fb923c" stopOpacity={0.9} />
+                                        <stop offset="100%" stopColor="#f97316" stopOpacity={0.7} />
+                                    </linearGradient>
+                                </defs>
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
                 </Card>
 
-                {/* Weight Trend - Prominent line chart with fill */}
+                {/* Weight Journey - Simplified with bars */}
                 <Card className="rounded-3xl shadow-xl bg-white/40 backdrop-blur-md border-none p-6 md:col-span-full lg:col-span-full xl:col-span-full">
                     <div className="flex items-center space-x-2 mb-4">
                         <h3 className="text-xl font-bold text-gray-800">Weight Journey ⚖️</h3>
                     </div>
                     <CardContent className="p-0 h-80">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={weight.length > 0 ? weight : dummyWeightTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                                <XAxis dataKey="date" className="text-xs text-gray-500" />
-                                <YAxis className="text-xs text-gray-500" />
-                                <Tooltip content={<CustomTooltip />} />
+                            <BarChart data={weight.length > 0 ? weight : dummyWeightTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                <XAxis 
+                                    dataKey="date" 
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                                    className="text-xs"
+                                />
+                                <YAxis 
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                                    className="text-xs"
+                                />
+                                <Tooltip 
+                                    content={({ active, payload, label }) => {
+                                        if (active && payload && payload.length) {
+                                            const data = payload[0].payload;
+                                            const goalWeight = 160; // You can make this dynamic
+                                            const progress = Math.round(((180 - data.weight) / (180 - goalWeight)) * 100);
+                                            
+                                            return (
+                                                <div className="rounded-2xl shadow-2xl bg-white/95 backdrop-blur-md border border-gray-200/50 p-5 min-w-[250px]">
+                                                    <div className="flex items-center gap-3 mb-4">
+                                                        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                                                            <span className="text-lg">⚖️</span>
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-bold text-gray-800">{label}</h4>
+                                                            <p className="text-sm text-gray-500">Weight Progress</p>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="space-y-3">
+                                                        <div className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
+                                                            <span className="text-sm font-medium text-gray-700">Current Weight</span>
+                                                            <span className="font-bold text-purple-600">{data.weight} lbs</span>
+                                                        </div>
+                                                        
+                                                        <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                                                            <span className="text-sm font-medium text-gray-700">Goal Weight</span>
+                                                            <span className="font-bold text-blue-600">{goalWeight} lbs</span>
+                                                        </div>
+                                                        
+                                                        <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
+                                                            <span className="text-sm font-medium text-gray-700">Progress</span>
+                                                            <span className="font-bold text-green-600">{progress}%</span>
+                                                        </div>
+                                                        
+                                                        <div className="bg-gray-50 rounded-lg p-2">
+                                                            <p className="text-xs text-gray-600 text-center">
+                                                                {data.weight <= goalWeight ? '🎯 Goal achieved!' : 
+                                                                 progress >= 80 ? '💪 Almost there!' : 
+                                                                 '📈 Keep going!'}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+                                        return null;
+                                    }}
+                                />
+                                <Bar 
+                                    dataKey="weight" 
+                                    fill="url(#weightBarGradient)" 
+                                    radius={[8, 8, 0, 0]} 
+                                    stroke="#8b5cf6"
+                                    strokeWidth={1}
+                                />
                                 <defs>
-                                    <linearGradient id="colorWeightGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor={colors.weight} stopOpacity={0.8} />
-                                        <stop offset="95%" stopColor={colors.weight} stopOpacity={0} />
+                                    <linearGradient id="weightBarGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.9} />
+                                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.7} />
                                     </linearGradient>
                                 </defs>
-                                <Area type="monotone" dataKey="weight" stroke={colors.weight} fill="url(#colorWeightGradient)" fillOpacity={1} strokeWidth={3} name="Weight (lbs)" dot={{ r: 5 }} activeDot={{ r: 8 }} />
-                            </AreaChart>
+                            </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
                 </Card>

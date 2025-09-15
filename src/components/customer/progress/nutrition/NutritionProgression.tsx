@@ -39,33 +39,69 @@ const DUMMY_TREND_DATA = {
     ],
 };
 
-// Custom tooltip for nutrition trend chart with color-coded indicators
-const NutritionTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+// Enhanced interactive tooltip for nutrition chart
+const EnhancedNutritionTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload;
+        const netCalories = data.consumed - data.burned;
+        const calorieGoal = 2200; // You can make this dynamic
+        const goalProgress = Math.round((data.consumed / calorieGoal) * 100);
+        
         return (
-            <div className="bg-gray-800/95 backdrop-blur-sm p-3 rounded-lg border border-gray-600/50 shadow-lg min-w-[160px]">
-                <p className="text-sm font-bold text-white mb-2">{label}</p>
-                <div className="space-y-1.5 text-xs">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                        <span className="text-purple-300">Weight: {data.weight} kg</span>
+            <div className="rounded-2xl shadow-2xl bg-white/95 backdrop-blur-md border border-gray-200/50 p-5 min-w-[280px] max-w-[320px]">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                        <Utensils className="w-5 h-5 text-orange-600" />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-sm bg-orange-400"></div>
-                        <span className="text-orange-300">Consumed: {data.consumed} kcal</span>
+                    <div>
+                        <h4 className="font-bold text-gray-800">{label}</h4>
+                        <p className="text-sm text-gray-500">Nutrition Overview</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-sm bg-red-400"></div>
-                        <span className="text-red-300">Burned: {data.burned} kcal</span>
+                </div>
+                
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between p-2 bg-orange-50 rounded-lg">
+                        <span className="text-sm font-medium text-gray-700">Consumed</span>
+                        <span className="font-bold text-orange-600">{data.consumed} kcal</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-sm bg-blue-400"></div>
-                        <span className="text-blue-300">Activity: {data.activity}%</span>
+                    
+                    <div className="flex items-center justify-between p-2 bg-red-50 rounded-lg">
+                        <span className="text-sm font-medium text-gray-700">Burned</span>
+                        <span className="font-bold text-red-600">{data.burned} kcal</span>
                     </div>
-                    <hr className="border-gray-600 my-1" />
-                    <div className="flex items-center gap-2">
-                        <span className="text-gray-300">Net: {data.net} kcal</span>
+                    
+                    <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                        <span className="text-sm font-medium text-gray-700">Activity Level</span>
+                        <span className="font-bold text-blue-600">{data.activity}%</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
+                        <span className="text-sm font-medium text-gray-700">Weight</span>
+                        <span className="font-bold text-purple-600">{data.weight} kg</span>
+                    </div>
+                    
+                    <hr className="border-gray-200" />
+                    
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">Net Calories</span>
+                            <span className={`font-bold ${netCalories > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {netCalories > 0 ? '+' : ''}{netCalories} kcal
+                            </span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">Goal Progress</span>
+                            <span className="font-bold text-gray-800">{goalProgress}%</span>
+                        </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 rounded-lg p-2">
+                        <p className="text-xs text-gray-600 text-center">
+                            {goalProgress >= 100 ? '🎯 Goal achieved!' : 
+                             goalProgress >= 80 ? '💪 Almost there!' : 
+                             '📈 Keep going!'}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -366,7 +402,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                     hide
                                     domain={[0, 100]}
                                 />
-                                <Tooltip content={<NutritionTooltip />} cursor={{ stroke: 'rgba(200,200,200,0.2)', strokeWidth: 1 }} />
+                                <Tooltip content={<EnhancedNutritionTooltip />} cursor={{ stroke: 'rgba(200,200,200,0.2)', strokeWidth: 1 }} />
                                 <Bar
                                     yAxisId="act"
                                     dataKey="activity"
