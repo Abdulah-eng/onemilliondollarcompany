@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Defs, LinearGradient, Stop } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
 // Types (same as before)
@@ -44,10 +44,6 @@ interface DashboardProps {
   client: any;
 }
 
-interface DashboardProps {
-  client: any;
-}
-
 // Utility for trend arrows
 const Trend = ({ value }: { value: number }) => {
     if (value > 0)
@@ -79,17 +75,20 @@ const ClientDashboard: React.FC<DashboardProps> = ({ client }) => {
   const fitness = client.fitness || { adherence: 0, progression: [] };
   const weight = client.weightTrend || [];
   
-  const nutrition = Array.isArray(client.nutrition) 
-    ? client.nutrition 
-    : client.nutrition 
-      ? [client.nutrition] 
-      : [];
+  // Transform nutrition and mental health objects into array format for charts
+  const nutrition = client.nutrition 
+    ? Object.entries(client.nutrition).map(([key, value]) => ({
+        metric: key,
+        value: typeof value === 'number' ? value : 0
+      }))
+    : [];
   
-  const mentalHealth = Array.isArray(client.mentalHealth)
-    ? client.mentalHealth
-    : client.mentalHealth
-      ? [client.mentalHealth] 
-      : [];
+  const mentalHealth = client.mentalHealth
+    ? Object.entries(client.mentalHealth).map(([key, value]) => ({
+        metric: key,
+        value: typeof value === 'number' ? value : 0
+      }))
+    : [];
 
   return (
     <div className="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 font-sans antialiased bg-gray-50 text-gray-800">
@@ -126,17 +125,12 @@ const ClientDashboard: React.FC<DashboardProps> = ({ client }) => {
             <span className="text-lg text-gray-500">Adherence</span>
           </div>
           <ResponsiveContainer width="100%" height={150}>
-            <LineChart data={fitness.progression.map((val, i) => ({ week: i + 1, val }))}>
-              <Defs>
-                <LinearGradient id="colorProgression" x1="0" y1="0" x2="0" y2="1">
-                  <Stop offset="5%" stopColor="#4a90e2" stopOpacity={0.8}/>
-                  <Stop offset="95%" stopColor="#4a90e2" stopOpacity={0}/>
-                </LinearGradient>
-              </Defs>
+            <LineChart data={fitness.progression || []}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="week" stroke="#d1d5db" />
               <YAxis stroke="#d1d5db" />
               <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="val" stroke="#4a90e2" strokeWidth={4} fillOpacity={1} fill="url(#colorProgression)" />
+              <Line type="monotone" dataKey="adherence" stroke="#4a90e2" strokeWidth={4} />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
@@ -148,18 +142,18 @@ const ClientDashboard: React.FC<DashboardProps> = ({ client }) => {
           <CardTitle className="text-2xl font-extrabold text-blue-800">Nutrition Insights</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={nutrition}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="date" hide />
-              <YAxis />
-              <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="protein" stroke="#50e3c2" strokeWidth={3} name="Protein" />
-              <Line type="monotone" dataKey="carbs" stroke="#4a90e2" strokeWidth={3} name="Carbs" />
-              <Line type="monotone" dataKey="fat" stroke="#f5a623" strokeWidth={3} name="Fat" />
-              <Line type="monotone" dataKey="calories" stroke="#e24a4a" strokeWidth={3} name="Calories" />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="space-y-4">
+            {nutrition.length > 0 ? (
+              nutrition.map((item, index) => (
+                <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <span className="font-medium text-gray-700 capitalize">{item.metric}</span>
+                  <span className="font-bold text-blue-600">{item.value}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-center">No nutrition data available</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -169,18 +163,18 @@ const ClientDashboard: React.FC<DashboardProps> = ({ client }) => {
           <CardTitle className="text-2xl font-extrabold text-blue-800">Mental Health</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={mentalHealth}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="date" hide />
-              <YAxis />
-              <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="stress" stroke="#e24a4a" strokeWidth={3} name="Stress" />
-              <Line type="monotone" dataKey="anxiety" stroke="#f5a623" strokeWidth={3} name="Anxiety" />
-              <Line type="monotone" dataKey="meditation" stroke="#50e3c2" strokeWidth={3} name="Meditation" />
-              <Line type="monotone" dataKey="yoga" stroke="#4a90e2" strokeWidth={3} name="Yoga" />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="space-y-4">
+            {mentalHealth.length > 0 ? (
+              mentalHealth.map((item, index) => (
+                <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <span className="font-medium text-gray-700 capitalize">{item.metric}</span>
+                  <span className="font-bold text-blue-600">{item.value}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-center">No mental health data available</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -192,17 +186,11 @@ const ClientDashboard: React.FC<DashboardProps> = ({ client }) => {
         <CardContent>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={weight}>
-              <Defs>
-                <LinearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
-                  <Stop offset="5%" stopColor="#4a90e2" stopOpacity={0.8}/>
-                  <Stop offset="95%" stopColor="#4a90e2" stopOpacity={0}/>
-                </LinearGradient>
-              </Defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="date" stroke="#d1d5db" />
               <YAxis stroke="#d1d5db" />
               <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="weight" stroke="#4a90e2" strokeWidth={4} fillOpacity={1} fill="url(#colorWeight)" name="Weight" />
+              <Line type="monotone" dataKey="weight" stroke="#4a90e2" strokeWidth={4} name="Weight" />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
