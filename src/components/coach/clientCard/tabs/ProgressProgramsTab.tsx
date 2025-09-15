@@ -511,7 +511,11 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                     </div>
                     <CardContent className="p-0 h-64 sm:h-72 lg:h-80">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={aggregateWeightData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                            <BarChart 
+                                data={aggregateWeightData} 
+                                key={`weight-chart-${weightRange}`}
+                                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                            >
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                                 <XAxis 
                                     dataKey="label" 
