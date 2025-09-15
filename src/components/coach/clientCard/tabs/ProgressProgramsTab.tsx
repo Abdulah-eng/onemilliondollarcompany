@@ -85,7 +85,77 @@ return null;
 
 // Radial Progress Card
 const RadialProgressCard: React.FC<{
-title: string;
+  title: string;
+  value: number;
+  maxValue?: number;
+  unit?: string;
+  color: string;
+  emoji?: string;
+  subText?: string;
+  size?: number;
+}> = ({ title, value, maxValue = 100, unit = '', color, emoji, subText, size = 120 }) => {
+  const percentage = Math.min((value / maxValue) * 100, 100);
+  
+  return (
+    <Card className="rounded-2xl shadow-lg bg-card border-none p-4 flex flex-col items-center justify-center min-h-[200px]">
+      <div className="relative" style={{ width: size, height: size }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <RadialBarChart cx="50%" cy="50%" innerRadius="70%" outerRadius="90%" data={[{ value: percentage }]}>
+            <RadialBar dataKey="value" cornerRadius={10} fill={color} />
+          </RadialBarChart>
+        </ResponsiveContainer>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <div className="text-2xl">{emoji}</div>
+          <div className="text-lg font-bold text-foreground">{value}{unit}</div>
+        </div>
+      </div>
+      <div className="text-center mt-3">
+        <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+        {subText && <p className="text-xs text-muted-foreground mt-1">{subText}</p>}
+      </div>
+    </Card>
+  );
+};
+
+// Daily Trend Card
+const DailyTrendCard: React.FC<{
+  title: string;
+  data: any[];
+  dataKey: string;
+  color: string;
+  emoji?: string;
+  unit?: string;
+  selectedRange: string;
+}> = ({ title, data, dataKey, color, emoji, unit = '', selectedRange }) => {
+  const rangeInDays = selectedRange === '4w' ? 28 : selectedRange === '12w' ? 84 : 168;
+  const filteredData = data.slice(-rangeInDays);
+  
+  const currentValue = filteredData[filteredData.length - 1]?.[dataKey] || 0;
+  const previousValue = filteredData[filteredData.length - 8]?.[dataKey] || 0;
+  const trend = ((currentValue - previousValue) / previousValue) * 100;
+  
+  return (
+    <Card className="rounded-2xl shadow-lg bg-card border-none p-4 min-h-[200px]">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center space-x-2">
+          {emoji && <span className="text-lg">{emoji}</span>}
+          <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+        </div>
+        <Trend value={trend} />
+      </div>
+      <div className="mb-3">
+        <span className="text-2xl font-bold text-foreground">{currentValue.toFixed(1)}</span>
+        <span className="text-sm text-muted-foreground ml-1">{unit}</span>
+      </div>
+      <div className="h-16">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={filteredData.slice(-14)}>
+            <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} dot={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </Card>
+  );
 };
 
 // Main dashboard component
