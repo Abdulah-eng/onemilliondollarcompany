@@ -369,8 +369,9 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                     <stop offset="95%" stopColor={colors.weight} stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <Area type="monotone" dataKey="weight" stroke={colors.weight} fill="url(#colorWeightGradient)" fillOpacity={1} strokeWidth={3} name="Weight (lbs)" dot={{ r: 5 }} activeDot={{ r: 8 }} />
-              </AreaChart>
+                <Area type="monotone" dataKey="weight" stroke={colors.weight} fill="url(#colorWeightGradient)" fillOpacity={1} strokeWidth={3} name="Weight (lbs)" dot={{ r: 5 }} activeDot={{ r: 8 }} />
+              </AreaChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 
