@@ -20,3 +20,5 @@ export const AuthCard = ({ className, children }: AuthCardProps) => {
     </div>
   );
 };
+
+export default AuthCard;
