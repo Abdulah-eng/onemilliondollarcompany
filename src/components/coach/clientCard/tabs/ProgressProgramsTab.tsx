@@ -336,7 +336,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                     </div>
                     <CardContent className="p-0 h-64">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={nutrition}>
+                            <BarChart data={nutrition.length > 0 ? nutrition : dummyNutrition}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                                 <XAxis dataKey="date" className="text-xs text-gray-500" />
                                 <YAxis className="text-xs text-gray-500" />
@@ -357,7 +357,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                     </div>
                     <CardContent className="p-0 h-80">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={weight}>
+                            <AreaChart data={weight.length > 0 ? weight : dummyWeightTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                                 <XAxis dataKey="date" className="text-xs text-gray-500" />
                                 <YAxis className="text-xs text-gray-500" />
