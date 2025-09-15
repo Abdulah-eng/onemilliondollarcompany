@@ -350,7 +350,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
     const dailyData = dailyCheckIns.length > 0 ? dailyCheckIns : dummyDailyCheckIns;
 
     return (
-        <div className="min-h-screen p-2 sm:p-3 md:p-4 font-sans antialiased bg-gray-50 text-gray-900">
+        <>
             {/* Time Range Selector for Fitness & Mental Health */}
             <div className="flex justify-center sm:justify-end mb-4 sm:mb-6">
                 <div className="bg-white/40 backdrop-blur-md rounded-full border border-gray-200/50 p-1 flex shadow-sm">
@@ -614,7 +614,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
                     </div>
                 </Card>
             </div>
-        </div>
+        </>
     );
 };
 
