@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { ClipboardCheck, Plus } from 'lucide-react';
 import { CheckInModal } from './CheckInModal';
 
-const SIZE = 64; // px (w-16 / h-16)
+const SIZE = 64; // FAB size
 const MARGIN = 16; // padding from viewport edges
+const ACTION_MARGIN = 12; // gap between FAB and action bubble
 
 export default function ClientActionButton() {
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
@@ -31,17 +32,14 @@ export default function ClientActionButton() {
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const [viewport, setViewport] = useState<{ w: number; h: number } | null>(null);
 
-  // init position → always bottom right
+  // init position → always bottom-right
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     setViewport({ w: vw, h: vh });
 
-    const defaultLeft = vw - SIZE - MARGIN;
-    const defaultTop = vh - SIZE - MARGIN;
-
-    setPos({ left: defaultLeft, top: defaultTop });
+    setPos({ left: vw - SIZE - MARGIN, top: vh - SIZE - MARGIN });
 
     const onResize = () => {
       const vw2 = window.innerWidth;
@@ -57,7 +55,7 @@ export default function ClientActionButton() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // start dragging
+  // drag logic
   const onPointerDownMain = (e: React.PointerEvent) => {
     if (!pos) return;
     draggingRef.current = true;
@@ -116,7 +114,6 @@ export default function ClientActionButton() {
     document.addEventListener('pointerup', onPointerUp);
   };
 
-  // click handler
   const onClickMain = (e: React.MouseEvent) => {
     if (movedRef.current) {
       e.preventDefault();
@@ -128,6 +125,10 @@ export default function ClientActionButton() {
   };
 
   if (!pos) return null;
+
+  // determine bubble alignment to stay inside screen
+  const actionLeft = Math.min(pos.left, (viewport?.w || 0) - SIZE - MARGIN - 150); // max width of bubble
+  const actionBottom = (viewport?.h || 0) - pos.top + ACTION_MARGIN; // space above FAB
 
   return (
     <>
@@ -149,7 +150,12 @@ export default function ClientActionButton() {
             actionItems.map((it) => (
               <div
                 key={it.label}
-                className="absolute bottom-full mb-3 flex items-center gap-2 select-none whitespace-nowrap"
+                className="absolute flex items-center gap-2 select-none whitespace-nowrap"
+                style={{
+                  bottom: SIZE + ACTION_MARGIN,
+                  left: 0,
+                  transform: `translateX(${pos.left > (viewport?.w || 0) / 2 ? -150 + SIZE : 0}px)`, // stay inside viewport
+                }}
               >
                 <span className="text-sm bg-card/80 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg border border-border/50">
                   {it.label}
@@ -184,6 +190,7 @@ export default function ClientActionButton() {
           </div>
         </div>
       </div>
+
       <CheckInModal
         isOpen={isCheckInModalOpen}
         onClose={() => setIsCheckInModalOpen(false)}
