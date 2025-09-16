@@ -2,16 +2,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, ClipboardCheck, Plus } from 'lucide-react';
+import { CheckInModal } from './CheckInModal'; // Corrected import path
 
 const SIZE = 64; // px (w-16 / h-16)
 const MARGIN = 16; // padding from viewport edges
 
-const actionItems = [
-  { label: 'Feedback', icon: <MessageCircle className="h-5 w-5" />, action: () => console.log('Feedback clicked') },
-  { label: 'Check In', icon: <ClipboardCheck className="h-5 w-5" />, action: () => console.log('Check In clicked') },
-];
-
 export default function ClientActionButton() {
+  const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false); // State to control modal visibility
+
+  const handleSendCheckIn = (data: { title: string; message: string }) => {
+    console.log('Sending check-in:', data);
+    // You would add your API call or state update logic here
+  };
+
+  const actionItems = [
+    { label: 'Feedback', icon: <MessageCircle className="h-5 w-5" />, action: () => console.log('Feedback clicked') },
+    { label: 'Check In', icon: <ClipboardCheck className="h-5 w-5" />, action: () => setIsCheckInModalOpen(true) }, // Action to open the modal
+  ];
+
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const innerRef = useRef<HTMLDivElement | null>(null);
 
@@ -137,68 +145,75 @@ export default function ClientActionButton() {
   const showAbove = viewport ? pos.top > (viewport.h || 0) / 3 : true;
 
   return (
-    <div
-      ref={wrapperRef}
-      style={{
-        position: 'fixed',
-        left: pos.left,
-        top: pos.top,
-        width: SIZE,
-        height: SIZE,
-        zIndex: 9999,
-        touchAction: 'none',
-      }}
-    >
-      <div ref={innerRef} style={{ width: '100%', height: '100%', position: 'relative', transform: 'none' }}>
-        {/* Actions */}
-        <div
-          style={{
-            position: 'absolute',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
-            alignItems: showLeft ? 'flex-end' : 'flex-start',
-            ...(showLeft ? { right: SIZE + 12 } : { left: SIZE + 12 }),
-            ...(showAbove ? { bottom: 0 } : { top: 0 }),
-            pointerEvents: isOpen ? 'auto' : 'none',
-          }}
-        >
-          {isOpen &&
-            actionItems.map((it) => (
-              <div key={it.label} className="flex items-center gap-3 select-none">
-                <span className="text-sm bg-card/80 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg border border-border/50">
-                  {it.label}
-                </span>
-                <Button
-                  size="icon"
-                  className="rounded-full w-12 h-12 shadow-lg"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    it.action();
-                    setIsOpen(false);
-                  }}
-                >
-                  {it.icon}
-                </Button>
-              </div>
-            ))}
-        </div>
-
-        {/* Main FAB */}
-        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Button
-            size="icon"
-            className="rounded-full w-16 h-16 shadow-2xl z-10 cursor-grab active:cursor-grabbing"
-            onPointerDown={onPointerDownMain}
-            onClick={onClickMain}
-            aria-label="Client actions"
+    <>
+      <div
+        ref={wrapperRef}
+        style={{
+          position: 'fixed',
+          left: pos.left,
+          top: pos.top,
+          width: SIZE,
+          height: SIZE,
+          zIndex: 9999,
+          touchAction: 'none',
+        }}
+      >
+        <div ref={innerRef} style={{ width: '100%', height: '100%', position: 'relative', transform: 'none' }}>
+          {/* Actions */}
+          <div
+            style={{
+              position: 'absolute',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+              alignItems: showLeft ? 'flex-end' : 'flex-start',
+              ...(showLeft ? { right: SIZE + 12 } : { left: SIZE + 12 }),
+              ...(showAbove ? { bottom: 0 } : { top: 0 }),
+              pointerEvents: isOpen ? 'auto' : 'none',
+            }}
           >
-            <div style={{ transform: `rotate(${isOpen ? 45 : 0}deg)`, transition: 'transform 180ms ease' }}>
-              <Plus className="h-8 w-8" />
-            </div>
-          </Button>
+            {isOpen &&
+              actionItems.map((it) => (
+                <div key={it.label} className="flex items-center gap-3 select-none">
+                  <span className="text-sm bg-card/80 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg border border-border/50">
+                    {it.label}
+                  </span>
+                  <Button
+                    size="icon"
+                    className="rounded-full w-12 h-12 shadow-lg"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      it.action();
+                      setIsOpen(false);
+                    }}
+                  >
+                    {it.icon}
+                  </Button>
+                </div>
+              ))}
+          </div>
+
+          {/* Main FAB */}
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Button
+              size="icon"
+              className="rounded-full w-16 h-16 shadow-2xl z-10 cursor-grab active:cursor-grabbing"
+              onPointerDown={onPointerDownMain}
+              onClick={onClickMain}
+              aria-label="Client actions"
+            >
+              <div style={{ transform: `rotate(${isOpen ? 45 : 0}deg)`, transition: 'transform 180ms ease' }}>
+                <Plus className="h-8 w-8" />
+              </div>
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+      <CheckInModal
+        isOpen={isCheckInModalOpen}
+        onClose={() => setIsCheckInModalOpen(false)}
+        onSend={handleSendCheckIn}
+      />
+    </>
   );
 }
