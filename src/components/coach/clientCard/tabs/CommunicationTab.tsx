@@ -4,26 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-import {
-  Send,
-  MessageSquare,
-  StickyNote,
-  Clock,
-  AlertCircle,
-  CheckCircle,
-  Trash2,
-  Tag,
-} from 'lucide-react';
-
-type NoteStatus = 'Open' | 'InReview' | 'Resolved';
-
-interface Note {
-  id: number;
-  content: string;
-  date: string;
-  status: NoteStatus;
-  internal?: boolean;
-}
+import { Send, Clock, MessageSquare } from 'lucide-react';
 
 interface Message {
   id: number;
@@ -48,29 +29,6 @@ interface CommunicationTabProps {
 
 const formatDate = (iso: string) => new Date(iso).toLocaleString();
 
-const StatusBadge: React.FC<{ status: NoteStatus }> = ({ status }) => {
-  if (status === 'Resolved')
-    return (
-      <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
-        <CheckCircle className="h-3 w-3 mr-1 inline" />
-        Resolved
-      </Badge>
-    );
-  if (status === 'InReview')
-    return (
-      <Badge className="bg-orange-100 text-orange-700 border-orange-200">
-        <Tag className="h-3 w-3 mr-1 inline" />
-        In review
-      </Badge>
-    );
-  return (
-    <Badge className="bg-amber-100 text-amber-700 border-amber-200">
-      <AlertCircle className="h-3 w-3 mr-1 inline" />
-      Open
-    </Badge>
-  );
-};
-
 const MessageBubble: React.FC<{ m: Message }> = ({ m }) => {
   const isCoach = m.author === 'coach';
   const classes = isCoach
@@ -92,63 +50,41 @@ const ThreadListItem: React.FC<{
   active?: boolean;
 }> = ({ thread, onSelect, active }) => {
   const latest = thread.messages.at(-1);
+  const isClientResponded = thread.messages.some((m) => m.author === 'client');
+
   return (
-    <div
+    <motion.div
       onClick={() => onSelect(thread.id)}
-      className={`cursor-pointer border rounded-xl p-3 hover:shadow-md ${
+      className={`cursor-pointer border rounded-xl p-3 hover:shadow-md transition-shadow ${
         active ? 'ring-2 ring-primary/30 bg-primary/5' : 'bg-card'
       }`}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.01 }}
+      transition={{ duration: 0.2 }}
     >
-      <div className="flex items-start justify-between">
-        <div>
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <Badge>{thread.type}</Badge>
-            <div className="text-sm font-semibold">{thread.title}</div>
+            <Badge variant={thread.type === 'check-in' ? 'secondary' : 'default'}>{thread.type}</Badge>
+            <div className="text-sm font-semibold truncate">{thread.title}</div>
           </div>
-          <div className="text-xs text-muted-foreground line-clamp-2">
-            {latest ? `${latest.author}: ${latest.content}` : 'Ingen meldinger enda'}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
+            <div className="ml-auto">
+              <Badge className={isClientResponded ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}>
+                {isClientResponded ? 'Client Responded' : 'Awaiting Reply'}
+              </Badge>
+            </div>
           </div>
-        </div>
-        <div className="text-xs text-muted-foreground">
-          {new Date(thread.createdAt).toLocaleDateString()}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
-const NoteItem: React.FC<{
-  note: Note;
-  onChangeStatus: (id: number, status: NoteStatus) => void;
-  onDelete: (id: number) => void;
-}> = ({ note, onChangeStatus, onDelete }) => (
-  <div className={`border rounded-xl p-4 ${note.status === 'Resolved' ? 'bg-emerald-50/60' : 'bg-card'}`}>
-    <div className="flex items-start justify-between">
-      <div className="flex-1">
-        <p className="text-sm mb-2">{note.content}</p>
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">{note.date}</span>
-          <StatusBadge status={note.status} />
-        </div>
-      </div>
-      <div className="flex gap-2 ml-4">
-        {note.status !== 'Resolved' && (
-          <Button size="sm" variant="ghost" onClick={() =>
-            onChangeStatus(note.id, note.status === 'Open' ? 'InReview' : 'Resolved')
-          }>
-            <CheckCircle className="h-4 w-4" />
-          </Button>
-        )}
-        <Button size="sm" variant="ghost" onClick={() => onDelete(note.id)}>
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  </div>
-);
-
-const CommunicationTab: React.FC<CommunicationTabProps> = ({ client }) => {
+const CommunicationTab: React.FC<CommunicationTabProps> = () => {
   const [threads, setThreads] = useState<Thread[]>([
     {
       id: 1,
@@ -161,10 +97,27 @@ const CommunicationTab: React.FC<CommunicationTabProps> = ({ client }) => {
         { id: 102, author: 'client', content: 'Bra! Litt sliten på onsdag.', date: '2024-09-10T14:22:00Z' },
       ],
     },
-  ]);
-
-  const [notes, setNotes] = useState<Note[]>([
-    { id: 1, content: 'Klient nevnte manglende motivasjon', date: '2024-09-10', status: 'Open' },
+    {
+      id: 2,
+      title: 'Feedback on meal plan',
+      type: 'feedback',
+      createdAt: '2024-09-08T11:30:00Z',
+      respondable: true,
+      messages: [
+        { id: 201, author: 'client', content: 'The new meal plan is great. The smoothie recipes are a lifesaver!', date: '2024-09-08T11:30:00Z' },
+        { id: 202, author: 'coach', content: 'Glad to hear it! Let me know if you have any questions.', date: '2024-09-08T15:00:00Z' },
+      ],
+    },
+    {
+      id: 3,
+      title: 'Quick question about macros',
+      type: 'message',
+      createdAt: '2024-09-07T10:00:00Z',
+      respondable: true,
+      messages: [
+        { id: 301, author: 'client', content: 'What are the recommended macros for a high-intensity workout day?', date: '2024-09-07T10:00:00Z' },
+      ],
+    },
   ]);
 
   const [activeThreadId, setActiveThreadId] = useState<number | null>(threads[0]?.id ?? null);
@@ -183,83 +136,58 @@ const CommunicationTab: React.FC<CommunicationTabProps> = ({ client }) => {
     setReplyText('');
   }, [activeThread, replyText, threads]);
 
-  const handleChangeNoteStatus = (id: number, status: NoteStatus) =>
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, status } : n)));
-
-  const handleDeleteNote = (id: number) => setNotes((prev) => prev.filter((n) => n.id !== id));
-
-  const checkIns = useMemo(() => threads.filter((t) => t.type === 'check-in'), [threads]);
-
   return (
-    <motion.div className="space-y-6" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Left: Threads + Check-ins */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader><CardTitle>Conversation Threads</CardTitle></CardHeader>
-            <CardContent>
-              {threads.map((t) => (
-                <ThreadListItem key={t.id} thread={t} onSelect={setActiveThreadId} active={activeThreadId === t.id} />
-              ))}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader><CardTitle>Check-ins</CardTitle></CardHeader>
-            <CardContent>
-              {checkIns.map((c) => {
-                const clientResponded = c.messages.some((m) => m.author === 'client');
-                return (
-                  <div key={c.id} className="border rounded-xl p-3">
-                    <div className="flex justify-between">
-                      <div>
-                        <div className="font-semibold">{c.title}</div>
-                        <div className="text-xs">{new Date(c.createdAt).toLocaleDateString()}</div>
-                      </div>
-                      <Badge className={clientResponded ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}>
-                        {clientResponded ? 'Client responded' : 'Awaiting reply'}
-                      </Badge>
-                    </div>
-                  </div>
-                );
-              })}
-            </CardContent>
-          </Card>
-        </div>
+    <motion.div className="space-y-6 lg:grid lg:grid-cols-3 lg:gap-4" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+      {/* Left: Unified Feed */}
+      <Card className="lg:col-span-1">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5" /> Conversation Feed
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 max-h-[70vh] overflow-y-auto">
+          {threads.map((t) => (
+            <ThreadListItem key={t.id} thread={t} onSelect={setActiveThreadId} active={activeThreadId === t.id} />
+          ))}
+        </CardContent>
+      </Card>
 
-        {/* Right: Active thread + Notes */}
-        <div className="lg:col-span-2 space-y-4">
-          <Card>
-            <CardHeader><CardTitle>Thread</CardTitle></CardHeader>
-            <CardContent>
-              {!activeThread ? (
-                <div className="text-sm text-muted-foreground">Velg en tråd</div>
-              ) : (
-                <>
-                  <div className="flex flex-col gap-2 max-h-[360px] overflow-auto border p-2 rounded-lg">
-                    {activeThread.messages.map((m) => <MessageBubble key={m.id} m={m} />)}
-                  </div>
-                  {activeThread.respondable && (
-                    <div className="mt-2 flex gap-2">
-                      <Textarea value={replyText} onChange={(e) => setReplyText(e.target.value)} placeholder="Skriv svar..." />
-                      <Button onClick={handleReply} disabled={!replyText.trim()}>
-                        <Send className="h-4 w-4 mr-2" /> Reply
-                      </Button>
-                    </div>
-                  )}
-                </>
+      {/* Right: Active Thread */}
+      <Card className="lg:col-span-2">
+        <CardHeader>
+          <CardTitle>
+            {activeThread ? activeThread.title : 'Select a conversation'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!activeThread ? (
+            <div className="text-sm text-muted-foreground text-center py-10">
+              Select a conversation from the feed to view its details and respond.
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-col gap-3 max-h-[calc(70vh-120px)] overflow-y-auto border p-4 rounded-lg">
+                {activeThread.messages.map((m) => (
+                  <MessageBubble key={m.id} m={m} />
+                ))}
+              </div>
+              {activeThread.respondable && (
+                <div className="mt-4 flex gap-2">
+                  <Textarea
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder="Write a reply..."
+                    className="flex-1"
+                  />
+                  <Button onClick={handleReply} disabled={!replyText.trim()} className="shrink-0">
+                    <Send className="h-4 w-4 mr-2" /> Reply
+                  </Button>
+                </div>
               )}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader><CardTitle>Private Coach Notes</CardTitle></CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {notes.map((n) => (
-                <NoteItem key={n.id} note={n} onChangeStatus={handleChangeNoteStatus} onDelete={handleDeleteNote} />
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </motion.div>
   );
 };
