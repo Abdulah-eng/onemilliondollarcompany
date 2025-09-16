@@ -12,8 +12,9 @@ const actionItems = [
 ];
 
 export default function ClientActionButton() {
-  const wrapperRef = useRef<HTMLDivElement | null>(null); // element that holds left/top
-  const innerRef = useRef<HTMLDivElement | null>(null); // element we transform during drag
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const innerRef = useRef<HTMLDivElement | null>(null);
+
   const draggingRef = useRef(false);
   const startRef = useRef({ x: 0, y: 0, left: 0, top: 0 });
   const movedRef = useRef(false);
@@ -24,7 +25,7 @@ export default function ClientActionButton() {
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const [viewport, setViewport] = useState<{ w: number; h: number } | null>(null);
 
-  // init position (from localStorage or default bottom-right)
+  // init position
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const saved = localStorage.getItem('fab-position');
@@ -36,7 +37,7 @@ export default function ClientActionButton() {
     const defaultTop = vh - SIZE - MARGIN;
 
     let initial = saved ? JSON.parse(saved) : { left: defaultLeft, top: defaultTop };
-    // clamp
+    // clamp to viewport
     initial.left = Math.min(Math.max(MARGIN, initial.left), vw - SIZE - MARGIN);
     initial.top = Math.min(Math.max(MARGIN, initial.top), vh - SIZE - MARGIN);
     setPos(initial);
@@ -45,7 +46,6 @@ export default function ClientActionButton() {
       const vw2 = window.innerWidth;
       const vh2 = window.innerHeight;
       setViewport({ w: vw2, h: vh2 });
-      // re-clamp current pos if needed
       setPos((p) => {
         if (!p) return p;
         return {
@@ -59,117 +59,58 @@ export default function ClientActionButton() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // pointer handlers (use document-level pointermove / pointerup)
-  useEffect(() => {
-    const onPointerMove = (e: PointerEvent) => {
-      if (!draggingRef.current) return;
-      movedRef.current = movedRef.current || Math.hypot(e.clientX - startRef.current.x, e.clientY - startRef.current.y) > 3;
-      const dx = e.clientX - startRef.current.x;
-      const dy = e.clientY - startRef.current.y;
-      translateRef.current = { x: dx, y: dy };
-
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => {
-        if (innerRef.current) {
-          innerRef.current.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
-        }
-      });
-    };
-
-    const onPointerUp = (e: PointerEvent) => {
-      if (!draggingRef.current) return;
-      draggingRef.current = false;
-      // remove capture if any
-      try {
-        // find any active pointer captures on wrapper and release - safe guard
-        const el = wrapperRef.current;
-        if (el && 'releasePointerCapture' in el && (e as any).pointerId) {
-          try { (el as any).releasePointerCapture((e as any).pointerId); } catch {}
-        }
-      } catch {}
-
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
-      const dx = translateRef.current.x;
-      const dy = translateRef.current.y;
-
-      setPos((prev) => {
-        if (!prev || typeof window === 'undefined') return prev;
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const rawLeft = startRef.current.left + dx;
-        const rawTop = startRef.current.top + dy;
-        const newLeft = Math.min(Math.max(MARGIN, Math.round(rawLeft)), vw - SIZE - MARGIN);
-        const newTop = Math.min(Math.max(MARGIN, Math.round(rawTop)), vh - SIZE - MARGIN);
-
-        // apply final no-transform
-        if (innerRef.current) innerRef.current.style.transform = 'none';
-        // persist
-        localStorage.setItem('fab-position', JSON.stringify({ left: newLeft, top: newTop }));
-        return { left: newLeft, top: newTop };
-      });
-
-      // small timeout to reset moved flag (so click won't immediately trigger)
-      setTimeout(() => (movedRef.current = false), 50);
-
-      document.removeEventListener('pointermove', onPointerMove);
-      document.removeEventListener('pointerup', onPointerUp);
-    };
-
-    // attach on demand (we attach/remove in onPointerDown)
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      document.removeEventListener('pointermove', onPointerMove);
-      document.removeEventListener('pointerup', onPointerUp);
-    };
-  }, []);
-
-  // onPointerDown handler (attached to main button only)
+  // start dragging
   const onPointerDownMain = (e: React.PointerEvent) => {
     if (!pos) return;
-    // start drag
     draggingRef.current = true;
     movedRef.current = false;
     startRef.current = { x: e.clientX, y: e.clientY, left: pos.left, top: pos.top };
     translateRef.current = { x: 0, y: 0 };
 
-    // capture pointer so we continue receiving events even if cursor leaves button
     try {
       (e.target as Element).setPointerCapture?.(e.pointerId);
     } catch {}
 
-    // attach document listeners
     const onPointerMove = (ev: PointerEvent) => {
       if (!draggingRef.current) return;
-      movedRef.current = movedRef.current || Math.hypot(ev.clientX - startRef.current.x, ev.clientY - startRef.current.y) > 3;
+      movedRef.current =
+        movedRef.current || Math.hypot(ev.clientX - startRef.current.x, ev.clientY - startRef.current.y) > 3;
+
       const dx = ev.clientX - startRef.current.x;
       const dy = ev.clientY - startRef.current.y;
-      translateRef.current = { x: dx, y: dy };
+
+      // clamp while dragging
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const rawLeft = startRef.current.left + dx;
+      const rawTop = startRef.current.top + dy;
+      const clampedLeft = Math.min(Math.max(MARGIN, rawLeft), vw - SIZE - MARGIN);
+      const clampedTop = Math.min(Math.max(MARGIN, rawTop), vh - SIZE - MARGIN);
+
+      translateRef.current = { x: clampedLeft - startRef.current.left, y: clampedTop - startRef.current.top };
+
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(() => {
-        if (innerRef.current) innerRef.current.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+        if (innerRef.current) {
+          innerRef.current.style.transform = `translate3d(${translateRef.current.x}px, ${translateRef.current.y}px, 0)`;
+        }
       });
     };
-    const onPointerUp = (ev: PointerEvent) => {
+
+    const onPointerUp = () => {
       if (!draggingRef.current) return;
       draggingRef.current = false;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      const dx = translateRef.current.x;
-      const dy = translateRef.current.y;
+
       setPos((prev) => {
-        if (!prev || typeof window === 'undefined') return prev;
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const rawLeft = startRef.current.left + dx;
-        const rawTop = startRef.current.top + dy;
-        const newLeft = Math.min(Math.max(MARGIN, Math.round(rawLeft)), vw - SIZE - MARGIN);
-        const newTop = Math.min(Math.max(MARGIN, Math.round(rawTop)), vh - SIZE - MARGIN);
+        if (!prev) return prev;
+        const newLeft = prev.left + translateRef.current.x;
+        const newTop = prev.top + translateRef.current.y;
         if (innerRef.current) innerRef.current.style.transform = 'none';
         localStorage.setItem('fab-position', JSON.stringify({ left: newLeft, top: newTop }));
         return { left: newLeft, top: newTop };
       });
+
       setTimeout(() => (movedRef.current = false), 50);
       document.removeEventListener('pointermove', onPointerMove);
       document.removeEventListener('pointerup', onPointerUp);
@@ -179,10 +120,9 @@ export default function ClientActionButton() {
     document.addEventListener('pointerup', onPointerUp);
   };
 
-  // click handler: ignore if user just dragged
+  // click handler
   const onClickMain = (e: React.MouseEvent) => {
     if (movedRef.current) {
-      // swallow accidental click after drag
       e.preventDefault();
       e.stopPropagation();
       movedRef.current = false;
@@ -191,9 +131,8 @@ export default function ClientActionButton() {
     setIsOpen((s) => !s);
   };
 
-  if (!pos) return null; // still initializing
+  if (!pos) return null;
 
-  // decide where to render action bubble (left / right) and above/below
   const showLeft = viewport ? pos.left > (viewport.w || 0) / 2 : true;
   const showAbove = viewport ? pos.top > (viewport.h || 0) / 3 : true;
 
@@ -207,12 +146,11 @@ export default function ClientActionButton() {
         width: SIZE,
         height: SIZE,
         zIndex: 9999,
-        touchAction: 'none', // prevent double-finger scroll issues
+        touchAction: 'none',
       }}
-      aria-hidden={false}
     >
       <div ref={innerRef} style={{ width: '100%', height: '100%', position: 'relative', transform: 'none' }}>
-        {/* Actions container */}
+        {/* Actions */}
         <div
           style={{
             position: 'absolute',
@@ -246,7 +184,7 @@ export default function ClientActionButton() {
             ))}
         </div>
 
-        {/* Main FAB button (drag handle) */}
+        {/* Main FAB */}
         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Button
             size="icon"
