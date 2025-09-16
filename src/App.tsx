@@ -32,6 +32,7 @@ const CustomerDashboardPage = lazy(() => import("./pages/customer/CustomerDashbo
 const CoachDashboardPage = lazy(() => import("./pages/coach/CoachDashboard"));
 const ClientOverviewPage = lazy(() => import("./pages/coach/ClientOverviewPage"));
 const ClientCard = lazy(() => import("./pages/coach/ClientCard"));
+const CoachProgramsPage = lazy(() => import("./pages/coach/ProgramsPage")); // ✅ Lazy-load the new page
 
 const MyProgramsPage = lazy(() => import("./pages/customer/MyProgramsPage"));
 const ViewProgramPage = lazy(() => import("./pages/customer/ViewProgramPage"));
@@ -42,9 +43,6 @@ const BlogPage = lazy(() => import("./pages/customer/BlogPage"));
 const ProfilePage = lazy(() => import("./pages/customer/Profile"));
 const UpdatePaymentPlanPage = lazy(() => import("./pages/customer/UpdatePaymentPlanPage"));
 const CancelSubscriptionPage = lazy(() => import("./pages/customer/CancelSubscriptionPage"));
-
-
-// ... (LoadingScreen, queryClient, and routing logic components remain unchanged) ...
 
 const LoadingScreen = () => (
   <div className="flex h-screen w-full items-center justify-center bg-emerald-50">
@@ -164,6 +162,11 @@ const ThemedApp = () => {
                   <Route path="/coach/clients" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <ClientOverviewPage />
+                    </Suspense>
+                  } />
+                  <Route path="/coach/programs" element={ // ✅ New route for the programs page
+                    <Suspense fallback={<LoadingScreen />}>
+                      <CoachProgramsPage />
                     </Suspense>
                   } />
                 </Route>
