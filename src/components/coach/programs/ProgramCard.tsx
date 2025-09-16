@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { ClipboardCheck, Pencil, Play, Clock, Crown, Users } from 'lucide-react';
-import { Program } from '@/types/program';
+import { Program } from '@/mockdata/programs/mockCoachPrograms';
 
 interface ProgramCardProps {
   program: Program;
@@ -43,33 +43,37 @@ const getActionButton = (program: Program, onEdit: (p: Program) => void, onAssig
   switch (program.status) {
     case 'active':
       return (
-        <Button variant="ghost" className="text-sm px-2 h-8" onClick={() => onEdit(program)}>
-          <Users className="h-4 w-4 mr-1" /> Manage
+        <Button variant="outline" className="text-sm px-3 h-8 gap-1" onClick={() => onEdit(program)}>
+          <Users className="h-4 w-4" />
+          <span className="hidden md:inline">Manage</span>
         </Button>
       );
     case 'scheduled':
       return (
-        <Button variant="ghost" className="text-sm px-2 h-8" onClick={() => onEdit(program)}>
-          <Pencil className="h-4 w-4 mr-1" /> Edit Plan
+        <Button variant="outline" className="text-sm px-3 h-8 gap-1" onClick={() => onEdit(program)}>
+          <Pencil className="h-4 w-4" />
+          <span className="hidden md:inline">Edit Plan</span>
         </Button>
       );
     case 'draft':
       return (
-        <Button className="text-sm px-2 h-8" onClick={() => onEdit(program)}>
-          <Pencil className="h-4 w-4 mr-1" /> Continue Editing
+        <Button className="text-sm px-3 h-8 gap-1" onClick={() => onEdit(program)}>
+          <Pencil className="h-4 w-4" />
+          <span className="hidden md:inline">Continue Editing</span>
         </Button>
       );
     default:
       return (
-        <Button className="text-sm px-2 h-8" onClick={() => onAssign(program)}>
-          <ClipboardCheck className="h-4 w-4 mr-1" /> Assign
+        <Button className="text-sm px-3 h-8 gap-1" onClick={() => onAssign(program)}>
+          <ClipboardCheck className="h-4 w-4" />
+          <span className="hidden md:inline">Assign</span>
         </Button>
       );
   }
 };
 
 export const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onAssign }) => {
-  const isPremium = program.category === 'mental health'; // Example for a premium feature
+  const isPremium = program.category === 'mental health';
 
   return (
     <motion.div
@@ -77,23 +81,21 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onAss
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="flex flex-col h-full hover:shadow-lg transition-shadow">
-        <CardHeader className="pb-3">
-          <div className="flex justify-between items-center">
+      <Card className="flex flex-col sm:flex-row items-center p-4 gap-4 hover:shadow-lg transition-shadow">
+        <div className="flex-1 flex flex-col gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {getStatusBadge(program.status)}
-            {isPremium && <Crown className="h-4 w-4 text-yellow-500" />}
+            {getCategoryBadge(program.category)}
+            {isPremium && <Badge variant="outline" className="text-yellow-500 border-yellow-200"><Crown className="h-3 w-3 mr-1" />Premium</Badge>}
           </div>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col justify-between">
-          <div className="mb-4">
-            <CardTitle className="text-xl font-semibold mb-1 truncate">{program.name}</CardTitle>
+          <div className="space-y-1">
+            <CardTitle className="text-xl font-semibold">{program.name}</CardTitle>
             <CardDescription className="line-clamp-2">{program.description}</CardDescription>
           </div>
-          <div className="flex justify-between items-center">
-            {getCategoryBadge(program.category)}
-            {getActionButton(program, onEdit, onAssign)}
-          </div>
-        </CardContent>
+        </div>
+        <div className="flex-shrink-0 flex items-center gap-2">
+          {getActionButton(program, onEdit, onAssign)}
+        </div>
       </Card>
     </motion.div>
   );
