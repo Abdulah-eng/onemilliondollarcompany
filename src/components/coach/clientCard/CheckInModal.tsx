@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
 import { X, Send } from 'lucide-react';
-import { useMediaQuery } from '@/hooks/use-media-query';
+import useMediaQuery from '@/hooks/use-media-query';
 
 interface CheckInModalProps {
   isOpen: boolean;
