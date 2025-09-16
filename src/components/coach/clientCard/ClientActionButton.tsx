@@ -12,11 +12,9 @@ export default function ClientActionButton() {
 
   const handleSendCheckIn = (data: { title: string; message: string }) => {
     console.log('Sending check-in:', data);
-    // You would add your API call or state update logic here
   };
 
   const actionItems = [
-    // Removed the "Feedback" option as requested
     { label: 'Check In', icon: <ClipboardCheck className="h-5 w-5" />, action: () => setIsCheckInModalOpen(true) },
   ];
 
@@ -33,10 +31,9 @@ export default function ClientActionButton() {
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const [viewport, setViewport] = useState<{ w: number; h: number } | null>(null);
 
-  // init position
+  // init position → always bottom right
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const saved = localStorage.getItem('fab-position');
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     setViewport({ w: vw, h: vh });
@@ -44,22 +41,15 @@ export default function ClientActionButton() {
     const defaultLeft = vw - SIZE - MARGIN;
     const defaultTop = vh - SIZE - MARGIN;
 
-    let initial = saved ? JSON.parse(saved) : { left: defaultLeft, top: defaultTop };
-    // clamp to viewport
-    initial.left = Math.min(Math.max(MARGIN, initial.left), vw - SIZE - MARGIN);
-    initial.top = Math.min(Math.max(MARGIN, initial.top), vh - SIZE - MARGIN);
-    setPos(initial);
+    setPos({ left: defaultLeft, top: defaultTop });
 
     const onResize = () => {
       const vw2 = window.innerWidth;
       const vh2 = window.innerHeight;
       setViewport({ w: vw2, h: vh2 });
-      setPos((p) => {
-        if (!p) return p;
-        return {
-          left: Math.min(Math.max(MARGIN, p.left), vw2 - SIZE - MARGIN),
-          top: Math.min(Math.max(MARGIN, p.top), vh2 - SIZE - MARGIN),
-        };
+      setPos({
+        left: vw2 - SIZE - MARGIN,
+        top: vh2 - SIZE - MARGIN,
       });
     };
 
@@ -87,7 +77,6 @@ export default function ClientActionButton() {
       const dx = ev.clientX - startRef.current.x;
       const dy = ev.clientY - startRef.current.y;
 
-      // clamp while dragging
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const rawLeft = startRef.current.left + dx;
@@ -115,7 +104,6 @@ export default function ClientActionButton() {
         const newLeft = prev.left + translateRef.current.x;
         const newTop = prev.top + translateRef.current.y;
         if (innerRef.current) innerRef.current.style.transform = 'none';
-        localStorage.setItem('fab-position', JSON.stringify({ left: newLeft, top: newTop }));
         return { left: newLeft, top: newTop };
       });
 
@@ -141,9 +129,6 @@ export default function ClientActionButton() {
 
   if (!pos) return null;
 
-  const showLeft = viewport ? pos.left > (viewport.w || 0) / 2 : true;
-  const showAbove = viewport ? pos.top > (viewport.h || 0) / 3 : true;
-
   return (
     <>
       <div
@@ -155,43 +140,33 @@ export default function ClientActionButton() {
           width: SIZE,
           height: SIZE,
           touchAction: 'none',
-          zIndex: isCheckInModalOpen ? -1 : 999, // ✅ Set z-index to a lower value when modal is open
+          zIndex: isCheckInModalOpen ? -1 : 999,
         }}
       >
         <div ref={innerRef} style={{ width: '100%', height: '100%', position: 'relative', transform: 'none' }}>
           {/* Actions */}
-          <div
-            style={{
-              position: 'absolute',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 12,
-              alignItems: showLeft ? 'flex-end' : 'flex-start',
-              ...(showLeft ? { right: SIZE + 12 } : { left: SIZE + 12 }),
-              ...(showAbove ? { bottom: 0 } : { top: 0 }),
-              pointerEvents: isOpen ? 'auto' : 'none',
-            }}
-          >
-            {isOpen &&
-              actionItems.map((it) => (
-                <div key={it.label} className="flex items-center gap-3 select-none">
-                  <span className="text-sm bg-card/80 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg border border-border/50">
-                    {it.label}
-                  </span>
-                  <Button
-                    size="icon"
-                    className="rounded-full w-12 h-12 shadow-lg"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      it.action();
-                      setIsOpen(false);
-                    }}
-                  >
-                    {it.icon}
-                  </Button>
-                </div>
-              ))}
-          </div>
+          {isOpen &&
+            actionItems.map((it) => (
+              <div
+                key={it.label}
+                className="absolute bottom-full mb-3 flex items-center gap-2 select-none whitespace-nowrap"
+              >
+                <span className="text-sm bg-card/80 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg border border-border/50">
+                  {it.label}
+                </span>
+                <Button
+                  size="icon"
+                  className="rounded-full w-12 h-12 shadow-lg"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    it.action();
+                    setIsOpen(false);
+                  }}
+                >
+                  {it.icon}
+                </Button>
+              </div>
+            ))}
 
           {/* Main FAB */}
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
