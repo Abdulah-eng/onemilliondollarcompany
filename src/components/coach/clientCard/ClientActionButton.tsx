@@ -1,19 +1,38 @@
 // src/components/coach/clientCard/ClientActionButton.tsx
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { MessageCircle, ClipboardCheck, Plus } from 'lucide-react';
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { MessageCircle, ClipboardCheck, Plus } from "lucide-react";
 
 const actionItems = [
-  { label: 'Feedback', icon: <MessageCircle className="h-5 w-5" />, action: () => console.log("Feedback clicked") },
-  { label: 'Check In', icon: <ClipboardCheck className="h-5 w-5" />, action: () => console.log("Check In clicked") },
+  {
+    label: "Feedback",
+    icon: <MessageCircle className="h-5 w-5" />,
+    action: () => console.log("Feedback clicked"),
+  },
+  {
+    label: "Check In",
+    icon: <ClipboardCheck className="h-5 w-5" />,
+    action: () => console.log("Check In clicked"),
+  },
 ];
 
 export default function ClientActionButton() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col-reverse items-end">
+    <motion.div
+      drag
+      dragMomentum={false}
+      dragElastic={0.2}
+      dragConstraints={{
+        left: 0,
+        right: window.innerWidth - 80, // keep inside screen
+        top: 0,
+        bottom: window.innerHeight - 80,
+      }}
+      className="fixed bottom-6 right-6 z-50 flex flex-col-reverse items-end cursor-grab active:cursor-grabbing"
+    >
       {/* Main Toggle Button */}
       <Button
         size="icon"
@@ -44,12 +63,21 @@ export default function ClientActionButton() {
                 className="flex items-center gap-3"
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.08, type: "spring", stiffness: 300, damping: 20 }}
+                transition={{
+                  delay: index * 0.08,
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 20,
+                }}
               >
                 <span className="text-sm bg-card/80 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg border border-border/50">
                   {item.label}
                 </span>
-                <Button size="icon" className="rounded-full w-12 h-12 shadow-lg" onClick={item.action}>
+                <Button
+                  size="icon"
+                  className="rounded-full w-12 h-12 shadow-lg"
+                  onClick={item.action}
+                >
                   {item.icon}
                 </Button>
               </motion.div>
@@ -57,6 +85,6 @@ export default function ClientActionButton() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
