@@ -440,3 +440,139 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
         />
         <DailyTrendCard
           title="Anxiety"
+          data={dailyData}
+          dataKey="anxiety"
+          color={colors.mentalAnxiety}
+          emoji="😰"
+          selectedRange={selectedRange}
+        />
+      </div>
+
+      {/* Nutrition Overview Card */}
+      <div className="mt-6">
+        <Card className="rounded-2xl shadow-lg bg-card border border-border p-6">
+          <h3 className="text-lg font-semibold text-foreground mb-4">Nutrition Overview</h3>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={dummyNutrition.slice(-7)}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="date" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
+                <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-card text-card-foreground p-3 rounded-lg shadow-lg border border-border">
+                          <p className="font-semibold text-sm mb-2">{label}</p>
+                          {payload.map((p: any, idx: number) => (
+                            <p key={idx} className="text-sm" style={{ color: p.color }}>
+                              {`${p.name}: ${p.value}g`}
+                            </p>
+                          ))}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar dataKey="protein" fill={colors.nutritionProtein} name="Protein" />
+                <Bar dataKey="carbs" fill={colors.nutritionCarbs} name="Carbs" />
+                <Bar dataKey="fat" fill={colors.nutritionFat} name="Fat" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      </div>
+
+      {/* Weight Journey Card */}
+      <div className="mt-6">
+        <Card className="rounded-2xl shadow-lg bg-card border border-border p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-foreground">Weight Journey</h3>
+            <div className="bg-card/80 backdrop-blur-md rounded-full border border-border p-1 flex shadow-sm">
+              {["1m", "3m", "6m", "12m"].map((range) => (
+                <button
+                  key={range}
+                  onClick={() => setWeightRange(range)}
+                  className={`text-xs font-medium px-3 py-1 rounded-full transition-all duration-300 ${
+                    weightRange === range
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {range === "1m"
+                    ? "1M"
+                    : range === "3m"
+                    ? "3M"
+                    : range === "6m"
+                    ? "6M"
+                    : "1Y"}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center mb-4">
+            <span className="text-2xl font-bold text-foreground">
+              {aggregateWeightData.length > 0
+                ? aggregateWeightData[aggregateWeightData.length - 1].weight
+                : "N/A"}
+            </span>
+            <span className="text-sm text-muted-foreground ml-2">lbs</span>
+          </div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={aggregateWeightData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis 
+                  dataKey="label" 
+                  tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} 
+                />
+                <YAxis 
+                  tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} 
+                  domain={['dataMin - 5', 'dataMax + 5']}
+                />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-card text-card-foreground p-3 rounded-lg shadow-lg border border-border">
+                          <p className="font-semibold text-sm mb-1">{label}</p>
+                          <p className="text-sm" style={{ color: payload[0].color }}>
+                            Weight: {payload[0].value} lbs
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="weight"
+                  stroke={colors.weight}
+                  strokeWidth={3}
+                  dot={{ fill: colors.weight, strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: colors.weight, strokeWidth: 2 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      </div>
+
+      {/* Fitness and Mental Health Trend Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <FitnessTrendChart 
+          data={fitness.progression || []} 
+          selectedRange={selectedRange}
+        />
+        <MentalHealthTrendChart 
+          data={mentalHealth} 
+          selectedRange={selectedRange}
+        />
+      </div>
+    </>
+  );
+};
+
+export default ProgressProgramsTab;
