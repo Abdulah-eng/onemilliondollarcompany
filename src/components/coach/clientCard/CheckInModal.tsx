@@ -33,14 +33,14 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ isOpen, onClose, onS
   };
 
   const modalContent = (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between p-4 md:p-6 pb-0">
+    <div className="flex flex-col h-full p-4 md:p-6">
+      <div className="flex items-center justify-between mb-4 md:mb-6">
         <CardTitle className="text-xl md:text-2xl">Send Check-in</CardTitle>
         <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close modal">
           <X className="h-5 w-5" />
         </Button>
       </div>
-      <div className="flex flex-col flex-1 p-4 md:p-6 space-y-4 overflow-y-auto">
+      <div className="flex flex-col flex-1 space-y-4 overflow-y-auto">
         <Input
           placeholder="Check-in title (e.g., Weekly progress check)"
           value={title}
@@ -53,7 +53,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ isOpen, onClose, onS
           className="flex-1 min-h-[150px] resize-none"
         />
       </div>
-      <div className="p-4 md:p-6 pt-0">
+      <div className="mt-4">
         <Button onClick={handleSend} className="w-full" disabled={!title.trim() || !message.trim()}>
           <Send className="h-4 w-4 mr-2" /> Send Check-in
         </Button>
@@ -92,7 +92,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ isOpen, onClose, onS
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()} closeThreshold={0.4}>
-      <DrawerContent className="h-[90%] rounded-t-3xl border-none bg-background flex flex-col">
+      <DrawerContent className="h-[90%] rounded-t-3xl border-none bg-background">
         {modalContent}
       </DrawerContent>
     </Drawer>
