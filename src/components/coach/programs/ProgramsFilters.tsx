@@ -51,14 +51,14 @@ const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
 
   return (
     <motion.div
-      className="flex flex-col gap-4"
+      className="flex flex-col md:flex-row items-center gap-4"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.1 }}
     >
-      <div className="flex flex-col md:flex-row items-center gap-4">
+      <div className="flex flex-col md:flex-row items-center w-full gap-4">
         {/* Search Bar */}
-        <div className="relative w-full md:flex-1">
+        <div className="relative flex-1 w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
