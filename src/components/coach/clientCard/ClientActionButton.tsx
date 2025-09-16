@@ -1,7 +1,7 @@
 // src/components/coach/clientCard/ClientActionButton.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, ClipboardCheck, Plus } from 'lucide-react';
+import { ClipboardCheck, Plus } from 'lucide-react';
 import { CheckInModal } from './CheckInModal';
 
 const SIZE = 64; // px (w-16 / h-16)
@@ -16,7 +16,7 @@ export default function ClientActionButton() {
   };
 
   const actionItems = [
-    { label: 'Feedback', icon: <MessageCircle className="h-5 w-5" />, action: () => console.log('Feedback clicked') },
+    // Removed the "Feedback" option as requested
     { label: 'Check In', icon: <ClipboardCheck className="h-5 w-5" />, action: () => setIsCheckInModalOpen(true) },
   ];
 
@@ -155,6 +155,7 @@ export default function ClientActionButton() {
           width: SIZE,
           height: SIZE,
           touchAction: 'none',
+          zIndex: isCheckInModalOpen ? -1 : 999, // ✅ Set z-index to a lower value when modal is open
         }}
       >
         <div ref={innerRef} style={{ width: '100%', height: '100%', position: 'relative', transform: 'none' }}>
