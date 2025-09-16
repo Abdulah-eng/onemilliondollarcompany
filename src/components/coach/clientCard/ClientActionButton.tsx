@@ -2,13 +2,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, ClipboardCheck, Plus } from 'lucide-react';
-import { CheckInModal } from './CheckInModal'; // Corrected import path
+import { CheckInModal } from './CheckInModal';
 
 const SIZE = 64; // px (w-16 / h-16)
 const MARGIN = 16; // padding from viewport edges
 
 export default function ClientActionButton() {
-  const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false); // State to control modal visibility
+  const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
 
   const handleSendCheckIn = (data: { title: string; message: string }) => {
     console.log('Sending check-in:', data);
@@ -17,7 +17,7 @@ export default function ClientActionButton() {
 
   const actionItems = [
     { label: 'Feedback', icon: <MessageCircle className="h-5 w-5" />, action: () => console.log('Feedback clicked') },
-    { label: 'Check In', icon: <ClipboardCheck className="h-5 w-5" />, action: () => setIsCheckInModalOpen(true) }, // Action to open the modal
+    { label: 'Check In', icon: <ClipboardCheck className="h-5 w-5" />, action: () => setIsCheckInModalOpen(true) },
   ];
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -154,7 +154,6 @@ export default function ClientActionButton() {
           top: pos.top,
           width: SIZE,
           height: SIZE,
-          zIndex: 9999,
           touchAction: 'none',
         }}
       >
