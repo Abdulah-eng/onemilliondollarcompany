@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-import { Send, Clock, MessageSquare } from 'lucide-react';
+import { Send, Clock, MessageSquare, ArrowLeft } from 'lucide-react';
 
 interface Message {
   id: number;
@@ -49,7 +49,6 @@ const ThreadListItem: React.FC<{
   onSelect: (id: number) => void;
   active?: boolean;
 }> = ({ thread, onSelect, active }) => {
-  const latest = thread.messages.at(-1);
   const isClientResponded = thread.messages.some((m) => m.author === 'client');
 
   return (
@@ -120,8 +119,19 @@ const CommunicationTab: React.FC<CommunicationTabProps> = () => {
     },
   ]);
 
-  const [activeThreadId, setActiveThreadId] = useState<number | null>(threads[0]?.id ?? null);
+  const [activeThreadId, setActiveThreadId] = useState<number | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [showThreadList, setShowThreadList] = useState(true);
+
+  const handleThreadSelect = (id: number) => {
+    setActiveThreadId(id);
+    setShowThreadList(false); // Hide the list on mobile
+  };
+
+  const handleBack = () => {
+    setShowThreadList(true); // Show the list on mobile
+    setActiveThreadId(null);
+  };
 
   const activeThread = useMemo(
     () => threads.find((t) => t.id === activeThreadId) ?? null,
@@ -137,25 +147,34 @@ const CommunicationTab: React.FC<CommunicationTabProps> = () => {
   }, [activeThread, replyText, threads]);
 
   return (
-    <motion.div className="space-y-6 lg:grid lg:grid-cols-3 lg:gap-4" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      {/* Left: Unified Feed */}
-      <Card className="lg:col-span-1">
+    <motion.div className="space-y-6 lg:grid lg:grid-cols-3 lg:gap-4 h-full" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+      {/* Unified Feed (Visible on all screens, but conditionally rendered on small screens) */}
+      <Card className={`lg:col-span-1 ${!showThreadList && 'hidden lg:block'}`}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" /> Conversation Feed
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 max-h-[70vh] overflow-y-auto">
+        <CardContent className="space-y-3 max-h-[calc(100vh-180px)] overflow-y-auto">
           {threads.map((t) => (
-            <ThreadListItem key={t.id} thread={t} onSelect={setActiveThreadId} active={activeThreadId === t.id} />
+            <ThreadListItem key={t.id} thread={t} onSelect={handleThreadSelect} active={activeThreadId === t.id} />
           ))}
         </CardContent>
       </Card>
 
-      {/* Right: Active Thread */}
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle>
+      {/* Active Thread (Visible on all screens, but conditionally rendered on small screens) */}
+      <Card className={`lg:col-span-2 ${showThreadList && 'hidden lg:block'}`}>
+        <CardHeader className="flex flex-row items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleBack}
+            className="lg:hidden"
+            aria-label="Back to conversations"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <CardTitle className="flex-1 text-center lg:text-left">
             {activeThread ? activeThread.title : 'Select a conversation'}
           </CardTitle>
         </CardHeader>
@@ -166,7 +185,7 @@ const CommunicationTab: React.FC<CommunicationTabProps> = () => {
             </div>
           ) : (
             <>
-              <div className="flex flex-col gap-3 max-h-[calc(70vh-120px)] overflow-y-auto border p-4 rounded-lg">
+              <div className="flex flex-col gap-3 max-h-[calc(100vh-280px)] overflow-y-auto border p-4 rounded-lg">
                 {activeThread.messages.map((m) => (
                   <MessageBubble key={m.id} m={m} />
                 ))}
