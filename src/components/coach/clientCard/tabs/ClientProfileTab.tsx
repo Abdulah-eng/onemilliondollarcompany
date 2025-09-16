@@ -14,14 +14,40 @@ import {
   Copy,
   Target,
   Activity,
-  TrendingUp, 
-  TrendingDown, 
-  Minus,
-  Crown
+  Crown,
+  Play,
+  Clock
 } from 'lucide-react';
 
 interface ClientProfileTabProps {
-  client: any;
+  client: {
+    name: string;
+    age: number;
+    height: number;
+    weight: number;
+    goals: string[];
+    plan: string;
+    daysRemaining: number;
+    programs: Program[]; // Updated client type to include programs
+    trends?: {
+      moodValue: number;
+      moodChange: number;
+      sleepValue: number;
+      sleepChange: number;
+      energyValue: number;
+      energyChange: number;
+      waterValue: number;
+      waterChange: number;
+    };
+  };
+}
+
+// ✅ New type definition for Program
+interface Program {
+  id: string;
+  name: string;
+  status: 'active' | 'scheduled';
+  startDate?: string;
 }
 
 const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
@@ -30,6 +56,17 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
     navigator.clipboard.writeText(info);
   };
 
+  // ✅ Mock programs data for demonstration
+  const programs: Program[] = [
+    { id: '1', name: '30-Day Strength Builder', status: 'active' },
+    { id: '2', name: 'Beginner Yoga Flow', status: 'active' },
+    { id: '3', name: 'Summer Shred Program', status: 'scheduled', startDate: '2025-10-01' },
+    { id: '4', name: 'Marathon Training Plan', status: 'scheduled', startDate: '2025-11-15' },
+  ];
+
+  const activePrograms = programs.filter(p => p.status === 'active');
+  const scheduledPrograms = programs.filter(p => p.status === 'scheduled');
+
   return (
     <motion.div 
       className="space-y-6"
@@ -37,20 +74,52 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Daily Check-in Trends */}
+      {/* ✅ New Programs Container */}
       <Card className="rounded-2xl border bg-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Activity className="h-5 w-5" />
-            Daily Check-in Trends (7 days)
+            Programs
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <TrendPill label="Mood" value={client.trends?.moodValue || 6} percentChange={client.trends?.moodChange || 10} />
-            <TrendPill label="Sleep" value={client.trends?.sleepValue || 7} percentChange={client.trends?.sleepChange || 0} />
-            <TrendPill label="Energy" value={client.trends?.energyValue || 5} percentChange={client.trends?.energyChange || -5} />
-            <TrendPill label="Hydration" value={client.trends?.waterValue || 4} percentChange={client.trends?.waterChange || -20} />
+        <CardContent className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground mb-2">Current Active Program(s)</h4>
+            {activePrograms.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                {activePrograms.map(p => (
+                  <div key={p.id} className="flex items-center gap-2 p-3 rounded-xl border bg-muted/30">
+                    <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
+                      <Play className="h-3 w-3 mr-1" /> Active
+                    </Badge>
+                    <span className="font-medium text-sm">{p.name}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground">No active programs.</div>
+            )}
+          </div>
+          
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground mb-2">Scheduled Program(s)</h4>
+            {scheduledPrograms.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                {scheduledPrograms.map(p => (
+                  <div key={p.id} className="flex items-center justify-between p-3 rounded-xl border bg-muted/30">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-blue-100 text-blue-700 border-blue-200">
+                        <Clock className="h-3 w-3 mr-1" /> Scheduled
+                      </Badge>
+                      <span className="font-medium text-sm">{p.name}</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground">{new Date(p.startDate!).toLocaleDateString()}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground">No scheduled programs.</div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -167,59 +236,6 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
     </motion.div>
   );
 };
-
-// Trend pill with emoji + percentage change
-function TrendPill({ label, value, percentChange }: { label: string; value: any; percentChange?: number }) {
-  const getIcon = () => {
-    if (percentChange && percentChange > 0) return <TrendingUp className="h-4 w-4 text-emerald-600" />;
-    if (percentChange && percentChange < 0) return <TrendingDown className="h-4 w-4 text-rose-600" />;
-    return <Minus className="h-4 w-4 text-muted-foreground" />;
-  };
-
-  const getEmoji = () => {
-    switch (label) {
-      case 'Mood':
-        if (value >= 8) return '😄';
-        if (value >= 5) return '🙂';
-        if (value >= 3) return '😐';
-        return '😞';
-      case 'Energy':
-        if (value >= 8) return '⚡';
-        if (value >= 5) return '💪';
-        if (value >= 3) return '😴';
-        return '😪';
-      case 'Sleep':
-        if (value >= 8) return '🛌';
-        if (value >= 5) return '😌';
-        return '😴';
-      case 'Hydration':
-        if (value >= 8) return '💧💧💧';
-        if (value >= 5) return '💧💧';
-        if (value >= 3) return '💧';
-        return '🚱';
-      default:
-        return '❓';
-    }
-  };
-
-  const meaning =
-    percentChange && percentChange > 0
-      ? `Up ${percentChange}%`
-      : percentChange && percentChange < 0
-      ? `Down ${Math.abs(percentChange)}%`
-      : 'Stable';
-
-  return (
-    <div className="flex flex-col items-center justify-center rounded-xl bg-muted/30 px-3 py-2">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <div className="flex items-center gap-1">
-        <span className="text-lg">{getEmoji()}</span>
-        <span className="text-sm font-medium">{meaning}</span>
-        {getIcon()}
-      </div>
-    </div>
-  );
-}
 
 // Generic info item
 function InfoItem({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
