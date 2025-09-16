@@ -1,0 +1,100 @@
+// src/components/coach/clientCard/CheckInModal.tsx
+'use client';
+
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { CardTitle } from '@/components/ui/card';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Drawer, DrawerContent } from '@/components/ui/drawer';
+import { cn } from '@/lib/utils';
+import { X, Send } from 'lucide-react';
+import { useMediaQuery } from '@/hooks/use-media-query';
+
+interface CheckInModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSend: (data: { title: string; message: string }) => void;
+}
+
+export const CheckInModal: React.FC<CheckInModalProps> = ({ isOpen, onClose, onSend }) => {
+  const [title, setTitle] = useState('');
+  const [message, setMessage] = useState('');
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+
+  const handleSend = () => {
+    if (title.trim() && message.trim()) {
+      onSend({ title, message });
+      setTitle('');
+      setMessage('');
+      onClose();
+    }
+  };
+
+  const modalContent = (
+    <div className="flex flex-col h-full p-4 md:p-6">
+      <div className="flex items-center justify-between mb-4 md:mb-6">
+        <CardTitle className="text-xl md:text-2xl">Send Check-in</CardTitle>
+        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close modal">
+          <X className="h-5 w-5" />
+        </Button>
+      </div>
+      <div className="flex-1 overflow-y-auto space-y-4">
+        <Input
+          placeholder="Check-in title (e.g., Weekly progress check)"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <Textarea
+          placeholder="Write your check-in message here..."
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className="flex-1 min-h-[150px] resize-none"
+        />
+      </div>
+      <div className="mt-6">
+        <Button onClick={handleSend} className="w-full" disabled={!title.trim() || !message.trim()}>
+          <Send className="h-4 w-4 mr-2" /> Send Check-in
+        </Button>
+      </div>
+    </div>
+  );
+
+  if (isDesktop) {
+    return (
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity"
+            />
+            {/* Sliding Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'tween', duration: 0.3 }}
+              className="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-card shadow-2xl overflow-hidden"
+            >
+              {modalContent}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    );
+  }
+
+  return (
+    <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()} closeThreshold={0.4}>
+      <DrawerContent className="h-[90%] rounded-t-3xl border-none bg-background pt-4">
+        {modalContent}
+      </DrawerContent>
+    </Drawer>
+  );
+};
