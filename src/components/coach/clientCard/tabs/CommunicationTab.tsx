@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Send, Clock, MessageSquare, ArrowLeft } from 'lucide-react';
 
 interface Message {
@@ -147,7 +147,7 @@ const CommunicationTab: React.FC<CommunicationTabProps> = () => {
   }, [activeThread, replyText, threads]);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] lg:h-auto lg:grid lg:grid-cols-3 lg:gap-4 overflow-hidden">
+    <div className="flex flex-col h-[calc(100dvh-var(--header-height,64px))] lg:h-auto lg:grid lg:grid-cols-3 lg:gap-4 overflow-hidden">
       {/* Unified Feed */}
       <Card 
         className={`flex-1 overflow-hidden flex flex-col ${!showThreadList ? 'hidden' : ''} lg:flex lg:col-span-1`}
@@ -195,12 +195,12 @@ const CommunicationTab: React.FC<CommunicationTabProps> = () => {
                 ))}
               </div>
               {activeThread.respondable && (
-                <div className="mt-4 flex gap-2">
+                <div className="mt-4 flex gap-2 items-end">
                   <Textarea
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
                     placeholder="Write a reply..."
-                    className="flex-1 resize-none"
+                    className="flex-1 resize-none min-h-[50px]"
                   />
                   <Button onClick={handleReply} disabled={!replyText.trim()} className="shrink-0">
                     <Send className="h-4 w-4 mr-2" /> Reply
