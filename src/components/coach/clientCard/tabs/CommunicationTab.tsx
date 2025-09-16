@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Clock, MessageSquare, ArrowLeft } from 'lucide-react';
 
 interface Message {
@@ -147,23 +147,27 @@ const CommunicationTab: React.FC<CommunicationTabProps> = () => {
   }, [activeThread, replyText, threads]);
 
   return (
-    <motion.div className="space-y-6 lg:grid lg:grid-cols-3 lg:gap-4 h-full" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      {/* Unified Feed (Visible on all screens, but conditionally rendered on small screens) */}
-      <Card className={`lg:col-span-1 ${!showThreadList && 'hidden lg:block'}`}>
+    <div className="flex flex-col h-[calc(100vh-64px)] lg:h-auto lg:grid lg:grid-cols-3 lg:gap-4 overflow-hidden">
+      {/* Unified Feed */}
+      <Card 
+        className={`flex-1 overflow-hidden flex flex-col ${!showThreadList ? 'hidden' : ''} lg:flex lg:col-span-1`}
+      >
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" /> Conversation Feed
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 max-h-[calc(100vh-180px)] overflow-y-auto">
+        <CardContent className="space-y-3 overflow-y-auto p-4 flex-1">
           {threads.map((t) => (
             <ThreadListItem key={t.id} thread={t} onSelect={handleThreadSelect} active={activeThreadId === t.id} />
           ))}
         </CardContent>
       </Card>
 
-      {/* Active Thread (Visible on all screens, but conditionally rendered on small screens) */}
-      <Card className={`lg:col-span-2 ${showThreadList && 'hidden lg:block'}`}>
+      {/* Active Thread */}
+      <Card 
+        className={`flex-1 overflow-hidden flex flex-col ${showThreadList ? 'hidden' : ''} lg:flex lg:col-span-2`}
+      >
         <CardHeader className="flex flex-row items-center">
           <Button
             variant="ghost"
@@ -178,14 +182,14 @@ const CommunicationTab: React.FC<CommunicationTabProps> = () => {
             {activeThread ? activeThread.title : 'Select a conversation'}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col p-4 flex-1">
           {!activeThread ? (
             <div className="text-sm text-muted-foreground text-center py-10">
               Select a conversation from the feed to view its details and respond.
             </div>
           ) : (
             <>
-              <div className="flex flex-col gap-3 max-h-[calc(100vh-280px)] overflow-y-auto border p-4 rounded-lg">
+              <div className="flex-1 flex flex-col gap-3 overflow-y-auto p-2 border rounded-lg">
                 {activeThread.messages.map((m) => (
                   <MessageBubble key={m.id} m={m} />
                 ))}
@@ -196,7 +200,7 @@ const CommunicationTab: React.FC<CommunicationTabProps> = () => {
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
                     placeholder="Write a reply..."
-                    className="flex-1"
+                    className="flex-1 resize-none"
                   />
                   <Button onClick={handleReply} disabled={!replyText.trim()} className="shrink-0">
                     <Send className="h-4 w-4 mr-2" /> Reply
@@ -207,7 +211,7 @@ const CommunicationTab: React.FC<CommunicationTabProps> = () => {
           )}
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 };
 
