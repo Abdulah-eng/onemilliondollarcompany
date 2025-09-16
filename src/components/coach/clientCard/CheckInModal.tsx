@@ -32,7 +32,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ isOpen, onClose, onS
   };
 
   const modalContent = (
-    <div className="flex flex-col h-full p-4 md:p-6">
+    <div className="flex flex-col h-full min-h-screen p-4 md:p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 md:mb-6 flex-shrink-0">
         <CardTitle className="text-xl md:text-2xl truncate">Send Check-in</CardTitle>
@@ -42,18 +42,18 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ isOpen, onClose, onS
       </div>
 
       {/* Body */}
-      <div className="flex flex-col flex-1 space-y-4 overflow-y-auto">
+      <div className="flex flex-col flex-1 space-y-4 overflow-y-auto pb-4">
         <Input
           placeholder="Check-in title (e.g., Weekly progress check)"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="min-h-[44px] md:min-h-[50px] w-full"
+          className="min-h-[50px] md:min-h-[60px] w-full focus:outline-none focus:ring-2 focus:ring-green-500"
         />
         <Textarea
           placeholder="Write your check-in message here..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="flex-1 min-h-[150px] resize-none w-full"
+          className="flex-1 min-h-[180px] resize-none w-full focus:outline-none focus:ring-2 focus:ring-green-500"
         />
       </div>
 
@@ -84,7 +84,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ isOpen, onClose, onS
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-card shadow-2xl flex flex-col"
+              className="fixed top-0 right-0 z-50 h-screen w-full max-w-md bg-card shadow-2xl flex flex-col"
             >
               {modalContent}
             </motion.div>
@@ -97,7 +97,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ isOpen, onClose, onS
   // Mobile drawer
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()} closeThreshold={0.4}>
-      <DrawerContent className="h-[90%] rounded-t-3xl border-none bg-background flex flex-col">
+      <DrawerContent className="h-screen rounded-t-3xl border-none bg-background flex flex-col p-4">
         {modalContent}
       </DrawerContent>
     </Drawer>
