@@ -1,14 +1,13 @@
-// src/components/coach/programs/ProgramsFilters.tsx
 'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, ChevronDown, Filter, Play, Clock, Pencil, ClipboardCheck, Tag, LayoutGrid } from 'lucide-react';
-import { ProgramCategory, ProgramStatus } from '@/mockdata/programs/mockCoachPrograms';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Search, ChevronDown, Filter, Play, Clock, Pencil, ClipboardCheck, Tag, LayoutGrid, PlusCircle } from 'lucide-react';
+import { ProgramCategory, ProgramStatus } from '@/mockdata/programs/mockCoachPrograms';
+import { cn } from '@/lib/utils';
 
 interface ProgramsFiltersProps {
   searchQuery: string;
@@ -32,7 +31,7 @@ const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
     { value: 'active', label: 'Active', icon: Play },
     { value: 'scheduled', label: 'Scheduled', icon: Clock },
     { value: 'draft', label: 'Draft', icon: Pencil },
-    { value: 'normal', label: 'Normal', icon: ClipboardCheck },
+    { value: 'normal', label: 'Normal', icon: PlusCircle },
   ];
 
   const categoryOptions = [
@@ -41,6 +40,14 @@ const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
     { value: 'nutrition', label: 'Nutrition' },
     { value: 'mental health', label: 'Mental Health' },
   ];
+
+  const getStatusLabel = (value: string) => {
+    return statusOptions.find(opt => opt.value === value)?.label || 'Status';
+  };
+
+  const getCategoryLabel = (value: string) => {
+    return categoryOptions.find(opt => opt.value === value)?.label || 'Category';
+  };
 
   return (
     <motion.div
@@ -62,57 +69,17 @@ const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
           />
         </div>
 
-        {/* Filters (Desktop) */}
-        <div className="hidden md:flex items-center gap-2 w-full md:w-auto">
-          <Select value={activeStatus} onValueChange={setActiveStatus}>
-            <SelectTrigger className="w-auto min-w-[150px] gap-2">
-              <span className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                <span>Status</span>
-              </span>
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              {statusOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  <div className="flex items-center gap-2">
-                    <option.icon className="h-4 w-4" />
-                    <span>{option.label}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={activeCategory} onValueChange={setActiveCategory}>
-            <SelectTrigger className="w-auto min-w-[150px] gap-2">
-              <span className="flex items-center gap-2">
-                <Tag className="h-4 w-4" />
-                <span>Category</span>
-              </span>
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              {categoryOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Filters (Mobile) */}
+        {/* Combined Filter Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="md:hidden w-full flex items-center gap-2">
+            <Button variant="outline" className="w-full md:w-auto flex items-center gap-2">
               <Filter className="h-4 w-4" />
-              Filter
+              Filter by
               <ChevronDown className="h-4 w-4 ml-auto" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56">
-            <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+            <DropdownMenuLabel className="font-bold">Status: {getStatusLabel(activeStatus)}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuRadioGroup value={activeStatus} onValueChange={setActiveStatus}>
               {statusOptions.map(option => (
@@ -122,7 +89,10 @@ const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
                 </DropdownMenuRadioItem>
               ))}
             </DropdownMenuRadioGroup>
-            <DropdownMenuLabel className="mt-2">Filter by Category</DropdownMenuLabel>
+            
+            <DropdownMenuSeparator />
+
+            <DropdownMenuLabel className="font-bold">Category: {getCategoryLabel(activeCategory)}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuRadioGroup value={activeCategory} onValueChange={setActiveCategory}>
               {categoryOptions.map(option => (
