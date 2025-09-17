@@ -8,14 +8,12 @@ import { Card } from '@/components/ui/card';
 import { Search } from 'lucide-react';
 import { ExerciseItem, ExerciseType } from '@/mockdata/createprogram/mockExercises';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 
 interface ExerciseLibraryProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   searchResults: ExerciseItem[];
   onSelect: (item: ExerciseItem) => void;
-  onSearch: (query: string) => void;
 }
 
 const getBadgeColor = (type: ExerciseType) => {
@@ -31,12 +29,7 @@ const getBadgeColor = (type: ExerciseType) => {
   }
 };
 
-const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({ searchQuery, setSearchQuery, searchResults, onSelect, onSearch }) => {
-    
-    useEffect(() => {
-        onSearch(searchQuery);
-    }, [searchQuery, onSearch]);
-
+const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({ searchQuery, setSearchQuery, searchResults, onSelect }) => {
     return (
         <div className="space-y-4 h-full flex flex-col p-4 md:p-6">
             <h3 className="text-xl font-bold">Exercise Library</h3>
