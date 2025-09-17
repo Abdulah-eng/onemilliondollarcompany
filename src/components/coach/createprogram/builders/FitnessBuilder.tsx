@@ -1,16 +1,15 @@
 // src/components/coach/createprogram/builders/FitnessBuilder.tsx
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Check, PanelLeft } from 'lucide-react';
+import { Check, PanelLeft, PanelRight } from 'lucide-react';
 import WorkoutDay, { WorkoutDayItem } from './WorkoutDay';
 import { mockExercises, ExerciseItem } from '@/mockdata/createprogram/mockExercises';
 import ExerciseLibrary from './ExerciseLibrary';
 import DaySummary from './DaySummary';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { DragDropContext, DropResult, Droppable, Draggable } from 'react-beautiful-dnd';
 
 interface FitnessBuilderProps {
   onBack: () => void;
@@ -24,6 +23,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
   const [workoutData, setWorkoutData] = useState<{ [day: string]: WorkoutDayItem[] }>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<ExerciseItem[]>([]);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const handleUpdateItems = useCallback((day: string, items: WorkoutDayItem[]) => {
     setWorkoutData(prevData => ({
@@ -43,34 +43,22 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
     }
   }, []);
 
-  const handleOnDragEnd = (result: DropResult) => {
-    const { source, destination } = result;
+  useEffect(() => {
+    handleSearch(searchQuery);
+  }, [searchQuery, handleSearch]);
 
-    if (!destination) return;
+  const handleSelectExercise = (exercise: ExerciseItem) => {
+    const newItem: WorkoutDayItem = {
+      id: `${exercise.id}-${Date.now()}`,
+      exercise: exercise,
+      sets: [0],
+      reps: [0],
+    };
 
-    // Dragging from library to workout day
-    if (source.droppableId !== destination.droppableId) {
-      const draggedItem = searchResults[source.index];
-      if (!draggedItem) return;
-
-      const newItem: WorkoutDayItem = {
-        id: `${draggedItem.id}-${Date.now()}`,
-        exercise: draggedItem,
-        sets: [0],
-        reps: [0],
-      };
-
-      const itemsForDay = workoutData[activeDay] ? [...workoutData[activeDay]] : [];
-      itemsForDay.splice(destination.index, 0, newItem);
-      handleUpdateItems(activeDay, itemsForDay);
-      return;
-    }
-    
-    // Reordering within the workout day
-    const itemsForDay = [...(workoutData[activeDay] || [])];
-    const [reorderedItem] = itemsForDay.splice(source.index, 1);
-    itemsForDay.splice(destination.index, 0, reorderedItem);
+    const itemsForDay = workoutData[activeDay] ? [...workoutData[activeDay]] : [];
+    itemsForDay.push(newItem);
     handleUpdateItems(activeDay, itemsForDay);
+    setIsSheetOpen(false);
   };
 
   const currentDayItems = workoutData[activeDay] || [];
@@ -102,87 +90,75 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
         </Button>
       </div>
 
-      <DragDropContext onDragEnd={handleOnDragEnd}>
-        {/* Desktop Layout */}
-        <div className="hidden lg:grid lg:grid-cols-3 lg:gap-8 flex-1">
-          {/* Left Column: Search & Library */}
-          <div className="lg:col-span-1">
-            <Droppable droppableId="exercise-library" isDropDisabled>
-              {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps} className="h-full">
-                  <ExerciseLibrary
-                    searchQuery={searchQuery}
-                    setSearchQuery={setSearchQuery}
-                    searchResults={searchResults}
-                  />
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </div>
-
-          {/* Middle Column: Workout Day */}
-          <div className="lg:col-span-1">
-            <WorkoutDay
-              day={activeDay}
-              items={currentDayItems}
-              onItemsChange={(items) => handleUpdateItems(activeDay, items)}
-            />
-          </div>
-
-          {/* Right Column: Day Summary */}
-          <div className="lg:col-span-1">
-            <DaySummary items={currentDayItems} />
-          </div>
+      {/* Desktop Layout */}
+      <div className="hidden lg:grid lg:grid-cols-3 lg:gap-8 flex-1">
+        {/* Left Column: Search & Library */}
+        <div className="lg:col-span-1">
+          <ExerciseLibrary
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            searchResults={searchResults}
+            onSelect={handleSelectExercise}
+          />
         </div>
 
-        {/* Mobile and Tablet Layout with Bottom Drawer */}
-        <div className="lg:hidden flex flex-col flex-1">
-          {/* Main Column */}
-          <div className="flex-1">
-            <WorkoutDay
-              day={activeDay}
-              items={currentDayItems}
-              onItemsChange={(items) => handleUpdateItems(activeDay, items)}
-            />
-          </div>
+        {/* Middle Column: Workout Day */}
+        <div className="lg:col-span-1">
+          <WorkoutDay
+            day={activeDay}
+            items={currentDayItems}
+            onItemsChange={(items) => handleUpdateItems(activeDay, items)}
+            onAddClick={() => {}} // No-op on desktop as it's not needed
+          />
+        </div>
 
-          {/* Bottom Drawer */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button className="fixed bottom-4 right-4 rounded-full shadow-lg z-50 h-16 w-16 md:h-12 md:w-12">
-                <PanelLeft className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
-              <SheetHeader className="mb-4">
-                <SheetTitle>Builder Tools</SheetTitle>
-              </SheetHeader>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-1 h-full flex flex-col">
-                  <h3 className="text-xl font-bold mb-4">Exercise Library</h3>
-                  <Droppable droppableId="exercise-library" isDropDisabled>
-                    {(provided) => (
-                      <div ref={provided.innerRef} {...provided.droppableProps} className="flex-1 h-full">
-                        <ExerciseLibrary
-                          searchQuery={searchQuery}
-                          setSearchQuery={setSearchQuery}
-                          searchResults={searchResults}
-                        />
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </div>
-                <div className="md:col-span-1 h-full flex flex-col">
-                  <h3 className="text-xl font-bold mb-4">Daily Overview</h3>
-                  <DaySummary items={currentDayItems} />
-                </div>
+        {/* Right Column: Day Summary */}
+        <div className="lg:col-span-1">
+          <DaySummary items={currentDayItems} />
+        </div>
+      </div>
+
+      {/* Mobile and Tablet Layout with Bottom Drawer */}
+      <div className="lg:hidden flex flex-col flex-1">
+        {/* Main Column */}
+        <div className="flex-1">
+          <WorkoutDay
+            day={activeDay}
+            items={currentDayItems}
+            onItemsChange={(items) => handleUpdateItems(activeDay, items)}
+            onAddClick={() => setIsSheetOpen(true)}
+          />
+        </div>
+
+        {/* Bottom Drawer */}
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <SheetTrigger asChild>
+            <Button className="fixed bottom-4 right-4 rounded-full shadow-lg z-50 h-16 w-16 md:h-12 md:w-12">
+              <Plus className="h-6 w-6" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
+            <SheetHeader className="mb-4">
+              <SheetTitle>Add Exercise</SheetTitle>
+            </SheetHeader>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-1 h-full flex flex-col">
+                <h3 className="text-xl font-bold mb-4">Exercise Library</h3>
+                <ExerciseLibrary
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  searchResults={searchResults}
+                  onSelect={handleSelectExercise}
+                />
               </div>
-            </SheetContent>
-            </Sheet>
-        </div>
-      </DragDropContext>
+              <div className="md:col-span-1 h-full flex flex-col">
+                <h3 className="text-xl font-bold mb-4">Daily Overview</h3>
+                <DaySummary items={currentDayItems} />
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
     </motion.div>
   );
 };
