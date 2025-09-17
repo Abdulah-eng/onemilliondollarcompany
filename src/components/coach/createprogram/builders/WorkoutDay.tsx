@@ -79,7 +79,7 @@ const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onAd
     <>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-bold">{day}</h3>
-        <Button onClick={onAddClick} className="gap-2">
+        <Button onClick={onAddClick} className="gap-2 lg:hidden">
             <Plus className="h-4 w-4" /> Add Exercise
         </Button>
       </div>
