@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -13,8 +13,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Search, ChevronDown, Filter, X, Play, Clock, Pencil, Tag, LayoutGrid, PlusCircle } from 'lucide-react';
-import { ProgramCategory, ProgramStatus } from '@/mockdata/programs/mockCoachPrograms';
 import { cn } from '@/lib/utils';
+
+// These types and data should be in a separate file (e.g., mockdata/programs/mockCoachPrograms.ts)
+export type ProgramStatus = 'active' | 'scheduled' | 'draft' | 'normal';
+export type ProgramCategory = 'fitness' | 'nutrition' | 'mental health';
 
 interface ProgramsFiltersProps {
   searchQuery: string;
@@ -25,6 +28,21 @@ interface ProgramsFiltersProps {
   setActiveCategory: (category: ProgramCategory | 'all') => void;
 }
 
+const statusOptions = [
+  { value: 'all', label: 'All', icon: LayoutGrid },
+  { value: 'active', label: 'Active', icon: Play },
+  { value: 'scheduled', label: 'Scheduled', icon: Clock },
+  { value: 'draft', label: 'Draft', icon: Pencil },
+  { value: 'normal', label: 'Normal', icon: PlusCircle },
+];
+
+const categoryOptions = [
+  { value: 'all', label: 'All Categories' },
+  { value: 'fitness', label: 'Fitness' },
+  { value: 'nutrition', label: 'Nutrition' },
+  { value: 'mental health', label: 'Mental Health' },
+];
+
 const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
   searchQuery,
   setSearchQuery,
@@ -32,21 +50,6 @@ const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
   setActiveStatus,
   activeCategory,
 }) => {
-  const statusOptions = [
-    { value: 'all', label: 'All', icon: LayoutGrid },
-    { value: 'active', label: 'Active', icon: Play },
-    { value: 'scheduled', label: 'Scheduled', icon: Clock },
-    { value: 'draft', label: 'Draft', icon: Pencil },
-    { value: 'normal', label: 'Normal', icon: PlusCircle },
-  ];
-
-  const categoryOptions = [
-    { value: 'all', label: 'All Categories' },
-    { value: 'fitness', label: 'Fitness' },
-    { value: 'nutrition', label: 'Nutrition' },
-    { value: 'mental health', label: 'Mental Health' },
-  ];
-
   const getStatusLabel = (value: ProgramStatus | 'all') => {
     return statusOptions.find(opt => opt.value === value)?.label || '';
   };
