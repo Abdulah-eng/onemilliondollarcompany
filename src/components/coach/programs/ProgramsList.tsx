@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import ProgramsFilters from '@/components/coach/programs/ProgramsFilters';
 import { mockCoachPrograms } from '@/mockdata/programs/mockCoachPrograms';
 import { Program, ProgramCategory, ProgramStatus } from '@/mockdata/programs/mockCoachPrograms';
-import { Frown, Play, Clock, Pencil, Users, Trash2, Calendar, MoreHorizontal, Tag, Crown, PlusCircle } from 'lucide-react';
+import { Frown, Play, Clock, Pencil, Users, Trash2, Calendar, MoreHorizontal, PlusCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -32,19 +32,6 @@ const getStatusBadge = (status: Program['status']) => {
   }
 };
 
-const getCategoryBadge = (category: Program['category']) => {
-  switch (category) {
-    case 'fitness':
-      return <Badge variant="outline" className="text-purple-600 border-purple-200">Fitness</Badge>;
-    case 'nutrition':
-      return <Badge variant="outline" className="text-teal-600 border-teal-200">Nutrition</Badge>;
-    case 'mental health':
-      return <Badge variant="outline" className="text-indigo-600 border-indigo-200">Mental Health</Badge>;
-    default:
-      return null;
-  }
-};
-
 const ProgramsList = () => {
   const [activeStatus, setActiveStatus] = useState<ProgramStatus | 'all'>('all');
   const [activeCategory, setActiveCategory] = useState<ProgramCategory | 'all'>('all');
@@ -54,8 +41,7 @@ const ProgramsList = () => {
     return mockCoachPrograms.filter(program => {
       const matchesStatus = activeStatus === 'all' || program.status === activeStatus;
       const matchesCategory = activeCategory === 'all' || program.category === activeCategory;
-      const matchesSearch = program.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            program.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = program.name.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesStatus && matchesCategory && matchesSearch;
     });
   }, [activeStatus, activeCategory, searchQuery]);
@@ -94,11 +80,10 @@ const ProgramsList = () => {
           {filteredPrograms.length > 0 ? (
             <div className="flex flex-col gap-4">
               {/* Table Header for larger screens */}
-              <div className="hidden md:grid grid-cols-5 gap-4 p-4 text-sm font-semibold text-muted-foreground border-b-2">
+              <div className="hidden md:grid grid-cols-4 gap-4 p-4 text-sm font-semibold text-muted-foreground border-b-2">
                 <div className="col-span-2">Program Name</div>
                 <div>Assigned Client</div>
-                <div>Status</div>
-                <div className="text-right">Actions</div>
+                <div className="text-right">Status</div>
               </div>
 
               {/* Programs List */}
@@ -113,15 +98,11 @@ const ProgramsList = () => {
                 >
                   <Card className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/20 bg-background/50 backdrop-blur-sm">
                     {/* Desktop View */}
-                    <div className="hidden md:grid grid-cols-5 items-center gap-4 p-4">
-                      {/* Program Name and Description */}
+                    <div className="hidden md:grid grid-cols-4 items-center gap-4 p-4">
+                      {/* Program Name */}
                       <div className="col-span-2 flex flex-col">
                         <span className="font-semibold text-lg group-hover:text-primary transition-colors">{program.name}</span>
-                        <span className="text-sm text-muted-foreground truncate">{program.description}</span>
-                        <div className="mt-1 md:hidden flex flex-wrap gap-2">
-                           {getCategoryBadge(program.category)}
-                           {getStatusBadge(program.status)}
-                        </div>
+                        {/* Removed: <span className="text-sm text-muted-foreground truncate">{program.description}</span> */}
                       </div>
 
                       {/* Client */}
@@ -131,12 +112,9 @@ const ProgramsList = () => {
                       </div>
 
                       {/* Status */}
-                      <div>
+                      <div className="text-right flex items-center justify-end gap-2">
                         {getStatusBadge(program.status)}
-                      </div>
-
-                      {/* Actions */}
-                      <div className="text-right flex justify-end">
+                        {/* Actions */}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8 opacity-75 hover:opacity-100">
@@ -175,14 +153,12 @@ const ProgramsList = () => {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
-                      <p className="text-sm text-muted-foreground">{program.description}</p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Users className="h-4 w-4 shrink-0" />
                         <span>Client: {getClientName(program.assignedTo)}</span>
                       </div>
                       <div className="flex flex-wrap gap-2 mt-2">
                         {getStatusBadge(program.status)}
-                        {getCategoryBadge(program.category)}
                       </div>
                     </div>
                   </Card>
