@@ -3,7 +3,6 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,7 +12,7 @@ import { ExerciseItem, ExerciseType } from '@/mockdata/createprogram/mockExercis
 import { cn } from '@/lib/utils';
 
 export interface WorkoutDayItem {
-  id: string; // Unique ID
+  id: string;
   exercise: ExerciseItem;
   comment?: string;
   sets: number[];
@@ -77,7 +76,7 @@ const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onAd
   };
 
   return (
-    <Card className="p-4 md:p-6 space-y-4 h-full">
+    <>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-bold">{day}</h3>
         <Button onClick={onAddClick} className="gap-2">
@@ -173,7 +172,7 @@ const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onAd
           </div>
         )}
       </div>
-    </Card>
+    </>
   );
 };
 
