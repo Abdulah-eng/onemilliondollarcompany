@@ -11,14 +11,21 @@ interface DaySummaryProps {
 }
 
 const DaySummary: React.FC<DaySummaryProps> = ({ items }) => {
+  const formatSetsReps = (item: WorkoutDayItem) => {
+    if (item.exercise.type !== 'exercise') return '';
+    const sets = item.sets.length;
+    const reps = item.reps.join(', ');
+    return `${sets}x${reps}`;
+  };
+
   return (
-    <Card className="p-4 md:p-6 space-y-4">
+    <Card className="p-4 md:p-6 space-y-4 h-full">
       <h3 className="text-xl font-bold">Daily Overview</h3>
-      <div className="space-y-4 text-sm text-muted-foreground">
+      <div className="space-y-4 text-sm text-muted-foreground overflow-y-auto max-h-[calc(100vh-25rem)]">
         <AnimatePresence>
           {items.map((item, index) => (
             <motion.div
-              key={index}
+              key={item.exercise.id + index}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
@@ -32,7 +39,7 @@ const DaySummary: React.FC<DaySummaryProps> = ({ items }) => {
                 <span className="font-medium text-foreground">{item.exercise.name}</span>
                 {item.exercise.type === 'exercise' && (
                   <span className="ml-2 text-muted-foreground">
-                    - {item.sets.length}x{item.reps[0]}
+                    - {item.sets.length} sets
                   </span>
                 )}
                 {item.comment && (
