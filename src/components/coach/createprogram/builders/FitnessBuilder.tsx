@@ -4,15 +4,14 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Check, Plus, GripVertical, X, ArrowLeft } from 'lucide-react';
+import { Check, Plus, ArrowLeft } from 'lucide-react';
 import WorkoutDay, { WorkoutDayItem } from './WorkoutDay';
 import { mockExercises, ExerciseItem } from '@/mockdata/createprogram/mockExercises';
 import ExerciseLibrary from './ExerciseLibrary';
 import DaySummary from './DaySummary';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { cn } from '@/lib/utils';
-import PageHeader from '../PageHeader';
 import DateCircles from './DateCircles';
+import { Card } from '@/components/ui/card';
 
 interface FitnessBuilderProps {
   onBack: () => void;
@@ -40,6 +39,10 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
     setSearchResults(results);
   }, []);
 
+  useEffect(() => {
+    handleSearch(searchQuery);
+  }, [searchQuery, handleSearch]);
+
   const handleSelectExercise = (exercise: ExerciseItem) => {
     const newItem: WorkoutDayItem = {
       id: `${exercise.id}-${Date.now()}`,
@@ -62,15 +65,23 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
-      className="flex-1 flex flex-col h-[calc(100vh-100px)]"
+      className="flex-1 flex flex-col h-[calc(100vh-100px)] space-y-4"
     >
-      <PageHeader
-        title="Create New Program"
-        onBack={onBack}
-        onSave={() => onSave(workoutData)}
-      />
+      {/* Action Bar */}
+      <div className="flex items-center justify-between p-4 bg-card rounded-xl shadow-md border">
+        <Button variant="outline" size="sm" onClick={onBack} className="gap-2">
+            <ArrowLeft className="h-4 w-4" /> Back
+        </Button>
+        <DateCircles
+          activeDay={activeDay}
+          onDayChange={setActiveDay}
+        />
+        <Button size="sm" onClick={() => onSave(workoutData)} className="gap-2 shrink-0">
+          <Check className="h-4 w-4" /> Save Program
+        </Button>
+      </div>
 
-      {/* Main Content Area */}
+      {/* Main Builder Grid */}
       <div className="flex-1 flex flex-col lg:grid lg:grid-cols-3 lg:gap-0 bg-card rounded-xl shadow-md border">
         {/* Left Column: Search & Library (Desktop only) */}
         <div className="hidden lg:block lg:col-span-1 border-r border-border h-full">
@@ -85,13 +96,6 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
 
         {/* Middle Column: Workout Day */}
         <div className="lg:col-span-1 flex-1 p-4 md:p-6 space-y-4">
-          <div className="mb-4">
-            <DateCircles
-              activeDay={activeDay}
-              onDayChange={setActiveDay}
-            />
-          </div>
-          
           <WorkoutDay
             day={activeDay}
             items={currentDayItems}
