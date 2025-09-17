@@ -91,7 +91,7 @@ const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onSe
   return (
     <Card className="p-4 md:p-6 space-y-4">
       <h3 className="text-xl font-bold">{day}</h3>
-      <DropdownMenu open={searchQuery.length > 2} onOpenChange={() => setSearchResults([])}>
+      <DropdownMenu open={searchQuery.length > 2} onOpenChange={() => setSearchQuery('')}>
         <DropdownMenuTrigger asChild>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

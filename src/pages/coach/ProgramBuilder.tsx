@@ -12,7 +12,7 @@ import { Crown } from 'lucide-react';
 type Step = 'program-details' | 'fitness-builder' | 'nutrition-builder' | 'mental-health-builder';
 
 interface ProgramData {
-  category: string;
+  category: 'fitness' | 'nutrition' | 'mental health';
   title: string;
   description: string;
   plan: any;

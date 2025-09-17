@@ -130,7 +130,7 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
       <Button
         onClick={handleSubmit(onNext)}
         className="w-full md:w-fit"
-        disabled={!selectedCategory || errors.title}
+        disabled={!selectedCategory || !!errors.title}
       >
         Next: Start Building
       </Button>
