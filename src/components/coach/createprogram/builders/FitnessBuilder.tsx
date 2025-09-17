@@ -15,6 +15,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { useNavigate } from 'react-router-dom';
 
 interface FitnessBuilderProps {
   onBack: () => void;
@@ -48,10 +49,6 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
     }
   }, []);
 
-  useEffect(() => {
-    handleSearch(searchQuery);
-  }, [searchQuery, handleSearch]);
-
   const handleSelectExercise = (exercise: ExerciseItem) => {
     const newItem: WorkoutDayItem = {
       id: `${exercise.id}-${Date.now()}`,
@@ -74,7 +71,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
-      className="h-[calc(100vh-100px)] flex flex-col space-y-4"
+      className="flex-1 flex flex-col h-[calc(100vh-100px)] space-y-4"
     >
       {/* Top Header */}
       <div className="flex items-center justify-between p-4 bg-card rounded-xl shadow-md border">
@@ -115,11 +112,37 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
         <div className="lg:col-span-1 flex-1 p-4 md:p-6 space-y-4">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold">{activeDay}</h3>
-                <Button onClick={() => setIsSheetOpen(true)} className="gap-2 lg:hidden">
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                    <SheetTrigger asChild>
+                        <Button onClick={() => setIsSheetOpen(true)} className="gap-2 lg:hidden">
+                            <Plus className="h-4 w-4" /> Add Exercise
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
+                        <SheetHeader className="mb-4">
+                            <SheetTitle>Add Exercise & Summary</SheetTitle>
+                        </SheetHeader>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="md:col-span-1">
+                                <ExerciseLibrary
+                                    searchQuery={searchQuery}
+                                    setSearchQuery={setSearchQuery}
+                                    searchResults={searchResults}
+                                    onSelect={handleSelectExercise}
+                                    onSearch={handleSearch}
+                                />
+                            </div>
+                            <div className="md:col-span-1">
+                                <DaySummary items={currentDayItems} />
+                            </div>
+                        </div>
+                    </SheetContent>
+                </Sheet>
+                <Button onClick={() => setIsSheetOpen(true)} className="gap-2 hidden lg:inline-flex">
                     <Plus className="h-4 w-4" /> Add Exercise
                 </Button>
             </div>
-            
+
             <div className="space-y-4 min-h-[100px] border-2 border-dashed border-gray-200 rounded-xl p-4">
                 <AnimatePresence>
                     {currentDayItems.length > 0 ? (
@@ -136,7 +159,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
                           <div className="flex items-center justify-between gap-2 mb-2">
                             <div className="flex items-center gap-2">
                               <GripVertical className="h-4 w-4 text-muted-foreground" />
-                              <span className={cn("text-sm px-2 py-1 rounded-full font-medium", getBadgeColor(item.exercise.type))}>
+                              <span className={cn("text-sm px-2 py-1 rounded-full font-medium", item.exercise.type === 'exercise' ? 'bg-green-100 text-green-700' : item.exercise.type === 'warm-up' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700')}>
                                 {item.exercise.type}
                               </span>
                               <span className="font-semibold text-lg flex-1 truncate">{item.exercise.name}</span>
@@ -167,24 +190,48 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
                                         type="number"
                                         placeholder="Sets"
                                         value={item.sets[setIndex]}
-                                        onChange={(e) => handleUpdateSetsReps(itemIndex, setIndex, 'sets', e.target.value)}
+                                        onChange={(e) => {
+                                          const newSets = [...item.sets];
+                                          newSets[setIndex] = parseInt(e.target.value) || 0;
+                                          const updatedItems = [...currentDayItems];
+                                          updatedItems[itemIndex].sets = newSets;
+                                          handleUpdateItems(activeDay, updatedItems);
+                                        }}
                                         className="w-full text-base"
                                       />
                                       <Input
                                         type="number"
                                         placeholder="Reps"
                                         value={item.reps[setIndex]}
-                                        onChange={(e) => handleUpdateSetsReps(itemIndex, setIndex, 'reps', e.target.value)}
+                                        onChange={(e) => {
+                                          const newReps = [...item.reps];
+                                          newReps[setIndex] = parseInt(e.target.value) || 0;
+                                          const updatedItems = [...currentDayItems];
+                                          updatedItems[itemIndex].reps = newReps;
+                                          handleUpdateItems(activeDay, updatedItems);
+                                        }}
                                         className="w-full text-base"
                                       />
                                     </div>
                                   </div>
-                                  <Button variant="ghost" size="icon" onClick={() => handleRemoveSet(itemIndex, setIndex)}>
+                                  <Button variant="ghost" size="icon" onClick={() => {
+                                    const updatedItems = [...currentDayItems];
+                                    if (updatedItems[itemIndex].sets.length > 1) {
+                                      updatedItems[itemIndex].sets.splice(setIndex, 1);
+                                      updatedItems[itemIndex].reps.splice(setIndex, 1);
+                                      handleUpdateItems(activeDay, updatedItems);
+                                    }
+                                  }}>
                                     <X className="h-4 w-4 text-muted-foreground" />
                                   </Button>
                                 </motion.div>
                               ))}
-                              <Button variant="outline" className="w-full gap-2" onClick={() => handleAddSet(itemIndex)}>
+                              <Button variant="outline" className="w-full gap-2" onClick={() => {
+                                const updatedItems = [...currentDayItems];
+                                updatedItems[itemIndex].sets.push(0);
+                                updatedItems[itemIndex].reps.push(0);
+                                handleUpdateItems(activeDay, updatedItems);
+                              }}>
                                 <Plus className="h-4 w-4" /> Add Set
                               </Button>
                             </div>
@@ -195,7 +242,11 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
                             <Textarea
                               placeholder="e.g., Use light weights for this warm-up set."
                               value={item.comment}
-                              onChange={(e) => handleUpdateComment(itemIndex, e.target.value)}
+                              onChange={(e) => {
+                                const updatedItems = [...currentDayItems];
+                                updatedItems[itemIndex].comment = e.target.value;
+                                handleUpdateItems(activeDay, updatedItems);
+                              }}
                             />
                           </div>
                         </motion.div>
@@ -215,36 +266,6 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
         <div className="hidden lg:block lg:col-span-1 border-l border-border h-full">
           <DaySummary items={currentDayItems} />
         </div>
-      </div>
-
-      {/* Mobile and Tablet Layout with Bottom Drawer */}
-      <div className="lg:hidden flex flex-col flex-1">
-        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-          <SheetTrigger asChild>
-            <Button className="fixed bottom-4 right-4 rounded-full shadow-lg z-50 h-16 w-16">
-              <Plus className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
-            <SheetHeader className="mb-4">
-              <SheetTitle>Add Exercise & Summary</SheetTitle>
-            </SheetHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-1">
-                <ExerciseLibrary
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                  searchResults={searchResults}
-                  onSelect={handleSelectExercise}
-                  onSearch={handleSearch}
-                />
-              </div>
-              <div className="md:col-span-1">
-                <DaySummary items={currentDayItems} />
-              </div>
-            </div>
-          </SheetContent>
-        </Sheet>
       </div>
     </motion.div>
   );
