@@ -264,7 +264,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
       <div className="lg:hidden flex flex-col flex-1">
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
-            <Button className="fixed bottom-4 right-4 rounded-full shadow-lg z-50 h-16 w-16">
+            <Button className="fixed bottom-4 right-4 rounded-full shadow-lg z-50 h-16 w-16 md:h-12 md:w-12">
               <Plus className="h-6 w-6" />
             </Button>
           </SheetTrigger>
