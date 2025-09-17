@@ -12,10 +12,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Search, ChevronDown, Filter, X, Play, Clock, Pencil, Tag, LayoutGrid, PlusCircle } from 'lucide-react';
+import {
+  Search,
+  ChevronDown,
+  Filter,
+  X,
+  Play,
+  Clock,
+  Pencil,
+  Tag,
+  LayoutGrid,
+  PlusCircle,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// These types and data should be in a separate file (e.g., mockdata/programs/mockCoachPrograms.ts)
+// Types
 export type ProgramStatus = 'active' | 'scheduled' | 'draft' | 'normal';
 export type ProgramCategory = 'fitness' | 'nutrition' | 'mental health';
 
@@ -28,6 +39,7 @@ interface ProgramsFiltersProps {
   setActiveCategory: (category: ProgramCategory | 'all') => void;
 }
 
+// Options
 const statusOptions = [
   { value: 'all', label: 'All', icon: LayoutGrid },
   { value: 'active', label: 'Active', icon: Play },
@@ -49,6 +61,7 @@ const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
   activeStatus,
   setActiveStatus,
   activeCategory,
+  setActiveCategory, // ✅ added here
 }) => {
   const getStatusLabel = (value: ProgramStatus | 'all') => {
     return statusOptions.find(opt => opt.value === value)?.label || '';
@@ -83,7 +96,7 @@ const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
       transition={{ duration: 0.5, delay: 0.1 }}
     >
       <div className="flex flex-col md:flex-row items-center gap-4">
-        {/* Modern Search Bar */}
+        {/* Search Bar */}
         <div className="relative flex-grow w-full md:w-auto">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
@@ -95,7 +108,7 @@ const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
           />
         </div>
 
-        {/* Unified Filter Dropdown */}
+        {/* Filter Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="flex items-center gap-2 rounded-full px-6 py-2">
@@ -111,7 +124,10 @@ const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
               <DropdownMenuItem
                 key={option.value}
                 onSelect={() => setActiveStatus(option.value as typeof activeStatus)}
-                className={cn("flex items-center gap-2", activeStatus === option.value && "bg-accent text-accent-foreground")}
+                className={cn(
+                  'flex items-center gap-2',
+                  activeStatus === option.value && 'bg-accent text-accent-foreground'
+                )}
               >
                 <option.icon className="h-4 w-4" />
                 <span>{option.label}</span>
@@ -124,7 +140,10 @@ const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
               <DropdownMenuItem
                 key={option.value}
                 onSelect={() => setActiveCategory(option.value as typeof activeCategory)}
-                className={cn("flex items-center gap-2", activeCategory === option.value && "bg-accent text-accent-foreground")}
+                className={cn(
+                  'flex items-center gap-2',
+                  activeCategory === option.value && 'bg-accent text-accent-foreground'
+                )}
               >
                 <Tag className="h-4 w-4" />
                 <span>{option.label}</span>
@@ -142,7 +161,11 @@ const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.2 }}
             >
-              <Button variant="ghost" onClick={resetAllFilters} className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium">
+              <Button
+                variant="ghost"
+                onClick={resetAllFilters}
+                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
+              >
                 <X className="h-4 w-4" />
                 Clear All
               </Button>
@@ -151,7 +174,7 @@ const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* Selected Filters Chips */}
+      {/* Active Filter Chips */}
       <div className="flex flex-wrap gap-2">
         <AnimatePresence>
           {activeStatus !== 'all' && (
