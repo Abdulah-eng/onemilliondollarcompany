@@ -16,6 +16,10 @@ interface ProgramDetailsForm {
   category: ProgramCategory;
   title: string;
   description: string;
+  muscleGroups?: string;
+  equipment?: string;
+  benefits?: string;
+  allergies?: string;
 }
 
 interface ProgramDetailsProps {
@@ -25,24 +29,9 @@ interface ProgramDetailsProps {
 
 // Categories with emojis
 const categoryOptions = [
-  {
-    value: 'fitness',
-    label: 'Fitness',
-    emoji: '💪',
-    description: 'Workouts, strength, and cardio plans.',
-  },
-  {
-    value: 'nutrition',
-    label: 'Nutrition',
-    emoji: '🥗',
-    description: 'Meal plans and dietary guidance.',
-  },
-  {
-    value: 'mental health',
-    label: 'Mental Health',
-    emoji: '🧘‍♂️',
-    description: 'Mindfulness and stress management.',
-  },
+  { value: 'fitness', label: 'Fitness', emoji: '💪', description: 'Workouts, strength, and cardio plans.' },
+  { value: 'nutrition', label: 'Nutrition', emoji: '🥗', description: 'Meal plans and dietary guidance.' },
+  { value: 'mental health', label: 'Mental Health', emoji: '🧘‍♂️', description: 'Mindfulness and stress management.' },
 ];
 
 const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) => {
@@ -109,10 +98,72 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
         <Label htmlFor="description">Program Description</Label>
         <Textarea
           id="description"
-          placeholder="A comprehensive plan to build foundational strength..."
+          placeholder="A comprehensive plan..."
           {...register('description')}
         />
       </div>
+
+      {/* Dynamic Fields based on Category */}
+      {selectedCategory === 'fitness' && (
+        <>
+          <div className="space-y-2">
+            <Label htmlFor="muscleGroups">Muscle Groups</Label>
+            <Input
+              id="muscleGroups"
+              placeholder="e.g., Chest, Back, Legs"
+              {...register('muscleGroups')}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="equipment">Equipment Needed</Label>
+            <Input
+              id="equipment"
+              placeholder="e.g., Dumbbells, Bands"
+              {...register('equipment')}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="benefits">Benefits</Label>
+            <Textarea
+              id="benefits"
+              placeholder="e.g., Strength, endurance..."
+              {...register('benefits')}
+            />
+          </div>
+        </>
+      )}
+
+      {selectedCategory === 'nutrition' && (
+        <div className="space-y-2">
+          <Label htmlFor="allergies">Allergies / Restrictions</Label>
+          <Input
+            id="allergies"
+            placeholder="e.g., Gluten, Dairy"
+            {...register('allergies')}
+          />
+        </div>
+      )}
+
+      {selectedCategory === 'mental health' && (
+        <>
+          <div className="space-y-2">
+            <Label htmlFor="equipment">Equipment Needed</Label>
+            <Input
+              id="equipment"
+              placeholder="e.g., Yoga mat, meditation app"
+              {...register('equipment')}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="benefits">Benefits</Label>
+            <Textarea
+              id="benefits"
+              placeholder="e.g., Mindfulness, relaxation"
+              {...register('benefits')}
+            />
+          </div>
+        </>
+      )}
 
       {/* Next Button */}
       <Button
