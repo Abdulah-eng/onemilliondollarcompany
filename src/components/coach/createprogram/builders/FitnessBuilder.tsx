@@ -15,7 +15,6 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useNavigate } from 'react-router-dom';
 
 interface FitnessBuilderProps {
   onBack: () => void;
@@ -48,6 +47,10 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
       setSearchResults([]);
     }
   }, []);
+
+  useEffect(() => {
+    handleSearch(searchQuery);
+  }, [searchQuery, handleSearch]);
 
   const handleSelectExercise = (exercise: ExerciseItem) => {
     const newItem: WorkoutDayItem = {
