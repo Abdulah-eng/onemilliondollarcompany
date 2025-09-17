@@ -11,7 +11,7 @@ import ExerciseLibrary from './ExerciseLibrary';
 import DaySummary from './DaySummary';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import DateCircles from './DateCircles';
-import { Card } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 interface FitnessBuilderProps {
   onBack: () => void;
@@ -22,7 +22,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
   const [activeDay, setActiveDay] = useState('Monday');
   const [workoutData, setWorkoutData] = useState<{ [day: string]: WorkoutDayItem[] }>({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<ExerciseItem[]>([]);
+  const [searchResults, setSearchResults] = useState<ExerciseItem[]>(mockExercises);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const handleUpdateItems = useCallback((day: string, items: WorkoutDayItem[]) => {
@@ -33,9 +33,9 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
   }, []);
 
   const handleSearch = useCallback((query: string) => {
-    const results = query.length > 2
+    const results = query.length > 0
       ? mockExercises.filter(item => item.name.toLowerCase().includes(query.toLowerCase()))
-      : [];
+      : mockExercises;
     setSearchResults(results);
   }, []);
 
@@ -65,23 +65,19 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
-      className="flex-1 flex flex-col h-[calc(100vh-100px)] space-y-4"
+      className="flex-1 flex flex-col h-[calc(100vh-100px)]"
     >
-      {/* Action Bar */}
-      <div className="flex items-center justify-between p-4 bg-card rounded-xl shadow-md border">
+      {/* Action Bar (mobile/tablet) */}
+      <div className="flex md:hidden items-center justify-between p-4 bg-card rounded-xl shadow-md border mb-4">
         <Button variant="outline" size="sm" onClick={onBack} className="gap-2">
             <ArrowLeft className="h-4 w-4" /> Back
         </Button>
-        <DateCircles
-          activeDay={activeDay}
-          onDayChange={setActiveDay}
-        />
         <Button size="sm" onClick={() => onSave(workoutData)} className="gap-2 shrink-0">
           <Check className="h-4 w-4" /> Save Program
         </Button>
       </div>
 
-      {/* Main Builder Grid */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:grid lg:grid-cols-3 lg:gap-0 bg-card rounded-xl shadow-md border">
         {/* Left Column: Search & Library (Desktop only) */}
         <div className="hidden lg:block lg:col-span-1 border-r border-border h-full">
@@ -96,6 +92,13 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
 
         {/* Middle Column: Workout Day */}
         <div className="lg:col-span-1 flex-1 p-4 md:p-6 space-y-4">
+          <div className="mb-4">
+            <DateCircles
+              activeDay={activeDay}
+              onDayChange={setActiveDay}
+            />
+          </div>
+          
           <WorkoutDay
             day={activeDay}
             items={currentDayItems}
