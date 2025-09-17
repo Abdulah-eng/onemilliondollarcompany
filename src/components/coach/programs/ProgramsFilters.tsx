@@ -51,59 +51,57 @@ const ProgramsFilters: React.FC<ProgramsFiltersProps> = ({
 
   return (
     <motion.div
-      className="flex flex-col md:flex-row items-center gap-4"
+      className="flex flex-col gap-6"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.1 }}
     >
-      <div className="flex flex-col md:flex-row items-center w-full gap-4">
-        {/* Search Bar */}
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search programs..."
-            className="w-full pl-9"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+      {/* Search Bar */}
+      <div className="relative w-full">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Search programs by name or description..."
+          className="w-full pl-12 pr-4 py-3 text-base rounded-xl border-2 focus:border-primary/50 bg-background/50 backdrop-blur-sm"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
 
-        {/* Combined Filter Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full md:w-auto flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              Filter by
-              <ChevronDown className="h-4 w-4 ml-auto" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            <DropdownMenuLabel className="font-bold">Status: {getStatusLabel(activeStatus)}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuRadioGroup value={activeStatus} onValueChange={setActiveStatus}>
-              {statusOptions.map(option => (
-                <DropdownMenuRadioItem key={option.value} value={option.value}>
-                  <option.icon className="h-4 w-4 mr-2" />
-                  {option.label}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-            
-            <DropdownMenuSeparator />
+      {/* Category Pills */}
+      <div className="flex flex-wrap gap-3">
+        <Button
+          variant={activeCategory === 'all' ? "default" : "outline"}
+          onClick={() => setActiveCategory('all')}
+          className="rounded-full px-6 py-2 text-sm font-medium transition-all hover:scale-105"
+        >
+          All Categories
+        </Button>
+        {categoryOptions.slice(1).map(option => (
+          <Button
+            key={option.value}
+            variant={activeCategory === option.value ? "default" : "outline"}
+            onClick={() => setActiveCategory(option.value as typeof activeCategory)}
+            className="rounded-full px-6 py-2 text-sm font-medium transition-all hover:scale-105"
+          >
+            {option.label}
+          </Button>
+        ))}
+      </div>
 
-            <DropdownMenuLabel className="font-bold">Category: {getCategoryLabel(activeCategory)}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuRadioGroup value={activeCategory} onValueChange={setActiveCategory}>
-              {categoryOptions.map(option => (
-                <DropdownMenuRadioItem key={option.value} value={option.value}>
-                  <Tag className="h-4 w-4 mr-2" />
-                  {option.label}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      {/* Status Filter Pills */}
+      <div className="flex flex-wrap gap-3">
+        {statusOptions.map(option => (
+          <Button
+            key={option.value}
+            variant={activeStatus === option.value ? "default" : "outline"}
+            onClick={() => setActiveStatus(option.value as typeof activeStatus)}
+            className="rounded-full px-4 py-2 text-sm font-medium transition-all hover:scale-105 flex items-center gap-2"
+          >
+            <option.icon className="h-4 w-4" />
+            {option.label}
+          </Button>
+        ))}
       </div>
     </motion.div>
   );

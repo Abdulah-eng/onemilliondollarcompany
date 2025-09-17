@@ -87,108 +87,123 @@ const ProgramsList = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <Card className="divide-y">
-          {/* Header Row (Desktop) */}
-          <div className="hidden md:grid grid-cols-[1.5fr_1fr_1fr_0.5fr] p-4 text-sm font-semibold text-muted-foreground">
-            <span>Program Name</span>
-            <span>Category</span>
-            <span>Status</span>
-            <span className="text-right">Actions</span>
-          </div>
-
+        <div className="grid gap-4 md:gap-6">
           {filteredPrograms.length > 0 ? (
-            filteredPrograms.map(program => (
-              <div
+            filteredPrograms.map((program, index) => (
+              <motion.div
                 key={program.id}
-                className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr_0.5fr] items-center p-4 gap-4 md:gap-6 hover:bg-muted/50 transition-colors"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
               >
-                {/* Program Name & Client Name */}
-                <div className="flex flex-col gap-1 md:gap-0">
-                  <h3 className="text-lg font-semibold">{program.name}</h3>
-                  {program.assignedTo ? (
-                    <span className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      Assigned to: {getClientName(program.assignedTo)}
-                    </span>
-                  ) : (
-                    <span className="text-sm text-muted-foreground italic">Unassigned</span>
-                  )}
-                </div>
-                
-                {/* Category Badge */}
-                <div className="md:block hidden">
-                  {getCategoryBadge(program.category)}
-                </div>
+                <Card className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/20 bg-background/50 backdrop-blur-sm">
+                  <div className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      {/* Left Content */}
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                              {program.name}
+                            </h3>
+                            <p className="text-muted-foreground text-sm leading-relaxed mb-3 max-w-2xl">
+                              {program.description}
+                            </p>
+                          </div>
+                          
+                          {/* Actions Dropdown */}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem onClick={() => handleAction('edit', program)}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Edit Program
+                              </DropdownMenuItem>
+                              {program.status === 'normal' && (
+                                <>
+                                  <DropdownMenuItem onClick={() => handleAction('assign', program)}>
+                                    <Users className="h-4 w-4 mr-2" />
+                                    Assign to Client
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleAction('schedule', program)}>
+                                    <Calendar className="h-4 w-4 mr-2" />
+                                    Schedule Program
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                              {program.status === 'scheduled' && (
+                                <DropdownMenuItem onClick={() => handleAction('assign', program)}>
+                                  <Play className="h-4 w-4 mr-2" />
+                                  Assign Now
+                                </DropdownMenuItem>
+                              )}
+                              {program.status === 'draft' && (
+                                <DropdownMenuItem onClick={() => handleAction('assign', program)}>
+                                  <Users className="h-4 w-4 mr-2" />
+                                  Assign Draft
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem onClick={() => handleAction('delete', program)} className="text-destructive focus:text-destructive">
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete Program
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
 
-                {/* Status Badge */}
-                <div className="md:block hidden">
-                  {getStatusBadge(program.status)}
-                </div>
+                        {/* Assigned Client */}
+                        {program.assignedTo ? (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                            <Users className="h-4 w-4" />
+                            <span>Assigned to:</span>
+                            <Badge variant="secondary" className="font-medium">
+                              {getClientName(program.assignedTo)}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                            <Users className="h-4 w-4" />
+                            <span className="italic">Unassigned program</span>
+                          </div>
+                        )}
 
-                {/* Mobile View: Category & Status */}
-                <div className="md:hidden flex flex-wrap gap-2">
-                  {getCategoryBadge(program.category)}
-                  {getStatusBadge(program.status)}
-                  {program.category === 'mental health' && (
-                    <Badge variant="outline" className="text-yellow-500 border-yellow-200"><Crown className="h-3 w-3 mr-1" />Premium</Badge>
-                  )}
-                </div>
-
-                {/* Actions Dropdown */}
-                <div className="flex justify-start md:justify-end">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleAction('delete', program)} className="text-destructive">
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleAction('edit', program)}>
-                        <Pencil className="h-4 w-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      {program.status === 'normal' && (
-                        <>
-                          <DropdownMenuItem onClick={() => handleAction('assign', program)}>
-                            <Users className="h-4 w-4 mr-2" />
-                            Assign
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleAction('schedule', program)}>
-                            <Calendar className="h-4 w-4 mr-2" />
-                            Schedule
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                      {program.status === 'scheduled' && (
-                        <DropdownMenuItem onClick={() => handleAction('assign', program)}>
-                          <Users className="h-4 w-4 mr-2" />
-                          Assign Now
-                        </DropdownMenuItem>
-                      )}
-                      {program.status === 'draft' && (
-                        <DropdownMenuItem onClick={() => handleAction('assign', program)}>
-                          <Users className="h-4 w-4 mr-2" />
-                          Assign Draft
-                        </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
+                        {/* Badges Row */}
+                        <div className="flex flex-wrap items-center gap-3">
+                          {getCategoryBadge(program.category)}
+                          {getStatusBadge(program.status)}
+                          {program.category === 'mental health' && (
+                            <Badge variant="outline" className="text-yellow-600 border-yellow-200 bg-yellow-50">
+                              <Crown className="h-3 w-3 mr-1" />
+                              Premium
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground">
-              <Frown className="h-12 w-12 mb-4" />
-              <h3 className="font-semibold text-xl">No programs found</h3>
-              <p>Try adjusting your search or filters.</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex flex-col items-center justify-center p-16 text-center"
+            >
+              <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">
+                <Frown className="h-10 w-10 text-muted-foreground" />
+              </div>
+              <h3 className="font-bold text-2xl mb-2">No programs found</h3>
+              <p className="text-muted-foreground text-lg max-w-md">
+                Try adjusting your search terms or filters to find what you're looking for.
+              </p>
+            </motion.div>
           )}
-        </Card>
+        </div>
       </motion.div>
     </>
   );
