@@ -47,7 +47,7 @@ const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onAd
     newItems[itemIndex].reps.push(0);
     onItemsChange(newItems);
   };
-  
+
   const handleRemoveSet = (itemIndex: number, setIndex: number) => {
     const newItems = [...items];
     if (newItems[itemIndex].sets.length > 1) {
