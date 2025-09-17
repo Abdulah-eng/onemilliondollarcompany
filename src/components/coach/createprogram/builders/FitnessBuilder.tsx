@@ -48,6 +48,10 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
     }
   }, []);
 
+  useEffect(() => {
+    handleSearch(searchQuery);
+  }, [searchQuery, handleSearch]);
+
   const handleSelectExercise = (exercise: ExerciseItem) => {
     const newItem: WorkoutDayItem = {
       id: `${exercise.id}-${Date.now()}`,
@@ -63,53 +67,6 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
   };
 
   const currentDayItems = workoutData[activeDay] || [];
-
-  const handleRemoveItem = (index: number) => {
-    const newItems = currentDayItems.filter((_, i) => i !== index);
-    handleUpdateItems(activeDay, newItems);
-  };
-
-  const handleUpdateSetsReps = (itemIndex: number, setIndex: number, type: 'sets' | 'reps', value: string) => {
-    const newItems = [...currentDayItems];
-    const numericValue = parseInt(value) || 0;
-    newItems[itemIndex][type][setIndex] = numericValue;
-    handleUpdateItems(activeDay, newItems);
-  };
-
-  const handleAddSet = (itemIndex: number) => {
-    const newItems = [...currentDayItems];
-    newItems[itemIndex].sets.push(0);
-    newItems[itemIndex].reps.push(0);
-    handleUpdateItems(activeDay, newItems);
-  };
-  
-  const handleRemoveSet = (itemIndex: number, setIndex: number) => {
-    const newItems = [...currentDayItems];
-    if (newItems[itemIndex].sets.length > 1) {
-      newItems[itemIndex].sets.splice(setIndex, 1);
-      newItems[itemIndex].reps.splice(setIndex, 1);
-      handleUpdateItems(activeDay, newItems);
-    }
-  };
-
-  const handleUpdateComment = (itemIndex: number, comment: string) => {
-    const newItems = [...currentDayItems];
-    newItems[itemIndex].comment = comment;
-    handleUpdateItems(activeDay, newItems);
-  };
-
-  const getBadgeColor = (type: ExerciseType) => {
-    switch (type) {
-      case 'warm-up':
-        return 'bg-blue-100 text-blue-700';
-      case 'exercise':
-        return 'bg-green-100 text-green-700';
-      case 'stretch':
-        return 'bg-purple-100 text-purple-700';
-      default:
-        return 'bg-gray-100 text-gray-700';
-    }
-  };
 
   return (
     <motion.div
@@ -264,7 +221,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
       <div className="lg:hidden flex flex-col flex-1">
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
-            <Button className="fixed bottom-4 right-4 rounded-full shadow-lg z-50 h-16 w-16 md:h-12 md:w-12">
+            <Button className="fixed bottom-4 right-4 rounded-full shadow-lg z-50 h-16 w-16">
               <Plus className="h-6 w-6" />
             </Button>
           </SheetTrigger>
