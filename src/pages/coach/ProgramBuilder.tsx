@@ -6,7 +6,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import ProgramDetails from '@/components/coach/createprogram/ProgramDetails';
 import FitnessBuilder from '@/components/coach/createprogram/builders/FitnessBuilder';
 import { Separator } from '@/components/ui/separator';
-import { Crown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Check } from 'lucide-react';
 
 type Step = 'program-details' | 'fitness-builder' | 'nutrition-builder' | 'mental-health-builder';
 
@@ -42,7 +43,16 @@ const ProgramBuilder = () => {
   const renderStep = () => {
     switch (step) {
       case 'program-details':
-        return <ProgramDetails onNext={handleProgramDetailsNext} initialData={programData} />;
+        return (
+          <>
+            <ProgramDetails onNext={handleProgramDetailsNext} initialData={programData} />
+            <div className="flex justify-end gap-2 mt-8">
+              <Button size="sm" onClick={() => {}} className="gap-2 text-sm">
+                Next: Start Building
+              </Button>
+            </div>
+          </>
+        );
       case 'fitness-builder':
         return (
           <FitnessBuilder
@@ -57,15 +67,14 @@ const ProgramBuilder = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-8">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold">Create New Program</h1>
-        <div className="flex items-center gap-2">
-          <Crown className="h-6 w-6 text-yellow-500" />
-          <span className="text-lg font-semibold">Premium Feature</span>
-        </div>
-      </div>
-      <Separator className="mb-8" />
-      <div className="max-w-3xl mx-auto">
+      {step === 'program-details' && (
+        <>
+          <h1 className="text-4xl font-bold">Create New Program</h1>
+          <Separator className="my-8" />
+        </>
+      )}
+      
+      <div className="max-w-7xl mx-auto">
         <AnimatePresence mode="wait">
           {renderStep()}
         </AnimatePresence>
