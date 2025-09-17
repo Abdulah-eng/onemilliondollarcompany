@@ -4,7 +4,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Check, PanelLeft, PanelRight } from 'lucide-react';
+import { Check, Plus, PanelLeft, PanelRight } from 'lucide-react';
 import WorkoutDay, { WorkoutDayItem } from './WorkoutDay';
 import { mockExercises, ExerciseItem } from '@/mockdata/createprogram/mockExercises';
 import ExerciseLibrary from './ExerciseLibrary';
