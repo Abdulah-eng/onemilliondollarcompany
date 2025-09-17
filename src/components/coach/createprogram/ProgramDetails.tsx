@@ -1,4 +1,3 @@
-// src/components/coach/createprogram/ProgramDetails.tsx
 'use client';
 
 import React from 'react';
@@ -11,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ProgramCategory } from '@/mockdata/createprogram/mockExercises';
 
-// Define the form data structure
+// Define form data structure
 interface ProgramDetailsForm {
   category: ProgramCategory;
   title: string;
@@ -23,6 +22,7 @@ interface ProgramDetailsProps {
   initialData?: Partial<ProgramDetailsForm>;
 }
 
+// Only non-premium categories
 const categoryOptions: ProgramCategory[] = ['fitness', 'nutrition', 'mental health'];
 
 const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) => {
@@ -38,6 +38,7 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
       transition={{ duration: 0.3 }}
       className="space-y-6"
     >
+      {/* Category */}
       <div className="space-y-2">
         <Label htmlFor="category">Category</Label>
         <Select
@@ -49,24 +50,39 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
           </SelectTrigger>
           <SelectContent>
             {categoryOptions.map(cat => (
-              <SelectItem key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</SelectItem>
+              <SelectItem key={cat} value={cat}>
+                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
+      {/* Program Title */}
       <div className="space-y-2">
         <Label htmlFor="title">Program Title</Label>
-        <Input id="title" placeholder="e.g., 30-Day Strength Builder" {...register('title', { required: 'Title is required' })} />
+        <Input
+          id="title"
+          placeholder="e.g., 30-Day Strength Builder"
+          {...register('title', { required: 'Title is required' })}
+        />
         {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
       </div>
 
+      {/* Program Description */}
       <div className="space-y-2">
         <Label htmlFor="description">Program Description</Label>
-        <Textarea id="description" placeholder="A comprehensive plan to build foundational strength..." {...register('description')} />
+        <Textarea
+          id="description"
+          placeholder="A comprehensive plan to build foundational strength..."
+          {...register('description')}
+        />
       </div>
 
-      <Button onClick={handleSubmit(onNext)} className="w-full md:w-fit">Next: Start Building</Button>
+      {/* Next Button */}
+      <Button onClick={handleSubmit(onNext)} className="w-full md:w-fit">
+        Next: Start Building
+      </Button>
     </motion.div>
   );
 };
