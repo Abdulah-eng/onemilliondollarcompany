@@ -32,8 +32,8 @@ const getBadgeColor = (type: ExerciseType) => {
 const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({ searchQuery, setSearchQuery, searchResults, onSelect, onSearch }) => {
 
   useEffect(() => {
-    // This useEffect hook ensures the search function is called whenever the searchQuery changes.
-    // It's a crucial part of making the search dynamic.
+    // This hook ensures the search function is called whenever the searchQuery changes.
+    // It is essential for the search results to appear.
     onSearch(searchQuery);
   }, [searchQuery, onSearch]);
 
