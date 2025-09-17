@@ -87,87 +87,89 @@ const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onAd
       
       <div className="space-y-4 min-h-[100px] border-2 border-dashed border-gray-200 rounded-xl p-4">
         <AnimatePresence>
-          {items.map((item, itemIndex) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2 }}
-              className="p-4 border rounded-lg relative group bg-card"
-              layout
-            >
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <GripVertical className="h-4 w-4 text-muted-foreground" />
-                  <span className={cn("text-sm px-2 py-1 rounded-full font-medium", getBadgeColor(item.exercise.type))}>
-                    {item.exercise.type}
-                  </span>
-                  <span className="font-semibold text-lg flex-1 truncate">{item.exercise.name}</span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 opacity-50 hover:opacity-100"
-                  onClick={() => handleRemoveItem(itemIndex)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {item.exercise.type === 'exercise' && (
-                <div className="space-y-3">
-                  {item.sets.map((setVal, setIndex) => (
-                    <motion.div
-                      key={setIndex}
-                      className="flex gap-2 items-end"
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                    >
-                      <div className="flex-1">
-                        <label className="block text-xs text-muted-foreground">Set {setIndex + 1}</label>
-                        <div className="flex gap-2">
-                          <Input
-                            type="number"
-                            placeholder="Sets"
-                            value={item.sets[setIndex]}
-                            onChange={(e) => handleUpdateSetsReps(itemIndex, setIndex, 'sets', e.target.value)}
-                            className="w-full text-base"
-                          />
-                          <Input
-                            type="number"
-                            placeholder="Reps"
-                            value={item.reps[setIndex]}
-                            onChange={(e) => handleUpdateSetsReps(itemIndex, setIndex, 'reps', e.target.value)}
-                            className="w-full text-base"
-                          />
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="icon" onClick={() => handleRemoveSet(itemIndex, setIndex)}>
-                        <X className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    </motion.div>
-                  ))}
-                  <Button variant="outline" className="w-full gap-2" onClick={() => handleAddSet(itemIndex)}>
-                    <Plus className="h-4 w-4" /> Add Set
+            {items.map((item, itemIndex) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.2 }}
+                className="p-4 border rounded-lg relative group bg-card"
+                layout
+              >
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <GripVertical className="h-4 w-4 text-muted-foreground" />
+                    <span className={cn("text-sm px-2 py-1 rounded-full font-medium", getBadgeColor(item.exercise.type))}>
+                      {item.exercise.type}
+                    </span>
+                    <span className="font-semibold text-lg flex-1 truncate">{item.exercise.name}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 opacity-50 hover:opacity-100"
+                    onClick={() => handleRemoveItem(itemIndex)}
+                  >
+                    <X className="h-4 w-4" />
                   </Button>
                 </div>
-              )}
-              
-              <div className="mt-4 space-y-2">
-                <Label>Optional Comment</Label>
-                <Textarea
-                  placeholder="e.g., Use light weights for this warm-up set."
-                  value={item.comment}
-                  onChange={(e) => handleUpdateComment(itemIndex, e.target.value)}
-                />
-              </div>
-            </motion.div>
-          ))}
+
+                {item.exercise.type === 'exercise' && (
+                  <div className="space-y-3">
+                    {item.sets.map((setVal, setIndex) => (
+                      <motion.div
+                        key={setIndex}
+                        className="flex gap-2 items-end"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
+                        <div className="flex-1">
+                          <label className="block text-xs text-muted-foreground">Set {setIndex + 1}</label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="number"
+                              placeholder="Sets"
+                              value={item.sets[setIndex]}
+                              onChange={(e) => handleUpdateSetsReps(itemIndex, setIndex, 'sets', e.target.value)}
+                              className="w-full text-base"
+                            />
+                            <Input
+                              type="number"
+                              placeholder="Reps"
+                              value={item.reps[setIndex]}
+                              onChange={(e) => handleUpdateSetsReps(itemIndex, setIndex, 'reps', e.target.value)}
+                              className="w-full text-base"
+                            />
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={() => handleRemoveSet(itemIndex, setIndex)}>
+                          <X className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </motion.div>
+                    ))}
+                    <Button variant="outline" className="w-full gap-2" onClick={() => handleAddSet(itemIndex)}>
+                      <Plus className="h-4 w-4" /> Add Set
+                    </Button>
+                  </div>
+                )}
+                
+                <div className="mt-4 space-y-2">
+                  <Label>Optional Comment</Label>
+                  <Textarea
+                    placeholder="e.g., Use light weights for this warm-up set."
+                    value={item.comment}
+                    onChange={(e) => handleUpdateComment(itemIndex, e.target.value)}
+                  />
+                </div>
+              </motion.div>
+            ))}
         </AnimatePresence>
         {items.length === 0 && (
           <div className="text-center text-muted-foreground py-12">
-            Click 'Add Exercise' to start building your workout.
+            <Plus className="h-12 w-12 mx-auto mb-2 text-muted-foreground/30"/>
+            <p className="font-semibold">Start building your workout</p>
+            <p className="text-sm">Add exercises to {day} to get started.</p>
           </div>
         )}
       </div>
