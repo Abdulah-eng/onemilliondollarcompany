@@ -4,7 +4,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Check, Plus, GripVertical, X } from 'lucide-react';
+import { Check, Plus, GripVertical, X, ArrowLeft } from 'lucide-react';
 import WorkoutDay, { WorkoutDayItem } from './WorkoutDay';
 import { mockExercises, ExerciseItem } from '@/mockdata/createprogram/mockExercises';
 import ExerciseLibrary from './ExerciseLibrary';
@@ -121,7 +121,9 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
     >
       {/* Top Header */}
       <div className="flex items-center justify-between p-4 bg-card rounded-xl shadow-md border">
-        <Button variant="outline" onClick={onBack}>Back</Button>
+        <Button variant="outline" onClick={onBack} className="gap-2">
+            <ArrowLeft className="h-4 w-4" /> Back
+        </Button>
         <div className="flex-1 flex overflow-x-auto gap-2 md:gap-4 justify-center">
           {weekDays.map(day => (
             <Button
