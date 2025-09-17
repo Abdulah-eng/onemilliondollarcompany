@@ -1,5 +1,6 @@
 // src/mockdata/createprogram/mockExercises.ts
 export type ExerciseType = 'warm-up' | 'exercise' | 'stretch';
+export type ProgramCategory = 'fitness' | 'nutrition' | 'mental health';
 
 export interface ExerciseItem {
   id: string;
