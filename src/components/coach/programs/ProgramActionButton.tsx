@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, FilePlus2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // ✅ Import useNavigate
 
 const SIZE = 64; // FAB size
 const MARGIN = 16; // padding from viewport edges
@@ -10,6 +11,8 @@ const ACTION_MARGIN = 12; // gap between FAB and action bubble
 const ACTION_WIDTH = 200; // safe max width for bubble (label + button)
 
 export default function ProgramActionButton() {
+  const navigate = useNavigate(); // ✅ Initialize the navigate function
+
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const innerRef = useRef<HTMLDivElement | null>(null);
 
@@ -114,6 +117,11 @@ export default function ProgramActionButton() {
     setIsOpen((s) => !s);
   };
 
+  const handleCreateProgramClick = () => {
+    setIsOpen(false);
+    navigate('/coach/programs/create'); // ✅ Navigate to the program builder page
+  };
+
   if (!pos) return null;
 
   // Decide alignment so the bubble stays on-screen
@@ -153,9 +161,7 @@ export default function ProgramActionButton() {
               className="rounded-full w-12 h-12 shadow-lg"
               onClick={(e) => {
                 e.stopPropagation();
-                setIsOpen(false);
-                console.log('Create Program clicked!');
-                // TODO: hook up modal / navigation here
+                handleCreateProgramClick(); // ✅ Call the new handler
               }}
             >
               <FilePlus2 className="h-5 w-5" />
