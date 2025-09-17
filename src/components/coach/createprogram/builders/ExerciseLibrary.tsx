@@ -1,0 +1,84 @@
+// src/components/coach/createprogram/builders/ExerciseLibrary.tsx
+'use client';
+
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Search, GripVertical } from 'lucide-react';
+import { ExerciseItem, ExerciseType } from '@/mockdata/createprogram/mockExercises';
+import { cn } from '@/lib/utils';
+import { Draggable } from 'react-beautiful-dnd';
+
+interface ExerciseLibraryProps {
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  searchResults: ExerciseItem[];
+}
+
+const getBadgeColor = (type: ExerciseType) => {
+  switch (type) {
+    case 'warm-up':
+      return 'bg-blue-100 text-blue-700';
+    case 'exercise':
+      return 'bg-green-100 text-green-700';
+    case 'stretch':
+      return 'bg-purple-100 text-purple-700';
+    default:
+      return 'bg-gray-100 text-gray-700';
+  }
+};
+
+const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({ searchQuery, setSearchQuery, searchResults }) => {
+  return (
+    <div className="space-y-4 h-full flex flex-col">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search exercises..."
+          className="pl-9"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+      <Card className="p-2 space-y-2 flex-1 overflow-y-auto">
+        <AnimatePresence>
+          {searchResults.length > 0 ? (
+            searchResults.map((exercise, index) => (
+              <Draggable key={exercise.id} draggableId={exercise.id} index={index}>
+                {(provided) => (
+                  <motion.div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center gap-2 p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-grab"
+                  >
+                    <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className={cn("text-xs px-2 py-1 rounded-full font-medium", getBadgeColor(exercise.type))}>
+                          {exercise.type}
+                        </span>
+                        <span className="font-semibold text-sm">{exercise.name}</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </Draggable>
+            ))
+          ) : (
+            <div className="p-4 text-center text-muted-foreground text-sm">
+              {searchQuery.length > 2 ? 'No exercises found.' : 'Start typing to search...'}
+            </div>
+          )}
+        </AnimatePresence>
+      </Card>
+    </div>
+  );
+};
+
+export default ExerciseLibrary;
