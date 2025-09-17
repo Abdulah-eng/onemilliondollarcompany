@@ -3,7 +3,6 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card } from '@/components/ui/card';
 import { WorkoutDayItem } from './WorkoutDay';
 import { Dumbbell, Heart, Utensils } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -13,13 +12,6 @@ interface DaySummaryProps {
 }
 
 const DaySummary: React.FC<DaySummaryProps> = ({ items }) => {
-  const formatSetsReps = (item: WorkoutDayItem) => {
-    if (item.exercise.type !== 'exercise') return '';
-    const sets = item.sets.length;
-    const reps = item.reps.join(', ');
-    return `${sets}x${reps}`;
-  };
-
   return (
     <div className="p-4 md:p-6 space-y-4 h-full">
       <h3 className="text-xl font-bold">Daily Overview</h3>
