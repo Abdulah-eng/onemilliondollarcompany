@@ -7,6 +7,7 @@ import { Plus, FilePlus2 } from 'lucide-react';
 const SIZE = 64; // FAB size
 const MARGIN = 16; // padding from viewport edges
 const ACTION_MARGIN = 12; // gap between FAB and action bubble
+const ACTION_WIDTH = 200; // safe max width for bubble (label + button)
 
 export default function ProgramActionButton() {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -115,6 +116,10 @@ export default function ProgramActionButton() {
 
   if (!pos) return null;
 
+  // Decide alignment so the bubble stays on-screen
+  const isRightHalf = pos.left > (viewport?.w || 0) / 2;
+  const translateX = isRightHalf ? -(ACTION_WIDTH - SIZE) : 0;
+
   return (
     <div
       ref={wrapperRef}
@@ -136,7 +141,8 @@ export default function ProgramActionButton() {
             style={{
               bottom: SIZE + ACTION_MARGIN,
               left: 0,
-              transform: `translateX(${pos.left > (viewport?.w || 0) / 2 ? -150 + SIZE : 0}px)`,
+              transform: `translateX(${translateX}px)`,
+              maxWidth: ACTION_WIDTH,
             }}
           >
             <span className="text-sm bg-card/80 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg border border-border/50">
