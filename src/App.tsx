@@ -32,7 +32,8 @@ const CustomerDashboardPage = lazy(() => import("./pages/customer/CustomerDashbo
 const CoachDashboardPage = lazy(() => import("./pages/coach/CoachDashboard"));
 const ClientOverviewPage = lazy(() => import("./pages/coach/ClientOverviewPage"));
 const ClientCard = lazy(() => import("./pages/coach/ClientCard"));
-const CoachProgramsPage = lazy(() => import("./pages/coach/ProgramsPage")); // ✅ Lazy-load the new page
+const CoachProgramsPage = lazy(() => import("./pages/coach/ProgramsPage"));
+const ProgramBuilder = lazy(() => import("./pages/coach/ProgramBuilder")); // ✅ Lazy-load the new page
 
 const MyProgramsPage = lazy(() => import("./pages/customer/MyProgramsPage"));
 const ViewProgramPage = lazy(() => import("./pages/customer/ViewProgramPage"));
@@ -164,9 +165,14 @@ const ThemedApp = () => {
                       <ClientOverviewPage />
                     </Suspense>
                   } />
-                  <Route path="/coach/programs" element={ // ✅ New route for the programs page
+                  <Route path="/coach/programs" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <CoachProgramsPage />
+                    </Suspense>
+                  } />
+                  <Route path="/coach/programs/create" element={ // ✅ New route for creating a program
+                    <Suspense fallback={<LoadingScreen />}>
+                      <ProgramBuilder />
                     </Suspense>
                   } />
                 </Route>
