@@ -5,15 +5,16 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Search, GripVertical } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { ExerciseItem, ExerciseType } from '@/mockdata/createprogram/mockExercises';
 import { cn } from '@/lib/utils';
-import { Draggable } from 'react-beautiful-dnd';
+import { Button } from '@/components/ui/button';
 
 interface ExerciseLibraryProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   searchResults: ExerciseItem[];
+  onSelect: (item: ExerciseItem) => void;
 }
 
 const getBadgeColor = (type: ExerciseType) => {
@@ -29,7 +30,7 @@ const getBadgeColor = (type: ExerciseType) => {
   }
 };
 
-const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({ searchQuery, setSearchQuery, searchResults }) => {
+const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({ searchQuery, setSearchQuery, searchResults, onSelect }) => {
   return (
     <div className="space-y-4 h-full flex flex-col">
       <div className="relative">
@@ -44,31 +45,25 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({ searchQuery, setSearc
       <Card className="p-2 space-y-2 flex-1 overflow-y-auto">
         <AnimatePresence>
           {searchResults.length > 0 ? (
-            searchResults.map((exercise, index) => (
-              <Draggable key={exercise.id} draggableId={exercise.id} index={index}>
-                {(provided) => (
-                  <motion.div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex items-center gap-2 p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-grab"
-                  >
-                    <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className={cn("text-xs px-2 py-1 rounded-full font-medium", getBadgeColor(exercise.type))}>
-                          {exercise.type}
-                        </span>
-                        <span className="font-semibold text-sm">{exercise.name}</span>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </Draggable>
+            searchResults.map((exercise) => (
+              <motion.div
+                key={exercise.id}
+                onClick={() => onSelect(exercise)}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center gap-2 p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+              >
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className={cn("text-xs px-2 py-1 rounded-full font-medium", getBadgeColor(exercise.type))}>
+                      {exercise.type}
+                    </span>
+                    <span className="font-semibold text-sm">{exercise.name}</span>
+                  </div>
+                </div>
+              </motion.div>
             ))
           ) : (
             <div className="p-4 text-center text-muted-foreground text-sm">
