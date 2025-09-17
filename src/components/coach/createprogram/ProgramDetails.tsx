@@ -68,7 +68,7 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
       <div className="space-y-2">
         <Label className="text-lg">Select Program Category</Label>
         <p className="text-muted-foreground text-sm">Choose the primary focus of your new program.</p>
-        <div className="flex gap-4 justify-center">
+        <div className="flex gap-4 flex-wrap justify-start">
           {categoryOptions.map(option => (
             <motion.div
               key={option.value}
