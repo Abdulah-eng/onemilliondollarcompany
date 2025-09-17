@@ -68,7 +68,7 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
       <div className="space-y-2">
         <Label className="text-lg">Select Program Category</Label>
         <p className="text-muted-foreground text-sm">Choose the primary focus of your new program.</p>
-        <div className="flex gap-4 flex-wrap justify-start">
+        <div className="flex gap-3 flex-wrap justify-start">
           {categoryOptions.map(option => (
             <motion.div
               key={option.value}
@@ -79,14 +79,14 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
             >
               <Card
                 className={cn(
-                  "flex flex-col items-center justify-center gap-2 p-4 w-24 h-24 text-center transition-all duration-200",
+                  "flex flex-col items-center justify-center gap-1 p-3 w-20 h-20 text-center transition-all duration-200",
                   selectedCategory === option.value
                     ? "border-primary ring-2 ring-primary/50"
                     : "border-border hover:border-primary/50"
                 )}
               >
-                <div className="text-3xl">{option.emoji}</div>
-                <h3 className="font-semibold text-sm">{option.label}</h3>
+                <div className="text-2xl">{option.emoji}</div>
+                <h3 className="font-semibold text-xs">{option.label}</h3>
               </Card>
             </motion.div>
           ))}
