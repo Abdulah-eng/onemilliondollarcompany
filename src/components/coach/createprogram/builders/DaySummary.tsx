@@ -1,11 +1,9 @@
-// src/components/coach/createprogram/builders/DaySummary.tsx
 'use client';
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WorkoutDayItem } from './WorkoutDay';
 import { Dumbbell, Heart, Utensils } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface DaySummaryProps {
   items: WorkoutDayItem[];
@@ -18,7 +16,7 @@ const DaySummary: React.FC<DaySummaryProps> = ({ items }) => {
       <div className="space-y-4 text-sm text-muted-foreground overflow-y-auto max-h-[calc(100vh-25rem)]">
         <AnimatePresence mode="popLayout">
           {items.length > 0 ? (
-            items.map((item, index) => (
+            items.map((item) => (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, x: -10 }}
@@ -28,19 +26,29 @@ const DaySummary: React.FC<DaySummaryProps> = ({ items }) => {
                 className="flex items-start gap-3 p-3 rounded-lg bg-card border shadow-sm"
               >
                 <div className="shrink-0 pt-1">
-                  {item.exercise.type === 'exercise' && <Dumbbell className="h-4 w-4 text-primary" />}
-                  {item.exercise.type === 'warm-up' && <Heart className="h-4 w-4 text-primary" />}
-                  {item.exercise.type === 'stretch' && <Utensils className="h-4 w-4 text-primary" />}
+                  {item.exercise.type === 'exercise' && (
+                    <Dumbbell className="h-4 w-4 text-primary" />
+                  )}
+                  {item.exercise.type === 'warm-up' && (
+                    <Heart className="h-4 w-4 text-primary" />
+                  )}
+                  {item.exercise.type === 'stretch' && (
+                    <Utensils className="h-4 w-4 text-primary" />
+                  )}
                 </div>
                 <div className="flex-1">
-                  <span className="font-medium text-foreground">{item.exercise.name}</span>
+                  <span className="font-medium text-foreground">
+                    {item.exercise.name}
+                  </span>
                   {item.exercise.type === 'exercise' && (
                     <span className="ml-2 text-muted-foreground">
                       - {item.sets.length} sets
                     </span>
                   )}
                   {item.comment && (
-                    <p className="italic text-xs mt-1 truncate max-w-full">"{item.comment}"</p>
+                    <p className="italic text-xs mt-1 truncate max-w-full">
+                      "{item.comment}"
+                    </p>
                   )}
                 </div>
               </motion.div>
