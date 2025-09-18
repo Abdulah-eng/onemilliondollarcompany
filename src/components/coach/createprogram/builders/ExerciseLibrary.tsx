@@ -23,8 +23,6 @@ const getBadgeColor = (type: ExerciseType) => {
       return 'bg-green-100 text-green-700';
     case 'stretch':
       return 'bg-purple-100 text-purple-700';
-    case 'balance':
-      return 'bg-yellow-100 text-yellow-700';
     default:
       return 'bg-gray-100 text-gray-700';
   }
@@ -86,7 +84,7 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground truncate">
-                      Muscle: {exercise.muscleGroup || 'General'}
+                      Muscle: {exercise.muscleGroups?.[0] || 'General'}
                     </p>
                   </div>
                 </div>

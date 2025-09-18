@@ -21,7 +21,7 @@ const formSchema = z.object({
   password: z.string().min(1, { message: "Password cannot be empty." }),
 });
 
-const LoginPage = () => {
+export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -38,7 +38,6 @@ const LoginPage = () => {
       // The onAuthStateChange listener in AuthContext will handle the redirection automatically.
     }
   };
-
 
   return (
     <AuthLayout>
@@ -109,6 +108,4 @@ const LoginPage = () => {
       </AuthCard>
     </AuthLayout>
   );
-};
-
-export default LoginPage;
+}
