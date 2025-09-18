@@ -91,6 +91,11 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:grid lg:grid-cols-3 lg:gap-0 bg-card rounded-xl shadow-md border">
+        {/* Date Selector Header (Desktop only) */}
+        <div className="hidden lg:block lg:col-span-3 border-b border-border p-4">
+          <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
+        </div>
+
         {/* Left Column: Search & Library (Desktop only) */}
         <div className="hidden lg:block lg:col-span-1 border-r border-border h-full">
           <ExerciseLibrary
@@ -104,7 +109,8 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
 
         {/* Middle Column: Workout Day */}
         <div className="lg:col-span-1 flex-1 p-4 md:p-6 space-y-4">
-          <div className="mb-4">
+          {/* Date selector (mobile/tablet only) */}
+          <div className="mb-4 lg:hidden">
             <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
           </div>
 
