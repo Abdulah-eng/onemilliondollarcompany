@@ -5,10 +5,9 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Corrected import
-import { Search, Filter, Dumbbell, Heart, Utensils, Zap } from 'lucide-react'; // Added Zap icon
+import { Search, Filter, Dumbbell, Heart, Utensils } from 'lucide-react';
 import { ExerciseItem, ExerciseType } from '@/mockdata/createprogram/mockExercises';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
 
 interface ExerciseLibraryProps {
   searchQuery: string;
@@ -26,8 +25,6 @@ const getBadgeColor = (type: ExerciseType) => {
       return 'bg-green-100 text-green-700';
     case 'stretch':
       return 'bg-purple-100 text-purple-700';
-    case 'balance':
-      return 'bg-yellow-100 text-yellow-700';
     default:
       return 'bg-gray-100 text-gray-700';
   }
@@ -41,8 +38,6 @@ const getIconForType = (type: ExerciseType) => {
       return <Dumbbell className="h-4 w-4" />;
     case 'stretch':
       return <Utensils className="h-4 w-4" />;
-    case 'balance':
-      return <Zap className="h-4 w-4" />;
     default:
       return <Filter className="h-4 w-4" />;
   }
@@ -96,9 +91,6 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
             <SelectItem value="stretch" className="flex items-center gap-2">
               <Utensils className="h-4 w-4 text-purple-700" /> Stretch
             </SelectItem>
-            <SelectItem value="balance" className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-yellow-700" /> Balance
-            </SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -119,13 +111,10 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
               >
                 {/* Image Placeholder */}
                 <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
-                  {/* The Image component is from Next.js. You can use a standard <img> tag if not in a Next.js project. */}
-                  <Image
+                  <img
                     src={`https://via.placeholder.com/64?text=${exercise.name.charAt(0).toUpperCase()}`}
                     alt={exercise.name}
-                    width={64}
-                    height={64}
-                    className="object-cover"
+                    className="w-full h-full object-cover"
                   />
                 </div>
 
