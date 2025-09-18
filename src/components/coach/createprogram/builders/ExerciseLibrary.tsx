@@ -23,6 +23,8 @@ const getBadgeColor = (type: ExerciseType) => {
       return 'bg-green-100 text-green-700';
     case 'stretch':
       return 'bg-purple-100 text-purple-700';
+    case 'balance':
+      return 'bg-yellow-100 text-yellow-700';
     default:
       return 'bg-gray-100 text-gray-700';
   }
@@ -53,7 +55,7 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
         />
       </div>
 
-      <div className="grid gap-4 flex-1 overflow-y-auto sm:grid-cols-2 lg:grid-cols-1">
+      <div className="flex-1 overflow-y-auto space-y-3">
         <AnimatePresence>
           {searchResults.length > 0 ? (
             searchResults.map((exercise) => (
@@ -64,30 +66,28 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="group rounded-2xl border border-gray-200 bg-card shadow-sm hover:shadow-lg transition cursor-pointer overflow-hidden hover:-translate-y-1"
+                className="group flex items-center gap-4 p-3 rounded-xl border border-gray-200 bg-card shadow-sm hover:shadow-lg transition cursor-pointer hover:-translate-y-1"
               >
-                {/* Card image / icon */}
-                <div className="w-full h-28 bg-gradient-to-tr from-gray-100 to-gray-200 rounded-t-2xl flex items-center justify-center text-gray-400 text-2xl font-bold">
+                {/* Image / Icon */}
+                <div className="w-16 h-16 flex-shrink-0 rounded-lg bg-gradient-to-tr from-gray-100 to-gray-200 flex items-center justify-center text-gray-400 text-2xl font-bold">
                   {exercise.name.charAt(0).toUpperCase()}
                 </div>
 
-                {/* Card content */}
-                <div className="p-4 flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
+                {/* Content */}
+                <div className="flex-1 flex flex-col justify-center min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className="text-sm font-semibold text-foreground truncate">
+                      {exercise.name}
+                    </h4>
                     <span
                       className={cn(
-                        'text-xs px-3 py-1 rounded-full font-semibold capitalize',
+                        'text-xs px-2 py-0.5 rounded-full font-semibold capitalize',
                         getBadgeColor(exercise.type)
                       )}
                     >
                       {exercise.type}
                     </span>
                   </div>
-
-                  <h4 className="text-sm font-semibold text-foreground truncate">
-                    {exercise.name}
-                  </h4>
-
                   <p className="text-xs text-muted-foreground truncate">
                     Muscle: {exercise.muscleGroups?.[0] || 'General'}
                   </p>
