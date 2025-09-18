@@ -1,4 +1,3 @@
-// src/components/coach/createprogram/builders/ExerciseLibrary.tsx
 'use client';
 
 import React, { useEffect } from 'react';
@@ -24,16 +23,21 @@ const getBadgeColor = (type: ExerciseType) => {
       return 'bg-green-100 text-green-700';
     case 'stretch':
       return 'bg-purple-100 text-purple-700';
+    case 'balance':
+      return 'bg-yellow-100 text-yellow-700';
     default:
       return 'bg-gray-100 text-gray-700';
   }
 };
 
-const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({ searchQuery, setSearchQuery, searchResults, onSelect, onSearch }) => {
-
+const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
+  searchQuery,
+  setSearchQuery,
+  searchResults,
+  onSelect,
+  onSearch,
+}) => {
   useEffect(() => {
-    // This hook ensures the search function is called whenever the searchQuery changes.
-    // It is essential for the search results to appear.
     onSearch(searchQuery);
   }, [searchQuery, onSearch]);
 
@@ -49,7 +53,8 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({ searchQuery, setSearc
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
-      <div className="p-2 space-y-2 flex-1 overflow-y-auto">
+
+      <div className="grid gap-4 flex-1 overflow-y-auto sm:grid-cols-2 lg:grid-cols-1">
         <AnimatePresence>
           {searchResults.length > 0 ? (
             searchResults.map((exercise) => (
@@ -60,21 +65,38 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({ searchQuery, setSearc
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="flex items-center gap-2 p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                className="group rounded-xl border bg-card shadow-sm hover:shadow-md transition cursor-pointer overflow-hidden"
               >
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className={cn("text-xs px-2 py-1 rounded-full font-medium", getBadgeColor(exercise.type))}>
-                      {exercise.type}
-                    </span>
-                    <span className="font-semibold text-sm">{exercise.name}</span>
+                <div className="flex items-center gap-4 p-4">
+                  {/* Placeholder image */}
+                  <div className="w-16 h-16 bg-muted rounded-lg flex-shrink-0" />
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span
+                        className={cn(
+                          'text-xs px-2 py-1 rounded-full font-medium capitalize',
+                          getBadgeColor(exercise.type)
+                        )}
+                      >
+                        {exercise.type}
+                      </span>
+                      <span className="font-semibold text-sm truncate">
+                        {exercise.name}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">
+                      Muscle: {exercise.muscleGroup || 'General'}
+                    </p>
                   </div>
                 </div>
               </motion.div>
             ))
           ) : (
             <div className="p-4 text-center text-muted-foreground text-sm">
-              {searchQuery.length > 2 ? 'No exercises found.' : 'Start typing to search...'}
+              {searchQuery.length > 2
+                ? 'No exercises found.'
+                : 'Start typing to search...'}
             </div>
           )}
         </AnimatePresence>
