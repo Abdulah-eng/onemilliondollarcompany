@@ -164,15 +164,6 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
           </div>
         </>
       )}
-
-      {/* Next Button */}
-      <Button
-        onClick={handleSubmit(onNext)}
-        className="w-full md:w-fit"
-        disabled={!selectedCategory || !!errors.title}
-      >
-        Next: Start Building
-      </Button>
     </motion.div>
   );
 };
