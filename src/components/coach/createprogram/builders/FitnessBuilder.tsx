@@ -90,14 +90,14 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_2.5fr_1fr] lg:gap-0 bg-card rounded-xl shadow-md border">
+      <div className="flex-1 flex flex-col lg:grid lg:grid-cols-5 lg:gap-4 bg-card rounded-xl shadow-md border">
         {/* Date Selector Header (Desktop only) */}
-        <div className="hidden lg:block lg:col-span-3 border-b border-border p-4">
+        <div className="hidden lg:block lg:col-span-5 border-b border-border p-4">
           <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
         </div>
 
         {/* Left Column: Search & Library (Desktop only) */}
-        <div className="hidden lg:block border-r border-border h-full">
+        <div className="hidden lg:block lg:col-span-1 border-r border-border h-[calc(100vh-4rem)] overflow-y-auto">
           <ExerciseLibrary
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
@@ -108,7 +108,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
         </div>
 
         {/* Middle Column: Workout Day */}
-        <div className="flex-1 p-4 md:p-6 space-y-4">
+        <div className="lg:col-span-3 flex-1 p-4 md:p-6 space-y-4 lg:sticky lg:top-4 lg:h-[calc(100vh-4rem)]">
           {/* Date selector (mobile/tablet only) */}
           <div className="mb-4 lg:hidden">
             <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
@@ -123,7 +123,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
         </div>
 
         {/* Right Column: Day Summary (Desktop only) */}
-        <div className="hidden lg:block border-l border-border h-full">
+        <div className="hidden lg:block lg:col-span-1 border-l border-border h-[calc(100vh-4rem)] overflow-y-auto">
           <DaySummary items={currentDayItems} />
         </div>
       </div>
