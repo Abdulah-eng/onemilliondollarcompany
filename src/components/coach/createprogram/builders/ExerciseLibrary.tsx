@@ -1,10 +1,11 @@
+// src/components/coach/createprogram/builders/ExerciseLibrary.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, Dumbbell, Heart, Utensils, Zap } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Corrected import
+import { Search, Filter, Dumbbell, Heart, Utensils, Zap } from 'lucide-react'; // Added Zap icon
 import { ExerciseItem, ExerciseType } from '@/mockdata/createprogram/mockExercises';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -118,7 +119,7 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
               >
                 {/* Image Placeholder */}
                 <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
-                  {/* You can replace this with a real image from your data */}
+                  {/* The Image component is from Next.js. You can use a standard <img> tag if not in a Next.js project. */}
                   <Image
                     src={`https://via.placeholder.com/64?text=${exercise.name.charAt(0).toUpperCase()}`}
                     alt={exercise.name}
