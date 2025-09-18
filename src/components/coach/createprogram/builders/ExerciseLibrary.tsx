@@ -1,18 +1,20 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Filter, Dumbbell, Heart, Utensils, Zap } from 'lucide-react';
 import { ExerciseItem, ExerciseType } from '@/mockdata/createprogram/mockExercises';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 interface ExerciseLibraryProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   searchResults: ExerciseItem[];
   onSelect: (item: ExerciseItem) => void;
-  onSearch: (query: string) => void;
+  onSearch: (query: string, filterType?: ExerciseType | 'all') => void;
 }
 
 const getBadgeColor = (type: ExerciseType) => {
@@ -30,6 +32,21 @@ const getBadgeColor = (type: ExerciseType) => {
   }
 };
 
+const getIconForType = (type: ExerciseType) => {
+  switch (type) {
+    case 'warm-up':
+      return <Heart className="h-4 w-4" />;
+    case 'exercise':
+      return <Dumbbell className="h-4 w-4" />;
+    case 'stretch':
+      return <Utensils className="h-4 w-4" />;
+    case 'balance':
+      return <Zap className="h-4 w-4" />;
+    default:
+      return <Filter className="h-4 w-4" />;
+  }
+};
+
 const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
   searchQuery,
   setSearchQuery,
@@ -37,25 +54,56 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
   onSelect,
   onSearch,
 }) => {
+  const [filterType, setFilterType] = useState<ExerciseType | 'all'>('all');
+
   useEffect(() => {
-    onSearch(searchQuery);
-  }, [searchQuery, onSearch]);
+    onSearch(searchQuery, filterType);
+  }, [searchQuery, filterType, onSearch]);
 
   return (
-    <div className="space-y-4 h-full flex flex-col p-4 md:p-6">
+    <div className="space-y-6 h-full flex flex-col p-4 md:p-6">
       <h3 className="text-xl font-bold">Exercise Library</h3>
 
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search exercises..."
-          className="pl-9"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+      {/* Search + Filter Row */}
+      <div className="flex flex-col sm:flex-row gap-4 items-center">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search exercises..."
+            className="pl-9 w-full"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Filter */}
+        <Select value={filterType} onValueChange={(val) => setFilterType(val as ExerciseType | 'all')}>
+          <SelectTrigger className="w-full sm:w-48">
+            <Filter className="h-4 w-4 text-muted-foreground mr-2" />
+            <SelectValue placeholder="Filter by Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all" className="flex items-center">
+              All Types
+            </SelectItem>
+            <SelectItem value="warm-up" className="flex items-center gap-2">
+              <Heart className="h-4 w-4 text-blue-700" /> Warm-up
+            </SelectItem>
+            <SelectItem value="exercise" className="flex items-center gap-2">
+              <Dumbbell className="h-4 w-4 text-green-700" /> Exercise
+            </SelectItem>
+            <SelectItem value="stretch" className="flex items-center gap-2">
+              <Utensils className="h-4 w-4 text-purple-700" /> Stretch
+            </SelectItem>
+            <SelectItem value="balance" className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-yellow-700" /> Balance
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-3">
+      {/* Exercise Cards */}
+      <div className="flex-1 overflow-y-auto space-y-3 pr-2">
         <AnimatePresence>
           {searchResults.length > 0 ? (
             searchResults.map((exercise) => (
@@ -68,9 +116,16 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
                 transition={{ duration: 0.2 }}
                 className="group flex items-center gap-4 p-3 rounded-xl border border-gray-200 bg-card shadow-sm hover:shadow-lg transition cursor-pointer hover:-translate-y-1"
               >
-                {/* Image / Icon */}
-                <div className="w-16 h-16 flex-shrink-0 rounded-lg bg-gradient-to-tr from-gray-100 to-gray-200 flex items-center justify-center text-gray-400 text-2xl font-bold">
-                  {exercise.name.charAt(0).toUpperCase()}
+                {/* Image Placeholder */}
+                <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                  {/* You can replace this with a real image from your data */}
+                  <Image
+                    src={`https://via.placeholder.com/64?text=${exercise.name.charAt(0).toUpperCase()}`}
+                    alt={exercise.name}
+                    width={64}
+                    height={64}
+                    className="object-cover"
+                  />
                 </div>
 
                 {/* Content */}
@@ -81,11 +136,12 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
                     </h4>
                     <span
                       className={cn(
-                        'text-xs px-2 py-0.5 rounded-full font-semibold capitalize',
+                        'text-xs px-2 py-0.5 rounded-full font-semibold capitalize flex items-center gap-1',
                         getBadgeColor(exercise.type)
                       )}
                     >
-                      {exercise.type}
+                      {getIconForType(exercise.type)}
+                      <span className="hidden sm:inline-block">{exercise.type}</span>
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground truncate">
