@@ -12,7 +12,7 @@ import { ArrowLeft, Check } from 'lucide-react';
 type Step = 'program-details' | 'fitness-builder' | 'nutrition-builder' | 'mental-health-builder';
 
 interface ProgramData {
-  category: string;
+  category: 'fitness' | 'nutrition' | 'mental health';
   title: string;
   description: string;
   plan: any;
@@ -44,14 +44,7 @@ const ProgramBuilder = () => {
     switch (step) {
       case 'program-details':
         return (
-          <>
-            <ProgramDetails onNext={handleProgramDetailsNext} initialData={programData} />
-            <div className="flex justify-end gap-2 mt-8">
-              <Button size="sm" onClick={() => {}} className="gap-2 text-sm">
-                Next: Start Building
-              </Button>
-            </div>
-          </>
+          <ProgramDetails onNext={handleProgramDetailsNext} initialData={programData} />
         );
       case 'fitness-builder':
         return (

@@ -102,7 +102,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
           <WorkoutDay
             day={activeDay}
             items={currentDayItems}
-            onItemsChange={handleUpdateItems}
+            onItemsChange={(items) => handleUpdateItems(activeDay, items)}
             onAddClick={() => setIsSheetOpen(true)}
           />
         </div>
