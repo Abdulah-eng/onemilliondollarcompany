@@ -42,7 +42,8 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
   return (
     <div className="space-y-4 h-full flex flex-col p-4 md:p-6">
       <h3 className="text-xl font-bold">Exercise Library</h3>
-      <div className="relative">
+
+      <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search exercises..."
@@ -63,30 +64,33 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="group rounded-xl border bg-card shadow-sm hover:shadow-md transition cursor-pointer overflow-hidden"
+                className="group rounded-2xl border border-gray-200 bg-card shadow-sm hover:shadow-lg transition cursor-pointer overflow-hidden hover:-translate-y-1"
               >
-                <div className="flex items-center gap-4 p-4">
-                  {/* Placeholder image */}
-                  <div className="w-16 h-16 bg-muted rounded-lg flex-shrink-0" />
+                {/* Card image / icon */}
+                <div className="w-full h-28 bg-gradient-to-tr from-gray-100 to-gray-200 rounded-t-2xl flex items-center justify-center text-gray-400 text-2xl font-bold">
+                  {exercise.name.charAt(0).toUpperCase()}
+                </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span
-                        className={cn(
-                          'text-xs px-2 py-1 rounded-full font-medium capitalize',
-                          getBadgeColor(exercise.type)
-                        )}
-                      >
-                        {exercise.type}
-                      </span>
-                      <span className="font-semibold text-sm truncate">
-                        {exercise.name}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground truncate">
-                      Muscle: {exercise.muscleGroups?.[0] || 'General'}
-                    </p>
+                {/* Card content */}
+                <div className="p-4 flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={cn(
+                        'text-xs px-3 py-1 rounded-full font-semibold capitalize',
+                        getBadgeColor(exercise.type)
+                      )}
+                    >
+                      {exercise.type}
+                    </span>
                   </div>
+
+                  <h4 className="text-sm font-semibold text-foreground truncate">
+                    {exercise.name}
+                  </h4>
+
+                  <p className="text-xs text-muted-foreground truncate">
+                    Muscle: {exercise.muscleGroups?.[0] || 'General'}
+                  </p>
                 </div>
               </motion.div>
             ))
