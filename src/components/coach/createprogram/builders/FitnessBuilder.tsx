@@ -1,17 +1,15 @@
-// src/components/coach/createprogram/builders/FitnessBuilder.tsx
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Check, Plus, ArrowLeft } from 'lucide-react';
+import { Check, ArrowLeft } from 'lucide-react';
 import WorkoutDay, { WorkoutDayItem } from './WorkoutDay';
 import { mockExercises, ExerciseItem } from '@/mockdata/createprogram/mockExercises';
 import ExerciseLibrary from './ExerciseLibrary';
 import DaySummary from './DaySummary';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import DateCircles from './DateCircles';
-import { Separator } from '@/components/ui/separator';
 
 interface FitnessBuilderProps {
   onBack: () => void;
@@ -33,9 +31,12 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
   }, []);
 
   const handleSearch = useCallback((query: string) => {
-    const results = query.length > 0
-      ? mockExercises.filter(item => item.name.toLowerCase().includes(query.toLowerCase()))
-      : mockExercises;
+    const results =
+      query.length > 0
+        ? mockExercises.filter(item =>
+            item.name.toLowerCase().includes(query.toLowerCase())
+          )
+        : mockExercises;
     setSearchResults(results);
   }, []);
 
@@ -49,9 +50,11 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
       exercise: exercise,
       sets: [0],
       reps: [0],
-      comment: ''
+      comment: '',
     };
-    const itemsForDay = workoutData[activeDay] ? [...workoutData[activeDay]] : [];
+    const itemsForDay = workoutData[activeDay]
+      ? [...workoutData[activeDay]]
+      : [];
     itemsForDay.push(newItem);
     handleUpdateItems(activeDay, itemsForDay);
     setIsSheetOpen(false);
@@ -69,10 +72,19 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
     >
       {/* Action Bar (mobile/tablet) */}
       <div className="flex md:hidden items-center justify-between p-4 bg-card rounded-xl shadow-md border mb-4">
-        <Button variant="outline" size="sm" onClick={onBack} className="gap-2">
-            <ArrowLeft className="h-4 w-4" /> Back
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onBack}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back
         </Button>
-        <Button size="sm" onClick={() => onSave(workoutData)} className="gap-2 shrink-0">
+        <Button
+          size="sm"
+          onClick={() => onSave(workoutData)}
+          className="gap-2 shrink-0"
+        >
           <Check className="h-4 w-4" /> Save Program
         </Button>
       </div>
@@ -93,16 +105,13 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
         {/* Middle Column: Workout Day */}
         <div className="lg:col-span-1 flex-1 p-4 md:p-6 space-y-4">
           <div className="mb-4">
-            <DateCircles
-              activeDay={activeDay}
-              onDayChange={setActiveDay}
-            />
+            <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
           </div>
-          
+
           <WorkoutDay
             day={activeDay}
             items={currentDayItems}
-            onItemsChange={(items) => handleUpdateItems(activeDay, items)}
+            onItemsChange={items => handleUpdateItems(activeDay, items)}
             onAddClick={() => setIsSheetOpen(true)}
           />
         </div>
@@ -117,21 +126,17 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
           <SheetHeader className="mb-4">
-            <SheetTitle>Add Exercise & Summary</SheetTitle>
+            <SheetTitle>Add Exercise</SheetTitle>
           </SheetHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-1">
-              <ExerciseLibrary
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                searchResults={searchResults}
-                onSelect={handleSelectExercise}
-                onSearch={handleSearch}
-              />
-            </div>
-            <div className="md:col-span-1">
-              <DaySummary items={currentDayItems} />
-            </div>
+          <div className="w-full">
+            {/* Only ExerciseLibrary on mobile/tablet */}
+            <ExerciseLibrary
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              searchResults={searchResults}
+              onSelect={handleSelectExercise}
+              onSearch={handleSearch}
+            />
           </div>
         </SheetContent>
       </Sheet>
