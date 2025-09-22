@@ -1,13 +1,13 @@
 // src/components/coach/createprogram/builders/WorkoutDay.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Plus, X, GripVertical } from 'lucide-react';
+import { Plus, X, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
 import { ExerciseItem, ExerciseType } from '@/mockdata/createprogram/mockExercises';
 import { cn } from '@/lib/utils';
 
@@ -27,31 +27,28 @@ interface WorkoutDayProps {
 }
 
 const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onAddClick }) => {
-  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
 
   const handleRemoveItem = (index: number) => {
     const newItems = items.filter((_, i) => i !== index);
     onItemsChange(newItems);
   };
 
-  const handleDragStart = (index: number) => {
-    setDraggedItemIndex(index);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedItemIndex(null);
-  };
-
-  const handleDrop = (targetIndex: number) => {
-    if (draggedItemIndex === null || draggedItemIndex === targetIndex) return;
-    
+  const handleMoveUp = (index: number) => {
+    if (index === 0) return;
     const newItems = [...items];
-    const draggedItem = newItems[draggedItemIndex];
-    newItems.splice(draggedItemIndex, 1);
-    newItems.splice(targetIndex, 0, draggedItem);
-    
+    const item = newItems[index];
+    newItems[index] = newItems[index - 1];
+    newItems[index - 1] = item;
     onItemsChange(newItems);
-    setDraggedItemIndex(null);
+  };
+
+  const handleMoveDown = (index: number) => {
+    if (index === items.length - 1) return;
+    const newItems = [...items];
+    const item = newItems[index];
+    newItems[index] = newItems[index + 1];
+    newItems[index + 1] = item;
+    onItemsChange(newItems);
   };
 
   const handleUpdateSetsReps = (itemIndex: number, setIndex: number, type: 'sets' | 'reps', value: string) => {
@@ -111,46 +108,48 @@ const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onAd
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, y: -20 }}
-                animate={{ 
-                  opacity: 1, 
-                  y: 0,
-                  scale: draggedItemIndex === itemIndex ? 1.02 : 1
-                }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.2 }}
-                className={cn(
-                  "p-4 border rounded-lg relative group bg-card cursor-grab active:cursor-grabbing",
-                  draggedItemIndex === itemIndex && "opacity-50 z-10"
-                )}
+                className="p-4 border rounded-lg relative group bg-card"
                 layout
-                drag="y"
-                dragConstraints={{ top: 0, bottom: 0 }}
-                onDragStart={() => handleDragStart(itemIndex)}
-                onDragEnd={() => handleDragEnd()}
-                onDrop={() => handleDrop(itemIndex)}
-                whileDrag={{ 
-                  scale: 1.02,
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
-                  zIndex: 100
-                }}
               >
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2">
-                    <GripVertical className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-grab active:cursor-grabbing" />
-                    <span className={cn("text-sm px-2 py-1 rounded-full font-medium", getBadgeColor(item.exercise.type))}>
-                      {item.exercise.type}
-                    </span>
-                    <span className="font-semibold text-lg flex-1 truncate">{item.exercise.name}</span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 opacity-50 hover:opacity-100"
-                    onClick={() => handleRemoveItem(itemIndex)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
+                 <div className="flex items-center justify-between gap-2 mb-2">
+                   <div className="flex items-center gap-2">
+                     <div className="flex flex-col gap-1">
+                       <Button
+                         variant="ghost"
+                         size="icon"
+                         className="h-4 w-4 p-0 hover:bg-muted"
+                         onClick={() => handleMoveUp(itemIndex)}
+                         disabled={itemIndex === 0}
+                       >
+                         <ChevronUp className="h-3 w-3" />
+                       </Button>
+                       <Button
+                         variant="ghost"
+                         size="icon"
+                         className="h-4 w-4 p-0 hover:bg-muted"
+                         onClick={() => handleMoveDown(itemIndex)}
+                         disabled={itemIndex === items.length - 1}
+                       >
+                         <ChevronDown className="h-3 w-3" />
+                       </Button>
+                     </div>
+                     <span className={cn("text-sm px-2 py-1 rounded-full font-medium", getBadgeColor(item.exercise.type))}>
+                       {item.exercise.type}
+                     </span>
+                     <span className="font-semibold text-lg flex-1 truncate">{item.exercise.name}</span>
+                   </div>
+                   <Button
+                     variant="ghost"
+                     size="icon"
+                     className="h-6 w-6 opacity-50 hover:opacity-100"
+                     onClick={() => handleRemoveItem(itemIndex)}
+                   >
+                     <X className="h-4 w-4" />
+                   </Button>
+                 </div>
 
                 {item.exercise.type === 'exercise' && (
                   <div className="space-y-3">
