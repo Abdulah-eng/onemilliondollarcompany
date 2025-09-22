@@ -1,7 +1,7 @@
 // src/components/coach/createprogram/builders/WorkoutDay.tsx
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,10 +27,31 @@ interface WorkoutDayProps {
 }
 
 const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onAddClick }) => {
+  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
 
   const handleRemoveItem = (index: number) => {
     const newItems = items.filter((_, i) => i !== index);
     onItemsChange(newItems);
+  };
+
+  const handleDragStart = (index: number) => {
+    setDraggedItemIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItemIndex(null);
+  };
+
+  const handleDrop = (targetIndex: number) => {
+    if (draggedItemIndex === null || draggedItemIndex === targetIndex) return;
+    
+    const newItems = [...items];
+    const draggedItem = newItems[draggedItemIndex];
+    newItems.splice(draggedItemIndex, 1);
+    newItems.splice(targetIndex, 0, draggedItem);
+    
+    onItemsChange(newItems);
+    setDraggedItemIndex(null);
   };
 
   const handleUpdateSetsReps = (itemIndex: number, setIndex: number, type: 'sets' | 'reps', value: string) => {
@@ -90,15 +111,32 @@ const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onAd
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0,
+                  scale: draggedItemIndex === itemIndex ? 1.02 : 1
+                }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.2 }}
-                className="p-4 border rounded-lg relative group bg-card"
+                className={cn(
+                  "p-4 border rounded-lg relative group bg-card cursor-grab active:cursor-grabbing",
+                  draggedItemIndex === itemIndex && "opacity-50 z-10"
+                )}
                 layout
+                drag="y"
+                dragConstraints={{ top: 0, bottom: 0 }}
+                onDragStart={() => handleDragStart(itemIndex)}
+                onDragEnd={() => handleDragEnd()}
+                onDrop={() => handleDrop(itemIndex)}
+                whileDrag={{ 
+                  scale: 1.02,
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+                  zIndex: 100
+                }}
               >
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
-                    <GripVertical className="h-4 w-4 text-muted-foreground" />
+                    <GripVertical className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-grab active:cursor-grabbing" />
                     <span className={cn("text-sm px-2 py-1 rounded-full font-medium", getBadgeColor(item.exercise.type))}>
                       {item.exercise.type}
                     </span>
