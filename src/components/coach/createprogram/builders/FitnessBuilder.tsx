@@ -152,22 +152,22 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
         </div>
       </div>
 
-      {/* Mobile and Tablet Layout with Bottom Drawer */}
+      {/* Mobile and Tablet Layout with Bottom Drawer - Enhanced */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
-          <SheetHeader className="mb-4">
-            <SheetTitle>Add Exercise</SheetTitle>
+        <SheetContent side="bottom" className="h-[85vh] sm:h-[80vh] overflow-hidden pb-safe">
+          <SheetHeader className="pb-4 border-b sticky top-0 bg-background z-10">
+            <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-2" />
+            <SheetTitle className="text-lg font-semibold">Add Exercise</SheetTitle>
           </SheetHeader>
-          <div className="w-full">
-            {/* Only ExerciseLibrary on mobile/tablet */}
-          <ExerciseLibrary
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            searchResults={searchResults}
-            onSelect={handleSelectExercise}
-            onSearch={handleSearch}
-            allExercises={mockExercises}
-          />
+          <div className="h-[calc(100%-80px)] overflow-hidden mt-4">
+            <ExerciseLibrary
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              searchResults={searchResults}
+              onSelect={handleSelectExercise}
+              onSearch={handleSearch}
+              allExercises={mockExercises}
+            />
           </div>
         </SheetContent>
       </Sheet>

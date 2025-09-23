@@ -79,75 +79,77 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
   const hasActiveFilters = filterType !== 'all' || muscleGroupFilter !== 'all' || searchQuery.length > 0;
 
   return (
-    <div className="space-y-6 h-full flex flex-col p-4 md:p-6">
-      <h3 className="text-xl font-bold">Exercise Library</h3>
+    <div className="space-y-3 sm:space-y-4 h-full flex flex-col p-3 sm:p-4 md:p-6">
+      <h3 className="text-lg sm:text-xl font-bold">Exercise Library</h3>
 
       {/* Search + Filter Row */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search exercises, muscle groups, descriptions..."
-            className="pl-9 w-full"
+            className="pl-9 w-full h-11 sm:h-10 text-base sm:text-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        {/* Filters Row */}
-        <div className="flex flex-col sm:flex-row gap-3 items-center">
-          {/* Exercise Type Filter */}
-          <Select value={filterType} onValueChange={(val) => setFilterType(val as ExerciseType | 'all')}>
-            <SelectTrigger className="w-full sm:w-44">
-              <Filter className="h-4 w-4 text-muted-foreground mr-2" />
-              <SelectValue placeholder="Exercise Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="warm-up">
-                <div className="flex items-center gap-2">
-                  <Heart className="h-4 w-4 text-blue-700" /> Warm-up
-                </div>
-              </SelectItem>
-              <SelectItem value="exercise">
-                <div className="flex items-center gap-2">
-                  <Dumbbell className="h-4 w-4 text-green-700" /> Exercise
-                </div>
-              </SelectItem>
-              <SelectItem value="stretch">
-                <div className="flex items-center gap-2">
-                  <Utensils className="h-4 w-4 text-purple-700" /> Stretch
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Muscle Group Filter */}
-          <Select value={muscleGroupFilter} onValueChange={setMuscleGroupFilter}>
-            <SelectTrigger className="w-full sm:w-44">
-              <Zap className="h-4 w-4 text-muted-foreground mr-2" />
-              <SelectValue placeholder="Muscle Group" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Muscles</SelectItem>
-              {uniqueMuscleGroups.map((group) => (
-                <SelectItem key={group} value={group}>
-                  <div className="flex items-center gap-2 capitalize">
-                    <Zap className="h-3 w-3" />
-                    {group}
+        {/* Filters Row - Mobile optimized */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex gap-2 flex-1">
+            {/* Exercise Type Filter */}
+            <Select value={filterType} onValueChange={(val) => setFilterType(val as ExerciseType | 'all')}>
+              <SelectTrigger className="flex-1 sm:w-44 h-11 sm:h-10 text-base sm:text-sm">
+                <Filter className="h-4 w-4 text-muted-foreground mr-2" />
+                <SelectValue placeholder="Exercise Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="warm-up">
+                  <div className="flex items-center gap-2">
+                    <Heart className="h-4 w-4 text-blue-700" /> Warm-up
                   </div>
                 </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                <SelectItem value="exercise">
+                  <div className="flex items-center gap-2">
+                    <Dumbbell className="h-4 w-4 text-green-700" /> Exercise
+                  </div>
+                </SelectItem>
+                <SelectItem value="stretch">
+                  <div className="flex items-center gap-2">
+                    <Utensils className="h-4 w-4 text-purple-700" /> Stretch
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
 
-          {/* Clear Filters Button */}
+            {/* Muscle Group Filter */}
+            <Select value={muscleGroupFilter} onValueChange={setMuscleGroupFilter}>
+              <SelectTrigger className="flex-1 sm:w-44 h-11 sm:h-10 text-base sm:text-sm">
+                <Zap className="h-4 w-4 text-muted-foreground mr-2" />
+                <SelectValue placeholder="Muscle Group" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Muscles</SelectItem>
+                {uniqueMuscleGroups.map((group) => (
+                  <SelectItem key={group} value={group}>
+                    <div className="flex items-center gap-2 capitalize">
+                      <Zap className="h-3 w-3" />
+                      {group}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Clear Filters Button - Mobile optimized */}
           {hasActiveFilters && (
             <button
               onClick={handleClearFilters}
-              className="flex items-center gap-1 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 sm:px-3 sm:py-2 text-base sm:text-sm text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap bg-background border border-border rounded-md min-h-[44px] sm:min-h-auto touch-manipulation"
             >
-              <X className="h-3 w-3" />
+              <X className="h-4 w-4 sm:h-3 sm:w-3" />
               Clear
             </button>
           )}
@@ -155,7 +157,7 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
 
         {/* Active Filters Summary */}
         {hasActiveFilters && (
-          <div className="text-xs text-muted-foreground">
+          <div className="text-sm sm:text-xs text-muted-foreground px-1">
             Showing {searchResults.length} exercise{searchResults.length !== 1 ? 's' : ''}
             {filterType !== 'all' && ` • Type: ${filterType}`}
             {muscleGroupFilter !== 'all' && ` • Muscle: ${muscleGroupFilter}`}
@@ -164,8 +166,8 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
         )}
       </div>
 
-      {/* Exercise Cards */}
-      <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+      {/* Exercise Cards - Mobile optimized */}
+      <div className="flex-1 overflow-y-auto space-y-2 sm:space-y-3 pr-1 sm:pr-2">
         <AnimatePresence>
           {searchResults.length > 0 ? (
             searchResults.map((exercise) => (
@@ -176,10 +178,10 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="group flex items-center gap-4 p-3 rounded-xl border border-gray-200 bg-card shadow-sm hover:shadow-lg transition cursor-pointer hover:-translate-y-1"
+                className="group flex items-center gap-3 sm:gap-4 p-4 rounded-xl border border-gray-200 bg-card shadow-sm hover:shadow-lg transition-all cursor-pointer hover:-translate-y-1 min-h-[80px] sm:min-h-[64px] touch-manipulation active:scale-[0.98]"
               >
-                {/* Image Placeholder */}
-                <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                {/* Image Placeholder - Mobile optimized */}
+                <div className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
                   <img
                     src={`https://via.placeholder.com/64?text=${exercise.name.charAt(0).toUpperCase()}`}
                     alt={exercise.name}
@@ -187,15 +189,15 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
                   />
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 flex flex-col justify-center min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <h4 className="text-sm font-semibold text-foreground truncate">
+                {/* Content - Mobile optimized */}
+                <div className="flex-1 flex flex-col justify-center min-w-0 gap-1">
+                  <div className="flex items-start justify-between mb-1 sm:mb-1">
+                    <h4 className="text-base sm:text-sm font-semibold text-foreground leading-tight pr-2">
                       {exercise.name}
                     </h4>
                     <span
                       className={cn(
-                        'text-xs px-2 py-0.5 rounded-full font-semibold capitalize flex items-center gap-1',
+                        'text-xs px-2 py-1 rounded-full font-medium capitalize flex items-center gap-1 shrink-0',
                         getBadgeColor(exercise.type)
                       )}
                     >
@@ -203,7 +205,7 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
                       <span className="hidden sm:inline-block">{exercise.type}</span>
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">
+                  <p className="text-sm sm:text-xs text-muted-foreground leading-relaxed">
                     {exercise.muscleGroups.length > 0 
                       ? `Muscles: ${exercise.muscleGroups.slice(0, 2).join(', ')}${exercise.muscleGroups.length > 2 ? '...' : ''}`
                       : 'General exercise'
@@ -213,10 +215,12 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
               </motion.div>
             ))
           ) : (
-            <div className="p-4 text-center text-muted-foreground text-sm">
-              {searchQuery.length > 2
-                ? 'No exercises found.'
-                : 'Start typing to search...'}
+            <div className="p-8 sm:p-4 text-center text-muted-foreground">
+              <div className="text-base sm:text-sm">
+                {searchQuery.length > 2
+                  ? 'No exercises found.'
+                  : 'Start typing to search...'}
+              </div>
             </div>
           )}
         </AnimatePresence>
