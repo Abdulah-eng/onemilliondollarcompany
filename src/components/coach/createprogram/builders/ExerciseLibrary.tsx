@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Corrected import
-import { Search, Filter, Dumbbell, Heart, Utensils } from 'lucide-react';
+import { Search, Filter, Dumbbell, Heart, Utensils, Zap, X } from 'lucide-react';
 import { ExerciseItem, ExerciseType } from '@/mockdata/createprogram/mockExercises';
 import { cn } from '@/lib/utils';
 
@@ -14,7 +14,8 @@ interface ExerciseLibraryProps {
   setSearchQuery: (query: string) => void;
   searchResults: ExerciseItem[];
   onSelect: (item: ExerciseItem) => void;
-  onSearch: (query: string, filterType?: ExerciseType | 'all') => void;
+  onSearch: (query: string, filterType?: ExerciseType | 'all', muscleGroup?: string) => void;
+  allExercises: ExerciseItem[];
 }
 
 const getBadgeColor = (type: ExerciseType) => {
@@ -49,50 +50,118 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
   searchResults,
   onSelect,
   onSearch,
+  allExercises,
 }) => {
   const [filterType, setFilterType] = useState<ExerciseType | 'all'>('all');
+  const [muscleGroupFilter, setMuscleGroupFilter] = useState<string>('all');
+
+  // Get unique muscle groups from all exercises
+  const uniqueMuscleGroups = React.useMemo(() => {
+    const groups = new Set<string>();
+    allExercises.forEach(exercise => {
+      exercise.muscleGroups.forEach(group => {
+        if (group) groups.add(group);
+      });
+    });
+    return Array.from(groups).sort();
+  }, [allExercises]);
 
   useEffect(() => {
-    onSearch(searchQuery, filterType);
-  }, [searchQuery, filterType, onSearch]);
+    onSearch(searchQuery, filterType, muscleGroupFilter);
+  }, [searchQuery, filterType, muscleGroupFilter, onSearch]);
+
+  const handleClearFilters = () => {
+    setFilterType('all');
+    setMuscleGroupFilter('all');
+    setSearchQuery('');
+  };
+
+  const hasActiveFilters = filterType !== 'all' || muscleGroupFilter !== 'all' || searchQuery.length > 0;
 
   return (
     <div className="space-y-6 h-full flex flex-col p-4 md:p-6">
       <h3 className="text-xl font-bold">Exercise Library</h3>
 
       {/* Search + Filter Row */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center">
-        <div className="relative flex-1 w-full">
+      <div className="space-y-4">
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search exercises..."
+            placeholder="Search exercises, muscle groups, descriptions..."
             className="pl-9 w-full"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        {/* Filter */}
-        <Select value={filterType} onValueChange={(val) => setFilterType(val as ExerciseType | 'all')}>
-          <SelectTrigger className="w-full sm:w-48">
-            <Filter className="h-4 w-4 text-muted-foreground mr-2" />
-            <SelectValue placeholder="Filter by Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all" className="flex items-center">
-              All Types
-            </SelectItem>
-            <SelectItem value="warm-up" className="flex items-center gap-2">
-              <Heart className="h-4 w-4 text-blue-700" /> Warm-up
-            </SelectItem>
-            <SelectItem value="exercise" className="flex items-center gap-2">
-              <Dumbbell className="h-4 w-4 text-green-700" /> Exercise
-            </SelectItem>
-            <SelectItem value="stretch" className="flex items-center gap-2">
-              <Utensils className="h-4 w-4 text-purple-700" /> Stretch
-            </SelectItem>
-          </SelectContent>
-        </Select>
+        {/* Filters Row */}
+        <div className="flex flex-col sm:flex-row gap-3 items-center">
+          {/* Exercise Type Filter */}
+          <Select value={filterType} onValueChange={(val) => setFilterType(val as ExerciseType | 'all')}>
+            <SelectTrigger className="w-full sm:w-44">
+              <Filter className="h-4 w-4 text-muted-foreground mr-2" />
+              <SelectValue placeholder="Exercise Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="warm-up">
+                <div className="flex items-center gap-2">
+                  <Heart className="h-4 w-4 text-blue-700" /> Warm-up
+                </div>
+              </SelectItem>
+              <SelectItem value="exercise">
+                <div className="flex items-center gap-2">
+                  <Dumbbell className="h-4 w-4 text-green-700" /> Exercise
+                </div>
+              </SelectItem>
+              <SelectItem value="stretch">
+                <div className="flex items-center gap-2">
+                  <Utensils className="h-4 w-4 text-purple-700" /> Stretch
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Muscle Group Filter */}
+          <Select value={muscleGroupFilter} onValueChange={setMuscleGroupFilter}>
+            <SelectTrigger className="w-full sm:w-44">
+              <Zap className="h-4 w-4 text-muted-foreground mr-2" />
+              <SelectValue placeholder="Muscle Group" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Muscles</SelectItem>
+              {uniqueMuscleGroups.map((group) => (
+                <SelectItem key={group} value={group}>
+                  <div className="flex items-center gap-2 capitalize">
+                    <Zap className="h-3 w-3" />
+                    {group}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Clear Filters Button */}
+          {hasActiveFilters && (
+            <button
+              onClick={handleClearFilters}
+              className="flex items-center gap-1 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+            >
+              <X className="h-3 w-3" />
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Active Filters Summary */}
+        {hasActiveFilters && (
+          <div className="text-xs text-muted-foreground">
+            Showing {searchResults.length} exercise{searchResults.length !== 1 ? 's' : ''}
+            {filterType !== 'all' && ` • Type: ${filterType}`}
+            {muscleGroupFilter !== 'all' && ` • Muscle: ${muscleGroupFilter}`}
+            {searchQuery && ` • Search: "${searchQuery}"`}
+          </div>
+        )}
       </div>
 
       {/* Exercise Cards */}
@@ -135,7 +204,10 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground truncate">
-                    Muscle: {exercise.muscleGroups?.[0] || 'General'}
+                    {exercise.muscleGroups.length > 0 
+                      ? `Muscles: ${exercise.muscleGroups.slice(0, 2).join(', ')}${exercise.muscleGroups.length > 2 ? '...' : ''}`
+                      : 'General exercise'
+                    }
                   </p>
                 </div>
               </motion.div>

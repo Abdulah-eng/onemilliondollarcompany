@@ -30,14 +30,37 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
     }));
   }, []);
 
-  const handleSearch = useCallback((query: string) => {
-    const results =
-      query.length > 0
-        ? mockExercises.filter(item =>
-            item.name.toLowerCase().includes(query.toLowerCase())
-          )
-        : mockExercises;
-    setSearchResults(results);
+  // Handle exercise search with enhanced filtering
+  const handleSearch = useCallback((query: string, filterType?: any, muscleGroup?: string) => {
+    let filtered = mockExercises;
+
+    // Filter by exercise type
+    if (filterType && filterType !== 'all') {
+      filtered = filtered.filter(exercise => exercise.type === filterType);
+    }
+
+    // Filter by muscle group
+    if (muscleGroup && muscleGroup !== 'all') {
+      filtered = filtered.filter(exercise => 
+        exercise.muscleGroups.some(group => 
+          group.toLowerCase() === muscleGroup.toLowerCase()
+        )
+      );
+    }
+
+    // Text search across name, description, and muscle groups
+    if (query.trim()) {
+      const searchTerm = query.toLowerCase();
+      filtered = filtered.filter(exercise =>
+        exercise.name.toLowerCase().includes(searchTerm) ||
+        exercise.description.toLowerCase().includes(searchTerm) ||
+        exercise.muscleGroups.some(group => 
+          group.toLowerCase().includes(searchTerm)
+        )
+      );
+    }
+
+    setSearchResults(filtered);
   }, []);
 
   useEffect(() => {
@@ -104,6 +127,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
             searchResults={searchResults}
             onSelect={handleSelectExercise}
             onSearch={handleSearch}
+            allExercises={mockExercises}
           />
         </div>
 
@@ -136,13 +160,14 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
           </SheetHeader>
           <div className="w-full">
             {/* Only ExerciseLibrary on mobile/tablet */}
-            <ExerciseLibrary
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              searchResults={searchResults}
-              onSelect={handleSelectExercise}
-              onSearch={handleSearch}
-            />
+          <ExerciseLibrary
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            searchResults={searchResults}
+            onSelect={handleSelectExercise}
+            onSearch={handleSearch}
+            allExercises={mockExercises}
+          />
           </div>
         </SheetContent>
       </Sheet>
