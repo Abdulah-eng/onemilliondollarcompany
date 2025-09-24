@@ -119,8 +119,8 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
           <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
         </div>
 
-        {/* Left Column: Search & Library (Desktop only) */}
-        <div className="hidden lg:block lg:col-span-1 border-r border-border min-h-[calc(100vh-4rem)] overflow-y-auto">
+        {/* Left Column: Search & Library (Desktop only) - Enhanced for Desktop */}
+        <div className="hidden lg:block lg:col-span-2 border-r border-border min-h-[calc(100vh-4rem)] overflow-y-auto bg-muted/20">
           <ExerciseLibrary
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
@@ -132,7 +132,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
         </div>
 
         {/* Middle Column: Workout Day */}
-        <div className="lg:col-span-3 flex-1 p-4 md:p-6 space-y-4">
+        <div className="lg:col-span-2 flex-1 p-4 md:p-6 space-y-4">
           {/* Date selector (mobile/tablet only) */}
           <div className="mb-4 lg:hidden">
             <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
