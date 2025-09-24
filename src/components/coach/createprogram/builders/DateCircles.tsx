@@ -16,8 +16,8 @@ const DateCircles: React.FC<DateCirclesProps> = ({ activeDay, onDayChange }) => 
   const week = Array.from({ length: 7 }).map((_, i) => addDays(currentWeekStart, i));
 
   return (
-    <div className="flex py-4 bg-background/50 backdrop-blur-sm rounded-xl px-2">
-      <div className="flex flex-1 gap-2 md:gap-4 overflow-x-auto scroll-pl-4 scroll-pr-4">
+    <div className="flex justify-center py-4 bg-background/50 backdrop-blur-sm rounded-xl px-2">
+      <div className="flex justify-center gap-2 md:gap-4 overflow-x-auto scroll-pl-4 scroll-pr-4">
         {week.map((date, index) => {
           const dayName = format(date, 'EEEE');
           const dayNumber = format(date, 'd');
