@@ -42,7 +42,18 @@ const DateCircles: React.FC<DateCirclesProps> = ({ activeDay, onDayChange, exerc
               <span className="text-xs font-medium">{dayNumber}</span>
 
               {hasExercises && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-green-500" />
+                <motion.span
+                  className="absolute top-1 right-1 w-2 h-2 rounded-full bg-green-500"
+                  animate={{
+                    scale: [1, 1.4, 1],
+                    opacity: [1, 0.6, 1],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
               )}
             </motion.div>
           );
