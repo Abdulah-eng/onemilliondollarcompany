@@ -42,26 +42,17 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({ data, activeDay }) 
           </span>
         </div>
 
-        {/* Macro Breakdown */}
-        <div className="grid grid-cols-3 gap-1">
-          {[
-            { label: 'Protein', value: totalMacros.protein, icon: Beef, color: 'text-green-500' },
-            { label: 'Carbs', value: totalMacros.carbs, icon: Carrot, color: 'text-orange-500' },
-            { label: 'Fat', value: totalMacros.fat, icon: Snowflake, color: 'text-blue-400' },
-          ].map((macro) => (
-            <div 
-              key={macro.label} 
-              className='flex flex-col items-center justify-center p-1 rounded-md bg-secondary/30 h-[65px] overflow-hidden'
-            >
-              <macro.icon className={`h-4 w-4 shrink-0 ${macro.color}`} />
-              <span className='font-bold text-lg text-foreground mt-1 leading-none truncate max-w-full'>
-                {macro.value}g
-              </span>
-              <span className='text-[10px] text-muted-foreground leading-none mt-1 uppercase truncate max-w-full'>
-                {macro.label}
-              </span>
-            </div>
-          ))}
+        {/* Macro Breakdown - simple inline list */}
+        <div className="flex items-center justify-around text-sm font-medium text-foreground">
+          <span className="flex items-center gap-1">
+            <Beef className="h-4 w-4 text-green-500" /> {totalMacros.protein}g Protein
+          </span>
+          <span className="flex items-center gap-1">
+            <Carrot className="h-4 w-4 text-orange-500" /> {totalMacros.carbs}g Carbs
+          </span>
+          <span className="flex items-center gap-1">
+            <Snowflake className="h-4 w-4 text-blue-400" /> {totalMacros.fat}g Fat
+          </span>
         </div>
       </div>
       
