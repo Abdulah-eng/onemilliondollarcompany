@@ -20,11 +20,11 @@ interface MentalHealthLibraryProps {
 
 const getActivityIcon = (type: ActivityType) => {
   switch (type) {
-    case 'yoga': return <Sun className="h-4 w-4" />;
-    case 'meditation': return <Feather className="h-4 w-4" />;
-    case 'reflections': return <BookOpen className="h-4 w-4" />;
-    case 'breathwork': return <Heart className="h-4 w-4" />;
-    case 'exercise': default: return <Zap className="h-4 w-4" />;
+    case 'yoga': return <Sun className="h-4 w-4 text-orange-400" />;
+    case 'meditation': return <Feather className="h-4 w-4 text-blue-400" />;
+    case 'reflections': return <BookOpen className="h-4 w-4 text-green-400" />;
+    case 'breathwork': return <Heart className="h-4 w-4 text-red-400" />;
+    case 'exercise': default: return <Zap className="h-4 w-4 text-purple-400" />;
   }
 };
 
@@ -63,7 +63,7 @@ const MentalHealthLibrary: React.FC<MentalHealthLibraryProps> = ({
     <div className="space-y-3 sm:space-y-4 lg:space-y-2 h-full flex flex-col p-3 sm:p-4 lg:p-2">
       <h3 className="text-lg sm:text-xl lg:text-sm font-bold text-foreground">Activity Library</h3>
 
-      {/* Search + Filter Row (Reusing Fitness Builder sizing) */}
+      {/* Search + Filter Row - Matched ExerciseLibrary Sizing */}
       <div className="space-y-3 sm:space-y-4 lg:space-y-5">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -75,11 +75,11 @@ const MentalHealthLibrary: React.FC<MentalHealthLibraryProps> = ({
           />
         </div>
 
-        {/* Filters Section (Reusing Fitness Builder sizing/layout) */}
+        {/* Filters Section - Matched ExerciseLibrary Layout */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:flex-col lg:items-stretch lg:gap-3">
           <div className="flex gap-2 flex-1 lg:flex-col lg:gap-2">
             
-            {/* Activity Type Filter */}
+            {/* Activity Type Filter - Matched Height */}
             <Select value={activityTypeFilter} onValueChange={(val) => setActivityTypeFilter(val as ActivityType | 'all')}>
               <SelectTrigger className="flex-1 sm:w-44 lg:w-full h-11 sm:h-10 lg:h-9 text-base sm:text-sm lg:text-sm capitalize">
                 <Filter className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground mr-2" />
@@ -97,7 +97,7 @@ const MentalHealthLibrary: React.FC<MentalHealthLibraryProps> = ({
               </SelectContent>
             </Select>
 
-            {/* Focus Area Filter */}
+            {/* Focus Area Filter - Matched Height */}
             <Select value={focusAreaFilter} onValueChange={setFocusAreaFilter}>
               <SelectTrigger className="flex-1 sm:w-44 lg:w-full h-11 sm:h-10 lg:h-8 text-base sm:text-sm lg:text-xs capitalize">
                 <Heart className="h-4 w-4 lg:h-3 lg:w-3 text-muted-foreground mr-2" />
@@ -114,7 +114,7 @@ const MentalHealthLibrary: React.FC<MentalHealthLibraryProps> = ({
             </Select>
           </div>
 
-          {/* Clear Filters Button */}
+          {/* Clear Filters Button - Matched Sizing */}
           {hasActiveFilters && (
             <button
               onClick={handleClearFilters}
@@ -126,7 +126,7 @@ const MentalHealthLibrary: React.FC<MentalHealthLibraryProps> = ({
           )}
         </div>
 
-        {/* Active Filters Summary */}
+        {/* Active Filters Summary - Matched Sizing */}
         {hasActiveFilters && (
           <div className="text-sm sm:text-xs lg:text-xs text-muted-foreground px-1 lg:px-1">
             <span className="font-medium">{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}</span>
@@ -134,7 +134,7 @@ const MentalHealthLibrary: React.FC<MentalHealthLibraryProps> = ({
         )}
       </div>
 
-      {/* Activity Cards - Reusing Fitness Builder sizing */}
+      {/* Activity Cards - Matched ExerciseLibrary Sizing */}
       <div className="flex-1 overflow-y-auto space-y-2 sm:space-y-3 lg:space-y-1 pr-1 sm:pr-2 lg:pr-1">
         <AnimatePresence>
           {searchResults.length > 0 ? (
@@ -146,14 +146,15 @@ const MentalHealthLibrary: React.FC<MentalHealthLibraryProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
+                // Matched Card Sizing
                 className="group flex items-center gap-3 sm:gap-4 lg:gap-2 p-4 lg:p-2 rounded-xl border border-border bg-card shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300 cursor-pointer hover:-translate-y-1 min-h-[80px] sm:min-h-[64px] lg:min-h-[60px] touch-manipulation active:scale-[0.98] hover:bg-card/80"
               >
-                {/* Icon Placeholder (W-10 H-10 for desktop) */}
+                {/* Icon Placeholder - Matched Sizing */}
                 <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-10 lg:h-10 flex-shrink-0 rounded-lg overflow-hidden bg-muted flex items-center justify-center text-xl text-primary/70 group-hover:scale-105 transition-transform duration-300">
                   {getActivityIcon(activity.type)}
                 </div>
 
-                {/* Content */}
+                {/* Content - Matched Font Sizing */}
                 <div className="flex-1 flex flex-col justify-center min-w-0 gap-1 lg:gap-1">
                   <div className="flex items-start justify-between mb-1 sm:mb-1 lg:mb-1">
                     <h4 className="text-base sm:text-sm lg:text-xs font-semibold text-foreground leading-tight pr-2 group-hover:text-primary transition-colors duration-200">
