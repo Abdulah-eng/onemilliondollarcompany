@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import ProgramDetails from '@/components/coach/createprogram/ProgramDetails';
 import FitnessBuilder from '@/components/coach/createprogram/builders/FitnessBuilder';
 import NutritionBuilder from '@/components/coach/createprogram/nutrition/NutritionBuilder'; 
-import MentalHealthBuilder from '@/components/coach/createprogram/mentalhealth/MentalHealthBuilder'; // ⭐ ADD THIS IMPORT
+import MentalHealthBuilder from '@/components/coach/createprogram/mentalhealth/MentalHealthBuilder'; 
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check } from 'lucide-react';
@@ -27,13 +27,13 @@ const ProgramBuilder = () => {
   const handleProgramDetailsNext = (data: any) => {
     setProgramData(prev => ({ ...prev, ...data }));
     
-    // ⭐ UPDATE THE NAVIGATION LOGIC
+    // THE NAVIGATION LOGIC IS CORRECT HERE:
     if (data.category === 'fitness') {
       setStep('fitness-builder');
     } else if (data.category === 'nutrition') {
       setStep('nutrition-builder');
     } else if (data.category === 'mental health') {
-      setStep('mental-health-builder'); // Navigate to the new mental health builder
+      setStep('mental-health-builder'); 
     } else {
       console.log(`Builder for ${data.category} is not yet implemented.`);
       alert(`Builder for ${data.category} is not yet implemented. Please select Fitness, Nutrition, or Mental Health.`);
@@ -70,7 +70,7 @@ const ProgramBuilder = () => {
         return (
           <NutritionBuilder {...commonBuilderProps} />
         );
-      case 'mental-health-builder': // ⭐ ADD THE NEW CASE
+      case 'mental-health-builder': 
         return (
           <MentalHealthBuilder {...commonBuilderProps} />
         );
