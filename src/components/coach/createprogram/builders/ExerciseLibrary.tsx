@@ -79,8 +79,8 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
   const hasActiveFilters = filterType !== 'all' || muscleGroupFilter !== 'all' || searchQuery.length > 0;
 
   return (
-    <div className="space-y-3 sm:space-y-4 lg:space-y-6 h-full flex flex-col p-3 sm:p-4 lg:p-6 xl:p-8">
-      <h3 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-foreground">Exercise Library</h3>
+    <div className="space-y-3 sm:space-y-4 lg:space-y-4 h-full flex flex-col p-3 sm:p-4 lg:p-4">
+      <h3 className="text-lg sm:text-xl lg:text-lg font-bold text-foreground">Exercise Library</h3>
 
       {/* Search + Filter Row - Desktop Enhanced */}
       <div className="space-y-3 sm:space-y-4 lg:space-y-5">
@@ -94,12 +94,12 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
           />
         </div>
 
-        {/* Filters Section - Desktop Enhanced Layout */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:flex-col lg:items-stretch lg:gap-4">
-          <div className="flex gap-2 flex-1 lg:flex-col lg:gap-3">
+        {/* Filters Section - Compact Layout for smaller width */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:flex-col lg:items-stretch lg:gap-3">
+          <div className="flex gap-2 flex-1 lg:flex-col lg:gap-2">
             {/* Exercise Type Filter - Desktop Enhanced */}
             <Select value={filterType} onValueChange={(val) => setFilterType(val as ExerciseType | 'all')}>
-              <SelectTrigger className="flex-1 sm:w-44 lg:w-full h-11 sm:h-10 lg:h-11 xl:h-12 text-base sm:text-sm lg:text-base xl:text-lg">
+              <SelectTrigger className="flex-1 sm:w-44 lg:w-full h-11 sm:h-10 lg:h-9 text-base sm:text-sm lg:text-sm">
                 <Filter className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground mr-2" />
                 <SelectValue placeholder="Exercise Type" />
               </SelectTrigger>
@@ -125,7 +125,7 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
 
             {/* Muscle Group Filter - Desktop Enhanced */}
             <Select value={muscleGroupFilter} onValueChange={setMuscleGroupFilter}>
-              <SelectTrigger className="flex-1 sm:w-44 lg:w-full h-11 sm:h-10 lg:h-11 xl:h-12 text-base sm:text-sm lg:text-base xl:text-lg">
+              <SelectTrigger className="flex-1 sm:w-44 lg:w-full h-11 sm:h-10 lg:h-9 text-base sm:text-sm lg:text-sm">
                 <Zap className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground mr-2" />
                 <SelectValue placeholder="Muscle Group" />
               </SelectTrigger>
@@ -178,10 +178,10 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className="group flex items-center gap-3 sm:gap-4 lg:gap-5 p-4 lg:p-5 xl:p-6 rounded-xl border border-border bg-card shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300 cursor-pointer hover:-translate-y-1 min-h-[80px] sm:min-h-[64px] lg:min-h-[96px] xl:min-h-[112px] touch-manipulation active:scale-[0.98] hover:bg-card/80"
+                className="group flex items-center gap-3 sm:gap-4 lg:gap-3 p-4 lg:p-3 rounded-xl border border-border bg-card shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300 cursor-pointer hover:-translate-y-1 min-h-[80px] sm:min-h-[64px] lg:min-h-[72px] touch-manipulation active:scale-[0.98] hover:bg-card/80"
               >
-                {/* Image Placeholder - Desktop Enhanced */}
-                <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 flex-shrink-0 rounded-lg lg:rounded-xl overflow-hidden bg-muted group-hover:scale-105 transition-transform duration-300">
+                {/* Image Placeholder - Compact for smaller width */}
+                <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-12 lg:h-12 flex-shrink-0 rounded-lg overflow-hidden bg-muted group-hover:scale-105 transition-transform duration-300">
                   <img
                     src={`https://via.placeholder.com/96?text=${exercise.name.charAt(0).toUpperCase()}`}
                     alt={exercise.name}
@@ -192,7 +192,7 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
                 {/* Content - Desktop Enhanced */}
                 <div className="flex-1 flex flex-col justify-center min-w-0 gap-1 lg:gap-2">
                   <div className="flex items-start justify-between mb-1 sm:mb-1 lg:mb-2">
-                    <h4 className="text-base sm:text-sm lg:text-lg xl:text-xl font-semibold text-foreground leading-tight pr-2 group-hover:text-primary transition-colors duration-200">
+                    <h4 className="text-base sm:text-sm lg:text-sm font-semibold text-foreground leading-tight pr-2 group-hover:text-primary transition-colors duration-200">
                       {exercise.name}
                     </h4>
                     <span
@@ -205,11 +205,11 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
                       <span className="hidden sm:inline-block lg:inline-block">{exercise.type}</span>
                     </span>
                   </div>
-                  <p className="text-sm sm:text-xs lg:text-sm xl:text-base text-muted-foreground leading-relaxed">
+                  <p className="text-sm sm:text-xs lg:text-xs text-muted-foreground leading-relaxed">
                     {exercise.description && exercise.description.length > 0 
-                      ? `${exercise.description.slice(0, 80)}${exercise.description.length > 80 ? '...' : ''}`
+                      ? `${exercise.description.slice(0, 50)}${exercise.description.length > 50 ? '...' : ''}`
                       : exercise.muscleGroups.length > 0 
-                        ? `Targets: ${exercise.muscleGroups.slice(0, 3).join(', ')}${exercise.muscleGroups.length > 3 ? '...' : ''}`
+                        ? `Targets: ${exercise.muscleGroups.slice(0, 2).join(', ')}${exercise.muscleGroups.length > 2 ? '...' : ''}`
                         : 'General exercise'
                     }
                   </p>
