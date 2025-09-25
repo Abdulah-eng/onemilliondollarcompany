@@ -4,18 +4,31 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WorkoutDayItem } from './WorkoutDay';
 import { Dumbbell, Heart, Utensils } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface DaySummaryProps {
   items: WorkoutDayItem[];
 }
 
 const DaySummary: React.FC<DaySummaryProps> = ({ items }) => {
+  const hasExercises = items.length > 0;
+
   return (
-    <div className="p-4 md:p-6 space-y-4 h-full">
-      <h3 className="text-xl font-bold">Daily Overview</h3>
+    <div className="p-4 md:p-6 space-y-4 h-full relative">
+      <div className="flex items-center gap-2">
+        <h3 className="text-xl font-bold">Daily Overview</h3>
+        {hasExercises && (
+          <span
+            className={cn(
+              "inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"
+            )}
+          />
+        )}
+      </div>
+
       <div className="space-y-4 text-sm text-muted-foreground overflow-y-auto max-h-[calc(100vh-25rem)]">
         <AnimatePresence mode="popLayout">
-          {items.length > 0 ? (
+          {hasExercises ? (
             items.map((item) => (
               <motion.div
                 key={item.id}
