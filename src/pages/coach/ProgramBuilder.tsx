@@ -5,8 +5,8 @@ import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import ProgramDetails from '@/components/coach/createprogram/ProgramDetails';
 import FitnessBuilder from '@/components/coach/createprogram/builders/FitnessBuilder';
-// ⭐ 1. Import the new NutritionBuilder
 import NutritionBuilder from '@/components/coach/createprogram/nutrition/NutritionBuilder'; 
+import MentalHealthBuilder from '@/components/coach/createprogram/mentalhealth/MentalHealthBuilder'; // ⭐ ADD THIS IMPORT
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check } from 'lucide-react';
@@ -27,15 +27,16 @@ const ProgramBuilder = () => {
   const handleProgramDetailsNext = (data: any) => {
     setProgramData(prev => ({ ...prev, ...data }));
     
-    // ⭐ 2. Update logic to check for 'nutrition'
+    // ⭐ UPDATE THE NAVIGATION LOGIC
     if (data.category === 'fitness') {
       setStep('fitness-builder');
     } else if (data.category === 'nutrition') {
-      setStep('nutrition-builder'); // Navigate to the new nutrition builder
+      setStep('nutrition-builder');
+    } else if (data.category === 'mental health') {
+      setStep('mental-health-builder'); // Navigate to the new mental health builder
     } else {
-      // Handle 'mental health' or other categories
       console.log(`Builder for ${data.category} is not yet implemented.`);
-      alert(`Builder for ${data.category} is not yet implemented. Please select Fitness or Nutrition.`);
+      alert(`Builder for ${data.category} is not yet implemented. Please select Fitness, Nutrition, or Mental Health.`);
     }
   };
 
@@ -46,7 +47,6 @@ const ProgramBuilder = () => {
     };
     console.log('Final Program Data:', finalProgram);
     alert('Program saved!');
-    // Optionally reset to the details page after saving
     setStep('program-details');
     setProgramData({});
   };
@@ -67,12 +67,14 @@ const ProgramBuilder = () => {
           <FitnessBuilder {...commonBuilderProps} />
         );
       case 'nutrition-builder': 
-        // ⭐ 3. Add the new case for the Nutrition Builder
         return (
           <NutritionBuilder {...commonBuilderProps} />
         );
+      case 'mental-health-builder': // ⭐ ADD THE NEW CASE
+        return (
+          <MentalHealthBuilder {...commonBuilderProps} />
+        );
       default:
-        // Placeholder for mental-health-builder or default unhandled state
         return null;
     }
   };
@@ -87,7 +89,6 @@ const ProgramBuilder = () => {
       )}
       
       <div className="max-w-7xl mx-auto">
-        {/* Use motion.div with a key inside AnimatePresence for smooth transitions between steps */}
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
