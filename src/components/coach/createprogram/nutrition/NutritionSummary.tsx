@@ -11,7 +11,7 @@ interface NutritionSummaryProps {
   activeDay: string;
 }
 
-const NutritionSummary: React.FC<NutritionSummaryProps> = ({ data, activeDay }) => {
+const NutritionSummary: React.FC<NutritionSummaryProps> = ({ data }) => {
   const allItems = Object.values(data).flat();
   
   const totalMacros = allItems.reduce(
@@ -28,34 +28,27 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({ data, activeDay }) 
   return (
     <div className="p-3 md:p-4 space-y-4 h-full overflow-hidden">
       <h3 className="text-lg font-bold text-foreground">Daily Summary</h3>
-      
-      {/* Total Macros */}
-      <div className="p-3 rounded-xl bg-gradient-to-br from-card to-background shadow-lg border border-border/50 flex flex-col gap-3">
-        <div className="flex items-center justify-between p-2 rounded-lg bg-secondary/30">
-          <h4 className="flex items-center gap-1 text-xs font-semibold text-primary/80 uppercase">
-            <Flame className="h-4 w-4 shrink-0" />
-            Total Kcal
-          </h4>
-          <span className="text-2xl font-extrabold text-primary truncate">
-            {totalMacros.calories} 
-            <span className='text-xs font-medium ml-1 text-primary/70'>Kcal</span>
-          </span>
-        </div>
 
-        {/* Macro Breakdown - simple inline list */}
-        <div className="flex items-center justify-around text-sm font-medium text-foreground">
-          <span className="flex items-center gap-1">
-            <Beef className="h-4 w-4 text-green-500" /> {totalMacros.protein}g Protein
-          </span>
-          <span className="flex items-center gap-1">
-            <Carrot className="h-4 w-4 text-orange-500" /> {totalMacros.carbs}g Carbs
-          </span>
-          <span className="flex items-center gap-1">
-            <Snowflake className="h-4 w-4 text-blue-400" /> {totalMacros.fat}g Fat
-          </span>
+      {/* Total Macros as plain text with icons */}
+      <div className="space-y-1 text-sm font-medium text-foreground">
+        <div className="flex items-center gap-2">
+          <Flame className="h-4 w-4 text-primary shrink-0" />
+          <span className="font-semibold">{totalMacros.calories} Kcal</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Beef className="h-4 w-4 text-green-500 shrink-0" />
+          <span>{totalMacros.protein}g Protein</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Carrot className="h-4 w-4 text-orange-500 shrink-0" />
+          <span>{totalMacros.carbs}g Carbs</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Snowflake className="h-4 w-4 text-blue-400 shrink-0" />
+          <span>{totalMacros.fat}g Fat</span>
         </div>
       </div>
-      
+
       {/* Meals */}
       <h4 className="text-base font-bold pt-2 border-b pb-1 border-border/70">Meal Schedule</h4>
       
@@ -69,9 +62,9 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({ data, activeDay }) 
               if (items.length === 0) return null;
 
               return (
-                <div key={section} className='space-y-2 pb-3 border-b border-border/70 last:border-b-0'>
-                  <h5 className='font-semibold text-xs text-primary/90 uppercase flex items-center gap-1 pt-1'>
-                    <BookOpenText className='h-3 w-3 shrink-0'/> {section.replace('snack', ' Snack')}
+                <div key={section} className="space-y-2 pb-3 border-b border-border/70 last:border-b-0">
+                  <h5 className="font-semibold text-xs text-primary/90 uppercase flex items-center gap-1 pt-1">
+                    <BookOpenText className="h-3 w-3 shrink-0" /> {section.replace('snack', ' Snack')}
                   </h5>
 
                   {items.map((item) => (
@@ -89,15 +82,15 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({ data, activeDay }) 
                         </span>
                         {item.time && (
                           <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0 ml-2">
-                            <Clock className='h-3 w-3 shrink-0'/> {item.time}
+                            <Clock className="h-3 w-3 shrink-0" /> {item.time}
                           </span>
                         )}
                       </div>
-                      <div className='flex items-center justify-between text-xs text-muted-foreground min-w-0'>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground min-w-0">
                         <p className="flex items-center gap-1 truncate">
-                          <Scale className='h-3 w-3 text-primary/70 shrink-0'/> {item.portionSize}
+                          <Scale className="h-3 w-3 text-primary/70 shrink-0" /> {item.portionSize}
                         </p>
-                        <p className='font-medium text-primary/80 shrink-0'>
+                        <p className="font-medium text-primary/80 shrink-0">
                           {item.recipe.calories} kcal
                         </p>
                       </div>
