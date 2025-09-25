@@ -4,7 +4,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NutritionDayItem, MealSection } from './NutritionDay';
-import { Utensils, Clock, Flame, Beef, Carrot, Snowflake, Scale, CheckCircle } from 'lucide-react';
+import { Utensils, Clock, Flame, Beef, Carrot, Snowflake, Scale, BookOpenText } from 'lucide-react';
 
 interface NutritionSummaryProps {
   data: { [key in MealSection]: NutritionDayItem[] };
@@ -27,53 +27,50 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({ data, activeDay }) 
   
   const getSectionItems = (section: MealSection) => data[section] || [];
 
+  // --- COMPONENT RENDER ---
   return (
-    // Adjusted padding for tighter fit in the side column, but still comfortable
     <div className="p-3 md:p-4 space-y-4 h-full"> 
-      <h3 className="text-xl font-bold text-foreground/90">Daily Summary</h3>
+      <h3 className="text-xl font-bold text-foreground">Daily Summary</h3>
       
-      {/* Total Macros Card - COMPACT REDESIGN */}
-      <div className="p-3 rounded-xl bg-card border border-border shadow-lg flex flex-col gap-3">
+      {/* Total Macros Card - Modern, Stable Layout */}
+      <div className="p-4 rounded-xl bg-gradient-to-br from-card to-background shadow-xl border border-border/50 flex flex-col gap-4">
         
-        {/* Total Calories Header - Cleaner layout, centered icon/title */}
-        <div className="flex items-center justify-between">
-            <h4 className="flex items-center gap-1 text-sm font-semibold text-muted-foreground">
-                <Flame className="h-4 w-4 text-primary" />
-                TOTAL CALORIES
+        {/* Total Calories Block - Primary Focus */}
+        <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-between">
+            <h4 className="flex items-center gap-1 text-sm font-semibold text-primary">
+                <Flame className="h-4 w-4" />
+                TOTAL Kcal
             </h4>
-            <span className="text-2xl font-extrabold text-primary">
+            <span className="text-3xl font-extrabold text-primary">
                 {totalMacros.calories} 
                 <span className='text-xs font-medium ml-1 text-primary/80'>Kcal</span>
             </span>
         </div>
 
-        {/* Macro Breakdown - Tighter, squarer boxes */}
-        <div className="grid grid-cols-3 gap-2 text-sm">
-            {/* Protein */}
-            <div className='flex flex-col items-center justify-center p-2 rounded-lg bg-secondary/50 border border-secondary/70 h-[75px]'>
-                <Beef className='h-5 w-5 text-green-600'/>
-                <span className='font-bold text-xl text-foreground mt-1 leading-none'>{totalMacros.protein}g</span>
-                <span className='text-xs text-muted-foreground leading-none mt-1'>Protein</span>
-            </div>
-            {/* Carbs */}
-            <div className='flex flex-col items-center justify-center p-2 rounded-lg bg-secondary/50 border border-secondary/70 h-[75px]'>
-                <Carrot className='h-5 w-5 text-orange-600'/>
-                <span className='font-bold text-xl text-foreground mt-1 leading-none'>{totalMacros.carbs}g</span>
-                <span className='text-xs text-muted-foreground leading-none mt-1'>Carbs</span>
-            </div>
-            {/* Fat */}
-            <div className='flex flex-col items-center justify-center p-2 rounded-lg bg-secondary/50 border border-secondary/70 h-[75px]'>
-                <Snowflake className='h-5 w-5 text-blue-600'/>
-                <span className='font-bold text-xl text-foreground mt-1 leading-none'>{totalMacros.fat}g</span>
-                <span className='text-xs text-muted-foreground leading-none mt-1'>Fat</span>
-            </div>
+        {/* Macro Breakdown - Stable Grid (Avoids overlap) */}
+        <div className="grid grid-cols-3 gap-2">
+            {/* Macro Box structure for stability and modernity */}
+            {[
+                { label: 'Protein', value: totalMacros.protein, icon: Beef, color: 'text-green-500' },
+                { label: 'Carbs', value: totalMacros.carbs, icon: Carrot, color: 'text-orange-500' },
+                { label: 'Fat', value: totalMacros.fat, icon: Snowflake, color: 'text-blue-400' },
+            ].map((macro) => (
+                <div key={macro.label} className='flex flex-col items-center justify-center p-2 rounded-lg bg-secondary/30 shadow-inner h-[80px]'>
+                    <macro.icon className={`h-5 w-5 ${macro.color}`} />
+                    <span className='font-extrabold text-xl text-foreground mt-1 leading-none truncate max-w-full'>
+                        {macro.value}g
+                    </span>
+                    <span className='text-xs text-muted-foreground leading-none mt-1'>{macro.label}</span>
+                </div>
+            ))}
         </div>
       </div>
       
-      {/* Meal Breakdown */}
-      <h4 className="text-lg font-semibold pt-2">Meal Schedule</h4>
+      {/* Meal Schedule Section */}
+      <h4 className="text-lg font-bold pt-2 border-b pb-1 border-border/70">Meal Schedule</h4>
       
-      <div className="space-y-3 text-sm text-muted-foreground overflow-y-auto max-h-[calc(100vh-28rem)]"> 
+      {/* Content Area - Ensured scrollable area with safe height */}
+      <div className="space-y-3 text-sm text-muted-foreground overflow-y-auto max-h-[calc(100vh-25rem)] pr-1"> 
         <AnimatePresence mode="popLayout">
           {allItems.length > 0 ? (
             Object.keys(data).map((sectionKey) => {
@@ -83,22 +80,22 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({ data, activeDay }) 
                 if (items.length === 0) return null;
 
                 return (
-                    // Section Wrapper: Cleaned up spacing and border
+                    // Meal Section: Clean, modern separator
                     <div key={section} className='space-y-2 pb-3 border-b border-border/70 last:border-b-0'> 
-                        <h5 className='font-bold text-sm text-foreground capitalize flex items-center gap-1 pt-1'>
-                            <CheckCircle className='h-3 w-3 text-green-500'/> {section.replace('snack', ' Snack')}
+                        <h5 className='font-semibold text-sm text-primary capitalize flex items-center gap-2 pt-1'>
+                            <BookOpenText className='h-3 w-3'/> {section.replace('snack', ' Snack')}
                         </h5>
                         {items.map((item) => (
                             <motion.div
                                 key={item.id}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -5 }}
                                 transition={{ duration: 0.2 }}
-                                className="flex flex-col p-2 bg-background/50 rounded-md border border-border/50 hover:bg-background shadow-sm transition-colors"
+                                className="flex flex-col p-3 bg-background rounded-lg border border-border/50 shadow-sm hover:shadow-md transition-shadow"
                             >
                                 <div className="flex justify-between items-start mb-1">
-                                    <span className="font-semibold text-foreground text-sm flex-1 truncate">
+                                    <span className="font-semibold text-foreground text-sm flex-1 truncate pr-2">
                                         {item.recipe.name}
                                     </span>
                                     {item.time && (
