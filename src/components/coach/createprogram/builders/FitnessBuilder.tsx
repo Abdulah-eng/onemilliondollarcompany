@@ -34,12 +34,10 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
   const handleSearch = useCallback((query: string, filterType?: any, muscleGroup?: string) => {
     let filtered = mockExercises;
 
-    // Filter by exercise type
     if (filterType && filterType !== 'all') {
       filtered = filtered.filter(exercise => exercise.type === filterType);
     }
 
-    // Filter by muscle group
     if (muscleGroup && muscleGroup !== 'all') {
       filtered = filtered.filter(exercise => 
         exercise.muscleGroups.some(group => 
@@ -48,7 +46,6 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
       );
     }
 
-    // Text search across name, description, and muscle groups
     if (query.trim()) {
       const searchTerm = query.toLowerCase();
       filtered = filtered.filter(exercise =>
@@ -93,8 +90,8 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
       transition={{ duration: 0.5 }}
       className="flex-1 flex flex-col"
     >
-      {/* Action Bar (mobile/tablet) */}
-      <div className="flex md:hidden items-center justify-between p-4 bg-card rounded-xl shadow-md border mb-4">
+      {/* Global Header - now always visible */}
+      <div className="flex items-center justify-between p-4 bg-card rounded-xl shadow-md border mb-4">
         <Button
           variant="outline"
           size="sm"
@@ -119,7 +116,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
           <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
         </div>
 
-        {/* Left Column: Search & Library (Desktop only) - Compact for smaller width */}
+        {/* Left Column: Search & Library (Desktop only) */}
         <div className="hidden lg:block lg:col-span-1 border-r border-border min-h-[calc(100vh-4rem)] overflow-y-auto bg-muted/20">
           <ExerciseLibrary
             searchQuery={searchQuery}
@@ -131,7 +128,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
           />
         </div>
 
-        {/* Middle Column: Workout Day - Now dominant */}
+        {/* Middle Column: Workout Day */}
         <div className="lg:col-span-3 flex-1 p-4 md:p-6 lg:p-8 space-y-4">
           {/* Date selector (mobile/tablet only) */}
           <div className="mb-4 lg:hidden">
@@ -148,11 +145,11 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
 
         {/* Right Column: Day Summary (Desktop only) */}
         <div className="hidden lg:block lg:col-span-1 border-l border-border min-h-[calc(100vh-4rem)] overflow-y-auto">
-          <DaySummary items={currentDayItems} />
+          <DaySummary items={currentDayItems} activeDay={activeDay} />
         </div>
       </div>
 
-      {/* Mobile and Tablet Layout with Bottom Drawer - Enhanced */}
+      {/* Mobile / Tablet Bottom Drawer */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent side="bottom" className="h-[85vh] sm:h-[80vh] overflow-hidden pb-safe">
           <SheetHeader className="pb-4 border-b sticky top-0 bg-background z-10">
