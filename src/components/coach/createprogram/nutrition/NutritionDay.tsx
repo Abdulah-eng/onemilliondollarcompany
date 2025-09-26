@@ -27,7 +27,7 @@ export interface NutritionDayData {
 }
 
 interface NutritionDayProps {
-  day: string;
+  day: string; // This prop now contains "Week # - DayName"
   data: { [key in MealSection]: NutritionDayItem[] };
   onDataChange: (data: { [key in MealSection]: NutritionDayItem[] }) => void;
   onAddClick: () => void;
@@ -141,6 +141,7 @@ const NutritionDay: React.FC<NutritionDayProps> = ({ day, data, onDataChange, on
   return (
     <>
       <div className="flex items-center justify-between mb-4">
+        {/* ⭐ Use the dynamic day prop */}
         <h3 className="text-xl font-bold">{day}'s Nutrition Plan</h3>
         <Button onClick={onAddClick} className="gap-2 lg:hidden">
           <Plus className="h-4 w-4" /> Add Recipe
