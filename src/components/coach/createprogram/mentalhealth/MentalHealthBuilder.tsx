@@ -12,6 +12,10 @@ import MentalHealthDay, { MentalHealthDayItem, MentalHealthSection } from './Men
 import MentalHealthSummary from './MentalHealthSummary'; // New/Adapted
 import { mockMentalHealthActivities, MentalHealthActivity, ActivityType, FocusArea } from '@/mockdata/createprogram/mockMentalHealthActivities';
 
+// Helper function to create a unique key for data storage
+const getDataKey = (week: number, day: string) => `W${week}_${day}`;
+const INITIAL_WEEK_DAY = 'Monday';
+
 // Initial state for a day's mental health plan
 const initialDayData = (): { [key in MentalHealthSection]: MentalHealthDayItem[] } => ({
     morning: [],
@@ -25,42 +29,54 @@ interface MentalHealthBuilderProps {
 }
 
 const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSave }) => {
-  const [activeDay, setActiveDay] = useState('Monday');
-  const [mhData, setMhData] = useState<{ [day: string]: { [key in MentalHealthSection]: MentalHealthDayItem[] } }>({
-      'Monday': initialDayData(),
-  });
+  // ⭐ ADD WEEK STATE
+  const [activeWeek, setActiveWeek] = useState(1); 
+  const [activeDay, setActiveDay] = useState(INITIAL_WEEK_DAY);
+  
+  // ⭐ UPDATE DATA STRUCTURE to use the compound key: { "W1_Monday": { morning: [] } }
+  const [mhData, setMhData] = useState<{ [key: string]: { [key in MentalHealthSection]: MentalHealthDayItem[] } }>({});
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<MentalHealthActivity[]>(mockMentalHealthActivities);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [lastSelectedSection] = useState<MentalHealthSection>('morning'); // Default to morning
+  const [lastSelectedSection] = useState<MentalHealthSection>('morning');
 
+  // ⭐ CALCULATE UNIQUE KEY
+  const currentDataKey = getDataKey(activeWeek, activeDay); 
+
+  // Ensure initial data exists for the current W#_DayName when navigating
   useEffect(() => {
-    if (!mhData[activeDay]) {
+    if (!mhData[currentDataKey]) {
         setMhData(prev => ({
             ...prev,
-            [activeDay]: initialDayData(),
+            [currentDataKey]: initialDayData(),
         }));
     }
-  }, [activeDay, mhData]);
+  }, [currentDataKey, mhData]);
 
-  const handleUpdateDayData = useCallback((day: string, data: { [key in MentalHealthSection]: MentalHealthDayItem[] }) => {
+  // ⭐ UPDATE HANDLER to use the compound key
+  const handleUpdateDayData = useCallback((key: string, data: { [key in MentalHealthSection]: MentalHealthDayItem[] }) => {
     setMhData(prevData => ({
       ...prevData,
-      [day]: data,
+      [key]: data,
     }));
   }, []);
 
+  // ⭐ NEW HANDLER for week change
+  const handleWeekChange = useCallback((week: number) => {
+    setActiveWeek(week);
+    setActiveDay(INITIAL_WEEK_DAY); // Reset to Monday when week changes
+  }, []);
+  
+  // Handlers for search (unchanged)
   const handleSearch = useCallback((query: string, activityTypeFilter?: ActivityType | 'all', focusArea?: FocusArea | 'all') => {
     let filtered = mockMentalHealthActivities;
-
     if (activityTypeFilter && activityTypeFilter !== 'all') {
       filtered = filtered.filter(activity => activity.type === activityTypeFilter);
     }
-
     if (focusArea && focusArea !== 'all') {
       filtered = filtered.filter(activity => activity.focusAreas.includes(focusArea as FocusArea));
     }
-
     if (query.trim()) {
       const searchTerm = query.toLowerCase();
       filtered = filtered.filter(activity =>
@@ -69,7 +85,6 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
         activity.focusAreas.some(area => area.toLowerCase().includes(searchTerm))
       );
     }
-
     setSearchResults(filtered);
   }, []);
 
@@ -84,7 +99,6 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
       comment: '',
     };
     
-    // Default to a sensible section based on activity type if possible, otherwise use 'morning'
     let targetSection: MentalHealthSection = lastSelectedSection;
 
     if (activity.type === 'yoga' || activity.type === 'breathwork' || activity.focusAreas.includes('energy')) {
@@ -95,17 +109,17 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
         targetSection = 'evening';
     }
 
-
-    const currentDayData = mhData[activeDay] || initialDayData();
+    // ⭐ USE COMPOUND KEY for data retrieval/update
+    const currentDayData = mhData[currentDataKey] || initialDayData();
     const itemsForSection = currentDayData[targetSection]
         ? [...currentDayData[targetSection], newItem]
         : [newItem];
         
-    handleUpdateDayData(activeDay, { ...currentDayData, [targetSection]: itemsForSection });
+    handleUpdateDayData(currentDataKey, { ...currentDayData, [targetSection]: itemsForSection });
     setIsSheetOpen(false);
   };
   
-  const currentDayData = mhData[activeDay] || initialDayData();
+  const currentDayData = mhData[currentDataKey] || initialDayData(); // ⭐ USE COMPOUND KEY for current day data
 
   return (
     <motion.div
@@ -129,8 +143,14 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
       <div className="flex-1 flex flex-col lg:grid lg:grid-cols-5 lg:gap-4 bg-card rounded-xl shadow-md border overflow-hidden">
         
         {/* Date Selector Header (Reused from DateCircles) */}
-        <div className="hidden lg:block lg:col-span-5 border-b border-border p-4">
-          <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
+        <div className="lg:col-span-5 border-b border-border p-4">
+          <DateCircles 
+            activeDay={activeDay} 
+            onDayChange={setActiveDay} 
+            // ⭐ PASS NEW WEEK PROPS
+            activeWeek={activeWeek}
+            onWeekChange={handleWeekChange}
+          />
         </div>
 
         {/* Left Column: Library */}
@@ -147,15 +167,13 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
 
         {/* Middle Column: Day Plan */}
         <div className="lg:col-span-3 flex-1 p-4 md:p-6 lg:p-8 space-y-4 overflow-y-auto">
-          {/* Date selector (mobile/tablet only) */}
-          <div className="mb-4 lg:hidden">
-            <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
-          </div>
+          {/* Mobile/Tablet date selector is handled inside the full DateCircles component now */}
 
           <MentalHealthDay
-            day={activeDay}
+            // ⭐ UPDATE DISPLAY NAME
+            day={`Week ${activeWeek} - ${activeDay}`}
             data={currentDayData}
-            onDataChange={data => handleUpdateDayData(activeDay, data)}
+            onDataChange={data => handleUpdateDayData(currentDataKey, data)} // ⭐ USE COMPOUND KEY
             onAddClick={() => setIsSheetOpen(true)}
           />
         </div>
