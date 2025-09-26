@@ -1,3 +1,4 @@
+// src/components/coach/createprogram/builders/FitnessBuilder.tsx
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
@@ -11,26 +12,46 @@ import DaySummary from './DaySummary';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import DateCircles from './DateCircles';
 
+// Helper function to create a unique key for data storage
+const getDataKey = (week: number, day: string) => `W${week}_${day}`;
+const INITIAL_WEEK_DAY = 'Monday';
+
 interface FitnessBuilderProps {
   onBack: () => void;
   onSave: (data: any) => void;
 }
 
 const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
-  const [activeDay, setActiveDay] = useState('Monday');
-  const [workoutData, setWorkoutData] = useState<{ [day: string]: WorkoutDayItem[] }>({});
+  // ⭐ ADD WEEK STATE
+  const [activeWeek, setActiveWeek] = useState(1); 
+  const [activeDay, setActiveDay] = useState(INITIAL_WEEK_DAY);
+  
+  // ⭐ UPDATE DATA STRUCTURE to use the compound key
+  const [workoutData, setWorkoutData] = useState<{ [key: string]: WorkoutDayItem[] }>({}); 
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<ExerciseItem[]>(mockExercises);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  const handleUpdateItems = useCallback((day: string, items: WorkoutDayItem[]) => {
+  // ⭐ CALCULATE UNIQUE KEY
+  const currentDataKey = getDataKey(activeWeek, activeDay); 
+
+  // ⭐ UPDATE HANDLERS to use the compound key
+  const handleUpdateItems = useCallback((key: string, items: WorkoutDayItem[]) => {
     setWorkoutData(prevData => ({
       ...prevData,
-      [day]: items,
+      [key]: items,
     }));
   }, []);
+  
+  // ⭐ NEW HANDLER for week change
+  const handleWeekChange = useCallback((week: number) => {
+    setActiveWeek(week);
+    setActiveDay(INITIAL_WEEK_DAY); // Optional: reset to Monday when week changes
+  }, []);
 
-  // Handle exercise search with enhanced filtering
+
+  // Handle exercise search with enhanced filtering (no change needed to search logic itself)
   const handleSearch = useCallback((query: string, filterType?: any, muscleGroup?: string) => {
     let filtered = mockExercises;
 
@@ -72,15 +93,16 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
       reps: [0],
       comment: '',
     };
-    const itemsForDay = workoutData[activeDay]
-      ? [...workoutData[activeDay]]
+    // ⭐ USE COMPOUND KEY for adding item
+    const itemsForDay = workoutData[currentDataKey]
+      ? [...workoutData[currentDataKey]]
       : [];
     itemsForDay.push(newItem);
-    handleUpdateItems(activeDay, itemsForDay);
+    handleUpdateItems(currentDataKey, itemsForDay);
     setIsSheetOpen(false);
   };
 
-  const currentDayItems = workoutData[activeDay] || [];
+  const currentDayItems = workoutData[currentDataKey] || []; // ⭐ USE COMPOUND KEY for display
 
   return (
     <motion.div
@@ -102,7 +124,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
         </Button>
         <Button
           size="sm"
-          onClick={() => onSave(workoutData)}
+          onClick={() => onSave(workoutData)} // Pass all data (containing W#_DayName keys)
           className="gap-2 shrink-0"
         >
           <Check className="h-4 w-4" /> Save Program
@@ -111,9 +133,16 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:grid lg:grid-cols-5 lg:gap-4 bg-card rounded-xl shadow-md border">
-        {/* Date Selector Header (Desktop only) */}
-        <div className="hidden lg:block lg:col-span-5 border-b border-border p-4">
-          <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
+        
+        {/* Date Selector Header (Now includes Week Selector) */}
+        <div className="lg:col-span-5 border-b border-border p-4">
+          <DateCircles 
+            activeDay={activeDay} 
+            onDayChange={setActiveDay} 
+            // ⭐ PASS NEW WEEK PROPS
+            activeWeek={activeWeek}
+            onWeekChange={handleWeekChange}
+          />
         </div>
 
         {/* Left Column: Search & Library (Desktop only) */}
@@ -130,15 +159,13 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
 
         {/* Middle Column: Workout Day */}
         <div className="lg:col-span-3 flex-1 p-4 md:p-6 lg:p-8 space-y-4">
-          {/* Date selector (mobile/tablet only) */}
-          <div className="mb-4 lg:hidden">
-            <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
-          </div>
+          {/* Mobile/Tablet date selector is handled inside the full DateCircles component now */}
 
           <WorkoutDay
-            day={activeDay}
+            // ⭐ UPDATE DISPLAY NAME
+            day={`Week ${activeWeek} - ${activeDay}`}
             items={currentDayItems}
-            onItemsChange={items => handleUpdateItems(activeDay, items)}
+            onItemsChange={items => handleUpdateItems(currentDataKey, items)} // ⭐ USE COMPOUND KEY
             onAddClick={() => setIsSheetOpen(true)}
           />
         </div>
