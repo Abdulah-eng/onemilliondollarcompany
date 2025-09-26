@@ -20,7 +20,7 @@ export interface MentalHealthDayItem {
 export type MentalHealthSection = 'morning' | 'evening' | 'night';
 
 interface MentalHealthDayProps {
-  day: string;
+  day: string; // This prop now contains "Week # - DayName"
   data: { [key in MentalHealthSection]: MentalHealthDayItem[] };
   onDataChange: (data: { [key in MentalHealthSection]: MentalHealthDayItem[] }) => void;
   onAddClick: () => void;
@@ -110,6 +110,7 @@ const MentalHealthDay: React.FC<MentalHealthDayProps> = ({ day, data, onDataChan
 
   return (
     <>
+      {/* ⭐ UPDATE DISPLAY TO USE THE DYNAMIC DAY PROP */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-bold">{day}'s Mental Wellness Plan</h3>
         <Button onClick={onAddClick} className="gap-2 lg:hidden">
