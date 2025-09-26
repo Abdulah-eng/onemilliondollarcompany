@@ -28,26 +28,22 @@ const PersonalInfoStep = lazy(() => import("./pages/onboarding/PersonalInfoStep"
 const PreferencesStep = lazy(() => import("./pages/onboarding/PreferencesStep"));
 const ContactStep = lazy(() => import("./pages/onboarding/ContactStep"));
 const OnboardingSuccess = lazy(() => import("./pages/onboarding/OnboardingSuccess"));
-
-// Customer Pages
 const CustomerDashboardPage = lazy(() => import("./pages/customer/CustomerDashboard"));
+const CoachDashboardPage = lazy(() => import("./pages/coach/CoachDashboard"));
+const ClientOverviewPage = lazy(() => import("./pages/coach/ClientOverviewPage"));
+const ClientCard = lazy(() => import("./pages/coach/ClientCard"));
+const CoachProgramsPage = lazy(() => import("./pages/coach/ProgramsPage"));
+const ProgramBuilder = lazy(() => import("./pages/coach/ProgramBuilder")); // ✅ Lazy-load the new page
+
 const MyProgramsPage = lazy(() => import("./pages/customer/MyProgramsPage"));
 const ViewProgramPage = lazy(() => import("./pages/customer/ViewProgramPage"));
-const CustomerLibraryPage = lazy(() => import("./pages/customer/LibraryPage")); // Renamed to avoid clash
+const LibraryPage = lazy(() => import("./pages/customer/LibraryPage"));
 const ProgressPage = lazy(() => import("./pages/customer/ProgressPage"));
 const MyCoachPage = lazy(() => import("./pages/customer/MyCoach"));
 const BlogPage = lazy(() => import("./pages/customer/BlogPage"));
 const ProfilePage = lazy(() => import("./pages/customer/Profile"));
 const UpdatePaymentPlanPage = lazy(() => import("./pages/customer/UpdatePaymentPlanPage"));
 const CancelSubscriptionPage = lazy(() => import("./pages/customer/CancelSubscriptionPage"));
-
-// Coach Pages
-const CoachDashboardPage = lazy(() => import("./pages/coach/CoachDashboard"));
-const ClientOverviewPage = lazy(() => import("./pages/coach/ClientOverviewPage"));
-const ClientCard = lazy(() => import("./pages/coach/ClientCard"));
-const CoachProgramsPage = lazy(() => import("./pages/coach/ProgramsPage"));
-const ProgramBuilder = lazy(() => import("./pages/coach/ProgramBuilder"));
-const CoachLibraryPage = lazy(() => import("./pages/coach/LibraryPage")); // ⭐ Coach Library Page Import
 
 const LoadingScreen = () => (
   <div className="flex h-screen w-full items-center justify-center bg-emerald-50">
@@ -174,15 +170,9 @@ const ThemedApp = () => {
                       <CoachProgramsPage />
                     </Suspense>
                   } />
-                  <Route path="/coach/programs/create" element={
+                  <Route path="/coach/programs/create" element={ // ✅ New route for creating a program
                     <Suspense fallback={<LoadingScreen />}>
                       <ProgramBuilder />
-                    </Suspense>
-                  } />
-                  {/* ⭐ NEW COACH LIBRARY ROUTE */}
-                  <Route path="/coach/library" element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <CoachLibraryPage />
                     </Suspense>
                   } />
                 </Route>
@@ -207,7 +197,7 @@ const ThemedApp = () => {
                   } />
                   <Route path="/customer/library" element={
                     <Suspense fallback={<LoadingScreen />}>
-                      <CustomerLibraryPage />
+                      <LibraryPage />
                     </Suspense>
                   } />
                   <Route path="/customer/progress" element={
