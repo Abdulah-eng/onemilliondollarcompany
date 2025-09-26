@@ -12,6 +12,10 @@ import NutritionDay, { NutritionDayItem, MealSection } from './NutritionDay'; //
 import NutritionSummary from './NutritionSummary'; // New/Adapted
 import { mockRecipes, RecipeItem, MealType, IngredientType } from '@/mockdata/createprogram/mockRecipes';
 
+// Helper function to create a unique key for data storage
+const getDataKey = (week: number, day: string) => `W${week}_${day}`;
+const INITIAL_WEEK_DAY = 'Monday';
+
 // Initial state for a day's nutrition plan
 const initialDayData = (): { [key in MealSection]: NutritionDayItem[] } => ({
     breakfast: [],
@@ -27,34 +31,46 @@ interface NutritionBuilderProps {
 }
 
 const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave }) => {
-  const [activeDay, setActiveDay] = useState('Monday');
-  const [nutritionData, setNutritionData] = useState<{ [day: string]: { [key in MealSection]: NutritionDayItem[] } }>({
-      'Monday': initialDayData(),
-  });
+  // ⭐ ADD WEEK STATE
+  const [activeWeek, setActiveWeek] = useState(1); 
+  const [activeDay, setActiveDay] = useState(INITIAL_WEEK_DAY);
+  
+  // ⭐ UPDATE DATA STRUCTURE to use the compound key: { "W#_DayName": { breakfast: [] } }
+  const [nutritionData, setNutritionData] = useState<{ [key: string]: { [key in MealSection]: NutritionDayItem[] } }>({});
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<RecipeItem[]>(mockRecipes);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedSection, setSelectedSection] = useState<MealSection>('breakfast');
+  
+  // ⭐ CALCULATE UNIQUE KEY
+  const currentDataKey = getDataKey(activeWeek, activeDay); 
 
-  // Ensure initial data exists for the active day
+  // Ensure initial data exists for the current W#_DayName
   useEffect(() => {
-    if (!nutritionData[activeDay]) {
+    if (!nutritionData[currentDataKey]) {
         setNutritionData(prev => ({
             ...prev,
-            [activeDay]: initialDayData(),
+            [currentDataKey]: initialDayData(),
         }));
     }
-  }, [activeDay, nutritionData]);
+  }, [currentDataKey, nutritionData]);
 
-  // Handle data update for the active day
-  const handleUpdateDayData = useCallback((day: string, data: { [key in MealSection]: NutritionDayItem[] }) => {
+  // Handle data update for the active day/week using compound key
+  const handleUpdateDayData = useCallback((key: string, data: { [key in MealSection]: NutritionDayItem[] }) => {
     setNutritionData(prevData => ({
       ...prevData,
-      [day]: data,
+      [key]: data,
     }));
   }, []);
 
-  // Handle recipe search with enhanced filtering
+  // ⭐ NEW HANDLER for week change
+  const handleWeekChange = useCallback((week: number) => {
+    setActiveWeek(week);
+    setActiveDay(INITIAL_WEEK_DAY); // Reset to Monday when week changes
+  }, []);
+
+  // Handle recipe search with enhanced filtering (unchanged)
   const handleSearch = useCallback((query: string, mealTypeFilter?: MealType | 'all', ingredientType?: IngredientType | 'all') => {
     let filtered = mockRecipes;
 
@@ -79,7 +95,6 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave }) =
   }, []);
 
   useEffect(() => {
-    // Initial search when component mounts
     handleSearch(searchQuery);
   }, [searchQuery, handleSearch]);
 
@@ -87,37 +102,30 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave }) =
     const newItem: NutritionDayItem = {
       id: `${recipe.id}-${Date.now()}`,
       recipe: recipe,
-      time: '', // Blank by default
+      time: '', 
       comment: '',
-      portionSize: '1 serving', // Default
+      portionSize: '1 serving', 
     };
     
     // Always add to the currently selected section (free assignment)
     const targetSection = selectedSection;
 
-    // Update state
-    const currentDayData = nutritionData[activeDay] || initialDayData();
+    // ⭐ USE COMPOUND KEY for data retrieval/update
+    const currentDayData = nutritionData[currentDataKey] || initialDayData();
     const itemsForSection = currentDayData[targetSection]
         ? [...currentDayData[targetSection], newItem]
         : [newItem];
         
-    handleUpdateDayData(activeDay, { ...currentDayData, [targetSection]: itemsForSection });
+    handleUpdateDayData(currentDataKey, { ...currentDayData, [targetSection]: itemsForSection });
     setIsSheetOpen(false);
   };
   
-  const currentDayData = nutritionData[activeDay] || initialDayData();
+  const currentDayData = nutritionData[currentDataKey] || initialDayData(); // ⭐ USE COMPOUND KEY for current day data
 
-  // Helper function to open the sheet and set the target section
+  // Helper function to open the sheet 
   const handleOpenSheet = () => {
-      // In the nutrition builder, the library should open and the user will select a recipe, 
-      // which will then be added based on the recipe's meal type. 
-      // We don't need to specify the section here, only when adding.
       setIsSheetOpen(true); 
   };
-  
-  // Note: DateCircles is reused directly
-  // Note: Page header is handled by the parent component (in a real app) or the component wrapping this builder.
-  // Here, we keep the in-builder header as per FitnessBuilder.tsx structure.
 
   return (
     <motion.div
@@ -139,7 +147,7 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave }) =
         </Button>
         <Button
           size="sm"
-          onClick={() => onSave(nutritionData)}
+          onClick={() => onSave(nutritionData)} // Pass all data (containing W#_DayName keys)
           className="gap-2 shrink-0"
         >
           <Check className="h-4 w-4" /> Save Program
@@ -150,8 +158,14 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave }) =
       <div className="flex-1 flex flex-col lg:grid lg:grid-cols-5 lg:gap-4 bg-card rounded-xl shadow-md border overflow-hidden lg:h-[calc(100vh-8rem)]">
         
         {/* Date Selector Header (Desktop only) */}
-        <div className="hidden lg:block lg:col-span-5 border-b border-border p-4 lg:sticky lg:top-0 bg-card z-10">
-          <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
+        <div className="lg:col-span-5 border-b border-border p-4 lg:sticky lg:top-0 bg-card z-10">
+          <DateCircles 
+            activeDay={activeDay} 
+            onDayChange={setActiveDay} 
+            // ⭐ PASS NEW WEEK PROPS
+            activeWeek={activeWeek}
+            onWeekChange={handleWeekChange}
+          />
         </div>
 
         {/* Left Column: Recipe Library (Desktop only) */}
@@ -168,15 +182,21 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave }) =
 
         {/* Middle Column: Nutrition Day */}
         <div className="lg:col-span-3 flex-1 p-4 md:p-6 lg:p-8 space-y-4 overflow-y-auto">
-          {/* Date selector (mobile/tablet only) */}
+          {/* Date selector (mobile/tablet only) - Needs the same props now */}
           <div className="mb-4 lg:hidden">
-            <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
+            <DateCircles 
+              activeDay={activeDay} 
+              onDayChange={setActiveDay} 
+              activeWeek={activeWeek}
+              onWeekChange={handleWeekChange}
+            />
           </div>
 
           <NutritionDay
-            day={activeDay}
+            // ⭐ UPDATE DISPLAY NAME
+            day={`Week ${activeWeek} - ${activeDay}`}
             data={currentDayData}
-            onDataChange={items => handleUpdateDayData(activeDay, items)}
+            onDataChange={data => handleUpdateDayData(currentDataKey, data)} // ⭐ USE COMPOUND KEY
             onAddClick={handleOpenSheet}
             selectedSection={selectedSection}
             onSectionSelect={setSelectedSection}
