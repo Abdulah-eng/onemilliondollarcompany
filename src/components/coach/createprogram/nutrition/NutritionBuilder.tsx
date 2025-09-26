@@ -147,25 +147,23 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave }) =
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col lg:grid lg:grid-cols-5 lg:gap-4 bg-card rounded-xl shadow-md border overflow-hidden">
+      <div className="flex-1 flex flex-col lg:grid lg:grid-cols-5 lg:gap-4 bg-card rounded-xl shadow-md border overflow-hidden lg:h-[calc(100vh-8rem)]">
         
         {/* Date Selector Header (Desktop only) */}
-        <div className="hidden lg:block lg:col-span-5 border-b border-border p-4">
+        <div className="hidden lg:block lg:col-span-5 border-b border-border p-4 lg:sticky lg:top-0 bg-card z-10">
           <DateCircles activeDay={activeDay} onDayChange={setActiveDay} />
         </div>
 
         {/* Left Column: Recipe Library (Desktop only) */}
-        <div className="hidden lg:block lg:col-span-1 border-r border-border bg-muted/20">
-          <div className="lg:sticky lg:top-0 h-[calc(100vh-2rem)] overflow-y-auto">
-            <RecipeLibrary
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              searchResults={searchResults}
-              onSelect={handleSelectRecipe}
-              onSearch={handleSearch}
-              allRecipes={mockRecipes}
-            />
-          </div>
+        <div className="hidden lg:block lg:col-span-1 border-r border-border bg-muted/20 lg:sticky lg:top-[80px] lg:h-[calc(100vh-12rem)] lg:overflow-y-auto">
+          <RecipeLibrary
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            searchResults={searchResults}
+            onSelect={handleSelectRecipe}
+            onSearch={handleSearch}
+            allRecipes={mockRecipes}
+          />
         </div>
 
         {/* Middle Column: Nutrition Day */}
