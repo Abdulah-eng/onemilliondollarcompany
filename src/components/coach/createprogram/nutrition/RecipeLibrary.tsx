@@ -106,7 +106,7 @@ const RecipeLibrary: React.FC<RecipeLibraryProps> = ({
             </Select>
 
             {/* Ingredient Type Filter - Matched height and font sizing */}
-            <Select value={ingredientTypeFilter} onValueChange={setIngredientTypeFilter}>
+            <Select value={ingredientTypeFilter} onValueChange={(value) => setIngredientTypeFilter(value as IngredientType | 'all')}>
               <SelectTrigger className="flex-1 sm:w-44 lg:w-full h-11 sm:h-10 lg:h-8 text-base sm:text-sm lg:text-xs capitalize">
                 <Soup className="h-4 w-4 lg:h-3 lg:w-3 text-muted-foreground mr-2" />
                 <SelectValue placeholder="Ingredient" />

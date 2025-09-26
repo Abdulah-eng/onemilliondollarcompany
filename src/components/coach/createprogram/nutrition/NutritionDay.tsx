@@ -31,11 +31,13 @@ interface NutritionDayProps {
   data: { [key in MealSection]: NutritionDayItem[] };
   onDataChange: (data: { [key in MealSection]: NutritionDayItem[] }) => void;
   onAddClick: () => void;
+  selectedSection?: MealSection;
+  onSectionSelect?: (section: MealSection) => void;
 }
 
 const mealSections: MealSection[] = ['breakfast', 'lunch', 'dinner', 'snack', 'nightsnack'];
 
-const NutritionDay: React.FC<NutritionDayProps> = ({ day, data, onDataChange, onAddClick }) => {
+const NutritionDay: React.FC<NutritionDayProps> = ({ day, data, onDataChange, onAddClick, selectedSection, onSectionSelect }) => {
 
   const handleUpdateItem = useCallback((section: MealSection, itemIndex: number, field: keyof NutritionDayItem, value: string) => {
     const newItems = [...data[section]];
@@ -148,15 +150,33 @@ const NutritionDay: React.FC<NutritionDayProps> = ({ day, data, onDataChange, on
       <div className="space-y-6">
         {mealSections.map((section) => (
           <div key={section} className="space-y-3">
-            <h4 className="text-lg font-semibold capitalize text-primary border-b pb-1">
+            <h4 
+              className={cn(
+                "text-lg font-semibold capitalize border-b pb-1 cursor-pointer transition-colors duration-200",
+                selectedSection === section && onSectionSelect 
+                  ? "text-primary bg-primary/5 px-2 py-1 rounded-md border-primary" 
+                  : "text-primary hover:text-primary/80"
+              )}
+              onClick={() => onSectionSelect?.(section)}
+            >
               {section.replace('snack', ' Snack')}
+              {selectedSection === section && onSectionSelect && (
+                <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full hidden lg:inline">
+                  Selected
+                </span>
+              )}
             </h4>
             
             <div 
               className={cn(
-                "space-y-4 p-4 rounded-xl",
-                data[section].length === 0 ? "border-2 border-dashed border-gray-200" : "border border-border"
+                "space-y-4 p-4 rounded-xl transition-all duration-200",
+                selectedSection === section && onSectionSelect 
+                  ? "border-2 border-primary/30 bg-primary/5" 
+                  : data[section].length === 0 
+                    ? "border-2 border-dashed border-gray-200" 
+                    : "border border-border",
               )}
+              onClick={() => onSectionSelect?.(section)}
             >
               <AnimatePresence>
                 {data[section].length > 0 ? (

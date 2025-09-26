@@ -1,6 +1,6 @@
 // src/mockdata/createprogram/mockRecipes.ts
 
-export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'smoothie' | 'pre-workout' | 'post-workout';
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'nightsnack' | 'smoothie' | 'pre-workout' | 'post-workout';
 export type IngredientType = 'chicken' | 'meat' | 'vegetables' | 'fish' | 'vegan' | 'dessert';
 
 export interface RecipeItem {

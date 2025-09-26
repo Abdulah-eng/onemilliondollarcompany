@@ -7,6 +7,7 @@ import { Dumbbell, Heart, Utensils } from 'lucide-react';
 
 interface DaySummaryProps {
   items: WorkoutDayItem[];
+  activeDay?: string;
 }
 
 const DaySummary: React.FC<DaySummaryProps> = ({ items }) => {

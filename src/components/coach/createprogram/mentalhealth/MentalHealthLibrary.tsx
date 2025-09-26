@@ -98,7 +98,7 @@ const MentalHealthLibrary: React.FC<MentalHealthLibraryProps> = ({
             </Select>
 
             {/* Focus Area Filter - Matched Height */}
-            <Select value={focusAreaFilter} onValueChange={setFocusAreaFilter}>
+            <Select value={focusAreaFilter} onValueChange={(value) => setFocusAreaFilter(value as FocusArea | 'all')}>
               <SelectTrigger className="flex-1 sm:w-44 lg:w-full h-11 sm:h-10 lg:h-8 text-base sm:text-sm lg:text-xs capitalize">
                 <Heart className="h-4 w-4 lg:h-3 lg:w-3 text-muted-foreground mr-2" />
                 <SelectValue placeholder="Focus Area" />

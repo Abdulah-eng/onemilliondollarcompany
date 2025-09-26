@@ -26,7 +26,7 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({ data }) => {
   );
 
   return (
-    <div className="p-3 md:p-4 space-y-4 h-full overflow-hidden">
+    <div className="p-3 md:p-4 space-y-4 h-full flex flex-col overflow-hidden">
       <h3 className="text-lg font-bold text-foreground">Daily Summary</h3>
 
       {/* Total Macros as plain text with icons */}
@@ -52,7 +52,7 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({ data }) => {
       {/* Meals */}
       <h4 className="text-base font-bold pt-2 border-b pb-1 border-border/70">Meal Schedule</h4>
       
-      <div className="space-y-3 text-sm text-muted-foreground overflow-y-auto max-h-[calc(100vh-22rem)] pr-1">
+      <div className="space-y-3 text-sm text-muted-foreground overflow-y-auto flex-1 pr-1">
         <AnimatePresence mode="popLayout">
           {allItems.length > 0 ? (
             Object.keys(data).map((sectionKey) => {

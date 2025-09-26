@@ -34,7 +34,7 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave }) =
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<RecipeItem[]>(mockRecipes);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [lastSelectedSection, setLastSelectedSection] = useState<MealSection>('breakfast');
+  const [selectedSection, setSelectedSection] = useState<MealSection>('breakfast');
 
   // Ensure initial data exists for the active day
   useEffect(() => {
@@ -92,11 +92,8 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave }) =
       portionSize: '1 serving', // Default
     };
     
-    // Determine the section to add the recipe to
-    // Default to the last used section, or the first matching mealType, or 'breakfast'
-    const targetSection: MealSection = recipe.mealTypes.includes(lastSelectedSection)
-        ? lastSelectedSection
-        : (recipe.mealTypes.find(type => ['breakfast', 'lunch', 'dinner', 'snack', 'nightsnack'].includes(type)) as MealSection) || 'breakfast';
+    // Always add to the currently selected section (free assignment)
+    const targetSection = selectedSection;
 
     // Update state
     const currentDayData = nutritionData[activeDay] || initialDayData();
@@ -105,9 +102,6 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave }) =
         : [newItem];
         
     handleUpdateDayData(activeDay, { ...currentDayData, [targetSection]: itemsForSection });
-    
-    // Set last selected section for next click
-    setLastSelectedSection(targetSection);
     setIsSheetOpen(false);
   };
   
@@ -184,6 +178,8 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave }) =
             data={currentDayData}
             onDataChange={items => handleUpdateDayData(activeDay, items)}
             onAddClick={handleOpenSheet}
+            selectedSection={selectedSection}
+            onSectionSelect={setSelectedSection}
           />
         </div>
 
