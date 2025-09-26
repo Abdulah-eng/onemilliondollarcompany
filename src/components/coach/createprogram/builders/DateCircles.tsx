@@ -4,46 +4,47 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { format, addDays, startOfWeek } from 'date-fns';
-import WeekSelector from './WeekSelector'; // Import the new selector
+import { format, addDays, startOfWeek, addWeeks } from 'date-fns'; // ⭐ IMPORT addWeeks
+import WeekSelector from './WeekSelector'; 
 
-// Define the days of the week based on starting Monday
 const WEEK_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const MAX_WEEKS = 4;
 
 interface DateCirclesProps {
   activeDay: string;
   onDayChange: (day: string) => void;
-  // New props for week management
   activeWeek: number;
   onWeekChange: (week: number) => void;
 }
 
 const DateCircles: React.FC<DateCirclesProps> = ({ activeDay, onDayChange, activeWeek, onWeekChange }) => {
-  // Original date logic is simplified/removed, but we keep format/startOfWeek for calculation stability (optional)
-  // We can simplify this to just map the weekday names, as the date numbers are no longer strictly relevant 
-  // for a programmatic builder where "Monday" means "Week X, Day 1."
+  // Use a stable current date for the reference point
+  const today = new Date();
+  const currentCalendarWeekStart = startOfWeek(today, { weekStartsOn: 1 });
   
-  // We'll calculate the date numbers for display just to keep the visual style similar
-  const [currentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
-  const week = Array.from({ length: 7 }).map((_, i) => addDays(currentWeekStart, i));
+  // ⭐ KEY CHANGE: Offset the start date by (activeWeek - 1)
+  const referenceWeekStart = addWeeks(currentCalendarWeekStart, activeWeek - 1);
+
+  // Calculate the dates for the currently active week
+  const weekDates = Array.from({ length: 7 }).map((_, i) => addDays(referenceWeekStart, i));
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Week Selector component */}
+      
       <WeekSelector
         currentWeek={activeWeek}
         maxWeeks={MAX_WEEKS}
         onWeekChange={onWeekChange}
       />
       
-      {/* Day Circles */}
       <div className="flex justify-center py-4 bg-background/50 backdrop-blur-sm rounded-xl px-2">
         <div className="flex justify-center gap-2 md:gap-4 overflow-x-auto scroll-pl-4 scroll-pr-4">
-          {week.map((date, index) => {
-            const dayName = WEEK_DAYS[index]; // Use fixed day names
+          {weekDates.map((date, index) => { // ⭐ Use weekDates
+            const dayName = WEEK_DAYS[index]; 
             const dayNumber = format(date, 'd');
-            const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && activeWeek === 1; // Only show 'today' marker for Week 1
+            
+            // Highlight 'today' only if it's Week 1 AND the actual calendar date
+            const isToday = format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd'); 
 
             return (
               <motion.div
@@ -58,7 +59,7 @@ const DateCircles: React.FC<DateCirclesProps> = ({ activeDay, onDayChange, activ
                 whileTap={{ scale: 0.95 }}
               >
                 <span className="text-xs font-semibold">{dayName.slice(0, 3)}</span>
-                <span className="text-xs font-medium">{dayNumber}</span>
+                <span className="text-xs font-medium">{dayNumber}</span> {/* ⭐ This is now the dynamic date */}
               </motion.div>
             );
           })}
