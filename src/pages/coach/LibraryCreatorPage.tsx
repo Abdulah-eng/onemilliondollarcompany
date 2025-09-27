@@ -1,14 +1,11 @@
-// src/pages/coach/LibraryCreatorPage.tsx
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, Save } from 'lucide-react';
-import { LibraryItem, LibraryCategory, ExerciseItem, RecipeItem, MentalHealthItem } from '@/mockdata/library/mockLibrary';
+import { LibraryItem, LibraryCategory } from '@/mockdata/library/mockLibrary';
 import ExerciseForm from '@/components/coach/library/creation/ExerciseForm';
 import RecipeForm from '@/components/coach/library/creation/RecipeForm';
 import MentalHealthForm from '@/components/coach/library/creation/MentalHealthForm';
+import LibraryCreationWrapper from '@/components/coach/library/creation/LibraryCreationWrapper'; // Import the new wrapper
 
 interface LibraryCreatorPageProps {
   onBack: () => void;
@@ -21,7 +18,6 @@ const LibraryCreatorPage: React.FC<LibraryCreatorPageProps> = ({ onBack, onSubmi
   const [formData, setFormData] = useState<Partial<LibraryItem>>({});
 
   useEffect(() => {
-    // Set initial data for editing or creation
     const baseData = { category: activeCategory, isCustom: true };
     setFormData(initialItem ? { ...baseData, ...initialItem } : baseData);
   }, [initialItem, activeCategory]);
@@ -38,28 +34,27 @@ const LibraryCreatorPage: React.FC<LibraryCreatorPageProps> = ({ onBack, onSubmi
     
     const newId = formData.id || `custom-${Date.now()}`;
 
-    // Simple type coercion, assumes forms ensure minimum required structure
+    // Simple type coercion to finalize the item
     const finalItem = {
-        ...formData,
-        id: newId,
-        category: activeCategory,
-        isCustom: true,
-        name: formData.name || '',
-        introduction: formData.introduction || '',
+      ...formData,
+      id: newId,
+      category: activeCategory,
+      isCustom: true,
+      name: formData.name || '',
+      introduction: formData.introduction || '',
     } as LibraryItem;
 
     onSubmit(finalItem);
-    onBack();
   };
 
   const renderForm = () => {
     switch (activeCategory) {
       case 'exercise':
-        return <ExerciseForm formData={formData as Partial<ExerciseItem>} onFormChange={handleFormChange as any} />;
+        return <ExerciseForm formData={formData} onFormChange={handleFormChange} />;
       case 'recipe':
-        return <RecipeForm formData={formData as Partial<RecipeItem>} onFormChange={handleFormChange as any} />;
+        return <RecipeForm formData={formData} onFormChange={handleFormChange} />;
       case 'mental health':
-        return <MentalHealthForm formData={formData as Partial<MentalHealthItem>} onFormChange={handleFormChange as any} />;
+        return <MentalHealthForm formData={formData} onFormChange={handleFormChange} />;
       default:
         return <div>Select a category first.</div>;
     }
@@ -68,33 +63,15 @@ const LibraryCreatorPage: React.FC<LibraryCreatorPageProps> = ({ onBack, onSubmi
   const isEditing = !!initialItem?.id;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 50 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -50 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-6"
+    <LibraryCreationWrapper
+      category={activeCategory}
+      isEditing={isEditing}
+      onBack={onBack}
+      onSubmit={handleSubmit}
     >
-      {/* Header and Actions */}
-      <div className="flex items-center justify-between pb-4 border-b">
-        <h1 className="text-3xl font-bold">
-          {isEditing ? 'Edit' : 'Create New'} {activeCategory.replace(' ', ' ')}
-        </h1>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={onBack} className="gap-2">
-            <ChevronLeft className="h-4 w-4" /> Back to Library
-          </Button>
-          <Button onClick={handleSubmit} className="gap-2">
-            <Save className="h-4 w-4" /> {isEditing ? 'Save Changes' : 'Create Item'}
-          </Button>
-        </div>
-      </div>
-
-      {/* Dynamic Form Content */}
-      <div className="max-w-4xl mx-auto p-4 md:p-8 bg-card rounded-xl shadow-md">
-        {renderForm()}
-      </div>
-    </motion.div>
+      {/* The form content is passed as children */}
+      {renderForm()}
+    </LibraryCreationWrapper>
   );
 };
 
