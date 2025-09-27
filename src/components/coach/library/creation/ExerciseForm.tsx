@@ -4,7 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ExerciseItem } from '@/mockdata/library/mockLibrary';
 import { Lightbulb, AlertTriangle } from 'lucide-react';
-import ContentUploadSection from './ContentUploadSection'; // Import dynamic section
+import ContentUploadSection from './ContentUploadSection';
 
 interface ExerciseFormProps {
   formData: Partial<ExerciseItem>;
