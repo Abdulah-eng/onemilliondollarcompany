@@ -15,8 +15,18 @@ const [activeCategory, setActiveCategory] = useState<LibraryCategory>('exercise'
 const [libraryData, setLibraryData] = useState<LibraryItem[]>(mockLibrary);
 const [view, setView] = useState<LibraryView>('list');
 const [editingItem, setEditingItem] = useState<LibraryItem | null>(null);
+const [searchTerm, setSearchTerm] = useState('');
 
 const handleCategoryChange = useCallback((cat: LibraryCategory) => setActiveCategory(cat), []);
+const handleSearch = useCallback((term: string) => setSearchTerm(term), []);
+
+// Filter items based on category and search
+const filteredItems = libraryData.filter(item => {
+  const matchesCategory = item.category === activeCategory;
+  const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                       item.introduction.toLowerCase().includes(searchTerm.toLowerCase());
+  return matchesCategory && matchesSearch;
+});
 
 const handleNewItem = () => {
 setEditingItem(null);
@@ -58,17 +68,18 @@ animate={{ opacity: 1, x: 0 }}
 exit={{ opacity: 0, x: -40 }}
 transition={{ duration: 0.25 }}
 >
-<LibraryHeader
-activeCategory={activeCategory}
-onNewItemClick={handleNewItem}
-itemCount={libraryData.filter(i => i.category === activeCategory).length}
-/> <LibraryList
-             activeCategory={activeCategory}
-             libraryData={libraryData}
-             onEdit={handleEditItem}
-             onDelete={handleDeleteItem}
-             onCategoryChange={handleCategoryChange}
-           />
+            <LibraryHeader
+              activeCategory={activeCategory}
+              onCategoryChange={handleCategoryChange}
+              onSearch={handleSearch}
+              itemCount={filteredItems.length}
+              onNewItemClick={handleNewItem}
+            />
+            <LibraryList
+              filteredItems={filteredItems}
+              onEdit={handleEditItem}
+              onDelete={handleDeleteItem}
+            />
 </motion.div>
 ) : (
 <LibraryCreatorPage

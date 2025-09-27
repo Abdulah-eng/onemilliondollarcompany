@@ -13,6 +13,7 @@ interface LibraryHeaderProps {
   onCategoryChange: (cat: LibraryCategory) => void; // Added for category control
   onSearch: (term: string) => void;
   itemCount: number;
+  onNewItemClick?: () => void; // Optional prop for creating new items
 }
 
 const allCategories: LibraryCategory[] = ['exercise', 'recipe', 'mental health'];
@@ -22,6 +23,7 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
   onCategoryChange,
   onSearch,
   itemCount,
+  onNewItemClick,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -41,7 +43,14 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
 
   return (
     <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-30 pt-6 pb-4 -mx-4 px-4 md:-mx-8 md:px-8">
-      <h1 className="text-3xl font-extrabold mb-4 text-center md:text-left">Your Library 📚</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-3xl font-extrabold text-center md:text-left">Your Library 📚</h1>
+        {onNewItemClick && (
+          <Button onClick={onNewItemClick} className="bg-primary hover:bg-primary/90">
+            Create New
+          </Button>
+        )}
+      </div>
 
       <div className="flex items-center space-x-2 md:space-x-4">
         {/* Main Search Input */}

@@ -58,7 +58,7 @@ const LibraryCard: React.FC<LibraryCardProps> = ({ item, onEdit, onDelete }) => 
       transition={{ duration: 0.3 }}
       className="col-span-1"
     >
-      <Card className="rounded-xl overflow-hidden shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-primary/20 cursor-pointer">
+      <Card className="group rounded-xl overflow-hidden shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-primary/20 cursor-pointer">
         
         {/* Top Image Section */}
         <div className="relative h-48 w-full bg-muted">
