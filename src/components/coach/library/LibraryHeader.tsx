@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'; // Assuming Shadcn Tabs component
+import { Button } from '@/components/ui/button';
 import { LibraryCategory } from '@/mockdata/library/mockLibrary';
 import { cn } from '@/lib/utils';
 

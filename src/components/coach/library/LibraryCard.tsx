@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { LibraryItem } from '@/mockdata/library/mockLibrary';
 import { Dumbbell, Utensils, Feather, Clock, Zap, Trash2, Edit } from 'lucide-react';
 import { motion } from 'framer-motion';

@@ -39,15 +39,15 @@ const ItemFormWrapper: React.FC<ItemFormWrapperProps> = ({ isOpen, onOpenChange,
     const newId = formData.id || `custom-${Date.now()}`;
 
     // Final object structure check (simplified)
-    const finalItem: LibraryItem = {
-        ...formData as LibraryItem, // Trusting the form ensures correctness for brevity
+    const finalItem = {
+        ...formData,
         id: newId,
         category: activeCategory,
         isCustom: true,
         // Ensure required fields are set, even if empty string
         name: formData.name || '',
         introduction: formData.introduction || '',
-    };
+    } as LibraryItem;
 
     onSubmit(finalItem);
     onOpenChange(false);
