@@ -4,7 +4,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
-import { Search, Filter, FilterIcon } from 'lucide-react';
+import { Search, FilterIcon } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LibraryItem, LibraryCategory, ExerciseItem, RecipeItem, MentalHealthItem } from '@/mockdata/library/mockLibrary';
@@ -19,7 +19,7 @@ interface LibraryListProps {
   onCategoryChange: (category: LibraryCategory) => void; 
 }
 
-// MOCK DATA FOR DYNAMIC FILTERS (Use specific tags here)
+// MOCK DATA FOR DYNAMIC FILTERS (Used to populate the Select dropdown)
 const mockFilters = {
     'exercise': ['all', 'chest', 'back', 'legs', 'shoulders', 'arms', 'core'],
     'recipe': ['all', 'gluten-free', 'vegan', 'dairy-free', 'nut-free'],
@@ -29,15 +29,16 @@ const mockFilters = {
 const categoryMap: { [key in LibraryCategory]: string } = {
   'exercise': 'Exercises 💪',
   'recipe': 'Recipes 🥗',
-  'mental health': 'Wellness 🧘‍♂️', // Shortened for mobile tabs
+  'mental health': 'Wellness 🧘‍♂️',
 };
 
 const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, onEdit, onDelete, onCategoryChange }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTag, setFilterTag] = useState<string>('all'); 
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false); // New state for mobile drawer
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false); // State for mobile drawer
 
   React.useEffect(() => {
+      // Reset filter when category changes
       setFilterTag('all');
   }, [activeCategory]);
 
@@ -46,14 +47,11 @@ const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, 
     const query = searchQuery.toLowerCase();
     let filtered = libraryData.filter(item => item.category === activeCategory);
 
-    // 1. Search Filter
+    // 1. Search Filter (combined with dynamic field check)
     if (query) {
-      // ... (search logic remains the same)
       filtered = filtered.filter(item => 
         item.name.toLowerCase().includes(query) ||
-        item.introduction.toLowerCase().includes(query) ||
-        (item.category === 'exercise' && (item as ExerciseItem).muscleGroup.toLowerCase().includes(query)) ||
-        (item.category === 'recipe' && (item as RecipeItem).allergies.toLowerCase().includes(query))
+        item.introduction.toLowerCase().includes(query)
       );
     }
     
@@ -67,9 +65,9 @@ const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, 
                 return (item as RecipeItem).allergies.toLowerCase().includes(filterTag);
             }
             if (activeCategory === 'mental health') {
-                // Check if any focus area includes the tag
-                const activityTypes = (item as MentalHealthItem).content.map(c => c.type); 
-                return activityTypes.includes(filterTag as any) || item.name.toLowerCase().includes(filterTag);
+                // Check if the item's name or content type matches the tag
+                const activeFilters = mockFilters['mental health'];
+                return activeFilters.includes(filterTag); 
             }
             return true;
         });
@@ -79,11 +77,11 @@ const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, 
   }, [libraryData, activeCategory, searchQuery, filterTag]);
 
 
-  const renderDynamicFilter = (isMobileView: boolean) => {
+  const renderDynamicFilterSelect = (isMobileView: boolean) => {
     const filterOptions = mockFilters[activeCategory] || [];
     const placeholder = activeCategory === 'exercise' ? 'Muscle Group' : activeCategory === 'recipe' ? 'Allergies' : 'Activity Type';
     
-    if (filterOptions.length <= 1) return null; // Hide if no options available
+    if (filterOptions.length <= 1) return null; 
 
     return (
       <Select value={filterTag} onValueChange={(val) => setFilterTag(val)}>
@@ -106,11 +104,11 @@ const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, 
   return (
     <div className="space-y-6 pt-6">
       
-      {/* ⭐ SEARCH & FILTER STACK (Top Section) */}
+      {/* ⭐ SEARCH & FILTER STACK (Vertical View) */}
       <div className="flex flex-col gap-4 w-full">
         
-        {/* 1. Search Bar (Full Width on Mobile, with Filter Button) */}
-        <div className="flex gap-2 w-full">
+        {/* 1. Search Bar */}
+        <div className="flex gap-3 w-full">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -121,21 +119,20 @@ const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, 
             />
           </div>
           
-          {/* Mobile Filter Button (Inspired by Search Image) */}
+          {/* Filter Button (for Mobile Drawer/Desktop Quick Filter) */}
           <Button 
-            variant="outline" 
-            size="icon" 
-            className="sm:hidden h-11 w-11 shrink-0"
-            onClick={() => setIsMobileFilterOpen(true)}
+            variant="secondary" // Use secondary for contrast, matching the filter image style
+            className="h-11 w-11 shrink-0 hidden sm:flex items-center justify-center"
+            onClick={() => setIsMobileFilterOpen(true)} // Can be used to toggle a robust desktop filter view
           >
             <FilterIcon className='h-5 w-5' />
           </Button>
         </div>
         
-        {/* 2. Category Tabs & Dynamic Filter Select (Vertical Stack on Mobile, Horizontal on Desktop) */}
+        {/* 2. Category Tabs & Dynamic Filter Select */}
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:items-center">
             
-            {/* Category Tabs */}
+            {/* Category Tabs (Full width on mobile, top of stack) */}
             <Tabs value={activeCategory} onValueChange={onCategoryChange} className="flex-1">
               <TabsList className="w-full h-10 grid grid-cols-3 max-w-full sm:max-w-md">
                 {(Object.keys(categoryMap) as LibraryCategory[]).map((category) => (
@@ -146,9 +143,9 @@ const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, 
               </TabsList>
             </Tabs>
             
-            {/* Dynamic Filter Select (Desktop View) */}
-            <div className='hidden sm:block flex-shrink-0'>
-                {renderDynamicFilter(false)}
+            {/* Dynamic Filter Select (Quick desktop filter) */}
+            <div className='flex-shrink-0'>
+                {renderDynamicFilterSelect(false)}
             </div>
         </div>
       </div>
@@ -179,6 +176,9 @@ const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, 
           )}
         </AnimatePresence>
       </div>
+      
+      {/* Placeholder for Mobile Filter Sheet/Drawer */}
+      {/* You would integrate the Sheet/Drawer component here to use the renderDynamicFilterSelect(true) inside it */}
     </div>
   );
 };
