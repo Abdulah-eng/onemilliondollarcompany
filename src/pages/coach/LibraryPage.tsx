@@ -11,19 +11,16 @@ import LibraryFAB from '@/components/coach/library/LibraryFAB';
 type LibraryView = 'list' | 'creator';
 
 const LibraryPage: React.FC = () => {
-  // Set initial category to null to show ALL items
-  const [activeCategory, setActiveCategory] = useState<LibraryCategory | null>(null); 
+  const [activeCategory, setActiveCategory] = useState<LibraryCategory | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [libraryData, setLibraryData] = useState<LibraryItem[]>(mockLibrary);
   const [view, setView] = useState<LibraryView>('list');
   const [editingItem, setEditingItem] = useState<LibraryItem | null>(null);
 
-  // Filtered and Searchable Data Logic
+  // ... (Filtering Logic remains the same)
   const filteredItems = useMemo(() => {
     return libraryData.filter(item => {
-      // FIX: categoryMatch is TRUE if activeCategory is null (show all)
       const categoryMatch = !activeCategory || item.category === activeCategory;
-      
       const searchMatch = !searchTerm ||
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.introduction.toLowerCase().includes(searchTerm.toLowerCase());
@@ -32,25 +29,25 @@ const LibraryPage: React.FC = () => {
     });
   }, [libraryData, activeCategory, searchTerm]);
 
-  // Handlers
+  // ... (Handlers remain the same)
   const handleCategoryChange = useCallback((cat: LibraryCategory | null) => {
     setActiveCategory(cat);
-    setSearchTerm(''); // Clear search when category changes
+    setSearchTerm('');
   }, []);
 
   const handleSearch = useCallback((term: string) => {
     setSearchTerm(term);
   }, []);
 
-  const handleNewItem = (category: LibraryCategory) => { 
+  const handleNewItem = (category: LibraryCategory) => {
     setEditingItem(null);
-    setActiveCategory(category); 
+    setActiveCategory(category);
     setView('creator');
   };
 
   const handleEditItem = (item: LibraryItem) => {
     setEditingItem(item);
-    setActiveCategory(item.category); 
+    setActiveCategory(item.category);
     setView('creator');
   };
 
@@ -72,12 +69,14 @@ const LibraryPage: React.FC = () => {
       }
       return [...prev, newItem];
     });
-    setActiveCategory(newItem.category); 
+    setActiveCategory(newItem.category);
     setView('list');
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-8 relative">
+    // ✨ FIX: Reduced max-width from default full-container to max-w-6xl 
+    // and reduced desktop padding (p-6 instead of p-8) for a tighter feel.
+    <div className="container mx-auto p-4 md:p-6 **max-w-6xl** relative"> 
       <AnimatePresence mode="wait">
         <motion.div key={view} className="w-full">
           {view === 'list' ? (
@@ -88,11 +87,11 @@ const LibraryPage: React.FC = () => {
               transition={{ duration: 0.25 }}
             >
               <LibraryHeader
-                activeCategory={activeCategory} // Pass null now
+                activeCategory={activeCategory}
                 onCategoryChange={handleCategoryChange}
                 onSearch={handleSearch}
                 itemCount={filteredItems.length}
-                totalItemCount={libraryData.length} // Pass total count
+                totalItemCount={libraryData.length}
               />
               <LibraryList
                 filteredItems={filteredItems}
@@ -105,7 +104,7 @@ const LibraryPage: React.FC = () => {
               onBack={handleBackToList}
               onSubmit={handleItemSubmit}
               initialItem={editingItem ?? undefined}
-              activeCategory={activeCategory || 'exercise'} // Default to exercise if null
+              activeCategory={activeCategory || 'exercise'}
             />
           )}
         </motion.div>
