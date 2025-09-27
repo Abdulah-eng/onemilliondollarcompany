@@ -42,28 +42,22 @@ const CATEGORY_DETAILS: Record<LibraryCategory, { title: string, emoji: string, 
 const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, category, isEditing, onBack, onSubmit, formData, onFormChange }) => {
   const details = CATEGORY_DETAILS[category] || CATEGORY_DETAILS.exercise;
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const fileInputRef = useRef<HTMLInputElement>(null); // Ref for the hidden file input
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const userImageUrl = (formData as any).heroImageUrl;
   const hasUserImage = !!userImageUrl;
   
   const [isTitleEditing, setIsTitleEditing] = useState(false);
 
-  // Function to trigger the actual file input click
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
 
-  // Handler for when a file is selected (simulates setting the image)
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // In a real app, this file would be uploaded to the server.
-      // Here, we use URL.createObjectURL to show a local preview of the selected image.
       const localUrl = URL.createObjectURL(file);
       onFormChange('heroImageUrl' as keyof LibraryItem, localUrl);
-      
-      // Clear the file input value so the same file can be selected again
       event.target.value = '';
     }
   };
@@ -84,7 +78,17 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
       className="space-y-6 max-w-4xl mx-auto"
     >
       
-      {/* HIDDEN FILE INPUT (Triggers local file explorer) */}
+      {/* 🌟 ACTION BUTTONS (MOVED TO TOP) */}
+      <div className="flex items-center justify-between pb-4 border-b">
+        <Button variant="outline" onClick={onBack} className="gap-2">
+          <ChevronLeft className="h-4 w-4" /> Back to Library
+        </Button>
+        <Button onClick={onSubmit} className="gap-2 bg-primary hover:bg-primary/90">
+          <Save className="h-4 w-4" /> {isEditing ? 'Save Changes' : 'Create Item'}
+        </Button>
+      </div>
+      
+      {/* HIDDEN FILE INPUT */}
       <input
         type="file"
         ref={fileInputRef}
@@ -99,7 +103,7 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
             "relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-xl bg-gray-200 dark:bg-gray-800 group cursor-pointer border-4 border-dashed border-transparent hover:border-primary/50 transition-all",
             !hasUserImage && "border-primary/30"
         )}
-        onClick={triggerFileInput} // Click on container triggers file input
+        onClick={triggerFileInput}
       >
         {/* Image Display or EMPTY STATE */}
         {hasUserImage ? (
@@ -117,7 +121,7 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
              </div>
         )}
         
-        {/* Overlay Gradient (Ensures text contrast when image is present) */}
+        {/* Overlay Gradient */}
         {hasUserImage && (
             <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-black/30 to-transparent"></div>
         )}
@@ -144,10 +148,10 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
             </Button>
         </div>
 
-        {/* Content Overlay (Bottom Left - Always visible) */}
+        {/* Content Overlay (Bottom Left - Title) */}
         <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full z-20">
           
-          {/* TITLE FIELD (Click-to-Edit, always white text for contrast) */}
+          {/* TITLE FIELD (Click-to-Edit) */}
           <div 
             className="inline-block relative"
             onClick={(e) => { e.stopPropagation(); setIsTitleEditing(true); }}
@@ -196,18 +200,6 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
         {children}
       </div>
 
-      {/* Fixed Action Footer */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t md:static md:p-0 md:border-none md:flex md:justify-end md:gap-4 z-40">
-        <Button variant="outline" onClick={onBack} className="w-full md:w-auto gap-2 mb-2 md:mb-0">
-          <ChevronLeft className="h-4 w-4" /> Back to Library
-        </Button>
-        <Button onClick={onSubmit} className="w-full md:w-auto gap-2">
-          <Save className="h-4 w-4" /> {isEditing ? 'Save Changes' : 'Create Item'}
-        </Button>
-      </div>
-      
-      {/* Spacer for fixed footer */}
-      <div className="md:hidden h-20"></div>
     </motion.div>
   );
 };
