@@ -10,7 +10,7 @@ const SIZE = 64;
 const MARGIN = 24; 
 
 interface BlogFABProps {
-  onActionClick: () => void; // Simplified to take no category argument
+  onActionClick: () => void; 
 }
 
 export default function BlogFAB({ onActionClick }: BlogFABProps) {
@@ -23,7 +23,6 @@ export default function BlogFAB({ onActionClick }: BlogFABProps) {
   const rafRef = useRef<number | null>(null);
   const translateRef = useRef({ x: 0, y: 0 });
 
-  const [isOpen, setIsOpen] = useState(false); // Can keep isOpen state for potential future expansion
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null); 
   const [viewport, setViewport] = useState<{ w: number; h: number } | null>(null);
 
@@ -103,7 +102,6 @@ export default function BlogFAB({ onActionClick }: BlogFABProps) {
       movedRef.current = false;
       return;
     }
-    // Simply call the action handler
     onActionClick();
   };
 
@@ -132,7 +130,6 @@ export default function BlogFAB({ onActionClick }: BlogFABProps) {
           transition: draggingRef.current ? 'none' : 'transform 100ms ease-out',
         }}>
         
-        {/* Main FAB - Always opens the creator page */}
         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Button
             size="icon"
