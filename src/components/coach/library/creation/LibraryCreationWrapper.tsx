@@ -44,19 +44,21 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   const userImageUrl = (formData as any).heroImageUrl;
-  const currentImageUrl = userImageUrl || details.defaultHeroUrl;
+  const hasUserImage = !!userImageUrl;
   
   const [isTitleEditing, setIsTitleEditing] = useState(false);
 
   const handleSimulatedUpload = () => {
-    const tempUrl = prompt("Paste an image URL to set as Hero Image (Simulated Upload):");
+    // This function simulates opening the file picker.
+    // We use a prompt here only for demonstration, but the UX is click-to-upload.
+    const tempUrl = prompt("SIMULATION: Paste Image URL (would be file upload):");
     if (tempUrl) {
       onFormChange('heroImageUrl' as keyof LibraryItem, tempUrl);
     }
   };
 
   const removeHeroImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation(); 
     onFormChange('heroImageUrl' as keyof LibraryItem, null);
   };
 
@@ -73,46 +75,62 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
       
       {/* Hero Section - The Clickable Image Canvas */}
       <div 
-        className="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-xl bg-gray-900 group cursor-pointer"
-        onClick={handleSimulatedUpload} // Entire container is the upload trigger
+        className={cn(
+            "relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-xl bg-gray-200 dark:bg-gray-800 group cursor-pointer border-4 border-dashed border-transparent hover:border-primary/50 transition-all",
+            !hasUserImage && "border-primary/30" // Dashed border only when empty
+        )}
+        onClick={handleSimulatedUpload} 
       >
-        {/* Image Display */}
-        <img 
-          src={currentImageUrl} 
-          alt={`${details.title} hero image`} 
-          className="w-full h-full object-cover" 
-          onError={(e) => { e.currentTarget.src = details.defaultHeroUrl; }}
-        />
+        {/* Image Display or EMPTY STATE */}
+        {hasUserImage ? (
+            <img 
+                src={userImageUrl} 
+                alt={`${details.title} hero image`} 
+                className="w-full h-full object-cover" 
+                onError={(e) => { e.currentTarget.src = details.defaultHeroUrl; }}
+            />
+        ) : (
+             <div className="flex flex-col items-center justify-center w-full h-full text-muted-foreground/80">
+                 <Upload className="h-12 w-12 mb-3 text-primary" />
+                 <span className="text-lg font-semibold">Click to Upload Hero Image</span>
+                 <span className="text-sm">Recommended aspect ratio 16:9</span>
+             </div>
+        )}
         
-        {/* Overlay Gradient (FIXED: Darker gradient for better contrast) */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-black/30 to-transparent"></div>
+        {/* Overlay Gradient (Ensures text contrast when image is present) */}
+        {hasUserImage && (
+            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-black/30 to-transparent"></div>
+        )}
         
         {/* Click Indicator / Remove Button (Top Right) */}
         <div className="absolute top-4 right-4 z-10 flex gap-2">
-            {userImageUrl && (
+            {hasUserImage ? (
+                // Button when image is present
                 <Button 
                     variant="destructive" 
                     size="icon" 
                     className="rounded-full h-8 w-8 bg-black/50 hover:bg-black/80" 
-                    onClick={removeHeroImage}
+                    onClick={removeHeroImage} 
                 >
                     <X className="h-4 w-4" />
                 </Button>
+            ) : (
+                // Camera icon when image is NOT present
+                <Button 
+                    variant="default" 
+                    size="icon" 
+                    className="rounded-full h-8 w-8 bg-black/50 hover:bg-black/80 text-white" 
+                    onClick={(e) => { e.stopPropagation(); handleSimulatedUpload(); }} 
+                >
+                    <Camera className="h-4 w-4" />
+                </Button>
             )}
-            <Button 
-                variant="default" 
-                size="icon" 
-                className="rounded-full h-8 w-8 bg-black/50 hover:bg-black/80 text-white" 
-                onClick={(e) => { e.stopPropagation(); handleSimulatedUpload(); }}
-            >
-                <Camera className="h-4 w-4" />
-            </Button>
         </div>
 
-        {/* Content Overlay (Bottom Left) */}
-        <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full">
+        {/* Content Overlay (Bottom Left - Always visible) */}
+        <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full z-20">
           
-          {/* TITLE FIELD (Click-to-Edit, FIXED: Text color set to white, Placeholder text color adjusted) */}
+          {/* TITLE FIELD (Click-to-Edit, always white text for contrast) */}
           <div 
             className="inline-block relative"
             onClick={(e) => { e.stopPropagation(); setIsTitleEditing(true); }}
@@ -123,14 +141,12 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
                 autoFocus
                 value={formData.name || ''} 
                 onChange={(e) => onFormChange('name', e.target.value)} 
-                // Set text color to white for contrast, background transparent
                 className="text-4xl md:text-5xl font-extrabold bg-transparent text-white border-primary w-full p-2 placeholder:text-gray-300"
                 placeholder={details.title}
                 onKeyDown={(e) => e.key === 'Enter' && setIsTitleEditing(false)}
               />
             ) : (
-              // Ensure static text is also white
-              <h1 className="text-4xl md:text-5xl font-extrabold **text-white** mb-2 group-hover:bg-black/10 group-hover:p-1 group-hover:rounded transition-colors">
+              <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-2 group-hover:bg-black/10 group-hover:p-1 group-hover:rounded transition-colors">
                 {currentTitle} {details.emoji}
                 <Pencil className="h-5 w-5 ml-2 inline text-white opacity-0 group-hover:opacity-100 transition-opacity" />
               </h1>
