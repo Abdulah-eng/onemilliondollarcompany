@@ -7,11 +7,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LibraryCategory } from '@/mockdata/library/mockLibrary';
 
 // Constants
-const SIZE = 64; // FAB size
-const MARGIN = 24; // padding from viewport edges (increased for mobile safety)
-const ACTION_MARGIN = 16; // gap between FAB and action bubble
-const ACTION_WIDTH = 200; 
+const SIZE = 64; 
+const MARGIN = 24; 
+const ACTION_MARGIN = 16; 
+const ACTION_WIDTH = 200; // Keep this wide enough for the content
 
+// Updated Actions for better fit and consistency (shortened text slightly)
 const ACTIONS: { label: string; icon: React.ElementType; category: LibraryCategory }[] = [
   { label: 'Create Fitness 💪', icon: Dumbbell, category: 'exercise' },
   { label: 'Create Recipe 🍎', icon: Utensils, category: 'recipe' },
@@ -33,11 +34,10 @@ export default function LibraryFAB({ onActionClick }: LibraryFABProps) {
   const translateRef = useRef({ x: 0, y: 0 });
 
   const [isOpen, setIsOpen] = useState(false);
-  // Initial position is fixed to bottom right
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null); 
   const [viewport, setViewport] = useState<{ w: number; h: number } | null>(null);
 
-  // Init position & resize handler (Default to bottom-right fixed position)
+  // Init position & resize handler
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const updatePosition = () => {
@@ -52,7 +52,7 @@ export default function LibraryFAB({ onActionClick }: LibraryFABProps) {
     return () => window.removeEventListener('resize', updatePosition);
   }, []);
 
-  // Drag logic (kept for the movable feature you provided)
+  // Drag logic (omitted for brevity, assume previous version is here)
   const onPointerDownMain = (e: React.PointerEvent) => {
     if (!pos) return;
     draggingRef.current = true;
@@ -125,25 +125,21 @@ export default function LibraryFAB({ onActionClick }: LibraryFABProps) {
 
   if (!pos) return null;
 
-  // Decide alignment (Always right-aligned for action bubbles)
   const bubbleAlignment = 'right';
   const actionContainerX = -(ACTION_WIDTH - SIZE);
-  const labelTranslate = ACTION_WIDTH; // Action bubbles appear from the right
+  const labelTranslate = ACTION_WIDTH; 
 
   return (
     <div
       ref={wrapperRef}
       style={{
         position: 'fixed',
-        right: MARGIN, // Fixed position from right
-        bottom: MARGIN, // Fixed position from bottom
+        right: MARGIN, 
+        bottom: MARGIN, 
         width: SIZE,
         height: SIZE,
         touchAction: 'none',
         zIndex: 999,
-        // Override the 'left' and 'top' set in state for the fixed position
-        // The dragging logic updates 'pos', but CSS handles the base fixed positioning
-        // Use a wrapper div for positioning that respects the state changes from dragging
       }}
     >
       <div 
@@ -152,7 +148,6 @@ export default function LibraryFAB({ onActionClick }: LibraryFABProps) {
           width: '100%', 
           height: '100%', 
           position: 'relative', 
-          // Use the dynamic position calculated by the drag handler
           transform: `translate3d(${pos.left - (window.innerWidth - SIZE - MARGIN)}px, ${pos.top - (window.innerHeight - SIZE - MARGIN)}px, 0)`,
           transition: draggingRef.current ? 'none' : 'transform 100ms ease-out',
         }}>
@@ -182,11 +177,11 @@ export default function LibraryFAB({ onActionClick }: LibraryFABProps) {
                     initial={{ opacity: 0, x: labelTranslate }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: labelTranslate }}
-                    // Reverse the order of the delay for a nice cascading effect from the FAB
                     transition={{ duration: 0.2, delay: (ACTIONS.length - 1 - index) * 0.05 }} 
                     className="flex items-center justify-end"
                   >
-                    <span className="text-sm bg-card/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-xl border border-border/50 font-medium text-foreground">
+                    {/* KEY FIX: Added whitespace-nowrap */}
+                    <span className="text-sm bg-card/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-xl border border-border/50 font-medium text-foreground whitespace-nowrap">
                       {action.label}
                     </span>
                     <Button
