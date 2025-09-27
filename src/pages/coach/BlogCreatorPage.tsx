@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Save, Upload, X, Pencil, Camera, Zap, Utensils, Feather } from 'lucide-react';
@@ -24,13 +24,13 @@ const CATEGORY_MAP: Record<BlogCategory, { label: string; emoji: string; default
 };
 const allCategories: BlogCategory[] = ['fitness', 'nutrition', 'mental health'];
 
-// Simple conversion helper for content display (since the mock uses a single string)
-const initialContentItems: BlogContentItem[] = [
-    { id: 'c-1', type: 'text', value: initialPost?.content || '' }
-];
-// NOTE: For a proper implementation, initialPost.content should be stored as JSON/array of BlogContentItem
-
 const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, initialPost }) => {
+  // Simple conversion helper for content display (since the mock uses a single string)
+  const initialContentItems: BlogContentItem[] = [
+    { id: 'c-1', type: 'text', value: initialPost?.content || '' }
+  ];
+  // NOTE: For a proper implementation, initialPost.content should be stored as JSON/array of BlogContentItem
+
   const [formData, setFormData] = useState<Partial<BlogPost>>({});
   const [contentItems, setContentItems] = useState<BlogContentItem[]>(initialContentItems);
   const fileInputRef = useRef<HTMLInputElement>(null);
