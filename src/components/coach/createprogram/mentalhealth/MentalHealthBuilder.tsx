@@ -39,7 +39,7 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<MentalHealthActivity[]>(mockMentalHealthActivities);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [lastSelectedSection] = useState<MentalHealthSection>('morning');
+  const [selectedSection, setSelectedSection] = useState<MentalHealthSection>('morning');
 
   // ⭐ CALCULATE UNIQUE KEY
   const currentDataKey = getDataKey(activeWeek, activeDay); 
@@ -99,14 +99,18 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
       comment: '',
     };
     
-    let targetSection: MentalHealthSection = lastSelectedSection;
+    // Use selected section for desktop, automatic assignment for mobile
+    let targetSection: MentalHealthSection = selectedSection;
 
-    if (activity.type === 'yoga' || activity.type === 'breathwork' || activity.focusAreas.includes('energy')) {
-        targetSection = 'morning';
-    } else if (activity.focusAreas.includes('sleep') || activity.type === 'meditation' || activity.type === 'reflections') {
-        targetSection = 'night';
-    } else {
-        targetSection = 'evening';
+    // For mobile/tablet (when section selection is not visible), use automatic assignment
+    if (window.innerWidth < 1024) {
+      if (activity.type === 'yoga' || activity.type === 'breathwork' || activity.focusAreas.includes('energy')) {
+          targetSection = 'morning';
+      } else if (activity.focusAreas.includes('sleep') || activity.type === 'meditation' || activity.type === 'reflections') {
+          targetSection = 'night';
+      } else {
+          targetSection = 'evening';
+      }
     }
 
     // ⭐ USE COMPOUND KEY for data retrieval/update
@@ -175,6 +179,8 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
             data={currentDayData}
             onDataChange={data => handleUpdateDayData(currentDataKey, data)} // ⭐ USE COMPOUND KEY
             onAddClick={() => setIsSheetOpen(true)}
+            selectedSection={selectedSection}
+            onSectionSelect={setSelectedSection}
           />
         </div>
 

@@ -24,11 +24,13 @@ interface MentalHealthDayProps {
   data: { [key in MentalHealthSection]: MentalHealthDayItem[] };
   onDataChange: (data: { [key in MentalHealthSection]: MentalHealthDayItem[] }) => void;
   onAddClick: () => void;
+  selectedSection?: MentalHealthSection;
+  onSectionSelect?: (section: MentalHealthSection) => void;
 }
 
 const mentalHealthSections: MentalHealthSection[] = ['morning', 'evening', 'night'];
 
-const MentalHealthDay: React.FC<MentalHealthDayProps> = ({ day, data, onDataChange, onAddClick }) => {
+const MentalHealthDay: React.FC<MentalHealthDayProps> = ({ day, data, onDataChange, onAddClick, selectedSection, onSectionSelect }) => {
 
   const handleUpdateItem = useCallback((section: MentalHealthSection, itemIndex: number, field: keyof MentalHealthDayItem, value: string) => {
     const newItems = [...data[section]];
@@ -121,14 +123,34 @@ const MentalHealthDay: React.FC<MentalHealthDayProps> = ({ day, data, onDataChan
       <div className="space-y-6">
         {mentalHealthSections.map((section) => (
           <div key={section} className="space-y-3">
-            <h4 className="text-lg font-bold capitalize text-primary border-b pb-1">
-              {section}
-            </h4>
+            <div 
+              className={cn(
+                "flex items-center justify-between text-lg font-bold capitalize border-b pb-1",
+                // Desktop only: clickable section headers with selection styling
+                "lg:cursor-pointer lg:hover:bg-muted/50 lg:rounded-t-lg lg:px-3 lg:py-2 lg:transition-colors",
+                selectedSection === section && onSectionSelect 
+                  ? "lg:bg-primary/10 lg:text-primary lg:border-primary" 
+                  : "text-primary"
+              )}
+              onClick={() => onSectionSelect && window.innerWidth >= 1024 && onSectionSelect(section)}
+            >
+              <span>{section}</span>
+              {/* Desktop only: Selected badge */}
+              {selectedSection === section && onSectionSelect && (
+                <span className="hidden lg:inline-flex bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs font-semibold">
+                  Selected
+                </span>
+              )}
+            </div>
             
             <div 
               className={cn(
-                "space-y-4 p-4 rounded-xl",
-                data[section].length === 0 ? "border-2 border-dashed border-gray-200" : "border border-border"
+                "space-y-4 p-4 rounded-xl transition-colors",
+                data[section].length === 0 ? "border-2 border-dashed border-gray-200" : "border border-border",
+                // Desktop only: highlight selected section container
+                selectedSection === section && onSectionSelect 
+                  ? "lg:border-primary/50 lg:bg-primary/5" 
+                  : ""
               )}
             >
               <AnimatePresence>
