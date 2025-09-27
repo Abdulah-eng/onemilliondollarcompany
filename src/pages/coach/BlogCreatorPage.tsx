@@ -1,15 +1,16 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Save, Upload, X, Pencil, Camera, Zap, Utensils, Feather } from 'lucide-react';
-import { BlogPost, BlogCategory } from '@/mockdata/blog/mockBlog';
+import { BlogPost, BlogCategory, mockBlogPosts, CATEGORY_DETAILS } from '@/mockdata/blog/mockBlog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import BlogContentBuilder, { BlogContentItem } from '@/components/coach/blog/BlogContentBuilder';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'; // Assuming you have a ToggleGroup component
 
 interface BlogCreatorPageProps {
   onBack: () => void;
@@ -17,34 +18,34 @@ interface BlogCreatorPageProps {
   initialPost: Partial<BlogPost> | null;
 }
 
-const CATEGORY_MAP: Record<BlogCategory, { label: string; emoji: string; defaultHeroUrl: string }> = {
-  'fitness': { label: 'Fitness', emoji: '💪', defaultHeroUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99d4db2?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
-  'nutrition': { label: 'Nutrition', emoji: '🍎', defaultHeroUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
-  'mental health': { label: 'Wellness', emoji: '🧘', defaultHeroUrl: 'https://images.unsplash.com/photo-1557342777-a8a2d1d2b86a?q=80&w=2942&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
-};
 const allCategories: BlogCategory[] = ['fitness', 'nutrition', 'mental health'];
 
 const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, initialPost }) => {
-  // Simple conversion helper for content display (since the mock uses a single string)
-  const initialContentItems: BlogContentItem[] = [
-    { id: 'c-1', type: 'text', value: initialPost?.content || '' }
-  ];
-  // NOTE: For a proper implementation, initialPost.content should be stored as JSON/array of BlogContentItem
-
   const [formData, setFormData] = useState<Partial<BlogPost>>({});
-  const [contentItems, setContentItems] = useState<BlogContentItem[]>(initialContentItems);
+  const [contentItems, setContentItems] = useState<BlogContentItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isEditing = !!initialPost?.id;
-  const currentCategory = (formData.category as BlogCategory) || 'fitness'; // Default to fitness
-  const emoji = CATEGORY_MAP[currentCategory].emoji;
+  const currentCategory: BlogCategory = (formData.category as BlogCategory) || 'fitness';
+  const emoji = CATEGORY_DETAILS[currentCategory]?.emoji || '✍️';
+  const heroColor = CATEGORY_DETAILS[currentCategory]?.color || 'bg-gray-800';
 
   useEffect(() => {
-    // Initialize form data, ensuring content is an array if editing
     setFormData({
       ...initialPost,
+      title: initialPost?.title || '',
+      introduction: initialPost?.introduction || '',
       category: initialPost?.category || 'fitness',
       isPublished: initialPost?.isPublished ?? false,
     });
+
+    // Simple conversion: if editing and content is a string, create one text block.
+    if (initialPost?.content) {
+        // Simple heuristic: if content is a string, put it in one text block
+        setContentItems([{ id: 'c-1', type: 'text', value: initialPost.content }]);
+    } else {
+        // Start with one empty text block for a new post
+        setContentItems([{ id: 'c-1', type: 'text', value: '' }]);
+    }
   }, [initialPost]);
 
   const handleFormChange = useCallback((field: keyof BlogPost, value: any) => {
@@ -54,52 +55,47 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
   const handleContentChange = useCallback((newItems: BlogContentItem[]) => {
     setContentItems(newItems);
   }, []);
+  
+  // Hero Interaction Handlers
+  const triggerFileInput = () => fileInputRef.current?.click();
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const localUrl = URL.createObjectURL(file);
+      handleFormChange('imageUrl', localUrl);
+      event.target.value = '';
+    }
+  };
+  const removeHeroImage = (e: React.MouseEvent) => {
+    e.stopPropagation(); 
+    handleFormChange('imageUrl', null);
+  };
+  const [isTitleEditing, setIsTitleEditing] = useState(false);
+  const hasUserImage = !!formData.imageUrl;
+
 
   const handleSubmit = () => {
-    if (!formData.title || !formData.introduction) {
-      alert("Please fill in the Title and Introduction.");
+    if (!formData.title || !formData.introduction || !formData.category) {
+      alert("Please ensure the Title, Introduction, and Category are set.");
       return;
     }
     
-    // Combine content blocks into a single string (simple model support)
-    const combinedContent = contentItems.map(item => `[${item.type.toUpperCase()}] ${item.value}`).join('\n\n');
+    // Combine content blocks back into a storable format (using JSON stringify for the modern approach)
+    const combinedContent = JSON.stringify(contentItems);
 
     const finalPost: BlogPost = {
       id: formData.id || `blog-${Date.now()}`,
       category: formData.category as BlogCategory,
       title: formData.title,
-      introduction: formData.introduction || '',
-      content: combinedContent,
-      imageUrl: (formData as any).heroImageUrl || '', // Use the set hero image
+      introduction: formData.introduction,
+      content: combinedContent, // Store as JSON string of blocks
+      imageUrl: formData.imageUrl || '',
       createdAt: formData.createdAt || new Date().toISOString(),
-      isPublished: formData.isPublished ?? true,
+      isPublished: formData.isPublished ?? false,
     };
 
     onSubmit(finalPost);
   };
-  
-  // Hero Interaction Handlers (from LibraryCreatorPage)
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const localUrl = URL.createObjectURL(file);
-      handleFormChange('imageUrl' as keyof BlogPost, localUrl);
-      event.target.value = '';
-    }
-  };
-
-  const removeHeroImage = (e: React.MouseEvent) => {
-    e.stopPropagation(); 
-    handleFormChange('imageUrl' as keyof BlogPost, null);
-  };
-
-  const [isTitleEditing, setIsTitleEditing] = useState(false);
-  const hasUserImage = !!formData.imageUrl;
-  const currentImageUrl = formData.imageUrl || CATEGORY_MAP[currentCategory].defaultHeroUrl;
 
 
   return (
@@ -122,26 +118,20 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
       </div>
       
       {/* HIDDEN FILE INPUT */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept="image/*"
-        className="hidden"
-      />
+      <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
 
-      {/* HERO SECTION - CANVAS */}
+      {/* HERO SECTION - CANVAS (Cleaned up gradients) */}
       <div 
         className={cn(
-            "relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-xl bg-gray-200 dark:bg-gray-800 group cursor-pointer border-4 border-dashed border-transparent hover:border-primary/50 transition-all",
-            !hasUserImage && "border-primary/30"
+            "relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-xl group cursor-pointer border-4 border-dashed transition-all",
+            !hasUserImage ? "border-primary/30 bg-gray-100 dark:bg-gray-800" : "border-transparent"
         )}
         onClick={triggerFileInput} 
       >
         {/* Image Display or EMPTY STATE */}
         {hasUserImage ? (
             <img 
-                src={currentImageUrl} 
+                src={formData.imageUrl} 
                 alt={`${formData.title || 'New Post'} hero image`} 
                 className="w-full h-full object-cover" 
             />
@@ -149,14 +139,11 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
              <div className="flex flex-col items-center justify-center w-full h-full text-muted-foreground/80">
                  <Upload className="h-12 w-12 mb-3 text-primary" />
                  <span className="text-lg font-semibold">Click to Upload Hero Image</span>
-                 <span className="text-sm">Recommended aspect ratio 16:9</span>
              </div>
         )}
         
-        {/* Overlay Gradient */}
-        {hasUserImage && (
-            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-black/30 to-transparent"></div>
-        )}
+        {/* Overlay Gradient (Ensures text contrast) */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-black/30 to-transparent"></div>
         
         {/* Click Indicator / Remove Button (Top Right) */}
         <div className="absolute top-4 right-4 z-10 flex gap-2">
@@ -196,35 +183,56 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
       <div className="bg-card p-6 md:p-8 rounded-2xl shadow-lg border border-border/50 space-y-8">
         
         {/* CATEGORY & INTRODUCTION */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-2 md:col-span-1">
-                <Label htmlFor="category" className="text-lg font-bold flex items-center">Category 🏷️</Label>
-                <select 
-                    id="category" 
-                    value={formData.category} 
-                    onChange={(e) => handleFormChange('category', e.target.value as BlogCategory)} 
-                    className="w-full h-10 px-3 py-2 border rounded-lg bg-input dark:bg-muted"
+        <div className="space-y-4">
+            {/* Category Selector (Modern Segmented Control) */}
+            <div className="space-y-2">
+                <Label htmlFor="category" className="text-xl font-bold flex items-center">
+                    Select Topic Category 🏷️
+                </Label>
+                {/* Assuming ToggleGroup is available from your UI library */}
+                <ToggleGroup 
+                    type="single" 
+                    value={formData.category as string} 
+                    onValueChange={(value) => handleFormChange('category', value as BlogCategory)}
+                    className="flex justify-start space-x-3 p-1 rounded-xl bg-muted/50 border shadow-inner"
                 >
-                    {allCategories.map(cat => (
-                        <option key={cat} value={cat}>
-                            {CATEGORY_MAP[cat].label} {CATEGORY_MAP[cat].emoji}
-                        </option>
-                    ))}
-                </select>
+                    {allCategories.map(cat => {
+                        const detail = CATEGORY_DETAILS[cat];
+                        const Icon = detail.icon;
+                        return (
+                            <ToggleGroupItem 
+                                key={cat} 
+                                value={cat} 
+                                className={cn(
+                                    "px-4 py-2 text-base font-semibold rounded-lg transition-all border",
+                                    formData.category === cat ? `${detail.color} text-white hover:${detail.color}/90 border-transparent` : 'bg-card text-foreground hover:bg-muted/80 border-border'
+                                )}
+                            >
+                                <Icon className="h-4 w-4 mr-2" /> {detail.label}
+                            </ToggleGroupItem>
+                        );
+                    })}
+                </ToggleGroup>
             </div>
             
-            <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="introduction" className="text-lg font-bold flex items-center">Short Introduction / Summary 📝</Label>
+            {/* Introduction */}
+            <div className="space-y-2">
+                <Label htmlFor="introduction" className="text-xl font-bold flex items-center">
+                    Short Introduction / Summary 📝
+                </Label>
                 <Textarea 
                     id="introduction" 
                     value={formData.introduction || ''} 
                     onChange={(e) => handleFormChange('introduction', e.target.value)} 
-                    placeholder="A brief summary for card previews..."
-                    className="min-h-[50px]"
+                    placeholder="A brief summary for card previews (max 2 lines)..."
+                    className="min-h-[60px]"
                 />
             </div>
         </div>
         
+        {/* Separator before dynamic content */}
+        <div className="border-t border-border/50"></div> 
+
         {/* BLOG CONTENT BUILDER */}
         <BlogContentBuilder content={contentItems} onContentChange={handleContentChange} />
         
