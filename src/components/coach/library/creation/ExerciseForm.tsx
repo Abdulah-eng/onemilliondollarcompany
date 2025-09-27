@@ -1,9 +1,10 @@
-// src/components/coach/library/creation/ExerciseForm.tsx
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ExerciseItem } from '@/mockdata/library/mockLibrary';
+import { Lightbulb, AlertTriangle } from 'lucide-react';
+import ContentUploadSection from './ContentUploadSection'; // Import dynamic section
 
 interface ExerciseFormProps {
   formData: Partial<ExerciseItem>;
@@ -12,31 +13,52 @@ interface ExerciseFormProps {
 
 const ExerciseForm: React.FC<ExerciseFormProps> = ({ formData, onFormChange }) => {
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="name">Exercise Name</Label>
-        <Input id="name" value={formData.name || ''} onChange={(e) => onFormChange('name', e.target.value)} placeholder="e.g., Dumbbell Bench Press" />
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">Exercise Details</h2>
+
+      {/* Core Fields */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="name">Exercise Name</Label>
+          <Input id="name" value={formData.name || ''} onChange={(e) => onFormChange('name', e.target.value)} placeholder="e.g., Dumbbell Bench Press" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="muscleGroup">Muscle Group Target</Label>
+          <Input id="muscleGroup" value={formData.muscleGroup || ''} onChange={(e) => onFormChange('muscleGroup', e.target.value)} placeholder="e.g., Chest, Triceps, Shoulders" />
+        </div>
       </div>
+      
       <div className="space-y-2">
-        <Label htmlFor="muscleGroup">Primary Muscle Group</Label>
-        <Input id="muscleGroup" value={formData.muscleGroup || ''} onChange={(e) => onFormChange('muscleGroup', e.target.value)} placeholder="e.g., Chest, Triceps" />
+        <Label htmlFor="requirements">Requirements (Equipment)</Label>
+        <Input id="requirements" value={formData.requirements || ''} onChange={(e) => onFormChange('requirements', e.target.value)} placeholder="e.g., Dumbbells, Bench, Resistance Band" />
       </div>
+
       <div className="space-y-2">
         <Label htmlFor="introduction">Introduction / Purpose</Label>
-        <Textarea id="introduction" value={formData.introduction || ''} onChange={(e) => onFormChange('introduction', e.target.value)} placeholder="Brief overview of the movement and its goal." />
+        <Textarea id="introduction" value={formData.introduction || ''} onChange={(e) => onFormChange('introduction', e.target.value)} placeholder="Brief overview of the movement, its goal, and benefits." />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="proTip">Pro Tip</Label>
-        <Textarea id="proTip" value={formData.proTip || ''} onChange={(e) => onFormChange('proTip', e.target.value)} placeholder="E.g., Squeeze your shoulder blades together." />
+
+      {/* Dynamic Content Uploads */}
+      <ContentUploadSection
+        content={formData.content || []}
+        onContentChange={(value) => onFormChange('content', value)}
+        allowedTypes={['image', 'video', 'step']}
+      />
+
+      {/* Pro Tip Section */}
+      <div className="space-y-2 p-4 rounded-xl border-l-4 border-yellow-500 bg-yellow-500/10">
+        <Label htmlFor="proTip" className="flex items-center text-yellow-600 font-semibold">
+          <Lightbulb className="w-5 h-5 mr-2" /> Pro Tip
+        </Label>
+        <Textarea id="proTip" value={formData.proTip || ''} onChange={(e) => onFormChange('proTip', e.target.value)} placeholder="Expert advice to maximize results, e.g., 'Focus on a slow eccentric phase.'" />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="avoid">What to Avoid</Label>
-        <Textarea id="avoid" value={formData.whatToAvoid || ''} onChange={(e) => onFormChange('whatToAvoid', e.target.value)} placeholder="E.g., Arching your lower back excessively." />
-      </div>
-      {/* Simplified 'howTo' input for brevity; could be expanded to dynamic steps */}
-      <div className="space-y-2">
-        <Label htmlFor="howTo">How To (Step 1 Text/Video URL)</Label>
-        <Input id="howTo" value={formData.howTo?.[0]?.value || ''} onChange={(e) => onFormChange('howTo', [{ id: 'h1', type: 'text', value: e.target.value }])} placeholder="Enter description or video link for Step 1" />
+      
+      {/* What to Avoid Section */}
+      <div className="space-y-2 p-4 rounded-xl border-l-4 border-red-500 bg-red-500/10">
+        <Label htmlFor="avoid" className="flex items-center text-red-600 font-semibold">
+          <AlertTriangle className="w-5 h-5 mr-2" /> What to Avoid
+        </Label>
+        <Textarea id="avoid" value={formData.whatToAvoid || ''} onChange={(e) => onFormChange('whatToAvoid', e.target.value)} placeholder="Common mistakes or injury risks, e.g., 'Do not let your knees collapse inward.'" />
       </div>
     </div>
   );
