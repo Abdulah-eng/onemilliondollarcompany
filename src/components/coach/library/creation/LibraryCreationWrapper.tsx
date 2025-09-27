@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Save, Upload, Image, X, Pencil, Camera } from 'lucide-react';
+import { ChevronLeft, Save, Upload, X, Pencil, Camera } from 'lucide-react';
 import { LibraryCategory, LibraryItem } from '@/mockdata/library/mockLibrary';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,18 +42,29 @@ const CATEGORY_DETAILS: Record<LibraryCategory, { title: string, emoji: string, 
 const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, category, isEditing, onBack, onSubmit, formData, onFormChange }) => {
   const details = CATEGORY_DETAILS[category] || CATEGORY_DETAILS.exercise;
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const fileInputRef = useRef<HTMLInputElement>(null); // Ref for the hidden file input
 
   const userImageUrl = (formData as any).heroImageUrl;
   const hasUserImage = !!userImageUrl;
   
   const [isTitleEditing, setIsTitleEditing] = useState(false);
 
-  const handleSimulatedUpload = () => {
-    // This function simulates opening the file picker.
-    // We use a prompt here only for demonstration, but the UX is click-to-upload.
-    const tempUrl = prompt("SIMULATION: Paste Image URL (would be file upload):");
-    if (tempUrl) {
-      onFormChange('heroImageUrl' as keyof LibraryItem, tempUrl);
+  // Function to trigger the actual file input click
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Handler for when a file is selected (simulates setting the image)
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // In a real app, this file would be uploaded to the server.
+      // Here, we use URL.createObjectURL to show a local preview of the selected image.
+      const localUrl = URL.createObjectURL(file);
+      onFormChange('heroImageUrl' as keyof LibraryItem, localUrl);
+      
+      // Clear the file input value so the same file can be selected again
+      event.target.value = '';
     }
   };
 
@@ -73,13 +84,22 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
       className="space-y-6 max-w-4xl mx-auto"
     >
       
+      {/* HIDDEN FILE INPUT (Triggers local file explorer) */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept="image/*"
+        className="hidden"
+      />
+
       {/* Hero Section - The Clickable Image Canvas */}
       <div 
         className={cn(
             "relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-xl bg-gray-200 dark:bg-gray-800 group cursor-pointer border-4 border-dashed border-transparent hover:border-primary/50 transition-all",
-            !hasUserImage && "border-primary/30" // Dashed border only when empty
+            !hasUserImage && "border-primary/30"
         )}
-        onClick={handleSimulatedUpload} 
+        onClick={triggerFileInput} // Click on container triggers file input
       >
         {/* Image Display or EMPTY STATE */}
         {hasUserImage ? (
@@ -104,8 +124,7 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
         
         {/* Click Indicator / Remove Button (Top Right) */}
         <div className="absolute top-4 right-4 z-10 flex gap-2">
-            {hasUserImage ? (
-                // Button when image is present
+            {hasUserImage && (
                 <Button 
                     variant="destructive" 
                     size="icon" 
@@ -114,17 +133,15 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
                 >
                     <X className="h-4 w-4" />
                 </Button>
-            ) : (
-                // Camera icon when image is NOT present
-                <Button 
-                    variant="default" 
-                    size="icon" 
-                    className="rounded-full h-8 w-8 bg-black/50 hover:bg-black/80 text-white" 
-                    onClick={(e) => { e.stopPropagation(); handleSimulatedUpload(); }} 
-                >
-                    <Camera className="h-4 w-4" />
-                </Button>
             )}
+            <Button 
+                variant="default" 
+                size="icon" 
+                className="rounded-full h-8 w-8 bg-black/50 hover:bg-black/80 text-white" 
+                onClick={(e) => { e.stopPropagation(); triggerFileInput(); }} 
+            >
+                <Camera className="h-4 w-4" />
+            </Button>
         </div>
 
         {/* Content Overlay (Bottom Left - Always visible) */}
