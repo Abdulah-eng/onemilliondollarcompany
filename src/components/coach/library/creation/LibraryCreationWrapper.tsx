@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Save, Upload, Image, X, Pencil } from 'lucide-react';
+import { ChevronLeft, Save, Upload, Image, X, Pencil, Camera } from 'lucide-react';
 import { LibraryCategory, LibraryItem } from '@/mockdata/library/mockLibrary';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils'; // Assuming cn utility is available
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 interface CreationWrapperProps {
   children: React.ReactNode;
@@ -45,25 +46,23 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
   const userImageUrl = (formData as any).heroImageUrl;
   const currentImageUrl = userImageUrl || details.defaultHeroUrl;
   
-  // Use a state to manage editing mode for the title/intro (optional, but good UX)
   const [isTitleEditing, setIsTitleEditing] = useState(false);
-  const [isIntroEditing, setIsIntroEditing] = useState(false);
 
   const handleSimulatedUpload = () => {
-    // Show file picker simulation or ask for URL
-    const tempUrl = prompt("Paste an image URL to set as Hero Image:");
+    // This function is now attached to the entire hero container click
+    const tempUrl = prompt("Paste an image URL to set as Hero Image (Simulated Upload):");
     if (tempUrl) {
       onFormChange('heroImageUrl' as keyof LibraryItem, tempUrl);
     }
   };
 
   const removeHeroImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation(); // Prevents triggering the upload when clicking 'X'
     onFormChange('heroImageUrl' as keyof LibraryItem, null);
   };
 
   const currentTitle = formData.name || details.title;
-  const currentIntro = formData.introduction || details.intro;
+  const currentIntro = formData.introduction || details.intro; // Kept for placeholder value
 
   return (
     <motion.div
@@ -74,34 +73,10 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
       className="space-y-6 max-w-4xl mx-auto"
     >
       
-      {/* Hero Image Upload Button (Clickable, simplified) */}
+      {/* Hero Section - The Clickable Image Canvas */}
       <div 
-        className={cn(
-            "bg-card p-3 rounded-xl shadow-lg border-2 border-dashed border-primary/50 hover:border-primary transition-colors cursor-pointer",
-            userImageUrl ? 'h-auto' : 'h-16 flex items-center justify-center'
-        )} 
-        onClick={handleSimulatedUpload}
-      >
-        <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-                <Upload className="h-5 w-5 mr-3 text-primary" />
-                <span className="text-lg font-semibold text-primary/80 cursor-pointer">
-                    {userImageUrl ? "Hero Image Set. Click to Change." : "Click here to Set Hero Image"}
-                </span>
-            </div>
-            {userImageUrl ? (
-                <Button variant="ghost" className="text-destructive hover:bg-destructive/10 gap-1" onClick={removeHeroImage}>
-                    <X className="h-4 w-4" /> Remove
-                </Button>
-            ) : (
-                <Image className="h-6 w-6 text-muted-foreground" />
-            )}
-        </div>
-      </div>
-
-      {/* Hero Section - The Clickable Canvas */}
-      <div 
-        className="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-xl bg-gray-900 group"
+        className="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-xl bg-gray-900 group cursor-pointer"
+        onClick={handleSimulatedUpload} // Entire container is the upload trigger
       >
         {/* Image Display */}
         <img 
@@ -110,15 +85,39 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
           className="w-full h-full object-cover" 
           onError={(e) => { e.currentTarget.src = details.defaultHeroUrl; }}
         />
+        
+        {/* Overlay Gradient (for text visibility) */}
         <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent"></div>
         
-        {/* Content Overlay */}
+        {/* Click Indicator / Remove Button (Top Right) */}
+        <div className="absolute top-4 right-4 z-10 flex gap-2">
+            {userImageUrl && (
+                <Button 
+                    variant="destructive" 
+                    size="icon" 
+                    className="rounded-full h-8 w-8 bg-black/50 hover:bg-black/80" 
+                    onClick={removeHeroImage} // Use the specific remove handler
+                >
+                    <X className="h-4 w-4" />
+                </Button>
+            )}
+            <Button 
+                variant="default" 
+                size="icon" 
+                className="rounded-full h-8 w-8 bg-black/50 hover:bg-black/80 text-white" 
+                onClick={(e) => { e.stopPropagation(); handleSimulatedUpload(); }} // Prevents double prompt
+            >
+                <Camera className="h-4 w-4" />
+            </Button>
+        </div>
+
+        {/* Content Overlay (Bottom Left) */}
         <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full">
           
           {/* TITLE FIELD (Click-to-Edit) */}
           <div 
-            className="inline-block relative cursor-pointer"
-            onClick={() => setIsTitleEditing(true)}
+            className="inline-block relative"
+            onClick={(e) => { e.stopPropagation(); setIsTitleEditing(true); }} // Prevent hero upload on title click
             onBlur={() => setIsTitleEditing(false)}
           >
             {isTitleEditing ? (
@@ -137,33 +136,32 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
               </h1>
             )}
           </div>
-
-          {/* INTRODUCTION FIELD (Click-to-Edit) */}
-          <div 
-            className="inline-block relative cursor-pointer mt-1"
-            onClick={() => setIsIntroEditing(true)}
-            onBlur={() => setIsIntroEditing(false)}
-          >
-            {isIntroEditing ? (
-              <Textarea 
-                autoFocus
-                value={formData.introduction || ''} 
-                onChange={(e) => onFormChange('introduction', e.target.value)} 
-                className="text-lg bg-card/90 text-muted-foreground border-primary w-full p-2 min-h-[50px]"
-                placeholder={details.intro}
-              />
-            ) : (
-              <p className="text-muted-foreground text-lg max-w-2xl group-hover:bg-black/10 group-hover:p-1 group-hover:rounded transition-colors">
-                {currentIntro}
-                <Pencil className="h-4 w-4 ml-2 inline text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-              </p>
-            )}
-          </div>
+          
+          {/* Introduction Placeholder Text (Static description is removed) */}
         </div>
       </div>
 
-      {/* Main Form Content */}
+      {/* Primary Input Section (New: Dedicated Introduction Field) */}
       <div className="bg-card p-6 md:p-8 rounded-2xl shadow-lg border border-border/50 space-y-8">
+        
+        {/* DEDICATED INTRODUCTION FIELD */}
+        <div className="space-y-2">
+            <Label htmlFor="introduction" className="text-xl font-bold flex items-center">
+                Short Introduction / Description 📝
+            </Label>
+            <Textarea 
+                id="introduction" 
+                value={formData.introduction || ''} 
+                onChange={(e) => onFormChange('introduction', e.target.value)} 
+                placeholder={details.intro}
+                className="min-h-[80px]"
+            />
+        </div>
+        
+        {/* Separator before dynamic content */}
+        <div className="border-t border-border/50"></div> 
+
+        {/* Dynamic Form Content (Passed as children) */}
         {children}
       </div>
 
