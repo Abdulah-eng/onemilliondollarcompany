@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 export interface BlogContentItem {
   id: string;
   type: 'text' | 'image' | 'video';
-  value: string; // Text content, Image URL, or Video URL
+  value: string;
 }
 
 interface BlogContentBuilderProps {
@@ -34,7 +34,6 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
 
   const renderContentBlock = (item: BlogContentItem) => {
     const isText = item.type === 'text';
-    const isMedia = item.type === 'image' || item.type === 'video';
     const placeholderText = isText 
       ? "Start typing your blog paragraph here..." 
       : item.type === 'image' ? "Paste image URL or click to upload..." : "Paste video link (e.g., YouTube)...";
@@ -42,11 +41,12 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
     return (
       <div 
         key={item.id} 
-        className="relative p-4 rounded-xl border transition-all hover:shadow-lg hover:border-primary/50 bg-card group flex items-start space-x-2"
+        // Increased horizontal and vertical padding (p-5) 
+        className="relative **p-5** rounded-xl border transition-all hover:shadow-lg hover:border-primary/50 bg-card group flex items-start **space-x-4**"
       >
         
-        {/* Control Column (Drag Handle & Delete) */}
-        <div className="flex flex-col items-center pt-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+        {/* Control Column (Fixed width for stability) */}
+        <div className="flex flex-col items-center pt-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 **w-6**">
           <Button variant="ghost" size="icon" className="h-8 w-8 cursor-grab text-muted-foreground hover:bg-muted">
             <GripVertical className="h-4 w-4" />
           </Button>
@@ -55,7 +55,7 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
           </Button>
         </div>
 
-        {/* Content Input Area */}
+        {/* Content Input Area (Adjusted for Textarea placement) */}
         <div className="flex-grow space-y-3">
           
           {/* Text Block */}
@@ -64,12 +64,14 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
               value={item.value}
               onChange={(e) => updateItem(item.id, e.target.value)}
               placeholder={placeholderText}
-              className="min-h-[100px] text-base focus:border-primary/50 border-none resize-none shadow-none focus-visible:ring-0 p-0"
+              // FIX: Removed padding reset on Textarea (p-0) and ensured it takes full width
+              // Added horizontal padding to the parent content block (flex-grow) for space.
+              className="min-h-[100px] text-base focus:border-primary/50 border-none resize-none shadow-none focus-visible:ring-0 **w-full**" 
             />
           )}
 
           {/* Media Block */}
-          {isMedia && (
+          {!isText && (
             <div className="space-y-2">
               <div className="flex items-center text-sm font-medium text-muted-foreground pt-1">
                 {item.type === 'image' ? <Image className="h-4 w-4 mr-2" /> : <Video className="h-4 w-4 mr-2" />}
@@ -117,8 +119,8 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
       </AnimatePresence>
 
       {/* Add Content Buttons (Floating, Centered) */}
-      <div className="flex justify-center pt-4">
-        <div className="flex gap-3 p-3 rounded-full border bg-muted/50 shadow-xl">
+      <div className="flex justify-center pt-6">
+        <div className="flex gap-3 p-3.5 rounded-full border bg-muted/50 shadow-xl">
           <Button variant="secondary" onClick={() => addItem('text')} className="gap-2">
             <Type className="h-4 w-4" /> Text
           </Button>
