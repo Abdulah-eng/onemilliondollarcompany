@@ -49,7 +49,6 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
   const [isTitleEditing, setIsTitleEditing] = useState(false);
 
   const handleSimulatedUpload = () => {
-    // This function is now attached to the entire hero container click
     const tempUrl = prompt("Paste an image URL to set as Hero Image (Simulated Upload):");
     if (tempUrl) {
       onFormChange('heroImageUrl' as keyof LibraryItem, tempUrl);
@@ -57,18 +56,17 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
   };
 
   const removeHeroImage = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevents triggering the upload when clicking 'X'
+    e.stopPropagation();
     onFormChange('heroImageUrl' as keyof LibraryItem, null);
   };
 
   const currentTitle = formData.name || details.title;
-  const currentIntro = formData.introduction || details.intro; // Kept for placeholder value
 
   return (
     <motion.div
       initial={{ opacity: 0, x: isMobile ? 0 : 50 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: isMobile ? 0 : -50 }}
+      exit={{ opacity: 0, x: -50 }}
       transition={{ duration: 0.3 }}
       className="space-y-6 max-w-4xl mx-auto"
     >
@@ -86,8 +84,8 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
           onError={(e) => { e.currentTarget.src = details.defaultHeroUrl; }}
         />
         
-        {/* Overlay Gradient (for text visibility) */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent"></div>
+        {/* Overlay Gradient (FIXED: Darker gradient for better contrast) */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-black/30 to-transparent"></div>
         
         {/* Click Indicator / Remove Button (Top Right) */}
         <div className="absolute top-4 right-4 z-10 flex gap-2">
@@ -96,7 +94,7 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
                     variant="destructive" 
                     size="icon" 
                     className="rounded-full h-8 w-8 bg-black/50 hover:bg-black/80" 
-                    onClick={removeHeroImage} // Use the specific remove handler
+                    onClick={removeHeroImage}
                 >
                     <X className="h-4 w-4" />
                 </Button>
@@ -105,7 +103,7 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
                 variant="default" 
                 size="icon" 
                 className="rounded-full h-8 w-8 bg-black/50 hover:bg-black/80 text-white" 
-                onClick={(e) => { e.stopPropagation(); handleSimulatedUpload(); }} // Prevents double prompt
+                onClick={(e) => { e.stopPropagation(); handleSimulatedUpload(); }}
             >
                 <Camera className="h-4 w-4" />
             </Button>
@@ -114,10 +112,10 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
         {/* Content Overlay (Bottom Left) */}
         <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full">
           
-          {/* TITLE FIELD (Click-to-Edit) */}
+          {/* TITLE FIELD (Click-to-Edit, FIXED: Text color set to white, Placeholder text color adjusted) */}
           <div 
             className="inline-block relative"
-            onClick={(e) => { e.stopPropagation(); setIsTitleEditing(true); }} // Prevent hero upload on title click
+            onClick={(e) => { e.stopPropagation(); setIsTitleEditing(true); }}
             onBlur={() => setIsTitleEditing(false)}
           >
             {isTitleEditing ? (
@@ -125,23 +123,23 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
                 autoFocus
                 value={formData.name || ''} 
                 onChange={(e) => onFormChange('name', e.target.value)} 
-                className="text-4xl md:text-5xl font-extrabold bg-card/90 text-foreground border-primary w-full p-2"
+                // Set text color to white for contrast, background transparent
+                className="text-4xl md:text-5xl font-extrabold bg-transparent text-white border-primary w-full p-2 placeholder:text-gray-300"
                 placeholder={details.title}
                 onKeyDown={(e) => e.key === 'Enter' && setIsTitleEditing(false)}
               />
             ) : (
-              <h1 className="text-4xl md:text-5xl font-extrabold text-foreground mb-2 group-hover:bg-black/10 group-hover:p-1 group-hover:rounded transition-colors">
+              // Ensure static text is also white
+              <h1 className="text-4xl md:text-5xl font-extrabold **text-white** mb-2 group-hover:bg-black/10 group-hover:p-1 group-hover:rounded transition-colors">
                 {currentTitle} {details.emoji}
-                <Pencil className="h-5 w-5 ml-2 inline text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Pencil className="h-5 w-5 ml-2 inline text-white opacity-0 group-hover:opacity-100 transition-opacity" />
               </h1>
             )}
           </div>
-          
-          {/* Introduction Placeholder Text (Static description is removed) */}
         </div>
       </div>
 
-      {/* Primary Input Section (New: Dedicated Introduction Field) */}
+      {/* Primary Input Section */}
       <div className="bg-card p-6 md:p-8 rounded-2xl shadow-lg border border-border/50 space-y-8">
         
         {/* DEDICATED INTRODUCTION FIELD */}
