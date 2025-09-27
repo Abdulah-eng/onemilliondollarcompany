@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Save, Upload, Image } from 'lucide-react';
+import { ChevronLeft, Save, Upload, Image, X } from 'lucide-react';
 import { LibraryCategory, LibraryItem } from '@/mockdata/library/mockLibrary';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,28 +12,27 @@ interface CreationWrapperProps {
   isEditing: boolean;
   onBack: () => void;
   onSubmit: () => void;
-  // NEW PROPS
-  formData: Partial<LibraryItem>; // Pass the form data to manage image state
+  formData: Partial<LibraryItem>;
   onFormChange: (field: keyof LibraryItem, value: any) => void;
 }
 
-const CATEGORY_DETAILS: Record<LibraryCategory, { title: string, emoji: string, heroUrl: string, intro: string }> = {
+const CATEGORY_DETAILS: Record<LibraryCategory, { title: string, emoji: string, defaultHeroUrl: string, intro: string }> = {
   'exercise': {
     title: 'New Fitness Item',
     emoji: '💪',
-    heroUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99d4db2?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    defaultHeroUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99d4db2?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     intro: 'Design a powerful exercise, from movement cues to equipment requirements.',
   },
   'recipe': {
     title: 'New Recipe/Meal',
     emoji: '🍎',
-    heroUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    defaultHeroUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     intro: 'Craft a delicious meal, complete with ingredients, allergies, and step-by-step instructions.',
   },
   'mental health': {
     title: 'New Wellness Activity',
     emoji: '🧘',
-    heroUrl: 'https://images.unsplash.com/photo-1557342777-a8a2d1d2b86a?q=80&w=2942&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    defaultHeroUrl: 'https://images.unsplash.com/photo-1557342777-a8a2d1d2b86a?q=80&w=2942&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     intro: 'Build a guided meditation, breathing exercise, or mindful activity.',
   },
 };
@@ -42,8 +41,23 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
   const details = CATEGORY_DETAILS[category] || CATEGORY_DETAILS.exercise;
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
-  // Determine the current image URL: use user-set imageUrl first, then default heroUrl.
-  const currentImageUrl = (formData as any).imageUrl || details.heroUrl;
+  // Use a simulated 'currentImageUrl' state for demonstration, tied to the form data
+  const userImageUrl = (formData as any).heroImageUrl;
+  const currentImageUrl = userImageUrl || details.defaultHeroUrl;
+
+  const handleSimulatedUpload = () => {
+    // In a real application, this would trigger the file picker.
+    // Here, we simulate a successful upload by setting a new placeholder image.
+    const tempUrl = prompt("Enter Image URL (Simulated Upload):");
+    if (tempUrl) {
+      onFormChange('heroImageUrl' as keyof LibraryItem, tempUrl);
+    }
+  };
+
+  const removeHeroImage = () => {
+    onFormChange('heroImageUrl' as keyof LibraryItem, null);
+  };
+
 
   return (
     <motion.div
@@ -59,7 +73,7 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
           src={currentImageUrl} 
           alt={`${details.title} hero image`} 
           className="w-full h-full object-cover" 
-          onError={(e) => { e.currentTarget.src = details.heroUrl; }} // Fallback if user URL fails
+          onError={(e) => { e.currentTarget.src = details.defaultHeroUrl; }} // Fallback
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent"></div>
         <div className="absolute bottom-0 left-0 p-6 md:p-8">
@@ -70,24 +84,24 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
         </div>
       </div>
       
-      {/* HERO IMAGE UPLOADER (NEW!) */}
-      <div className="bg-card p-4 rounded-xl shadow-md border space-y-2">
-        <Label htmlFor="hero-image" className="flex items-center text-lg font-semibold text-primary">
-          <Image className="h-5 w-5 mr-2" /> Custom Hero Image URL
-        </Label>
-        <div className="flex gap-2">
-            <Input 
-                id="hero-image" 
-                value={(formData as any).imageUrl || ''} 
-                onChange={(e) => onFormChange('imageUrl' as keyof LibraryItem, e.target.value)} 
-                placeholder="Paste an image URL here to override the default hero image"
-                className="flex-grow"
-            />
-            <Button variant="outline" className='flex-shrink-0'>
-                <Upload className="h-4 w-4 mr-2" /> Upload File
-            </Button>
+      {/* HERO IMAGE UPLOAD ZONE (FIXED: Empty, Clickable Field) */}
+      <div className="bg-card p-4 rounded-xl shadow-lg border-2 border-dashed border-primary/50 hover:border-primary transition-colors cursor-pointer" onClick={handleSimulatedUpload}>
+        <div className="flex items-center justify-between">
+            <div className="flex items-center">
+                <Upload className="h-6 w-6 mr-3 text-primary" />
+                <Label className="text-lg font-semibold text-primary/80 cursor-pointer">
+                    Click here to Upload/Change Hero Image
+                </Label>
+            </div>
+            {userImageUrl ? (
+                <Button variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={(e) => { e.stopPropagation(); removeHeroImage(); }}>
+                    <X className="h-4 w-4 mr-1" /> Remove Current
+                </Button>
+            ) : (
+                <Image className="h-6 w-6 text-muted-foreground" />
+            )}
         </div>
-        <p className="text-xs text-muted-foreground">Note: Pasting a URL above will instantly update the hero image preview.</p>
+        <p className="text-sm text-muted-foreground ml-9 mt-1">PNG, JPG, or GIF (max 10MB). Best ratio: 16:9</p>
       </div>
 
       {/* Main Form Content */}
