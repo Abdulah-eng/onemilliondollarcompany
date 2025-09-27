@@ -28,11 +28,7 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ formData, onFormChange }) =
         </div>
       </div>
       
-      <div className="space-y-2">
-        <Label htmlFor="requirements">Requirements (Equipment)</Label>
-        <Input id="requirements" value={formData.requirements || ''} onChange={(e) => onFormChange('requirements', e.target.value)} placeholder="e.g., Dumbbells, Bench, Resistance Band" />
-      </div>
-
+      
       <div className="space-y-2">
         <Label htmlFor="introduction">Introduction / Purpose</Label>
         <Textarea id="introduction" value={formData.introduction || ''} onChange={(e) => onFormChange('introduction', e.target.value)} placeholder="Brief overview of the movement, its goal, and benefits." />
@@ -40,8 +36,8 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ formData, onFormChange }) =
 
       {/* Dynamic Content Uploads */}
       <ContentUploadSection
-        content={formData.content || []}
-        onContentChange={(value) => onFormChange('content', value)}
+        content={formData.howTo || []}
+        onContentChange={(value) => onFormChange('howTo', value)}
         allowedTypes={['image', 'video', 'step']}
       />
 

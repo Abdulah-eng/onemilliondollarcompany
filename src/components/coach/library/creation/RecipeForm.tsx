@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RecipeItem, Ingredient } from '@/mockdata/library/mockLibrary';
-import { Lightbulb, Plus, Trash2, Salad, Scale } from 'lucide-react';
+import { Lightbulb, Plus, Trash2, Salad, Scale, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ContentUploadSection from './ContentUploadSection';
 
@@ -99,10 +99,10 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ formData, onFormChange }) => {
         ))}
       </div>
 
-      {/* Dynamic Content Uploads (Image/Video) */}
+      {/* Image/Video uploads only - no content field for recipes */}
       <ContentUploadSection
-        content={formData.content || []}
-        onContentChange={(value) => onFormChange('content', value)}
+        content={[]} 
+        onContentChange={() => {}} 
         allowedTypes={['image', 'video']} 
       />
       

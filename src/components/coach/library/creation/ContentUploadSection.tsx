@@ -4,18 +4,18 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Image, Video, FileText, Mic, X } from 'lucide-react';
-import { ContentItem } from '@/mockdata/library/mockLibrary';
+import { ContentStep } from '@/mockdata/library/mockLibrary';
 
 interface ContentUploadSectionProps {
-  content: ContentItem[];
-  onContentChange: (newContent: ContentItem[]) => void;
+  content: ContentStep[];
+  onContentChange: (newContent: ContentStep[]) => void;
   allowedTypes: ('image' | 'video' | 'soundfile' | 'step')[];
 }
 
 const ContentUploadSection: React.FC<ContentUploadSectionProps> = ({ content, onContentChange, allowedTypes }) => {
   const exists = (type: string) => content.some(c => c.type === type);
 
-  const toggleContent = (type: ContentItem['type'], initialValue: string = '') => {
+  const toggleContent = (type: ContentStep['type'], initialValue: string = '') => {
     if (exists(type)) {
       onContentChange(content.filter(c => c.type !== type));
     } else {
