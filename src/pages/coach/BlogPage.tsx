@@ -6,7 +6,7 @@ import { BlogPost, BlogCategory, mockBlogPosts } from '@/mockdata/blog/mockBlog'
 import BlogHeader from '@/components/coach/blog/BlogHeader';
 import BlogList from '@/components/coach/blog/BlogList';
 import BlogFAB from '@/components/coach/blog/BlogFAB';
-import BlogCreatorPage from './BlogCreatorPage'; // Import the new creator page
+import BlogCreatorPage from './BlogCreatorPage';
 
 type BlogView = 'list' | 'creator';
 
@@ -17,7 +17,6 @@ const BlogPage: React.FC = () => {
   const [view, setView] = useState<BlogView>('list');
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
 
-  // Filtering Logic (remains the same)
   const filteredPosts = useMemo(() => {
     return blogData.filter(post => {
       const categoryMatch = !activeCategory || post.category === activeCategory;
@@ -29,7 +28,6 @@ const BlogPage: React.FC = () => {
     });
   }, [blogData, activeCategory, searchTerm]);
 
-  // Handlers (updated for single FAB action)
   const handleCategoryChange = useCallback((cat: BlogCategory | null) => {
     setActiveCategory(cat);
     setSearchTerm('');
@@ -39,7 +37,6 @@ const BlogPage: React.FC = () => {
     setSearchTerm(term);
   }, []);
 
-  // FAB action simplified: no category needed initially
   const handleNewPost = () => { 
     setEditingPost(null);
     setView('creator');
@@ -58,7 +55,6 @@ const BlogPage: React.FC = () => {
     }
   };
 
-  // Submit handler (remains the same)
   const handlePostSubmit = (newPost: BlogPost) => {
     setBlogData(prev => {
       const i = prev.findIndex(post => post.id === newPost.id);
