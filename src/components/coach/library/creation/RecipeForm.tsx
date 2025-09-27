@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RecipeItem, Ingredient } from '@/mockdata/library/mockLibrary';
-import { Lightbulb, Plus, Trash2 } from 'lucide-react';
+import { Lightbulb, Plus, Trash2, Salad, Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ContentUploadSection from './ContentUploadSection';
 
@@ -29,9 +29,6 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ formData, onFormChange }) => {
   const removeIngredient = (index: number) => {
     onFormChange('ingredients', ingredients.filter((_, i) => i !== index));
   };
-  
-  // Recipe uses 'stepByStep' field for instructions, not 'content'
-  // We'll manage ingredients dynamically and use the content section for media.
   
   const steps: string[] = formData.stepByStep || [];
   
@@ -64,38 +61,39 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ formData, onFormChange }) => {
         <Textarea id="introduction" value={formData.introduction || ''} onChange={(e) => onFormChange('introduction', e.target.value)} placeholder="Quick description, e.g., High protein, low carb meal prep." />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="allergies">Allergies / Dietary Notes</Label>
+        <Label htmlFor="allergies">Allergies / Dietary Notes (Target)</Label>
         <Input id="allergies" value={formData.allergies || ''} onChange={(e) => onFormChange('allergies', e.target.value)} placeholder="e.g., Gluten-Free, Contains Nuts, Vegan" />
       </div>
       
-      {/* Ingredients List */}
+      {/* Ingredients List (FIXED: Dedicated fields for Qty and Name) */}
       <div className="space-y-4 p-4 rounded-xl border bg-muted/10">
-        <h3 className="text-xl font-semibold flex justify-between items-center">
-            Ingredients List
-            <Button variant="secondary" size="sm" onClick={addIngredient}>
-                <Plus className="h-4 w-4 mr-2" /> Add Ingredient
+        <h3 className="text-xl font-bold flex justify-between items-center text-primary">
+            INGREDIENTS LIST 🔪
+            <Button variant="default" onClick={addIngredient}>
+                <Plus className="h-4 w-4 mr-2" /> Add Item
             </Button>
         </h3>
         {ingredients.map((item, index) => (
-          <div key={index} className="flex gap-2 items-end">
+          <div key={index} className="flex gap-3 items-center p-2 border-b last:border-b-0">
             <div className="flex-1 space-y-1">
-                <Label className="text-xs text-muted-foreground">Quantity</Label>
+                <Label className="text-xs text-muted-foreground flex items-center"><Scale className="h-3 w-3 mr-1" /> Qty</Label>
                 <Input 
                   value={item.quantity} 
                   onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)} 
-                  placeholder="e.g., 150g" 
+                  placeholder="e.g., 150g or 1 cup" 
                 />
             </div>
-            <div className="flex-[2] space-y-1">
-                <Label className="text-xs text-muted-foreground">Name</Label>
+            <div className="flex-[3] space-y-1">
+                <Label className="text-xs text-muted-foreground flex items-center"><Salad className="h-3 w-3 mr-1" /> Item Name</Label>
+                {/* Simulated Selector for intuitive experience */}
                 <Input 
                   value={item.name} 
                   onChange={(e) => handleIngredientChange(index, 'name', e.target.value)} 
-                  placeholder="e.g., Chicken Breast" 
+                  placeholder="e.g., Tomato (or Banana, Chicken Breast)" 
                 />
             </div>
-            <Button variant="destructive" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => removeIngredient(index)}>
-                <Trash2 className="h-4 w-4" />
+            <Button variant="destructive" size="icon" className="h-10 w-10 flex-shrink-0 self-end" onClick={() => removeIngredient(index)}>
+                <Trash2 className="h-5 w-5" />
             </Button>
           </div>
         ))}
@@ -105,31 +103,29 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ formData, onFormChange }) => {
       <ContentUploadSection
         content={formData.content || []}
         onContentChange={(value) => onFormChange('content', value)}
-        allowedTypes={['image', 'video']} // Steps are handled separately in Recipe model
+        allowedTypes={['image', 'video']} 
       />
       
-      {/* Steps (using Textarea fields for simplicity, instead of ContentUploadSection steps) */}
-      <div className="space-y-4 p-4 rounded-xl border bg-muted/10">
-        <h3 className="text-xl font-semibold flex justify-between items-center">
-            Step by Step Instructions
-            <Button variant="secondary" size="sm" onClick={addStep}>
-                <Plus className="h-4 w-4 mr-2" /> Add Step
-            </Button>
-        </h3>
-        {steps.map((step, index) => (
-            <div key={index} className="flex items-start gap-2">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold">{index + 1}</div>
-                <Textarea 
-                    value={step} 
-                    onChange={(e) => handleStepChange(index, e.target.value)} 
-                    placeholder={`Step ${index + 1} instructions`}
-                    className="flex-grow"
-                />
-                <Button variant="ghost" size="icon" className="flex-shrink-0 mt-1" onClick={() => removeStep(index)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-            </div>
-        ))}
+      {/* Recipe Steps (Now using the old Recipe model structure but with the new, prominent Step-by-Step look) */}
+      <div className="space-y-5 border-t pt-5">
+              <h4 className="text-xl font-bold flex justify-between items-center text-primary">
+                  STEP BY FUCKING STEP Instructions 👣
+                  <Button variant="default" onClick={addStep}>+ Add Step</Button>
+              </h4>
+              {steps.map((step, index) => (
+                  <div key={index} className="flex items-start gap-3 p-3 bg-card rounded-lg shadow-inner border">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-extrabold mt-1">{index + 1}</div>
+                      <Textarea 
+                          value={step} 
+                          onChange={(e) => handleStepChange(index, e.target.value)} 
+                          placeholder={`Step ${index + 1} instructions`}
+                          className="flex-grow min-h-[60px]"
+                      />
+                      <Button variant="ghost" size="icon" className="flex-shrink-0 mt-1 text-destructive hover:bg-destructive/10" onClick={() => removeStep(index)}>
+                          <X className="h-4 w-4" />
+                      </Button>
+                  </div>
+              ))}
       </div>
 
       {/* Pro Tip Section */}
