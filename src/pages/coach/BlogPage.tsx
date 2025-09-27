@@ -6,6 +6,7 @@ import { BlogPost, BlogCategory, mockBlogPosts } from '@/mockdata/blog/mockBlog'
 import BlogHeader from '@/components/coach/blog/BlogHeader';
 import BlogList from '@/components/coach/blog/BlogList';
 import BlogFAB from '@/components/coach/blog/BlogFAB';
+import { Button } from '@/components/ui/button';
 // import BlogCreatorPage from '@/components/coach/blog/BlogCreatorPage'; // Assume a creator page exists
 
 type BlogView = 'list' | 'creator';
