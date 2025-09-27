@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { LibraryItem, LibraryCategory } from '@/mockdata/library/mockLibrary';
-import LibraryCard from './LibraryCard'; // Use the modern card
+import { LibraryItem } from '@/mockdata/library/mockLibrary';
+import LibraryCard from './LibraryCard';
 
 interface LibraryListProps {
-  filteredItems: LibraryItem[]; // New prop for the filtered list
+  filteredItems: LibraryItem[];
   onEdit: (item: LibraryItem) => void;
   onDelete: (id: string) => void;
 }
@@ -25,7 +25,9 @@ const LibraryList: React.FC<LibraryListProps> = ({
   }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-4">
+    // ✨ FIX: Increased column count for larger screens (xl:grid-cols-4)
+    // to make cards smaller and denser, fitting better proportionally.
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 **xl:grid-cols-4** pt-4"> 
       {filteredItems.map(item => (
         <LibraryCard
           key={item.id}
