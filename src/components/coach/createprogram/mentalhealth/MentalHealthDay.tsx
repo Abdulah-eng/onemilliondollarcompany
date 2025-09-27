@@ -123,35 +123,37 @@ const MentalHealthDay: React.FC<MentalHealthDayProps> = ({ day, data, onDataChan
       <div className="space-y-6">
         {mentalHealthSections.map((section) => (
           <div key={section} className="space-y-3">
-            <div 
+            <h4 
               className={cn(
-                "flex items-center justify-between text-lg font-bold capitalize border-b pb-1",
-                // Desktop only: clickable section headers with selection styling
-                "lg:cursor-pointer lg:hover:bg-muted/50 lg:rounded-t-lg lg:px-3 lg:py-2 lg:transition-colors",
+                "text-lg font-semibold capitalize border-b pb-1 transition-colors duration-200",
+                // Desktop only: clickable and styled headers
+                "lg:cursor-pointer",
                 selectedSection === section && onSectionSelect 
-                  ? "lg:bg-primary/10 lg:text-primary lg:border-primary" 
-                  : "text-primary"
+                  ? "text-primary bg-primary/5 px-2 py-1 rounded-md border-primary" 
+                  : "text-primary lg:hover:text-primary/80"
               )}
               onClick={() => onSectionSelect && window.innerWidth >= 1024 && onSectionSelect(section)}
             >
-              <span>{section}</span>
-              {/* Desktop only: Selected badge */}
+              {section}
               {selectedSection === section && onSectionSelect && (
-                <span className="hidden lg:inline-flex bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs font-semibold">
+                <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full hidden lg:inline">
                   Selected
                 </span>
               )}
-            </div>
+            </h4>
             
             <div 
               className={cn(
-                "space-y-4 p-4 rounded-xl transition-colors",
-                data[section].length === 0 ? "border-2 border-dashed border-gray-200" : "border border-border",
-                // Desktop only: highlight selected section container
+                "space-y-4 p-4 rounded-xl transition-all duration-200",
+                // Desktop only: clickable containers with selection styling
+                "lg:cursor-pointer",
                 selectedSection === section && onSectionSelect 
-                  ? "lg:border-primary/50 lg:bg-primary/5" 
-                  : ""
+                  ? "border-2 border-primary/30 bg-primary/5" 
+                  : data[section].length === 0 
+                    ? "border-2 border-dashed border-gray-200" 
+                    : "border border-border"
               )}
+              onClick={() => onSectionSelect && window.innerWidth >= 1024 && onSectionSelect(section)}
             >
               <AnimatePresence>
                 {data[section].length > 0 ? (
