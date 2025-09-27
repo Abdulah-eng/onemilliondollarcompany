@@ -6,8 +6,7 @@ import { BlogPost, BlogCategory, mockBlogPosts } from '@/mockdata/blog/mockBlog'
 import BlogHeader from '@/components/coach/blog/BlogHeader';
 import BlogList from '@/components/coach/blog/BlogList';
 import BlogFAB from '@/components/coach/blog/BlogFAB';
-import { Button } from '@/components/ui/button';
-// import BlogCreatorPage from '@/components/coach/blog/BlogCreatorPage'; // Assume a creator page exists
+import BlogCreatorPage from './BlogCreatorPage'; // Import the new creator page
 
 type BlogView = 'list' | 'creator';
 
@@ -18,21 +17,19 @@ const BlogPage: React.FC = () => {
   const [view, setView] = useState<BlogView>('list');
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
 
-  // Filtering Logic
+  // Filtering Logic (remains the same)
   const filteredPosts = useMemo(() => {
     return blogData.filter(post => {
       const categoryMatch = !activeCategory || post.category === activeCategory;
-      
       const searchMatch = !searchTerm ||
         post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.introduction.toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.content.toLowerCase().includes(searchTerm.toLowerCase());
-      
       return categoryMatch && searchMatch;
     });
   }, [blogData, activeCategory, searchTerm]);
 
-  // Handlers
+  // Handlers (updated for single FAB action)
   const handleCategoryChange = useCallback((cat: BlogCategory | null) => {
     setActiveCategory(cat);
     setSearchTerm('');
@@ -42,15 +39,14 @@ const BlogPage: React.FC = () => {
     setSearchTerm(term);
   }, []);
 
-  const handleNewPost = (category: BlogCategory) => { 
+  // FAB action simplified: no category needed initially
+  const handleNewPost = () => { 
     setEditingPost(null);
-    setActiveCategory(category); 
     setView('creator');
   };
 
   const handleEditPost = (post: BlogPost) => {
     setEditingPost(post);
-    setActiveCategory(post.category); 
     setView('creator');
   };
 
@@ -62,7 +58,7 @@ const BlogPage: React.FC = () => {
     }
   };
 
-  // Simplified Save/Submit handler (for demonstration)
+  // Submit handler (remains the same)
   const handlePostSubmit = (newPost: BlogPost) => {
     setBlogData(prev => {
       const i = prev.findIndex(post => post.id === newPost.id);
@@ -100,12 +96,11 @@ const BlogPage: React.FC = () => {
               />
             </motion.div>
           ) : (
-            // Replace this with your actual BlogCreatorPage component
-            <div className="p-8 bg-card rounded-xl">
-                <h2 className="text-2xl font-bold mb-4">Blog Creator (Under Construction)</h2>
-                <p>Creating: {editingPost ? `Editing ${editingPost.title}` : `New Post (${activeCategory})`}</p>
-                <Button onClick={handleBackToList} className="mt-4">Back to List</Button>
-            </div>
+            <BlogCreatorPage
+                onBack={handleBackToList}
+                onSubmit={handlePostSubmit}
+                initialPost={editingPost}
+            />
           )}
         </motion.div>
       </AnimatePresence>
