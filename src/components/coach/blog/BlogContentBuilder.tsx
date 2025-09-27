@@ -41,12 +41,11 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
     return (
       <div 
         key={item.id} 
-        // Increased horizontal and vertical padding (p-5) 
-        className="relative **p-5** rounded-xl border transition-all hover:shadow-lg hover:border-primary/50 bg-card group flex items-start **space-x-4**"
+        className="relative p-5 rounded-xl border transition-all hover:shadow-lg hover:border-primary/50 bg-card group flex items-start space-x-4"
       >
         
-        {/* Control Column (Fixed width for stability) */}
-        <div className="flex flex-col items-center pt-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 **w-6**">
+        {/* Control Column */}
+        <div className="flex flex-col items-center pt-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 w-6">
           <Button variant="ghost" size="icon" className="h-8 w-8 cursor-grab text-muted-foreground hover:bg-muted">
             <GripVertical className="h-4 w-4" />
           </Button>
@@ -55,7 +54,7 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
           </Button>
         </div>
 
-        {/* Content Input Area (Adjusted for Textarea placement) */}
+        {/* Content Input Area */}
         <div className="flex-grow space-y-3">
           
           {/* Text Block */}
@@ -64,9 +63,8 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
               value={item.value}
               onChange={(e) => updateItem(item.id, e.target.value)}
               placeholder={placeholderText}
-              // FIX: Removed padding reset on Textarea (p-0) and ensured it takes full width
-              // Added horizontal padding to the parent content block (flex-grow) for space.
-              className="min-h-[100px] text-base focus:border-primary/50 border-none resize-none shadow-none focus-visible:ring-0 **w-full**" 
+              // FIX: Ensure placeholder space is respected
+              className="min-h-[100px] text-base focus:border-primary/50 border-none resize-none shadow-none focus-visible:ring-0 w-full" 
             />
           )}
 
@@ -118,7 +116,6 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
         ))}
       </AnimatePresence>
 
-      {/* Add Content Buttons (Floating, Centered) */}
       <div className="flex justify-center pt-6">
         <div className="flex gap-3 p-3.5 rounded-full border bg-muted/50 shadow-xl">
           <Button variant="secondary" onClick={() => addItem('text')} className="gap-2">
