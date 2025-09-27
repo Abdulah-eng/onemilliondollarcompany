@@ -1,10 +1,10 @@
 // src/components/coach/library/LibraryList.tsx
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
-import { Search, Filter, Dumbbell, Zap, Heart, Utensils } from 'lucide-react';
+import { Search, Filter, FilterIcon } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LibraryItem, LibraryCategory, ExerciseItem, RecipeItem, MentalHealthItem } from '@/mockdata/library/mockLibrary';
@@ -16,10 +16,10 @@ interface LibraryListProps {
   libraryData: LibraryItem[];
   onEdit: (item: LibraryItem) => void;
   onDelete: (id: string) => void;
-  onCategoryChange: (category: LibraryCategory) => void; // ⭐ Must be passed down from LibraryPage
+  onCategoryChange: (category: LibraryCategory) => void; 
 }
 
-// MOCK DATA FOR DYNAMIC FILTERS (Ideally these come from a database/API)
+// MOCK DATA FOR DYNAMIC FILTERS (Use specific tags here)
 const mockFilters = {
     'exercise': ['all', 'chest', 'back', 'legs', 'shoulders', 'arms', 'core'],
     'recipe': ['all', 'gluten-free', 'vegan', 'dairy-free', 'nut-free'],
@@ -29,14 +29,14 @@ const mockFilters = {
 const categoryMap: { [key in LibraryCategory]: string } = {
   'exercise': 'Exercises 💪',
   'recipe': 'Recipes 🥗',
-  'mental health': 'Mental Wellness 🧘‍♂️',
+  'mental health': 'Wellness 🧘‍♂️', // Shortened for mobile tabs
 };
 
 const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, onEdit, onDelete, onCategoryChange }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTag, setFilterTag] = useState<string>('all'); 
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false); // New state for mobile drawer
 
-  // Reset filter tag when category changes
   React.useEffect(() => {
       setFilterTag('all');
   }, [activeCategory]);
@@ -44,11 +44,11 @@ const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, 
 
   const filteredItems = useMemo(() => {
     const query = searchQuery.toLowerCase();
-    
     let filtered = libraryData.filter(item => item.category === activeCategory);
 
     // 1. Search Filter
     if (query) {
+      // ... (search logic remains the same)
       filtered = filtered.filter(item => 
         item.name.toLowerCase().includes(query) ||
         item.introduction.toLowerCase().includes(query) ||
@@ -67,10 +67,9 @@ const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, 
                 return (item as RecipeItem).allergies.toLowerCase().includes(filterTag);
             }
             if (activeCategory === 'mental health') {
-                // Assuming we can check if the activity name or type includes the tag
-                const activityType = (item as MentalHealthItem).content?.[0]?.type || ''; // Simplified check
-                const itemName = item.name.toLowerCase();
-                return itemName.includes(filterTag) || activityType.includes(filterTag);
+                // Check if any focus area includes the tag
+                const activityTypes = (item as MentalHealthItem).content.map(c => c.type); 
+                return activityTypes.includes(filterTag as any) || item.name.toLowerCase().includes(filterTag);
             }
             return true;
         });
@@ -80,14 +79,16 @@ const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, 
   }, [libraryData, activeCategory, searchQuery, filterTag]);
 
 
-  const renderFilterSelect = () => {
+  const renderDynamicFilter = (isMobileView: boolean) => {
     const filterOptions = mockFilters[activeCategory] || [];
     const placeholder = activeCategory === 'exercise' ? 'Muscle Group' : activeCategory === 'recipe' ? 'Allergies' : 'Activity Type';
+    
+    if (filterOptions.length <= 1) return null; // Hide if no options available
 
     return (
       <Select value={filterTag} onValueChange={(val) => setFilterTag(val)}>
-        <SelectTrigger className="w-full sm:max-w-[150px] h-10 text-base sm:text-sm">
-          <Filter className="h-4 w-4 text-muted-foreground mr-2" />
+        <SelectTrigger className={`h-11 ${isMobileView ? 'w-full' : 'sm:max-w-[150px] lg:max-w-[200px]'}`}>
+          <FilterIcon className="h-4 w-4 text-muted-foreground mr-2" />
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
@@ -105,26 +106,38 @@ const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, 
   return (
     <div className="space-y-6 pt-6">
       
-      {/* ⭐ NEW SEARCH & FILTER STACK (MODERN VERTICAL VIEW) */}
+      {/* ⭐ SEARCH & FILTER STACK (Top Section) */}
       <div className="flex flex-col gap-4 w-full">
         
-        {/* 1. Search Bar */}
-        <div className="relative w-full max-w-xl">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={`Search ${activeCategory} library...`}
-            className="pl-9 w-full h-11"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        {/* 1. Search Bar (Full Width on Mobile, with Filter Button) */}
+        <div className="flex gap-2 w-full">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={`Search ${activeCategory} library...`}
+              className="pl-9 w-full h-11"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          {/* Mobile Filter Button (Inspired by Search Image) */}
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="sm:hidden h-11 w-11 shrink-0"
+            onClick={() => setIsMobileFilterOpen(true)}
+          >
+            <FilterIcon className='h-5 w-5' />
+          </Button>
         </div>
         
-        {/* 2. Category Tabs & Dynamic Filter Select */}
+        {/* 2. Category Tabs & Dynamic Filter Select (Vertical Stack on Mobile, Horizontal on Desktop) */}
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:items-center">
             
-            {/* Category Tabs (Moved from Header) */}
+            {/* Category Tabs */}
             <Tabs value={activeCategory} onValueChange={onCategoryChange} className="flex-1">
-              <TabsList className="w-full sm:w-auto h-10 grid grid-cols-3 max-w-lg">
+              <TabsList className="w-full h-10 grid grid-cols-3 max-w-full sm:max-w-md">
                 {(Object.keys(categoryMap) as LibraryCategory[]).map((category) => (
                   <TabsTrigger key={category} value={category} className="text-sm">
                     {categoryMap[category]}
@@ -133,8 +146,10 @@ const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, 
               </TabsList>
             </Tabs>
             
-            {/* Dynamic Filter Select */}
-            {renderFilterSelect()}
+            {/* Dynamic Filter Select (Desktop View) */}
+            <div className='hidden sm:block flex-shrink-0'>
+                {renderDynamicFilter(false)}
+            </div>
         </div>
       </div>
       
@@ -151,10 +166,16 @@ const LibraryList: React.FC<LibraryListProps> = ({ activeCategory, libraryData, 
               />
             ))
           ) : (
-            <div className="col-span-full py-12 text-center text-muted-foreground bg-card rounded-xl border">
+            <motion.div 
+              key="empty" 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="col-span-full py-12 text-center text-muted-foreground bg-card rounded-xl border"
+            >
               <h4 className="text-lg font-medium">No {activeCategory} items found.</h4>
               <p className='text-sm mt-1'>Try clearing your filters or search term.</p>
-            </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
