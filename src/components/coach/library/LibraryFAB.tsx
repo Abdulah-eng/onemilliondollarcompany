@@ -4,20 +4,22 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Dumbbell, Utensils, Feather } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LibraryCategory } from '@/mockdata/library/mockLibrary';
 
 // Constants
 const SIZE = 64; // FAB size
-const MARGIN = 16; // padding from viewport edges
-const ACTION_MARGIN = 12; // gap between FAB and action bubble
-const ACTION_WIDTH = 180; // safe max width for bubble
-const ACTIONS = [
-  { label: 'Create Fitness', icon: Dumbbell, category: 'exercise' },
-  { label: 'Create Recipe', icon: Utensils, category: 'recipe' },
-  { label: 'Create Wellness', icon: Feather, category: 'mental health' },
+const MARGIN = 24; // padding from viewport edges (increased for mobile safety)
+const ACTION_MARGIN = 16; // gap between FAB and action bubble
+const ACTION_WIDTH = 200; 
+
+const ACTIONS: { label: string; icon: React.ElementType; category: LibraryCategory }[] = [
+  { label: 'Create Fitness 💪', icon: Dumbbell, category: 'exercise' },
+  { label: 'Create Recipe 🍎', icon: Utensils, category: 'recipe' },
+  { label: 'Create Wellness 🧘', icon: Feather, category: 'mental health' },
 ];
 
 interface LibraryFABProps {
-  onActionClick: (category: 'exercise' | 'recipe' | 'mental health') => void;
+  onActionClick: (category: LibraryCategory) => void;
 }
 
 export default function LibraryFAB({ onActionClick }: LibraryFABProps) {
@@ -31,33 +33,26 @@ export default function LibraryFAB({ onActionClick }: LibraryFABProps) {
   const translateRef = useRef({ x: 0, y: 0 });
 
   const [isOpen, setIsOpen] = useState(false);
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  // Initial position is fixed to bottom right
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null); 
   const [viewport, setViewport] = useState<{ w: number; h: number } | null>(null);
 
-  // Init position & resize handler
+  // Init position & resize handler (Default to bottom-right fixed position)
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    setViewport({ w: vw, h: vh });
-    setPos({ left: vw - SIZE - MARGIN, top: vh - SIZE - MARGIN });
-
-    const onResize = () => {
-      const vw2 = window.innerWidth;
-      const vh2 = window.innerHeight;
-      setViewport({ w: vw2, h: vh2 });
-      // Reset to bottom-right on resize
-      setPos({
-        left: vw2 - SIZE - MARGIN,
-        top: vh2 - SIZE - MARGIN,
-      });
+    const updatePosition = () => {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      setViewport({ w: vw, h: vh });
+      setPos({ left: vw - SIZE - MARGIN, top: vh - SIZE - MARGIN });
     };
 
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    return () => window.removeEventListener('resize', updatePosition);
   }, []);
 
-  // Drag logic (Simplified from the provided code)
+  // Drag logic (kept for the movable feature you provided)
   const onPointerDownMain = (e: React.PointerEvent) => {
     if (!pos) return;
     draggingRef.current = true;
@@ -123,45 +118,57 @@ export default function LibraryFAB({ onActionClick }: LibraryFABProps) {
     setIsOpen((s) => !s);
   };
 
-  const handleAction = (category: 'exercise' | 'recipe' | 'mental health') => {
+  const handleAction = (category: LibraryCategory) => {
     setIsOpen(false);
     onActionClick(category);
   };
 
   if (!pos) return null;
 
-  // Decide alignment (left or right side)
-  const isRightHalf = pos.left > (viewport?.w || 0) / 2;
-  const bubbleAlignment = isRightHalf ? 'right' : 'left';
-  const actionContainerX = isRightHalf ? -(ACTION_WIDTH - SIZE) : 0;
-  const labelTranslate = isRightHalf ? ACTION_WIDTH : -ACTION_WIDTH;
+  // Decide alignment (Always right-aligned for action bubbles)
+  const bubbleAlignment = 'right';
+  const actionContainerX = -(ACTION_WIDTH - SIZE);
+  const labelTranslate = ACTION_WIDTH; // Action bubbles appear from the right
 
   return (
     <div
       ref={wrapperRef}
       style={{
         position: 'fixed',
-        left: pos.left,
-        top: pos.top,
+        right: MARGIN, // Fixed position from right
+        bottom: MARGIN, // Fixed position from bottom
         width: SIZE,
         height: SIZE,
         touchAction: 'none',
         zIndex: 999,
+        // Override the 'left' and 'top' set in state for the fixed position
+        // The dragging logic updates 'pos', but CSS handles the base fixed positioning
+        // Use a wrapper div for positioning that respects the state changes from dragging
       }}
     >
-      <div ref={innerRef} style={{ width: '100%', height: '100%', position: 'relative', transform: 'none' }}>
+      <div 
+        ref={innerRef} 
+        style={{ 
+          width: '100%', 
+          height: '100%', 
+          position: 'relative', 
+          // Use the dynamic position calculated by the drag handler
+          transform: `translate3d(${pos.left - (window.innerWidth - SIZE - MARGIN)}px, ${pos.top - (window.innerHeight - SIZE - MARGIN)}px, 0)`,
+          transition: draggingRef.current ? 'none' : 'transform 100ms ease-out',
+        }}>
+        
         {/* Actions */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
+              exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.2 }}
               className="absolute flex flex-col gap-3 select-none"
               style={{
                 bottom: SIZE + ACTION_MARGIN,
-                [bubbleAlignment]: bubbleAlignment === 'right' ? 0 : 'auto',
+                [bubbleAlignment]: 0, 
                 transform: `translateX(${actionContainerX}px)`,
                 maxWidth: ACTION_WIDTH,
                 minWidth: ACTION_WIDTH,
@@ -175,37 +182,24 @@ export default function LibraryFAB({ onActionClick }: LibraryFABProps) {
                     initial={{ opacity: 0, x: labelTranslate }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: labelTranslate }}
-                    transition={{ duration: 0.2, delay: index * 0.05 }}
-                    className="flex items-center"
-                    style={{ justifyContent: bubbleAlignment === 'right' ? 'flex-end' : 'flex-start' }}
+                    // Reverse the order of the delay for a nice cascading effect from the FAB
+                    transition={{ duration: 0.2, delay: (ACTIONS.length - 1 - index) * 0.05 }} 
+                    className="flex items-center justify-end"
                   >
-                    {bubbleAlignment === 'left' && (
-                      <Button
-                        size="icon"
-                        className="rounded-full w-12 h-12 shadow-lg mr-3"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAction(action.category as any);
-                        }}
-                      >
-                        <Icon className="h-5 w-5" />
-                      </Button>
-                    )}
-                    <span className="text-sm bg-card/80 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-border/50 font-medium">
+                    <span className="text-sm bg-card/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-xl border border-border/50 font-medium text-foreground">
                       {action.label}
                     </span>
-                    {bubbleAlignment === 'right' && (
-                      <Button
-                        size="icon"
-                        className="rounded-full w-12 h-12 shadow-lg ml-3"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAction(action.category as any);
-                        }}
-                      >
-                        <Icon className="h-5 w-5" />
-                      </Button>
-                    )}
+                    <Button
+                      size="icon"
+                      className="rounded-full w-12 h-12 shadow-xl ml-3 bg-primary hover:bg-primary/90 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAction(action.category);
+                      }}
+                      aria-label={action.label}
+                    >
+                      <Icon className="h-5 w-5 text-primary-foreground" />
+                    </Button>
                   </motion.div>
                 );
               })}
