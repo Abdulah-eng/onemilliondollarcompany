@@ -2,13 +2,11 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion'; 
+import { motion, AnimatePresence } from 'framer-motion';
 import { LibraryItem, LibraryCategory, mockLibrary } from '@/mockdata/library/mockLibrary';
-import LibraryHeader from '@/components/coach/library/LibraryHeader'; // Still used for title/button
+import LibraryHeader from '@/components/coach/library/LibraryHeader';
 import LibraryList from '@/components/coach/library/LibraryList';
 import LibraryCreatorPage from './LibraryCreatorPage'; 
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"; // Assuming you have these
-import { Button } from '@/components/ui/button';
 
 type LibraryViewMode = 'list' | 'creator';
 
@@ -18,6 +16,7 @@ const LibraryPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<LibraryViewMode>('list'); 
   const [editingItem, setEditingItem] = useState<Partial<LibraryItem> | null>(null);
 
+  // Handler for category change (passed down to LibraryList)
   const handleCategoryChange = useCallback((category: LibraryCategory) => {
     setActiveCategory(category);
   }, []);
@@ -67,21 +66,20 @@ const LibraryPage: React.FC = () => {
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Header now simplified */}
+              {/* Header is now simplified (Title + New Button) */}
               <LibraryHeader
                 activeCategory={activeCategory}
                 onNewItemClick={handleNewItem}
                 itemCount={libraryData.filter(item => item.category === activeCategory).length}
-                // onCategoryChange removed from header
               />
               
-              {/* List now handles the tabs, search, and dynamic filter */}
+              {/* List handles tabs, search, and dynamic filter */}
               <LibraryList
                 activeCategory={activeCategory}
                 libraryData={libraryData}
                 onEdit={handleEditItem}
                 onDelete={handleDeleteItem}
-                onCategoryChange={handleCategoryChange} // PASS HANDLER DOWN for tabs
+                onCategoryChange={handleCategoryChange} 
               />
             </motion.div>
           ) : (
