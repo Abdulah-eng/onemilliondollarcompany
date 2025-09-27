@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Save } from 'lucide-react';
-import { LibraryCategory } from '@/mockdata/library/mockLibrary';
+import { ChevronLeft, Save, Upload, Image } from 'lucide-react';
+import { LibraryCategory, LibraryItem } from '@/mockdata/library/mockLibrary';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface CreationWrapperProps {
   children: React.ReactNode;
@@ -10,6 +12,9 @@ interface CreationWrapperProps {
   isEditing: boolean;
   onBack: () => void;
   onSubmit: () => void;
+  // NEW PROPS
+  formData: Partial<LibraryItem>; // Pass the form data to manage image state
+  onFormChange: (field: keyof LibraryItem, value: any) => void;
 }
 
 const CATEGORY_DETAILS: Record<LibraryCategory, { title: string, emoji: string, heroUrl: string, intro: string }> = {
@@ -33,9 +38,12 @@ const CATEGORY_DETAILS: Record<LibraryCategory, { title: string, emoji: string, 
   },
 };
 
-const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, category, isEditing, onBack, onSubmit }) => {
+const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, category, isEditing, onBack, onSubmit, formData, onFormChange }) => {
   const details = CATEGORY_DETAILS[category] || CATEGORY_DETAILS.exercise;
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
+  // Determine the current image URL: use user-set imageUrl first, then default heroUrl.
+  const currentImageUrl = (formData as any).imageUrl || details.heroUrl;
 
   return (
     <motion.div
@@ -43,12 +51,16 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: isMobile ? 0 : -50 }}
       transition={{ duration: 0.3 }}
-      className="space-y-6 max-w-4xl mx-auto" // Tighter max-w-4xl for dashboard feel
+      className="space-y-6 max-w-4xl mx-auto"
     >
       {/* Hero Section */}
       <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-xl bg-gray-900">
-        {/* Removed opacity from image for strong visibility */}
-        <img src={details.heroUrl} alt="Hero background" className="w-full h-full object-cover" /> 
+        <img 
+          src={currentImageUrl} 
+          alt={`${details.title} hero image`} 
+          className="w-full h-full object-cover" 
+          onError={(e) => { e.currentTarget.src = details.heroUrl; }} // Fallback if user URL fails
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent"></div>
         <div className="absolute bottom-0 left-0 p-6 md:p-8">
           <h1 className="text-4xl md:text-5xl font-extrabold text-foreground mb-2">
@@ -58,11 +70,32 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
         </div>
       </div>
       
-      {/* ... rest of the wrapper content remains the same ... */}
+      {/* HERO IMAGE UPLOADER (NEW!) */}
+      <div className="bg-card p-4 rounded-xl shadow-md border space-y-2">
+        <Label htmlFor="hero-image" className="flex items-center text-lg font-semibold text-primary">
+          <Image className="h-5 w-5 mr-2" /> Custom Hero Image URL
+        </Label>
+        <div className="flex gap-2">
+            <Input 
+                id="hero-image" 
+                value={(formData as any).imageUrl || ''} 
+                onChange={(e) => onFormChange('imageUrl' as keyof LibraryItem, e.target.value)} 
+                placeholder="Paste an image URL here to override the default hero image"
+                className="flex-grow"
+            />
+            <Button variant="outline" className='flex-shrink-0'>
+                <Upload className="h-4 w-4 mr-2" /> Upload File
+            </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">Note: Pasting a URL above will instantly update the hero image preview.</p>
+      </div>
+
+      {/* Main Form Content */}
       <div className="bg-card p-6 md:p-8 rounded-2xl shadow-lg border border-border/50 space-y-8">
         {children}
       </div>
 
+      {/* Fixed Action Footer */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t md:static md:p-0 md:border-none md:flex md:justify-end md:gap-4">
         <Button variant="outline" onClick={onBack} className="w-full md:w-auto gap-2 mb-2 md:mb-0">
           <ChevronLeft className="h-4 w-4" /> Back to Library
@@ -72,6 +105,7 @@ const LibraryCreationWrapper: React.FC<CreationWrapperProps> = ({ children, cate
         </Button>
       </div>
       
+      {/* Spacer for fixed footer */}
       <div className="md:hidden h-20"></div>
     </motion.div>
   );
