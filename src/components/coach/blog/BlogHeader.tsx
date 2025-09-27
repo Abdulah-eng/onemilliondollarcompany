@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Search, Filter, X, Dumbbell, Utensils, Feather } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { BlogCategory } from '@/mockdata/blog/mockBlog';
+import { BlogCategory, CATEGORY_DETAILS } from '@/mockdata/blog/mockBlog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -16,11 +16,6 @@ interface BlogHeaderProps {
   itemCount: number;
 }
 
-const CATEGORY_MAP: Record<BlogCategory, { label: string; emoji: string; icon: React.ElementType }> = {
-  'fitness': { label: 'Fitness 💪', emoji: '💪', icon: Dumbbell },
-  'nutrition': { label: 'Nutrition 🍎', emoji: '🍎', icon: Utensils },
-  'mental health': { label: 'Wellness 🧘', emoji: '🧘', icon: Feather },
-};
 const allCategories: BlogCategory[] = ['fitness', 'nutrition', 'mental health'];
 
 const BlogHeader: React.FC<BlogHeaderProps> = ({ activeCategory, onCategoryChange, onSearch, itemCount }) => {
@@ -40,18 +35,17 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({ activeCategory, onCategoryChang
     onCategoryChange(null);
   };
 
-  const activeCategoryLabel = activeCategory ? CATEGORY_MAP[activeCategory].label : 'All Posts ✨';
+  const activeCategoryLabel = activeCategory ? CATEGORY_DETAILS[activeCategory].label : 'All Posts ✨';
 
   return (
     <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-30 pt-6 pb-4 -mx-4 px-4 md:-mx-6 md:px-6">
       <h1 className="text-3xl font-extrabold mb-3 text-center md:text-left">Blog Posts ✍️</h1>
 
       <div className="flex items-center space-x-2 md:space-x-4">
-        {/* Main Search Input */}
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder={`Search ${activeCategory ? CATEGORY_MAP[activeCategory].label : 'all posts'}...`}
+            placeholder={`Search ${activeCategory ? CATEGORY_DETAILS[activeCategory].label : 'all posts'}...`}
             className="w-full pl-10 pr-10 h-11 rounded-xl border-2 shadow-inner bg-card/80 transition-all text-sm"
             value={searchTerm}
             onChange={handleSearchChange}
@@ -69,7 +63,6 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({ activeCategory, onCategoryChang
           )}
         </div>
 
-        {/* Filter/Category Button */}
         <Popover>
           <PopoverTrigger asChild>
             <Button
@@ -80,7 +73,7 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({ activeCategory, onCategoryChang
               aria-label="Filter content"
             >
               <Filter className="h-4 w-4" />
-              <span className='hidden sm:inline'>{activeCategory ? CATEGORY_MAP[activeCategory].emoji : 'Filter'}</span>
+              <span className='hidden sm:inline'>{activeCategory ? CATEGORY_DETAILS[activeCategory].emoji : 'Filter'}</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-64 p-4 space-y-3 rounded-xl shadow-2xl" align="end">
@@ -94,7 +87,7 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({ activeCategory, onCategoryChang
                     All Topics 📚
                 </Button>
               {allCategories.map((cat) => {
-                const { label, icon: Icon } = CATEGORY_MAP[cat];
+                const { label, icon: Icon } = CATEGORY_DETAILS[cat];
                 return (
                     <Button
                         key={cat}
@@ -102,7 +95,7 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({ activeCategory, onCategoryChang
                         className='w-full justify-start text-sm'
                         onClick={() => onCategoryChange(cat)}
                     >
-                        <Icon className="h-4 w-4 mr-3" /> {label}
+                        <Icon className="h-4 w-4 mr-3" /> {label} {CATEGORY_DETAILS[cat].emoji}
                     </Button>
                 );
               })}
@@ -111,7 +104,6 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({ activeCategory, onCategoryChang
         </Popover>
       </div>
 
-      {/* Active Filter Display */}
       <div className="mt-3 flex items-center space-x-2 text-sm text-muted-foreground">
         <span className="font-medium text-sm text-foreground">{itemCount} posts</span>
         <span className='text-lg font-light text-muted-foreground'>|</span>
