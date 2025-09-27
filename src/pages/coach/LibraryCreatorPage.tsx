@@ -5,7 +5,7 @@ import { LibraryItem, LibraryCategory } from '@/mockdata/library/mockLibrary';
 import ExerciseForm from '@/components/coach/library/creation/ExerciseForm';
 import RecipeForm from '@/components/coach/library/creation/RecipeForm';
 import MentalHealthForm from '@/components/coach/library/creation/MentalHealthForm';
-import LibraryCreationWrapper from '@/components/coach/library/creation/LibraryCreationWrapper'; // Import the new wrapper
+import LibraryCreationWrapper from '@/components/coach/library/creation/LibraryCreationWrapper';
 
 interface LibraryCreatorPageProps {
   onBack: () => void;
@@ -48,13 +48,16 @@ const LibraryCreatorPage: React.FC<LibraryCreatorPageProps> = ({ onBack, onSubmi
   };
 
   const renderForm = () => {
+    // Note: Type casting is necessary here because TypeScript doesn't know the exact item structure until runtime
+    const castedFormChange = handleFormChange as any; 
+
     switch (activeCategory) {
       case 'exercise':
-        return <ExerciseForm formData={formData} onFormChange={handleFormChange} />;
+        return <ExerciseForm formData={formData as any} onFormChange={castedFormChange} />;
       case 'recipe':
-        return <RecipeForm formData={formData} onFormChange={handleFormChange} />;
+        return <RecipeForm formData={formData as any} onFormChange={castedFormChange} />;
       case 'mental health':
-        return <MentalHealthForm formData={formData} onFormChange={handleFormChange} />;
+        return <MentalHealthForm formData={formData as any} onFormChange={castedFormChange} />;
       default:
         return <div>Select a category first.</div>;
     }
@@ -68,8 +71,10 @@ const LibraryCreatorPage: React.FC<LibraryCreatorPageProps> = ({ onBack, onSubmi
       isEditing={isEditing}
       onBack={onBack}
       onSubmit={handleSubmit}
+      // Pass state handlers to the wrapper for Hero Image control
+      formData={formData}
+      onFormChange={handleFormChange}
     >
-      {/* The form content is passed as children */}
       {renderForm()}
     </LibraryCreationWrapper>
   );
