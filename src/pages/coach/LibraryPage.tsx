@@ -2,15 +2,19 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion'; // For animations
 import { LibraryItem, LibraryCategory, mockLibrary } from '@/mockdata/library/mockLibrary';
 import LibraryHeader from '@/components/coach/library/LibraryHeader';
 import LibraryList from '@/components/coach/library/LibraryList';
-import ItemFormWrapper from '@/components/coach/library/creation/ItemFormWrapper';
+import LibraryCreatorPage from './LibraryCreatorPage'; // ⭐ NEW PAGE IMPORT
+// import ItemFormWrapper from '@/components/coach/library/creation/ItemFormWrapper'; // REMOVED
+
+type LibraryViewMode = 'list' | 'creator';
 
 const LibraryPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<LibraryCategory>('exercise');
   const [libraryData, setLibraryData] = useState<LibraryItem[]>(mockLibrary);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<LibraryViewMode>('list'); // ⭐ NEW VIEW STATE
   const [editingItem, setEditingItem] = useState<Partial<LibraryItem> | null>(null);
 
   const handleCategoryChange = useCallback((category: LibraryCategory) => {
@@ -19,12 +23,16 @@ const LibraryPage: React.FC = () => {
 
   const handleNewItem = () => {
     setEditingItem(null);
-    setIsSheetOpen(true);
+    setViewMode('creator');
   };
 
   const handleEditItem = (item: LibraryItem) => {
     setEditingItem(item);
-    setIsSheetOpen(true);
+    setViewMode('creator');
+  };
+
+  const handleBackToList = () => {
+    setViewMode('list');
   };
 
   const handleDeleteItem = (id: string) => {
@@ -35,16 +43,13 @@ const LibraryPage: React.FC = () => {
 
   const handleItemSubmit = (newItem: LibraryItem) => {
     setLibraryData(prev => {
-      // Find existing item index
       const existingIndex = prev.findIndex(item => item.id === newItem.id);
 
       if (existingIndex > -1) {
-        // Update existing item
         const updatedData = [...prev];
         updatedData[existingIndex] = newItem;
         return updatedData;
       } else {
-        // Create new item
         return [...prev, newItem];
       }
     });
@@ -52,27 +57,40 @@ const LibraryPage: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-8">
-      <LibraryHeader
-        activeCategory={activeCategory}
-        onCategoryChange={handleCategoryChange}
-        onNewItemClick={handleNewItem}
-        itemCount={libraryData.filter(item => item.category === activeCategory).length}
-      />
-
-      <LibraryList
-        activeCategory={activeCategory}
-        libraryData={libraryData}
-        onEdit={handleEditItem}
-        onDelete={handleDeleteItem}
-      />
-
-      <ItemFormWrapper
-        isOpen={isSheetOpen}
-        onOpenChange={setIsSheetOpen}
-        onSubmit={handleItemSubmit}
-        initialItem={editingItem}
-        activeCategory={activeCategory}
-      />
+      <AnimatePresence mode="wait">
+        <motion.div key={viewMode} className="w-full">
+          {viewMode === 'list' ? (
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.3 }}
+            >
+              <LibraryHeader
+                activeCategory={activeCategory}
+                onCategoryChange={handleCategoryChange}
+                onNewItemClick={handleNewItem}
+                itemCount={libraryData.filter(item => item.category === activeCategory).length}
+              />
+              <LibraryList
+                activeCategory={activeCategory}
+                libraryData={libraryData}
+                onEdit={handleEditItem}
+                onDelete={handleDeleteItem}
+              />
+            </motion.div>
+          ) : (
+            <LibraryCreatorPage
+              onBack={handleBackToList}
+              onSubmit={handleItemSubmit}
+              initialItem={editingItem}
+              activeCategory={activeCategory}
+            />
+          )}
+        </motion.div>
+      </AnimatePresence>
+      
+      {/* REMOVED: ItemFormWrapper component */}
     </div>
   );
 };
