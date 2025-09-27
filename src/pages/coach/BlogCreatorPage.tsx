@@ -28,7 +28,7 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
   const currentCategory: BlogCategory = (formData.category as BlogCategory) || 'fitness';
   const emoji = CATEGORY_DETAILS[currentCategory]?.emoji || '✍️';
 
-  // ... (useEffect, handleFormChange, handleContentChange, handleSubmit, Hero Handlers remain the same) ...
+  // ... (Data initialization and logic handlers remain the same) ...
   useEffect(() => {
     setFormData({
       ...initialPost,
@@ -38,7 +38,6 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
       isPublished: initialPost?.isPublished ?? false,
     });
     if (initialPost?.content) {
-        // NOTE: In a real app, you would parse the JSON string back into blocks here.
         setContentItems([{ id: 'c-1', type: 'text', value: initialPost.content }]);
     } else {
         setContentItems([{ id: 'c-1', type: 'text', value: '' }]);
@@ -98,12 +97,12 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
       transition={{ duration: 0.3 }}
-      // FIX 1: Reduced max-width (max-w-3xl -> max-w-2xl) and adjusted vertical spacing (space-y-6)
-      className="space-y-6 **max-w-2xl** mx-auto" 
+      // FIX 1: Increased max-width back to max-w-3xl for adequate space
+      className="space-y-6 **max-w-3xl** mx-auto" 
     >
       
       {/* ACTION BUTTONS (TOP) */}
-      <div className="flex items-center justify-between **pb-4 border-b**"> {/* Reduced padding slightly */}
+      <div className="flex items-center justify-between pb-4 border-b">
         <Button variant="outline" onClick={onBack} className="gap-2 **text-sm**">
           <ChevronLeft className="h-4 w-4" /> Back to Blog
         </Button>
@@ -118,8 +117,8 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
       {/* HERO SECTION - CANVAS */}
       <div 
         className={cn(
-            // FIX 2: Reduced height (h-64/h-80 -> h-56/h-72)
-            "relative **h-56 md:h-72** rounded-xl overflow-hidden shadow-xl group cursor-pointer border-4 border-dashed transition-all",
+            // FIX 2: Restored original height for visual impact (h-64/h-80)
+            "relative **h-64 md:h-80** rounded-xl overflow-hidden shadow-xl group cursor-pointer border-4 border-dashed transition-all",
             !hasUserImage ? "border-primary/30 bg-gray-100 dark:bg-gray-800" : "border-transparent"
         )}
         onClick={triggerFileInput} 
@@ -133,8 +132,8 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
             />
         ) : (
              <div className="flex flex-col items-center justify-center w-full h-full text-muted-foreground/80">
-                 <Upload className="h-10 w-10 mb-3 text-primary" /> {/* Reduced icon size */}
-                 <span className="text-base font-semibold">Click to Upload Hero Image</span> {/* Reduced text size */}
+                 <Upload className="h-12 w-12 mb-3 text-primary" /> 
+                 <span className="text-lg font-semibold">Click to Upload Hero Image</span> 
                  <span className="text-sm">Recommended aspect ratio 16:9</span>
              </div>
         )}
@@ -143,15 +142,15 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
             <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-black/30 to-transparent"></div>
         )}
         
-        <div className="absolute top-3 right-3 z-10 flex gap-2"> {/* Reduced top/right padding */}
+        <div className="absolute top-3 right-3 z-10 flex gap-2">
             {hasUserImage && (
-                <Button variant="destructive" size="icon" className="rounded-full **h-7 w-7** bg-black/50 hover:bg-black/80" onClick={removeHeroImage}><X className="h-4 w-4" /></Button>
+                <Button variant="destructive" size="icon" className="rounded-full h-7 w-7 bg-black/50 hover:bg-black/80" onClick={removeHeroImage}><X className="h-4 w-4" /></Button>
             )}
-            <Button variant="default" size="icon" className="rounded-full **h-7 w-7** bg-black/50 hover:bg-black/80 text-white" onClick={(e) => { e.stopPropagation(); triggerFileInput(); }} ><Camera className="h-4 w-4" /></Button>
+            <Button variant="default" size="icon" className="rounded-full h-7 w-7 bg-black/50 hover:bg-black/80 text-white" onClick={(e) => { e.stopPropagation(); triggerFileInput(); }} ><Camera className="h-4 w-4" /></Button>
         </div>
 
         {/* Content Overlay (Bottom Left - Title) */}
-        <div className="absolute bottom-0 left-0 **p-5 md:p-6** w-full z-20"> {/* Reduced padding */}
+        <div className="absolute bottom-0 left-0 **p-6 md:p-8** w-full z-20"> {/* Restored original padding */}
           
           {/* TITLE FIELD (Click-to-Edit) */}
           <div 
@@ -164,14 +163,14 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
                 autoFocus
                 value={formData.title || ''} 
                 onChange={(e) => handleFormChange('title', e.target.value)} 
-                // FIX 3: Reduced font size again
-                className="**text-3xl md:text-4xl** font-extrabold bg-transparent text-white border-primary w-full p-1 placeholder:text-gray-300"
+                // FIX 3: Restored font size to prominent level
+                className="**text-4xl md:text-5xl** font-extrabold bg-transparent text-white border-primary w-full p-2 placeholder:text-gray-300"
                 placeholder={`Your Blog Post Title ${emoji}`}
                 onKeyDown={(e) => e.key === 'Enter' && setIsTitleEditing(false)}
               />
             ) : (
-              // Reduced static font size
-              <h1 className="**text-3xl md:text-4xl** font-extrabold text-white mb-2 group-hover:bg-black/10 group-hover:p-1 group-hover:rounded transition-colors">
+              // Restored static font size
+              <h1 className="**text-4xl md:text-5xl** font-extrabold text-white mb-2 group-hover:bg-black/10 group-hover:p-1 group-hover:rounded transition-colors">
                 {formData.title || `Your Blog Post Title ${emoji}`}
                 <Pencil className="h-5 w-5 ml-2 inline text-white opacity-0 group-hover:opacity-100 transition-opacity" />
               </h1>
@@ -181,21 +180,21 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
       </div>
 
       {/* CORE FORM CONTENT */}
-      {/* FIX 4: Reduced padding: p-8/p-10 -> p-6/p-8 */}
-      <div className="bg-card **p-6 md:p-8** rounded-xl shadow-lg border border-border/50 space-y-6"> 
+      {/* FIX 4: Restored inner padding to p-8/p-10 to give breathing room */}
+      <div className="bg-card **p-8 md:p-10** rounded-xl shadow-lg border border-border/50 space-y-8"> 
         
         {/* CATEGORY & INTRODUCTION */}
         <div className="space-y-6"> 
             {/* Category Selector */}
             <div className="space-y-3"> 
-                <Label htmlFor="category" className="**text-lg** font-bold flex items-center">
+                <Label htmlFor="category" className="**text-xl** font-bold flex items-center">
                     Select Topic Category 🏷️
                 </Label>
                 <ToggleGroup 
                     type="single" 
                     value={formData.category as string} 
                     onValueChange={(value) => handleFormChange('category', value as BlogCategory)}
-                    className="flex justify-start **p-1** rounded-lg bg-muted/50 border shadow-inner" // Reduced padding and border radius
+                    className="flex justify-start **p-1.5** rounded-xl bg-muted/50 border shadow-inner" 
                 >
                     {allCategories.map(cat => {
                         const detail = CATEGORY_DETAILS[cat];
@@ -205,8 +204,8 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
                                 key={cat} 
                                 value={cat} 
                                 className={cn(
-                                    // Reduced padding: px-5 py-2.5 -> px-4 py-2
-                                    "**px-4 py-2** text-sm font-semibold rounded-md transition-all border", 
+                                    // Restored padding to look fuller
+                                    "**px-5 py-2.5** text-base font-semibold rounded-lg transition-all border", 
                                     formData.category === cat ? `${detail.color} text-white hover:${detail.color}/90 border-transparent` : 'bg-card text-foreground hover:bg-muted/80 border-border'
                                 )}
                             >
@@ -219,7 +218,7 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
             
             {/* Introduction */}
             <div className="space-y-3">
-                <Label htmlFor="introduction" className="**text-lg** font-bold flex items-center">
+                <Label htmlFor="introduction" className="**text-xl** font-bold flex items-center">
                     Short Introduction / Summary 📝
                 </Label>
                 <Textarea 
@@ -227,19 +226,20 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
                     value={formData.introduction || ''} 
                     onChange={(e) => handleFormChange('introduction', e.target.value)} 
                     placeholder="A brief summary for card previews (max 2 lines)..."
-                    className="**min-h-[70px] text-sm**" // Reduced min height and font size
+                    // Restored height/font size to be more usable
+                    className="**min-h-[80px] text-base**" 
                 />
             </div>
         </div>
         
         {/* Separator before dynamic content */}
-        <div className="border-t border-border/50 **my-4**"></div> 
+        <div className="border-t border-border/50 **my-6**"></div> 
 
         {/* BLOG CONTENT BUILDER */}
         <BlogContentBuilder content={contentItems} onContentChange={handleContentChange} />
         
         {/* PUBLISH TOGGLE */}
-        <div className="flex items-center space-x-2 border-t **pt-4**">
+        <div className="flex items-center space-x-2 border-t **pt-6**">
             <input 
                 type="checkbox" 
                 id="isPublished" 
