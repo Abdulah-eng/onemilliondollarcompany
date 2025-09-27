@@ -1,4 +1,4 @@
-// src/pages/coach/LibraryPage.tsx
+```tsx
 'use client';
 
 import React, { useState, useCallback } from 'react';
@@ -6,87 +6,78 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LibraryItem, LibraryCategory, mockLibrary } from '@/mockdata/library/mockLibrary';
 import LibraryHeader from '@/components/coach/library/LibraryHeader';
 import LibraryList from '@/components/coach/library/LibraryList';
-import LibraryCreatorPage from './LibraryCreatorPage'; 
+import LibraryCreatorPage from './LibraryCreatorPage';
 
-type LibraryViewMode = 'list' | 'creator';
+type LibraryView = 'list' | 'creator';
 
 const LibraryPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<LibraryCategory>('exercise');
   const [libraryData, setLibraryData] = useState<LibraryItem[]>(mockLibrary);
-  const [viewMode, setViewMode] = useState<LibraryViewMode>('list'); 
-  const [editingItem, setEditingItem] = useState<Partial<LibraryItem> | null>(null);
+  const [view, setView] = useState<LibraryView>('list');
+  const [editingItem, setEditingItem] = useState<LibraryItem | null>(null);
 
-  // Handler for category change (passed down to LibraryList)
-  const handleCategoryChange = useCallback((category: LibraryCategory) => {
-    setActiveCategory(category);
-  }, []);
+  const handleCategoryChange = useCallback((cat: LibraryCategory) => setActiveCategory(cat), []);
 
   const handleNewItem = () => {
     setEditingItem(null);
-    setViewMode('creator');
+    setView('creator');
   };
 
   const handleEditItem = (item: LibraryItem) => {
     setEditingItem(item);
-    setViewMode('creator');
+    setView('creator');
   };
 
-  const handleBackToList = () => {
-    setViewMode('list');
-  };
+  const handleBackToList = () => setView('list');
 
   const handleDeleteItem = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this item?")) {
+    if (window.confirm('Delete this item?')) {
       setLibraryData(prev => prev.filter(item => item.id !== id));
     }
   };
 
   const handleItemSubmit = (newItem: LibraryItem) => {
     setLibraryData(prev => {
-      const existingIndex = prev.findIndex(item => item.id === newItem.id);
-
-      if (existingIndex > -1) {
-        const updatedData = [...prev];
-        updatedData[existingIndex] = newItem;
-        return updatedData;
-      } else {
-        return [...prev, newItem];
+      const i = prev.findIndex(item => item.id === newItem.id);
+      if (i > -1) {
+        const updated = [...prev];
+        updated[i] = newItem;
+        return updated;
       }
+      return [...prev, newItem];
     });
+    setView('list');
   };
 
   return (
     <div className="container mx-auto p-4 md:p-8">
       <AnimatePresence mode="wait">
-        <motion.div key={viewMode} className="w-full">
-          {viewMode === 'list' ? (
+        <motion.div key={view} className="w-full">
+          {view === 'list' ? (
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
+              initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.3 }}
+              exit={{ opacity: 0, x: -40 }}
+              transition={{ duration: 0.25 }}
             >
-              {/* Header is now simplified (Title + New Button) */}
               <LibraryHeader
                 activeCategory={activeCategory}
                 onNewItemClick={handleNewItem}
-                itemCount={libraryData.filter(item => item.category === activeCategory).length}
+                itemCount={libraryData.filter(i => i.category === activeCategory).length}
               />
-              
-              {/* List handles tabs, search, and dynamic filter */}
               <LibraryList
                 activeCategory={activeCategory}
                 libraryData={libraryData}
                 onEdit={handleEditItem}
                 onDelete={handleDeleteItem}
-                onCategoryChange={handleCategoryChange} 
+                onCategoryChange={handleCategoryChange}
               />
             </motion.div>
           ) : (
             <LibraryCreatorPage
               onBack={handleBackToList}
               onSubmit={handleItemSubmit}
-              initialItem={editingItem}
+              initialItem={editingItem ?? undefined}
               activeCategory={activeCategory}
             />
           )}
@@ -97,3 +88,4 @@ const LibraryPage: React.FC = () => {
 };
 
 export default LibraryPage;
+```
