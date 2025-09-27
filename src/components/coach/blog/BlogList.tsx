@@ -20,7 +20,6 @@ const BlogList: React.FC<BlogListProps> = ({ filteredPosts, onEdit, onDelete }) 
     );
   }
 
-  // Sort by timeline (newest first)
   const sortedPosts = [...filteredPosts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
