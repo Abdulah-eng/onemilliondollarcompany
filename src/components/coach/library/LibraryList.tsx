@@ -23,11 +23,29 @@ onDelete,
 }) => {
 const items = libraryData.filter(i => i.category === activeCategory);
 
-return ( <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-{items.map(item => ( <Card key={item.id}> <CardHeader> <CardTitle>{item.title}</CardTitle> </CardHeader> <CardContent> <p className="text-sm text-muted-foreground mb-2">{item.description}</p> <div className="flex space-x-2">
-<Button variant="outline" size="sm" onClick={() => onEdit(item)}> <Pencil className="w-4 h-4 mr-1" /> Edit </Button>
-<Button variant="destructive" size="sm" onClick={() => onDelete(item.id)}> <Trash2 className="w-4 h-4 mr-1" /> Delete </Button> </div> </CardContent> </Card>
-))} </div>
+return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {items.map(item => (
+        <Card key={item.id}>
+          <CardHeader>
+            <CardTitle>{item.name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-2">{item.introduction}</p>
+            <div className="flex space-x-2">
+              <Button variant="outline" size="sm" onClick={() => onEdit(item)}>
+                <Pencil className="w-4 h-4 mr-1" />
+                Edit
+              </Button>
+              <Button variant="destructive" size="sm" onClick={() => onDelete(item.id)}>
+                <Trash2 className="w-4 h-4 mr-1" />
+                Delete
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
 );
 };
 

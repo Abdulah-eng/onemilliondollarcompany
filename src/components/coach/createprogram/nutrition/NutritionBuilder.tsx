@@ -169,7 +169,7 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave }) =
         </div>
 
         {/* Left Column: Recipe Library (Desktop only) */}
-        <div className="hidden lg:block lg:col-span-1 border-r border-border bg-muted/20 lg:sticky lg:top-[80px] lg:h-[calc(100vh-12rem)] lg:overflow-y-auto">
+        <div className="hidden lg:block lg:col-span-1 border-r border-border bg-muted/20 lg:sticky lg:top-[60px] lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:max-h-[calc(100vh-8rem)]">
           <RecipeLibrary
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
