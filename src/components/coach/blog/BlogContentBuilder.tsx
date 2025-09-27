@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 export interface BlogContentItem {
   id: string;
   type: 'text' | 'image' | 'video';
-  value: string;
+  value: string; // Text content, Image URL, or Video URL
 }
 
 interface BlogContentBuilderProps {
@@ -34,6 +34,7 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
 
   const renderContentBlock = (item: BlogContentItem) => {
     const isText = item.type === 'text';
+    const isMedia = item.type === 'image' || item.type === 'video';
     const placeholderText = isText 
       ? "Start typing your blog paragraph here..." 
       : item.type === 'image' ? "Paste image URL or click to upload..." : "Paste video link (e.g., YouTube)...";
@@ -41,8 +42,7 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
     return (
       <div 
         key={item.id} 
-        // Increased horizontal and vertical padding (p-5) and better spacing
-        className="relative **p-5** rounded-xl border transition-all hover:shadow-lg hover:border-primary/50 bg-card group flex items-start **space-x-4**"
+        className="relative p-4 rounded-xl border transition-all hover:shadow-lg hover:border-primary/50 bg-card group flex items-start space-x-2"
       >
         
         {/* Control Column (Drag Handle & Delete) */}
@@ -64,13 +64,12 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
               value={item.value}
               onChange={(e) => updateItem(item.id, e.target.value)}
               placeholder={placeholderText}
-              // Removed p-0 to allow the Textarea to fill the space cleanly
-              className="min-h-[100px] text-base focus:border-primary/50 border-none resize-none shadow-none focus-visible:ring-0 **p-0**" 
+              className="min-h-[100px] text-base focus:border-primary/50 border-none resize-none shadow-none focus-visible:ring-0 p-0"
             />
           )}
 
           {/* Media Block */}
-          {!isText && (
+          {isMedia && (
             <div className="space-y-2">
               <div className="flex items-center text-sm font-medium text-muted-foreground pt-1">
                 {item.type === 'image' ? <Image className="h-4 w-4 mr-2" /> : <Video className="h-4 w-4 mr-2" />}
@@ -118,8 +117,8 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
       </AnimatePresence>
 
       {/* Add Content Buttons (Floating, Centered) */}
-      <div className="flex justify-center **pt-6**">
-        <div className="flex gap-3 **p-3.5** rounded-full border bg-muted/50 shadow-xl">
+      <div className="flex justify-center pt-4">
+        <div className="flex gap-3 p-3 rounded-full border bg-muted/50 shadow-xl">
           <Button variant="secondary" onClick={() => addItem('text')} className="gap-2">
             <Type className="h-4 w-4" /> Text
           </Button>
