@@ -2,21 +2,21 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion'; // For animations
+import { motion, AnimatePresence } from 'framer-motion';
 import { LibraryItem, LibraryCategory, mockLibrary } from '@/mockdata/library/mockLibrary';
 import LibraryHeader from '@/components/coach/library/LibraryHeader';
 import LibraryList from '@/components/coach/library/LibraryList';
-import LibraryCreatorPage from './LibraryCreatorPage'; // ⭐ NEW PAGE IMPORT
-// import ItemFormWrapper from '@/components/coach/library/creation/ItemFormWrapper'; // REMOVED
+import LibraryCreatorPage from './LibraryCreatorPage'; 
 
 type LibraryViewMode = 'list' | 'creator';
 
 const LibraryPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<LibraryCategory>('exercise');
   const [libraryData, setLibraryData] = useState<LibraryItem[]>(mockLibrary);
-  const [viewMode, setViewMode] = useState<LibraryViewMode>('list'); // ⭐ NEW VIEW STATE
+  const [viewMode, setViewMode] = useState<LibraryViewMode>('list'); 
   const [editingItem, setEditingItem] = useState<Partial<LibraryItem> | null>(null);
 
+  // This handler is now passed to LibraryList for tab changes
   const handleCategoryChange = useCallback((category: LibraryCategory) => {
     setActiveCategory(category);
   }, []);
@@ -66,17 +66,20 @@ const LibraryPage: React.FC = () => {
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.3 }}
             >
+              {/* Header is now simplified */}
               <LibraryHeader
                 activeCategory={activeCategory}
-                onCategoryChange={handleCategoryChange}
                 onNewItemClick={handleNewItem}
                 itemCount={libraryData.filter(item => item.category === activeCategory).length}
               />
+              
+              {/* List now handles the tabs, search, and dynamic filter */}
               <LibraryList
                 activeCategory={activeCategory}
                 libraryData={libraryData}
                 onEdit={handleEditItem}
                 onDelete={handleDeleteItem}
+                onCategoryChange={handleCategoryChange} // ⭐ PASS HANDLER DOWN
               />
             </motion.div>
           ) : (
@@ -89,8 +92,6 @@ const LibraryPage: React.FC = () => {
           )}
         </motion.div>
       </AnimatePresence>
-      
-      {/* REMOVED: ItemFormWrapper component */}
     </div>
   );
 };
