@@ -2,28 +2,18 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Dumbbell, Utensils, Feather, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { BlogCategory } from '@/mockdata/blog/mockBlog'; // Use BlogCategory
+import { Plus, FilePlus2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 // Constants
 const SIZE = 64; 
 const MARGIN = 24; 
-const ACTION_MARGIN = 16; 
-const ACTION_WIDTH = 200; 
-
-const ACTIONS: { label: string; icon: React.ElementType; category: BlogCategory }[] = [
-  { label: 'New Fitness Post 💪', icon: Dumbbell, category: 'fitness' },
-  { label: 'New Nutrition Post 🍎', icon: Utensils, category: 'nutrition' },
-  { label: 'New Wellness Post 🧘', icon: Feather, category: 'mental health' },
-];
 
 interface BlogFABProps {
-  onActionClick: (category: BlogCategory) => void;
+  onActionClick: () => void; // Simplified to take no category argument
 }
 
 export default function BlogFAB({ onActionClick }: BlogFABProps) {
-  // ... (FAB positioning/drag logic remains the same as LibraryFAB.tsx) ...
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const innerRef = useRef<HTMLDivElement | null>(null);
 
@@ -33,7 +23,7 @@ export default function BlogFAB({ onActionClick }: BlogFABProps) {
   const rafRef = useRef<number | null>(null);
   const translateRef = useRef({ x: 0, y: 0 });
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // Can keep isOpen state for potential future expansion
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null); 
   const [viewport, setViewport] = useState<{ w: number; h: number } | null>(null);
 
@@ -113,19 +103,11 @@ export default function BlogFAB({ onActionClick }: BlogFABProps) {
       movedRef.current = false;
       return;
     }
-    setIsOpen((s) => !s);
-  };
-
-  const handleAction = (category: BlogCategory) => {
-    setIsOpen(false);
-    onActionClick(category);
+    // Simply call the action handler
+    onActionClick();
   };
 
   if (!pos) return null;
-
-  const bubbleAlignment = 'right';
-  const actionContainerX = -(ACTION_WIDTH - SIZE);
-  const labelTranslate = ACTION_WIDTH; 
 
   return (
     <div
@@ -150,67 +132,16 @@ export default function BlogFAB({ onActionClick }: BlogFABProps) {
           transition: draggingRef.current ? 'none' : 'transform 100ms ease-out',
         }}>
         
-        {/* Actions */}
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.2 }}
-              className="absolute flex flex-col gap-3 select-none"
-              style={{
-                bottom: SIZE + ACTION_MARGIN,
-                [bubbleAlignment]: 0, 
-                transform: `translateX(${actionContainerX}px)`,
-                maxWidth: ACTION_WIDTH,
-                minWidth: ACTION_WIDTH,
-              }}
-            >
-              {ACTIONS.map((action, index) => {
-                const Icon = action.icon;
-                return (
-                  <motion.div
-                    key={action.category}
-                    initial={{ opacity: 0, x: labelTranslate }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: labelTranslate }}
-                    transition={{ duration: 0.2, delay: (ACTIONS.length - 1 - index) * 0.05 }} 
-                    className="flex items-center justify-end"
-                  >
-                    <span className="text-sm bg-card/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-xl border border-border/50 font-medium text-foreground whitespace-nowrap">
-                      {action.label}
-                    </span>
-                    <Button
-                      size="icon"
-                      className="rounded-full w-12 h-12 shadow-xl ml-3 bg-primary hover:bg-primary/90 transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAction(action.category);
-                      }}
-                      aria-label={action.label}
-                    >
-                      <Icon className="h-5 w-5 text-primary-foreground" />
-                    </Button>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Main FAB */}
+        {/* Main FAB - Always opens the creator page */}
         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Button
             size="icon"
             className="rounded-full w-16 h-16 shadow-2xl z-10 cursor-grab active:cursor-grabbing bg-primary hover:bg-primary/90 transition-colors"
             onPointerDown={onPointerDownMain}
             onClick={onClickMain}
-            aria-label="Blog creation actions"
+            aria-label="Create new blog post"
           >
-            <motion.div animate={{ rotate: isOpen ? 45 : 0 }} transition={{ duration: 0.2 }}>
-              <Plus className="h-8 w-8 text-primary-foreground" />
-            </motion.div>
+            <FilePlus2 className="h-8 w-8 text-primary-foreground" />
           </Button>
         </div>
       </div>
