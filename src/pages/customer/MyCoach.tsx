@@ -1,6 +1,8 @@
 // src/pages/customer/MyCoach.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useMediaQuery from '@/hooks/use-media-query';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 // Import from the strictly separated directories
 import CurrentCoachTab from '@/components/customer/mycoach/CurrentCoachTab';
@@ -14,11 +16,12 @@ import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
-import { coachInfo } from '@/mockdata/mycoach/coachData';
-import { User, Search } from 'lucide-react';
+import { User, Search, Loader2 } from 'lucide-react';
 
 const MyCoach = () => {
-    const hasCurrentCoach = !!coachInfo.name;
+    const { user, profile } = useAuth();
+    const [hasCurrentCoach, setHasCurrentCoach] = useState(false);
+    const [loading, setLoading] = useState(true);
     const initialTab = hasCurrentCoach ? 'myCoach' : 'explore';
     const [activeTab, setActiveTab] = useState(initialTab);
 
@@ -32,6 +35,42 @@ const MyCoach = () => {
         requested: false,
     });
 
+    // Check if user has a coach or accepted request
+    useEffect(() => {
+        const checkCoachStatus = async () => {
+            if (!user) return;
+
+            try {
+                // Check if user has coach_id in profile OR has an accepted request
+                const hasCoachId = profile?.coach_id;
+                
+                // Also check for accepted requests
+                const { data: acceptedRequest } = await supabase
+                    .from('coach_requests')
+                    .select('*')
+                    .eq('customer_id', user.id)
+                    .eq('status', 'accepted')
+                    .single();
+
+                const hasCoach = hasCoachId || acceptedRequest;
+                setHasCurrentCoach(!!hasCoach);
+                
+                // Update active tab based on coach status
+                if (hasCoach && activeTab === 'explore') {
+                    setActiveTab('myCoach');
+                } else if (!hasCoach && activeTab === 'myCoach') {
+                    setActiveTab('explore');
+                }
+            } catch (error) {
+                console.error('Error checking coach status:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        checkCoachStatus();
+    }, [user, profile, activeTab]);
+
     const showPopup = (message: string, requested = false) => {
         setFeedbackPopup({ isVisible: true, message, requested });
         setTimeout(() => {
@@ -41,7 +80,7 @@ const MyCoach = () => {
 
     const handleFeedbackRequest = () => {
         if (feedbackPopup.requested) {
-            showPopup(`You already requested feedback. Your coach ${coachInfo.name} will reach out soon.`, true);
+            showPopup(`You already requested feedback. Your coach will reach out soon.`, true);
         } else {
             showPopup("Feedback requested! Your coach will reach out soon.", true);
         }
@@ -53,6 +92,17 @@ const MyCoach = () => {
             setActiveTab('myCoach');
         }
     };
+
+    if (loading) {
+        return (
+            <div className="w-full max-w-5xl mx-auto px-4 py-8 flex items-center justify-center">
+                <div className="text-center">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                    <p className="text-muted-foreground">Loading your coaching information...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full max-w-5xl mx-auto px-4 py-8 space-y-8">

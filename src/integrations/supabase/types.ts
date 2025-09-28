@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      coach_requests: {
+        Row: {
+          coach_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          message: string | null
+          status: Database["public"]["Enums"]["request_status"]
+          updated_at: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          message?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          updated_at?: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          message?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_requests_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_details: {
         Row: {
           allergies: string[]
@@ -135,7 +180,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      request_status: "pending" | "accepted" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -262,6 +307,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      request_status: ["pending", "accepted", "rejected"],
+    },
   },
 } as const

@@ -38,7 +38,18 @@ const CurrentCoachTab: React.FC<CurrentCoachTabProps> = ({ isMobile, onViewBio, 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Content Column */}
                 <div className="lg:col-span-2 space-y-8">
-                    <ModernCoachDashboard onViewBio={onViewBio} />
+                    <ModernCoachDashboard 
+                        coach={{
+                            name: 'Your Coach',
+                            bio: 'Dedicated to helping you achieve your health and fitness goals.',
+                            specialties: ['Fitness', 'Nutrition'],
+                            profileImageUrl: '',
+                        }}
+                        isMobile={isMobile}
+                        onViewBio={onViewBio}
+                        onRequestFeedback={onRequestFeedback}
+                        onViewSharedFiles={onViewSharedFiles}
+                    />
                     <EnhancedCoachUpdates />
                 </div>
 

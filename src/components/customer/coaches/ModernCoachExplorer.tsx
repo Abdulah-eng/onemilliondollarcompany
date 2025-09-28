@@ -1,7 +1,9 @@
 // src/components/customer/coaches/ModernCoachExplorer.tsx
-import { useState } from 'react';
-import { allCoaches, Coach } from '@/mockdata/mycoach/coachData';
+import { useState, useEffect } from 'react';
+import { Coach } from '@/mockdata/mycoach/coachData';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { CircleUserRound, Zap, MessageSquare, Star, Send, Search, Filter, History, Loader2, BarChart3, Clock } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
@@ -22,8 +24,9 @@ interface CoachCardProps {
     coach: Coach;
     onRequest: (coach: Coach) => void;
     index: number;
+    requestStatus?: 'pending' | 'accepted' | 'rejected' | null;
 }
-const ModernCoachCard: React.FC<CoachCardProps> = ({ coach, onRequest, index }) => (
+const ModernCoachCard: React.FC<CoachCardProps> = ({ coach, onRequest, index, requestStatus }) => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -92,9 +95,14 @@ const ModernCoachCard: React.FC<CoachCardProps> = ({ coach, onRequest, index }) 
                         <Button 
                             onClick={() => onRequest(coach)} 
                             className="w-full sm:w-auto shadow-md transition-all duration-300"
+                            disabled={requestStatus === 'pending' || requestStatus === 'accepted'}
+                            variant={requestStatus === 'rejected' ? 'outline' : 'default'}
                         >
                             <MessageSquare className="w-4 h-4 mr-2" />
-                            Request Coach
+                            {requestStatus === 'pending' && 'Request Sent'}
+                            {requestStatus === 'accepted' && 'Already Your Coach'}
+                            {requestStatus === 'rejected' && 'Request Again'}
+                            {!requestStatus && 'Request Coach'}
                         </Button>
                     </div>
                 </div>
@@ -138,33 +146,108 @@ interface ModernCoachExplorerProps {
 }
 
 const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachRequestSent }) => {
+    const { user } = useAuth();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    // 💡 Filter state added
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [selectedCoach, setSelectedCoach] = useState<Coach | null>(null);
     const [requestMessage, setRequestMessage] = useState('');
     const [isRequestLoading, setIsRequestLoading] = useState(false);
-    // 💡 Search and Filter states added
     const [searchTerm, setSearchTerm] = useState('');
     const [activeFilter, setActiveFilter] = useState<FilterOption>('All');
+    const [coaches, setCoaches] = useState<Coach[]>([]);
+    const [coachRequests, setCoachRequests] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch coaches and requests
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!user) return;
+            
+            try {
+                // Fetch all coaches
+                const { data: profilesData, error: profilesError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('role', 'coach');
+
+                if (profilesError) throw profilesError;
+
+                // Convert profiles to Coach format  
+                const coachesData: Coach[] = (profilesData || []).map((profile, index) => ({
+                    id: index + 1, // Use numeric id for compatibility with Coach interface
+                    profileId: profile.id, // Store actual profile ID separately
+                    name: profile.full_name || 'Coach',
+                    profileImageUrl: profile.avatar_url || '',
+                    bio: 'Experienced fitness coach dedicated to helping you achieve your goals.',
+                    specialties: ['Fitness', 'Nutrition'], // Default specialties
+                    rating: 4.8,
+                    reviews: 42,
+                    yearsExperience: 5
+                } as Coach & { profileId: string }));
+
+                // Fetch user's requests
+                const { data: requestsData, error: requestsError } = await supabase
+                    .from('coach_requests')
+                    .select('*')
+                    .eq('customer_id', user.id);
+
+                if (requestsError) throw requestsError;
+
+                setCoaches(coachesData);
+                setCoachRequests(requestsData || []);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [user]);
 
     const handleRequest = (coach: Coach) => {
+        const coachProfileId = (coach as any).profileId || coach.id.toString();
+        const existingRequest = coachRequests.find(req => req.coach_id === coachProfileId);
+        if (existingRequest?.status === 'pending' || existingRequest?.status === 'accepted') {
+            return; // Don't open dialog if request exists
+        }
+        
         setSelectedCoach(coach);
         setIsDialogOpen(true);
         setRequestMessage(`I'm interested in working with ${coach.name} because of their expertise in ${coach.specialties[0]} and I'm looking to achieve [specific goal, e.g., muscle gain/marathon prep].`);
     };
 
-    const handleSendRequest = () => {
-        if (!selectedCoach || requestMessage.trim().length < 10) return;
+    const handleSendRequest = async () => {
+        if (!selectedCoach || !user || requestMessage.trim().length < 10) return;
 
+        const coachProfileId = (selectedCoach as any).profileId || selectedCoach.id.toString();
         setIsRequestLoading(true);
-        setTimeout(() => {
-            setIsRequestLoading(false);
+        try {
+            const { error } = await supabase.from('coach_requests').insert({
+                customer_id: user.id,
+                coach_id: coachProfileId,
+                message: requestMessage.trim(),
+                status: 'pending'
+            });
+
+            if (error) throw error;
+
+            // Refresh requests
+            const { data: updatedRequests } = await supabase
+                .from('coach_requests')
+                .select('*')
+                .eq('customer_id', user.id);
+            
+            setCoachRequests(updatedRequests || []);
             setIsDialogOpen(false);
             onNewCoachRequestSent(selectedCoach.name);
             setSelectedCoach(null);
             setRequestMessage('');
-        }, 1500);
+        } catch (error) {
+            console.error('Error sending request:', error);
+        } finally {
+            setIsRequestLoading(false);
+        }
     };
 
     // Map specialties to broader categories for filtering
@@ -182,8 +265,15 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
         return lower;
     };
 
-    // 💡 Comprehensive Filter Logic
-    const filteredCoaches = allCoaches
+    // Get request status for a coach
+    const getRequestStatus = (coach: Coach & { profileId?: string }): 'pending' | 'accepted' | 'rejected' | null => {
+        const coachProfileId = (coach as any).profileId || coach.id.toString();
+        const request = coachRequests.find(req => req.coach_id === coachProfileId);
+        return request?.status || null;
+    };
+
+    // Comprehensive Filter Logic
+    const filteredCoaches = coaches
         .filter(coach => {
             // 1. Filter by Category
             if (activeFilter !== 'All') {
@@ -206,6 +296,17 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
                 coach.specialties.some(s => s.toLowerCase().includes(lowerCaseSearch))
             );
         });
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Loading coaches...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8">
@@ -258,6 +359,7 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
                                 coach={coach} 
                                 onRequest={handleRequest} 
                                 index={index}
+                                requestStatus={getRequestStatus(coach)}
                             />
                         ))}
                     </div>

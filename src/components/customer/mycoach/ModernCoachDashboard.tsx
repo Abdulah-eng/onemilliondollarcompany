@@ -5,18 +5,35 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { User, Star, Calendar, X } from 'lucide-react';
-import { coachInfo, dailyMessage } from '@/mockdata/mycoach/coachData';
+import { dailyMessage } from '@/mockdata/mycoach/coachData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import useMediaQuery from '@/hooks/use-media-query';
 
-interface ModernCoachDashboardProps {
-    onViewBio: () => void;
+interface CoachInfo {
+    name: string;
+    bio: string;
+    specialties: string[];
+    profileImageUrl?: string;
+    email?: string;
 }
 
-const ModernCoachDashboard: React.FC<ModernCoachDashboardProps> = ({ onViewBio }) => {
+interface ModernCoachDashboardProps {
+    coach: CoachInfo;
+    isMobile: boolean;
+    onViewBio: () => void;
+    onRequestFeedback: () => void;
+    onViewSharedFiles: () => void;
+}
+
+const ModernCoachDashboard: React.FC<ModernCoachDashboardProps> = ({ 
+    coach, 
+    isMobile, 
+    onViewBio, 
+    onRequestFeedback, 
+    onViewSharedFiles 
+}) => {
     const [isDailyMessageVisible, setIsDailyMessageVisible] = useState(true);
-    const isMobile = useMediaQuery('(max-width: 768px)');
 
     const handleDismissMessage = () => {
         setIsDailyMessageVisible(false);
@@ -32,7 +49,7 @@ const ModernCoachDashboard: React.FC<ModernCoachDashboardProps> = ({ onViewBio }
                         <div className="flex flex-col md:flex-row items-start gap-6">
                             <div className="relative flex-shrink-0">
                                 <Avatar className="w-24 h-24 ring-4 ring-primary/20 shadow-xl">
-                                    <AvatarImage src={coachInfo.profileImageUrl} alt={coachInfo.name} />
+                                    <AvatarImage src={coach.profileImageUrl} alt={coach.name} />
                                     <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-3xl">
                                         <User className="w-12 h-12" />
                                     </AvatarFallback>
@@ -45,7 +62,7 @@ const ModernCoachDashboard: React.FC<ModernCoachDashboardProps> = ({ onViewBio }
 
                             <div className="flex-1 space-y-4 pt-1">
                                 <div>
-                                    <h2 className="text-3xl font-bold text-foreground mb-1">{coachInfo.name}</h2>
+                                    <h2 className="text-3xl font-bold text-foreground mb-1">{coach.name}</h2>
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
                                         <span className="text-base font-medium">Your Personal Coach</span>
@@ -53,7 +70,7 @@ const ModernCoachDashboard: React.FC<ModernCoachDashboardProps> = ({ onViewBio }
                                 </div>
 
                                 <div className="flex flex-wrap gap-2">
-                                    {coachInfo.specialties.map((specialty, index) => (
+                                    {coach.specialties.map((specialty, index) => (
                                         <Badge
                                             key={index}
                                             variant="secondary"
