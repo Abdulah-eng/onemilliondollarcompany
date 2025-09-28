@@ -55,12 +55,7 @@ const MyCoach = () => {
                 const hasCoach = hasCoachId || acceptedRequest;
                 setHasCurrentCoach(!!hasCoach);
                 
-                // Update active tab based on coach status
-                if (hasCoach && activeTab === 'explore') {
-                    setActiveTab('myCoach');
-                } else if (!hasCoach && activeTab === 'myCoach') {
-                    setActiveTab('explore');
-                }
+                // No automatic tab switching - let users navigate manually
             } catch (error) {
                 console.error('Error checking coach status:', error);
             } finally {
@@ -69,7 +64,7 @@ const MyCoach = () => {
         };
 
         checkCoachStatus();
-    }, [user, profile, activeTab]);
+    }, [user, profile]);
 
     const showPopup = (message: string, requested = false) => {
         setFeedbackPopup({ isVisible: true, message, requested });
@@ -122,7 +117,6 @@ const MyCoach = () => {
                     <TabsTrigger
                         value="myCoach"
                         onClick={() => setActiveTab('myCoach')}
-                        // ❌ Removed disabled={!hasCurrentCoach}
                         className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-border/50 rounded-lg h-10 transition-all"
                     >
                         <User className="w-4 h-4 mr-2"/> My Coach
@@ -130,7 +124,11 @@ const MyCoach = () => {
                     <TabsTrigger
                         value="explore"
                         onClick={() => setActiveTab('explore')}
-                        className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-border/50 rounded-lg h-10 transition-all"
+                        className={`data-[state=active]:bg-background/80 data-[state=active]:shadow-md data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-border/50 rounded-lg h-10 transition-all ${
+                            !hasCurrentCoach && activeTab === 'myCoach' 
+                                ? 'ring-2 ring-primary/50 ring-offset-2 ring-offset-background animate-pulse' 
+                                : ''
+                        }`}
                     >
                         <Search className="w-4 h-4 mr-2"/> Explore & History
                     </TabsTrigger>
@@ -149,13 +147,13 @@ const MyCoach = () => {
                         />
                     ) : (
                         <div className="text-center py-12">
-                            <h3 className="text-xl font-semibold mb-2">No Coach Assigned</h3>
-                            <p className="text-muted-foreground mb-4">Start by exploring available coaches to find your perfect match.</p>
+                            <h3 className="text-xl font-semibold mb-2">You don't have any coach</h3>
+                            <p className="text-muted-foreground mb-4">Find a coach from the <span className="font-semibold text-primary">Explore & History</span> tab.</p>
                             <button 
                                 onClick={() => setActiveTab('explore')}
                                 className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                             >
-                                Explore Coaches
+                                Go to Explore & History
                             </button>
                         </div>
                     )}
