@@ -2,7 +2,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PaymentPlanModal from '@/components/modals/PaymentPlanModal';
 import { usePaymentPlan } from '@/hooks/usePaymentPlan';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +23,23 @@ const RoleGate = ({ allowedRole, children }: RoleGateProps) => {
   const { planStatus, startTrial } = usePaymentPlan();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const navigate = useNavigate();
+
+  // Check if modal was dismissed in this session
+  useEffect(() => {
+    if (allowedRole === 'customer' && profile?.onboarding_complete && planStatus.needsUpgrade) {
+      const modalDismissed = sessionStorage.getItem('paymentModalDismissed');
+      const modalShown = sessionStorage.getItem('paymentModalShown');
+      
+      if (!modalDismissed && !modalShown) {
+        const timer = setTimeout(() => {
+          setShowPaymentModal(true);
+          sessionStorage.setItem('paymentModalShown', 'true');
+        }, 1000);
+        
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [allowedRole, profile?.onboarding_complete, planStatus.needsUpgrade]);
 
   if (loading || planStatus.loading) return <LoadingScreen />;
   
@@ -45,24 +62,23 @@ const RoleGate = ({ allowedRole, children }: RoleGateProps) => {
     return <Navigate to="/onboarding/step-1" replace />;
   }
 
-  // For customers with completed onboarding, check payment plan
-  if (allowedRole === 'customer' && profile.onboarding_complete && planStatus.needsUpgrade) {
-    // Show payment modal after a brief delay to avoid immediate popup
-    if (!showPaymentModal) {
-      setTimeout(() => setShowPaymentModal(true), 1000);
-    }
-  }
-
   const handleStartTrial = async () => {
     const { error } = await startTrial();
     if (!error) {
       setShowPaymentModal(false);
+      sessionStorage.setItem('paymentModalDismissed', 'true');
     }
   };
 
   const handleUpgrade = () => {
     setShowPaymentModal(false);
+    sessionStorage.setItem('paymentModalDismissed', 'true');
     navigate('/customer/cancel-subscription'); // Reuse existing payment page
+  };
+
+  const handleClose = () => {
+    setShowPaymentModal(false);
+    sessionStorage.setItem('paymentModalDismissed', 'true');
   };
 
   return (
@@ -70,7 +86,7 @@ const RoleGate = ({ allowedRole, children }: RoleGateProps) => {
       {children}
       <PaymentPlanModal
         isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
+        onClose={handleClose}
         hasUsedTrial={planStatus.hasUsedTrial}
         onStartTrial={!planStatus.hasUsedTrial ? handleStartTrial : undefined}
         onUpgrade={handleUpgrade}
