@@ -1,77 +1,98 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DollarSign, TrendingUp, Users, Calendar } from 'lucide-react';
+'use client';
 
-const IncomePage = () => {
+import React, { useState, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import StatCard from '@/components/coach/income/StatCard';
+import ClientTable from '@/components/coach/income/ClientTable';
+import TransactionHistory from '@/components/coach/income/TransactionHistory';
+import WithdrawalModal from '@/components/coach/income/WithdrawalModal';
+import { mockIncomeStats, mockClientEarnings, mockTransactions, IncomeStats, Transaction } from '@/mockdata/income/mockIncome';
+import { DollarSign, Clock, ArrowUp, Wallet, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+const IncomePage: React.FC = () => {
+  const [stats, setStats] = useState<IncomeStats>(mockIncomeStats);
+  const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
+
+  const handleWithdraw = useCallback((amount: number) => {
+    if (amount > 0 && amount <= stats.currentBalance) {
+      const newTransaction: Transaction = {
+        id: `tx-${Date.now()}`,
+        type: 'Withdrawal',
+        clientName: null,
+        amount: -amount,
+        date: new Date().toISOString(),
+        status: 'Pending',
+      };
+
+      setStats(prev => ({
+        ...prev,
+        currentBalance: prev.currentBalance - amount,
+        pendingPayout: prev.pendingPayout + amount,
+      }));
+      setTransactions(prev => [newTransaction, ...prev]);
+
+      alert(`Withdrawal request for $${amount.toFixed(2)} submitted successfully! Processing may take 1-3 days.`);
+    }
+  }, [stats.currentBalance]);
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">Income Dashboard</h1>
+    <div className="container mx-auto p-4 md:p-6 max-w-6xl space-y-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-4xl font-extrabold mb-2">Income Dashboard 💰</h1>
+        <p className="text-muted-foreground text-lg">Manage your earnings, track client payments, and request payouts.</p>
+      </motion.div>
+
+      {/* Stats and Withdrawal Button */}
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            title="Current Balance"
+            value={stats.currentBalance}
+            icon={Wallet}
+            className="lg:col-span-1"
+          />
+          <StatCard
+            title="Total Earned (All Time)"
+            value={stats.totalEarned}
+            icon={DollarSign}
+            className="lg:col-span-1"
+          />
+          <StatCard
+            title="Last Month Income"
+            value={stats.lastMonthIncome}
+            icon={ArrowUp}
+            className="lg:col-span-1"
+          />
+          <StatCard
+            title="Pending Payouts"
+            value={stats.pendingPayout}
+            icon={Clock}
+            className="lg:col-span-1"
+          />
+        </div>
+        
+        <div className="flex justify-end">
+          <WithdrawalModal stats={stats} onWithdraw={handleWithdraw} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$4,230</div>
-            <p className="text-xs text-muted-foreground">
-              +12% from last month
-            </p>
-          </CardContent>
-        </Card>
+      {/* Detailed Sections */}
+      <div className="grid gap-8 lg:grid-cols-5">
+        {/* Transaction History (Small Column) */}
+        <div className="lg:col-span-2">
+          <TransactionHistory transactions={transactions} />
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Clients</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">
-              +3 new this month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Per Client</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$176</div>
-            <p className="text-xs text-muted-foreground">
-              +5% from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sessions This Month</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">132</div>
-            <p className="text-xs text-muted-foreground">
-              +8 from last month
-            </p>
-          </CardContent>
-        </Card>
+        {/* Client Earnings Table (Large Column) */}
+        <div className="lg:col-span-3">
+          <ClientTable earnings={mockClientEarnings} />
+        </div>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Income Overview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Your income tracking and analytics will be displayed here. This is a placeholder for future income management features.
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 };
