@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-// Assuming MORE_THAN_PLAN_CARDS is an array of 4 items based on the new requirement
-declare const MORE_THAN_PLAN_CARDS: any[];
+import { MORE_THAN_PLAN_CARDS } from '@/mockdata/landingpage/morethanplan.js';
 
 // --- BlurImage Component (Reverted to simple image container for flexibility) ---
 
