@@ -1,17 +1,20 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Type, Image, Video, X, GripVertical } from 'lucide-react';
+import { Type, Image, Video, Upload, X, GripVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
+// NOTE: Item type is simplified to 'text' or 'file', 
+// but 'value' stores the local URL/path/text content.
 export interface BlogContentItem {
   id: string;
-  type: 'text' | 'image' | 'video';
-  value: string;
+  type: 'text' | 'file'; // Simplified types
+  mediaType?: 'image' | 'video'; // New field to distinguish file type
+  value: string; // Text content or local file URL
 }
 
 interface BlogContentBuilderProps {
@@ -20,6 +23,9 @@ interface BlogContentBuilderProps {
 }
 
 const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onContentChange }) => {
+  // Ref to track which file input to open/update
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
   const updateItem = useCallback((id: string, value: string) => {
     onContentChange(content.map(item => item.id === id ? { ...item, value } : item));
   }, [content, onContentChange]);
@@ -28,15 +34,47 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
     onContentChange(content.filter(item => item.id !== id));
   }, [content, onContentChange]);
 
-  const addItem = useCallback((type: BlogContentItem['type']) => {
-    onContentChange([...content, { id: `c-${Date.now()}`, type, value: '' }]);
+  const addItem = useCallback((type: BlogContentItem['type'], mediaType?: BlogContentItem['mediaType']) => {
+    onContentChange([...content, { id: `c-${Date.now()}`, type, mediaType, value: '' }]);
   }, [content, onContentChange]);
 
+  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>, id: string, type: 'image' | 'video') => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Use FileReader or URL.createObjectURL for local preview
+      const localUrl = URL.createObjectURL(file);
+      
+      onContentChange(content.map(item => 
+        item.id === id ? { ...item, value: localUrl, mediaType: type } : item
+      ));
+      // Reset input value to allow selecting the same file again
+      event.target.value = '';
+    }
+  }, [content, onContentChange]);
+  
   const renderContentBlock = (item: BlogContentItem) => {
     const isText = item.type === 'text';
-    const placeholderText = isText 
-      ? "Start typing your blog paragraph here..." 
-      : item.type === 'image' ? "Paste image URL or click to upload..." : "Paste video link (e.g., YouTube)...";
+    const isFile = item.type === 'file';
+    const mediaType = item.mediaType;
+    const placeholderText = isText ? "Start typing your blog paragraph here..." : "Click to select file...";
+    
+    // Hidden File Input for the current block
+    const HiddenFileInput = ({ type }: { type: 'image' | 'video' }) => (
+        <input
+            type="file"
+            ref={el => fileInputRefs.current[`${item.id}-${type}`] = el}
+            onChange={(e) => handleFileChange(e as any, item.id, type)}
+            accept={type === 'image' ? 'image/*' : 'video/*'}
+            className="hidden"
+        />
+    );
+    
+    // Helper function to trigger the hidden input
+    const triggerFileExplorer = (e: React.MouseEvent, type: 'image' | 'video') => {
+        e.stopPropagation();
+        fileInputRefs.current[`${item.id}-${type}`]?.click();
+    };
+
 
     return (
       <div 
@@ -63,35 +101,47 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
               value={item.value}
               onChange={(e) => updateItem(item.id, e.target.value)}
               placeholder={placeholderText}
-              // FIX: Ensure placeholder space is respected
               className="min-h-[100px] text-base focus:border-primary/50 border-none resize-none shadow-none focus-visible:ring-0 w-full" 
             />
           )}
 
-          {/* Media Block */}
-          {!isText && (
+          {/* File Upload Block */}
+          {isFile && (
             <div className="space-y-2">
-              <div className="flex items-center text-sm font-medium text-muted-foreground pt-1">
-                {item.type === 'image' ? <Image className="h-4 w-4 mr-2" /> : <Video className="h-4 w-4 mr-2" />}
-                {item.type === 'image' ? 'Image URL/Upload' : 'Video Link (Embed)'}
-              </div>
-              <Input
-                value={item.value}
-                onChange={(e) => updateItem(item.id, e.target.value)}
-                placeholder={placeholderText}
-              />
+              <HiddenFileInput type={mediaType || 'image'} />
+              
+              {!item.value ? (
+                // Empty Upload Zone
+                <div 
+                  className="w-full h-32 border-2 border-dashed border-muted-foreground/30 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={(e) => triggerFileExplorer(e, mediaType || 'image')} // Click to trigger upload
+                >
+                  <Upload className="h-6 w-6 text-muted-foreground" />
+                  <span className="text-sm font-medium text-muted-foreground mt-1">
+                    Click to Upload {mediaType === 'video' ? 'Video' : 'Image'}
+                  </span>
+                </div>
+              ) : (
+                // Preview Zone
+                <div className="relative border rounded-lg overflow-hidden">
+                    {mediaType === 'image' && (
+                        <img src={item.value} alt="Preview" className="max-h-64 w-full object-contain" />
+                    )}
+                    {mediaType === 'video' && (
+                        <div className="p-4 text-center bg-muted">
+                            Video File Ready: {mediaType} (Click to replace)
+                        </div>
+                    )}
+                    <Button 
+                        variant="ghost" 
+                        className="absolute top-2 right-2 bg-black/50 text-white hover:bg-black/70"
+                        onClick={(e) => triggerFileExplorer(e, mediaType || 'image')}
+                    >
+                        Replace
+                    </Button>
+                </div>
+              )}
             </div>
-          )}
-          
-          {/* Media Preview */}
-          {item.type === 'image' && item.value && (
-              <img src={item.value} alt="Preview" className="mt-2 max-h-64 w-full object-contain rounded-lg border" />
-          )}
-          
-          {item.type === 'video' && item.value && (
-              <div className="mt-2 p-3 bg-muted rounded-lg text-center text-sm text-muted-foreground">
-                  Video Embed Preview: {item.value}
-              </div>
           )}
         </div>
       </div>
@@ -116,16 +166,17 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
         ))}
       </AnimatePresence>
 
+      {/* Add Content Buttons (Simplified and Focused on Text/File) */}
       <div className="flex justify-center pt-6">
         <div className="flex gap-3 p-3.5 rounded-full border bg-muted/50 shadow-xl">
           <Button variant="secondary" onClick={() => addItem('text')} className="gap-2">
-            <Type className="h-4 w-4" /> Text
+            <Type className="h-4 w-4" /> Add Text
           </Button>
-          <Button variant="secondary" onClick={() => addItem('image')} className="gap-2">
-            <Image className="h-4 w-4" /> Image
+          <Button variant="secondary" onClick={() => addItem('file', 'image')} className="gap-2">
+            <Image className="h-4 w-4" /> Add Image
           </Button>
-          <Button variant="secondary" onClick={() => addItem('video')} className="gap-2">
-            <Video className="h-4 w-4" /> Video
+          <Button variant="secondary" onClick={() => addItem('file', 'video')} className="gap-2">
+            <Video className="h-4 w-4" /> Add Video
           </Button>
         </div>
       </div>
