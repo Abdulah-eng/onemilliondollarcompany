@@ -1,15 +1,10 @@
-// src/components/customer/mycoach/FileListItem.tsx (NEW HELPER)
+// src/components/customer/mycoach/FileListItem.tsx
 import { Download, File } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { sharedFiles } from '@/mockdata/mycoach/coachData';
 
-// Assuming a file type from coachData.ts
-interface FileItem {
-    id: number;
-    name: string;
-    description: string;
-}
-
-const FileListItem: React.FC<{ file: FileItem }> = ({ file }) => (
+// Reusable component for a single file entry
+const FileItem: React.FC<{ file: (typeof sharedFiles)[0] }> = ({ file }) => (
     <div key={file.id} className="flex items-center justify-between p-4 border rounded-xl bg-gray-50 dark:bg-gray-800 min-w-0">
         <div className="flex items-start gap-4 min-w-0">
             <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -26,16 +21,15 @@ const FileListItem: React.FC<{ file: FileItem }> = ({ file }) => (
     </div>
 );
 
+// Reusable component for the list wrapper
 const FileList: React.FC = () => {
-    const files = sharedFiles; // Assume sharedFiles is imported or passed as prop
-
-    return files.length > 0 ? (
+    return sharedFiles.length > 0 ? (
         <div className="space-y-4">
-            {files.map(file => <FileListItem key={file.id} file={file} />)}
+            {sharedFiles.map(file => <FileItem key={file.id} file={file} />)}
         </div>
     ) : (
         <p className="text-center text-muted-foreground p-6">Your coach has not shared any files with you yet.</p>
     );
-}
+};
 
 export default FileList;
