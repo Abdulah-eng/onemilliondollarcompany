@@ -1,146 +1,133 @@
-// src/pages/customer/MyCoach.tsx (UPDATED)
+// src/pages/customer/MyCoach.tsx (FINAL RESTRUCTURED CODE)
 import { useState } from 'react';
 import useMediaQuery from '@/hooks/use-media-query';
-import CoachMainHeader from '@/components/customer/mycoach/CoachMainHeader';
-import TodaysMessage from '@/components/customer/mycoach/TodaysMessage';
-import CoachUpdates from '@/components/customer/mycoach/CoachUpdates';
-import SharedFilesCard from '@/components/customer/mycoach/SharedFilesCard';
-import RequestFeedbackFab from '@/components/customer/mycoach/RequestFeedbackFab';
+
+// New Tab Content Components
+import MyCurrentCoach from '@/components/customer/mycoach/MyCurrentCoach';
+import ExploreAndHistory from '@/components/customer/mycoach/ExploreAndHistory';
+
+// Modal/Drawer/UI Components
 import FeedbackMessagePopup from '@/components/customer/mycoach/FeedbackMessagePopup';
 import CoachBioDrawer from '@/components/customer/mycoach/CoachBioDrawer';
-import CoachExplorerDrawer from '@/components/customer/mycoach/CoachExplorerDrawer'; // NEW IMPORT
-import ExploreCoachesCard from '@/components/customer/mycoach/ExploreCoachesCard'; // NEW IMPORT
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import SharedFilesDrawerContent from '@/components/customer/mycoach/SharedFilesDrawerContent';
-import { coachInfo } from '@/mockdata/mycoach/coachData'; // Import coachInfo
+import { Drawer, DrawerContent } from '@/components/ui/drawer';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs'; 
+
+import { coachInfo } from '@/mockdata/mycoach/coachData'; 
+import { User, Search } from 'lucide-react'; 
 
 const MyCoach = () => {
-    // Coach Bio Drawer State (for clicking on the current coach's header)
+    const hasCurrentCoach = !!coachInfo.name;
+    const initialTab = hasCurrentCoach ? 'myCoach' : 'explore';
+    const [activeTab, setActiveTab] = useState(initialTab);
+
     const [isBioDrawerOpen, setIsBioDrawerOpen] = useState(false);
-    // NEW: Coach Explorer Drawer/Sheet State
-    const [isExplorerOpen, setIsExplorerOpen] = useState(false);
-
+    const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false); // Used only for the SharedFilesDrawer for mobile
     const isMobile = useMediaQuery('(max-width: 768px)');
-    const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false);
 
-    // State for managing the feedback pop-up message
     const [feedbackPopup, setFeedbackPopup] = useState({
         isVisible: false,
         message: '',
         requested: false,
     });
 
+    // DRY: Helper to centralize showing the popup message
+    const showPopup = (message: string, requested = false) => {
+        setFeedbackPopup({ isVisible: true, message, requested });
+        setTimeout(() => {
+            setFeedbackPopup(prev => ({ ...prev, isVisible: false }));
+        }, 5000);
+    };
+
     const handleFeedbackRequest = () => {
         if (feedbackPopup.requested) {
-            setFeedbackPopup({
-                isVisible: true,
-                message: `You already requested feedback. Your coach ${coachInfo.name} will reach out soon.`,
-                requested: true,
-            });
+            showPopup(`You already requested feedback. Your coach ${coachInfo.name} will reach out soon.`, true);
         } else {
-            setFeedbackPopup({
-                isVisible: true,
-                message: "Feedback requested! Your coach will reach out soon.",
-                requested: true,
-            });
+            showPopup("Feedback requested! Your coach will reach out soon.", true);
         }
-        setTimeout(() => {
-            setFeedbackPopup(prev => ({ ...prev, isVisible: false }));
-        }, 5000);
     };
 
-    // NEW: Handler for successful coach request from the explorer
     const handleNewCoachRequestSent = (coachName: string) => {
-        // Show success message
-        setFeedbackPopup({
-            isVisible: true,
-            message: `Your request to switch to ${coachName} has been sent! We'll process it shortly.`,
-            requested: true,
-        });
-
-        setTimeout(() => {
-            setFeedbackPopup(prev => ({ ...prev, isVisible: false }));
-        }, 5000);
+        showPopup(`Your request for ${coachName} has been sent! We'll process the switch shortly.`);
+        // After sending a request, switch back to the 'My Coach' tab if they have one.
+        if (hasCurrentCoach) {
+             setActiveTab('myCoach');
+        }
     };
-
-    // Determine which component (Drawer or Sheet) to use for the Explorer
-    const ExplorerWrapper = isMobile ? Drawer : Sheet;
-    const ExplorerContent = isMobile ? DrawerContent : SheetContent;
-    const ExplorerHeader = isMobile ? DrawerHeader : SheetHeader;
-    const ExplorerTitle = isMobile ? DrawerTitle : SheetTitle;
-
 
     return (
         <div className="w-full max-w-5xl mx-auto px-4 py-8 space-y-8">
-            {/* Page Header */}
             <div className="px-2">
-                <h1 className="text-3xl font-bold text-foreground">My Coach 🤝</h1>
-                <p className="mt-1 text-lg text-muted-foreground">Everything you need to connect with your coach.</p>
+                <h1 className="text-3xl font-bold text-foreground">Coaching Hub 🚀</h1>
+                <p className="mt-1 text-lg text-muted-foreground">Your complete coach management center.</p>
             </div>
+            
+            <Tabs 
+                defaultValue={initialTab} 
+                value={activeTab} 
+                onValueChange={setActiveTab} 
+                className="w-full"
+            >
+                {/* 1. TAB LIST */}
+                <TabsList className="grid w-full grid-cols-2">
+                    {/* Tab 1: My Current Coach (disabled if no coach assigned) */}
+                    <TabsTrigger 
+                        value="myCoach" 
+                        onClick={() => setActiveTab('myCoach')}
+                        disabled={!hasCurrentCoach}
+                    >
+                        <User className="w-4 h-4 mr-2"/> My Coach
+                    </TabsTrigger>
+                    {/* Tab 2: Explore Coaches & History */}
+                    <TabsTrigger value="explore" onClick={() => setActiveTab('explore')}>
+                        <Search className="w-4 h-4 mr-2"/> Explore & History
+                    </TabsTrigger>
+                </TabsList>
 
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Main Content Column */}
-                <div className="lg:col-span-2 space-y-6">
-                    <CoachMainHeader onClick={() => setIsBioDrawerOpen(true)} />
-                    
-                    {/* NEW: Explore Coaches Card */}
-                    <ExploreCoachesCard onExplore={() => setIsExplorerOpen(true)} />
+                {/* 2. TAB CONTENT */}
+                
+                {/* --- CONTENT 1: MY COACH --- */}
+                {hasCurrentCoach && (
+                    <TabsContent value="myCoach">
+                        <MyCurrentCoach
+                            isMobile={isMobile}
+                            onViewBio={() => setIsBioDrawerOpen(true)}
+                            onRequestFeedback={handleFeedbackRequest}
+                        />
+                    </TabsContent>
+                )}
+                
+                {/* --- CONTENT 2: EXPLORE & HISTORY --- */}
+                <TabsContent value="explore">
+                    <ExploreAndHistory
+                        onNewCoachRequestSent={handleNewCoachRequestSent}
+                    />
+                </TabsContent>
+            </Tabs>
 
-                    <TodaysMessage />
-                    <CoachUpdates />
-                </div>
 
-                {/* Shared Files Column */}
-                <div className="lg:col-span-1 space-y-6">
-                    <SharedFilesCard />
-                </div>
-            </div>
-
-            {/* Coach Bio Modal/Drawer (Existing Logic) */}
+            {/* MODAL/DRAWER LAYERS (Non-Tab Overlays) */}
+            
+            {/* Coach Bio Modal/Drawer (Triggered from MyCurrentCoach Header) */}
             {isMobile ? (
                 <Drawer open={isBioDrawerOpen} onOpenChange={setIsBioDrawerOpen}>
-                    <DrawerContent>
-                        <CoachBioDrawer />
-                    </DrawerContent>
+                    <DrawerContent><CoachBioDrawer /></DrawerContent>
                 </Drawer>
             ) : (
                 <Sheet open={isBioDrawerOpen} onOpenChange={setIsBioDrawerOpen}>
-                    <SheetContent side="right" className="w-full sm:max-w-md">
-                        <CoachBioDrawer />
-                    </SheetContent>
+                    <SheetContent side="right" className="w-full sm:max-w-md"><CoachBioDrawer /></SheetContent>
                 </Sheet>
             )}
 
-            {/* NEW: Coach Explorer Modal/Drawer (Triggered by the new card) */}
-            <ExplorerWrapper open={isExplorerOpen} onOpenChange={setIsExplorerOpen}>
-                <ExplorerContent className={isMobile ? "h-[90%] max-h-[90vh]" : "w-full sm:max-w-md"}>
-                    <ExplorerHeader>
-                        <ExplorerTitle>Find a New Coach</ExplorerTitle>
-                    </ExplorerHeader>
-                    {/* We pass the onClose function to allow the CoachExplorerDrawer to close the main modal when a request is sent */}
-                    <CoachExplorerDrawer 
-                        onClose={() => setIsExplorerOpen(false)}
-                        onNewCoachRequestSent={handleNewCoachRequestSent} 
-                    />
-                </ExplorerContent>
-            </ExplorerWrapper>
-
-
-            {/* Shared Files Drawer for Mobile (Existing Logic) */}
+            {/* Shared Files Drawer for Mobile (Currently unused, but kept if trigger is added later) */}
             {isMobile && (
                 <Drawer open={isFilesDrawerOpen} onOpenChange={setIsFilesDrawerOpen}>
-                    <DrawerContent>
-                        <SharedFilesDrawerContent />
-                    </DrawerContent>
+                    <DrawerContent><SharedFilesDrawerContent /></DrawerContent>
                 </Drawer>
             )}
 
-            {/* Floating Action Button */}
-            <RequestFeedbackFab isMobile={isMobile} onRequestFeedback={handleFeedbackRequest} />
-
-            {/* Feedback Pop-up Message */}
+            {/* Feedback Pop-up Message - Global */}
             <FeedbackMessagePopup
                 message={feedbackPopup.message}
                 isVisible={feedbackPopup.isVisible}
