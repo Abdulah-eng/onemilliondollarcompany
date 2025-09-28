@@ -8,31 +8,32 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input'; // 💡 Added Input for search
+import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge'; // 💡 Added Badge component
+import { Badge } from '@/components/ui/badge';
 
+// Define the available filter options (using "All" for clear reset)
+type FilterOption = 'All' | 'Fitness' | 'Nutrition' | 'Mental Health';
+const FILTER_OPTIONS: FilterOption[] = ['All', 'Fitness', 'Nutrition', 'Mental Health'];
+
+// --- CoachCard and History Section components remain largely unchanged ---
 interface CoachCardProps {
     coach: Coach;
     onRequest: (coach: Coach) => void;
     index: number;
 }
-
 const ModernCoachCard: React.FC<CoachCardProps> = ({ coach, onRequest, index }) => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.05 }} // Faster sequential animation
+        transition={{ duration: 0.3, delay: index * 0.05 }}
         className="group"
     >
         <Card className="shadow-lg border-0 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            {/* Subtle background gradient on card for depth */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 z-0" />
             <CardContent className="relative p-6 z-10">
                 <div className="flex flex-col sm:flex-row items-start gap-4">
-                    
-                    {/* Coach Avatar and Status */}
                     <div className="relative flex-shrink-0">
                         <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center ring-2 ring-primary/10 group-hover:ring-primary/20 transition-all shadow-md">
                             {coach.profileImageUrl ? (
@@ -45,7 +46,6 @@ const ModernCoachCard: React.FC<CoachCardProps> = ({ coach, onRequest, index }) 
                                 <CircleUserRound className="w-8 h-8 text-primary/70" />
                             )}
                         </div>
-                        {/* Status badge: Use pulse for modern feel */}
                         <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-background flex items-center justify-center">
                             <div className="absolute inset-0 rounded-full bg-green-500 animate-pulse opacity-75" />
                         </div>
@@ -56,7 +56,6 @@ const ModernCoachCard: React.FC<CoachCardProps> = ({ coach, onRequest, index }) 
                             {coach.name}
                         </h4>
                         
-                        {/* Stats Section */}
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mb-3">
                             <div className="flex items-center gap-1">
                                 <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
@@ -73,7 +72,6 @@ const ModernCoachCard: React.FC<CoachCardProps> = ({ coach, onRequest, index }) 
                             {coach.bio}
                         </p>
                         
-                        {/* Specialties Tags */}
                         <div className="flex flex-wrap gap-2 mb-4">
                             {coach.specialties.slice(0, 3).map((specialty, idx) => (
                                 <Badge 
@@ -91,7 +89,6 @@ const ModernCoachCard: React.FC<CoachCardProps> = ({ coach, onRequest, index }) 
                             )}
                         </div>
                         
-                        {/* Action Button */}
                         <Button 
                             onClick={() => onRequest(coach)} 
                             className="w-full sm:w-auto shadow-md transition-all duration-300"
@@ -135,21 +132,25 @@ const CoachHistorySection = () => (
     </Card>
 );
 
+
 interface ModernCoachExplorerProps {
     onNewCoachRequestSent: (coachName: string) => void;
 }
 
 const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachRequestSent }) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    // 💡 Filter state added
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [selectedCoach, setSelectedCoach] = useState<Coach | null>(null);
     const [requestMessage, setRequestMessage] = useState('');
     const [isRequestLoading, setIsRequestLoading] = useState(false);
+    // 💡 Search and Filter states added
     const [searchTerm, setSearchTerm] = useState('');
+    const [activeFilter, setActiveFilter] = useState<FilterOption>('All');
 
     const handleRequest = (coach: Coach) => {
         setSelectedCoach(coach);
         setIsDialogOpen(true);
-        // Pre-populate message for better user guidance
         setRequestMessage(`I'm interested in working with ${coach.name} because of their expertise in ${coach.specialties[0]} and I'm looking to achieve [specific goal, e.g., muscle gain/marathon prep].`);
     };
 
@@ -157,7 +158,6 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
         if (!selectedCoach || requestMessage.trim().length < 10) return;
 
         setIsRequestLoading(true);
-        // Simulate API delay
         setTimeout(() => {
             setIsRequestLoading(false);
             setIsDialogOpen(false);
@@ -167,12 +167,26 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
         }, 1500);
     };
 
-    // Filter logic
-    const filteredCoaches = allCoaches.filter(coach => 
-        coach.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        coach.bio.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        coach.specialties.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    // 💡 Comprehensive Filter Logic
+    const filteredCoaches = allCoaches
+        .filter(coach => {
+            // 1. Filter by Speciality
+            if (activeFilter !== 'All') {
+                if (!coach.specialties.some(s => s.toLowerCase().includes(activeFilter.toLowerCase()))) {
+                    return false;
+                }
+            }
+            // 2. Filter by Search Term
+            if (searchTerm.trim() === '') {
+                return true;
+            }
+            const lowerCaseSearch = searchTerm.toLowerCase();
+            return (
+                coach.name.toLowerCase().includes(lowerCaseSearch) ||
+                coach.bio.toLowerCase().includes(lowerCaseSearch) ||
+                coach.specialties.some(s => s.toLowerCase().includes(lowerCaseSearch))
+            );
+        });
 
     return (
         <div className="space-y-8">
@@ -185,7 +199,7 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
                     </p>
                 </div>
 
-                {/* Search and Filter Inputs - More Prominent and Unified */}
+                {/* Search and Filter Inputs - FIXED Search */}
                 <div className="flex gap-3">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -194,10 +208,16 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
                             placeholder="Search by name, specialty, or focus..." 
                             className="w-full pl-9 h-10 border-2 rounded-xl focus-visible:ring-primary/50 transition-colors"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => setSearchTerm(e.target.value)} // 💡 Search state updated
                         />
                     </div>
-                    <Button variant="outline" size="icon" className="h-10 w-10 flex-shrink-0 hover:bg-primary/5 rounded-xl">
+                    {/* Filter Button opens the dialog */}
+                    <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className={cn("h-10 w-10 flex-shrink-0 rounded-xl", activeFilter !== 'All' && 'border-primary text-primary bg-primary/10')}
+                        onClick={() => setIsFilterOpen(true)}
+                    >
                         <Filter className="w-5 h-5" />
                         <span className="sr-only">Filter</span>
                     </Button>
@@ -238,7 +258,7 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
             {/* Coach History Section */}
             <CoachHistorySection />
 
-            {/* Request Dialog (Model/Popup) */}
+            {/* Request Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="sm:max-w-[500px] rounded-2xl p-6">
                     <DialogHeader className="space-y-3">
@@ -297,6 +317,43 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
                                     Send Request
                                 </>
                             )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* 💡 Filter Dialog - FIXED Filters */}
+            <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                <DialogContent className="sm:max-w-[400px] rounded-2xl p-6">
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                            <Filter className='w-5 h-5 text-primary' />
+                            Filter Coaches
+                        </DialogTitle>
+                        <DialogDescription className="text-base text-muted-foreground">
+                            Narrow down the list by primary area of expertise.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="grid grid-cols-2 gap-3 py-4">
+                        {FILTER_OPTIONS.map(option => (
+                            <Button
+                                key={option}
+                                variant={activeFilter === option ? 'default' : 'outline'}
+                                onClick={() => {
+                                    setActiveFilter(option);
+                                    setIsFilterOpen(false); // Close dialog on select for mobile friendliness
+                                }}
+                                className={cn("h-12 text-base rounded-xl transition-all", activeFilter !== option && "hover:bg-primary/5")}
+                            >
+                                {option}
+                            </Button>
+                        ))}
+                    </div>
+
+                    <DialogFooter className="pt-4">
+                        <Button variant="ghost" onClick={() => setIsFilterOpen(false)}>
+                            Close
                         </Button>
                     </DialogFooter>
                 </DialogContent>
