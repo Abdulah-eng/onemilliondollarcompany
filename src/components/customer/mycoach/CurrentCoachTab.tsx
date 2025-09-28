@@ -1,8 +1,7 @@
 // src/components/customer/mycoach/CurrentCoachTab.tsx
-import CoachMainHeader from './CoachMainHeader';
-import TodaysMessage from './TodaysMessage';
-import CoachUpdates from './CoachUpdates';
-import SharedFilesCard from './SharedFilesCard';
+import ModernCoachDashboard from './ModernCoachDashboard';
+import EnhancedCoachUpdates from './EnhancedCoachUpdates';
+import UnifiedSharedFiles from './UnifiedSharedFiles';
 import RequestFeedbackFab from './RequestFeedbackFab';
 
 interface CurrentCoachTabProps {
@@ -13,18 +12,17 @@ interface CurrentCoachTabProps {
 
 const CurrentCoachTab: React.FC<CurrentCoachTabProps> = ({ isMobile, onViewBio, onRequestFeedback }) => {
     return (
-        <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Content Column */}
-                <div className="lg:col-span-2 space-y-6">
-                    <CoachMainHeader onClick={onViewBio} />
-                    <TodaysMessage />
-                    <CoachUpdates />
+                <div className="lg:col-span-2 space-y-8">
+                    <ModernCoachDashboard onViewBio={onViewBio} />
+                    <EnhancedCoachUpdates />
                 </div>
 
                 {/* Shared Files Column (Desktop/Tablet) */}
-                <div className="lg:col-span-1 space-y-6">
-                    <SharedFilesCard />
+                <div className="lg:col-span-1">
+                    <UnifiedSharedFiles />
                 </div>
             </div>
 

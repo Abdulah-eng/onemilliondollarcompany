@@ -6,8 +6,8 @@ import useMediaQuery from '@/hooks/use-media-query';
 import CurrentCoachTab from '@/components/customer/mycoach/CurrentCoachTab'; // From mycoach folder
 import ExplorerTab from '@/components/customer/coaches/ExplorerTab'; // From coaches folder
 import CoachBioDrawer from '@/components/customer/mycoach/CoachBioDrawer';
-import SharedFilesDrawerContent from '@/components/customer/mycoach/SharedFilesDrawerContent';
-import FeedbackMessagePopup from '@/components/customer/mycoach/FeedbackMessagePopup';
+import { SharedFilesDrawerContent } from '@/components/customer/mycoach/UnifiedSharedFiles';
+import SmartFeedbackSystem from '@/components/customer/mycoach/SmartFeedbackSystem';
 
 // UI Components
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
@@ -124,11 +124,12 @@ const MyCoach = () => {
                 </Drawer>
             )}
 
-            {/* Feedback Pop-up Message - Global */}
-            <FeedbackMessagePopup
+            {/* Smart Feedback System - Global */}
+            <SmartFeedbackSystem
                 message={feedbackPopup.message}
                 isVisible={feedbackPopup.isVisible}
                 onDismiss={() => setFeedbackPopup(prev => ({ ...prev, isVisible: false }))}
+                type="success"
             />
         </div>
     );
