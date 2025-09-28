@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { User, Tag, Award, Plus, Trash2, Link } from 'lucide-react';
+import { User, Tag, Award, Plus, Trash2, Link, Upload, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ProfileSettingsProps {
