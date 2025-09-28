@@ -22,8 +22,7 @@ const MyCoach = () => {
     const { user, profile } = useAuth();
     const [hasCurrentCoach, setHasCurrentCoach] = useState(false);
     const [loading, setLoading] = useState(true);
-    const initialTab = hasCurrentCoach ? 'myCoach' : 'explore';
-    const [activeTab, setActiveTab] = useState(initialTab);
+    const [activeTab, setActiveTab] = useState('myCoach');
 
     const [isBioDrawerOpen, setIsBioDrawerOpen] = useState(false);
     const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false);
@@ -107,7 +106,7 @@ const MyCoach = () => {
             </div>
 
             <Tabs
-                defaultValue={initialTab}
+                defaultValue="myCoach"
                 value={activeTab}
                 onValueChange={setActiveTab}
                 className="w-full"
@@ -116,14 +115,12 @@ const MyCoach = () => {
                 <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-secondary/50 dark:bg-secondary/20 rounded-xl">
                     <TabsTrigger
                         value="myCoach"
-                        onClick={() => setActiveTab('myCoach')}
                         className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-border/50 rounded-lg h-10 transition-all"
                     >
                         <User className="w-4 h-4 mr-2"/> My Coach
                     </TabsTrigger>
                     <TabsTrigger
                         value="explore"
-                        onClick={() => setActiveTab('explore')}
                         className={`data-[state=active]:bg-background/80 data-[state=active]:shadow-md data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-border/50 rounded-lg h-10 transition-all ${
                             !hasCurrentCoach && activeTab === 'myCoach' 
                                 ? 'ring-2 ring-primary/50 ring-offset-2 ring-offset-background animate-pulse' 
