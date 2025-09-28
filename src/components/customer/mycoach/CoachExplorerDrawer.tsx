@@ -48,13 +48,13 @@ const CoachCard = ({ coach, onRequest }: { coach: Coach, onRequest: (coach: Coac
     </div>
 );
 
-// Main Coach Explorer Drawer Content
-interface CoachExplorerDrawerProps {
-    onClose: () => void;
+// Main Coach Explorer Content (now designed to be used inside a TabsContent area)
+interface CoachExplorerContentProps {
+    onClose: () => void; // Kept for the internal dialog to call after success
     onNewCoachRequestSent: (coachName: string) => void;
 }
 
-const CoachExplorerDrawer: React.FC<CoachExplorerDrawerProps> = ({ onClose, onNewCoachRequestSent }) => {
+const CoachExplorerDrawer: React.FC<CoachExplorerContentProps> = ({ onClose, onNewCoachRequestSent }) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedCoach, setSelectedCoach] = useState<Coach | null>(null);
     const [requestMessage, setRequestMessage] = useState('');
@@ -69,12 +69,11 @@ const CoachExplorerDrawer: React.FC<CoachExplorerDrawerProps> = ({ onClose, onNe
         if (!selectedCoach || requestMessage.trim().length < 10) return;
 
         setIsRequestLoading(true);
-        // Simulate API call and closing both the modal and the main drawer/sheet
+        // Simulate API call 
         setTimeout(() => {
             console.log(`Request sent to ${selectedCoach.name}: ${requestMessage}`);
             setIsRequestLoading(false);
             setIsDialogOpen(false);
-            onClose(); // Close the main drawer/sheet
             
             // Notify the parent component (main page) to show the popup
             onNewCoachRequestSent(selectedCoach.name);
@@ -86,8 +85,8 @@ const CoachExplorerDrawer: React.FC<CoachExplorerDrawerProps> = ({ onClose, onNe
     };
 
     return (
-        <div className="h-full overflow-y-auto p-6 md:p-8 space-y-6">
-            <h3 className="text-2xl font-bold">Explore Our Coaches 🤝</h3>
+        <div className="h-full overflow-y-auto p-0 md:p-0 space-y-6">
+            {/* Removed redundant header/title since this is now in a tab */}
             <p className="text-muted-foreground">
                 Found a new specialization? Request a switch to an expert coach that fits your evolving needs.
             </p>
@@ -98,7 +97,7 @@ const CoachExplorerDrawer: React.FC<CoachExplorerDrawerProps> = ({ onClose, onNe
                 ))}
             </div>
 
-            {/* Coach Request Dialog */}
+            {/* Coach Request Dialog (uses Dialog, which is correct for desktop/mobile consistency) */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
