@@ -104,8 +104,8 @@ export default function ModernFeatureSection() {
                 // Mobile/Tablet: Horizontal Scroll container setup
                 'flex gap-4 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 scroll-smooth pb-8',
                 'scroll-p-4', // Padding at the start of the scroll
-                // Desktop: Stacked Vertical with positioning for overlay effect
-                'lg:block lg:space-y-6 lg:mx-0 lg:px-0 lg:pb-0 lg:max-w-2xl'
+                // Desktop: Side by side with positioning for overlay effect
+                'lg:gap-6 lg:mx-0 lg:px-0 lg:pb-0 lg:overflow-x-visible'
               )}
             >
               {features.map((card, index) => (
