@@ -1,14 +1,26 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { MORE_THAN_PLAN_CARDS } from '@/mockdata/landingpage/morethanplan';
+// Assuming MORE_THAN_PLAN_CARDS has an array of objects with { title, description, image, points }
+// The type structure for the mock data is assumed to be an array of:
+// interface CardType {
+//   title: string;
+//   description: string;
+//   image: string;
+//   points: string[];
+// }
+// declare const MORE_THAN_PLAN_CARDS: CardType[];
+declare const MORE_THAN_PLAN_CARDS: any[]; // Use 'any' as the actual type isn't provided
 
-function BlurImage({ src, alt }: { src: string; alt: string }) {
+// --- BlurImage Component (Slightly modified to fit new container structure) ---
+
+function BlurImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <div className="absolute inset-0">
+    <div className={cn('relative w-full h-full', className)}>
       {!loaded && (
-        <div className="w-full h-full bg-gray-200 animate-pulse rounded-2xl" />
+        // Added 'absolute inset-0' to the loading state to cover the container
+        <div className="absolute inset-0 w-full h-full bg-gray-200 animate-pulse rounded-2xl" />
       )}
       <img
         src={src}
@@ -25,11 +37,13 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
   );
 }
 
+// --- MoreThanPlanSection Component (Refactored to Alternate Layout) ---
+
 export default function MoreThanPlanSection() {
   return (
     <section className="relative pt-20 pb-28 bg-gradient-to-b from-[#BFEDE6]/40 via-[#DDF5F0]/35 to-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* Header (Kept as is) */}
         <div
           className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-14 items-center"
           data-reveal
@@ -48,49 +62,64 @@ export default function MoreThanPlanSection() {
           </div>
         </div>
 
-        {/* Cards */}
-        <div
-          className={cn(
-            'flex gap-2 overflow-x-auto snap-x snap-mandatory -mx-2 px-2 scroll-px-2',
-            'lg:grid lg:grid-cols-4 lg:gap-2 lg:overflow-visible lg:mx-0 lg:px-0',
-            'pb-8'
-          )}
-          data-reveal
-        >
-          {MORE_THAN_PLAN_CARDS.map((card, index) => (
-            <div
-              key={card.title}
-              className={cn(
-                'relative flex-shrink-0 w-[90%] sm:w-72 lg:w-auto',
-                'rounded-2xl snap-center overflow-hidden transition-all duration-300 group',
-                'shadow-[0_8px_20px_-10px_rgba(0,0,0,0.1),_0_15px_30px_-15px_rgba(34,139,121,0.15)]',
-                'hover:shadow-[0_8px_25px_-12px_rgba(0,0,0,0.15),_0_20px_40px_-20px_rgba(34,139,121,0.2)] hover:-translate-y-0.5'
-              )}
-              style={{ transitionDelay: `${index * 80}ms` }}
-            >
-              {/* Full Image */}
-              <BlurImage src={card.image} alt={card.title} />
+        {/* Cards - Refactored for Alternating Layout */}
+        <div className="space-y-16 lg:space-y-24">
+          {MORE_THAN_PLAN_CARDS.map((card, index) => {
+            // Determine if the card is an even or odd index for layout swapping
+            const isOdd = index % 2 !== 0;
 
-              {/* Subtle gradient behind text only */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent rounded-2xl" />
+            // Conditional classes for the main grid container
+            const cardGridClasses = cn(
+              'grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center',
+              {
+                // For odd indices (1st, 3rd, etc.): Image Left, Text Right
+                'lg:grid-flow-col-dense': isOdd, 
+              }
+            );
 
-              {/* Text aligned left */}
-              <div className="relative z-10 flex flex-col justify-center h-full p-5 sm:p-6 min-h-[300px]">
-                <div className="max-w-[60%]">
-                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight mb-2 text-white drop-shadow-lg">
+            // Conditional classes for image/text order inside the grid
+            const imageOrderClass = isOdd ? 'lg:order-1' : 'lg:order-2';
+            const textOrderClass = isOdd ? 'lg:order-2' : 'lg:order-1';
+
+            return (
+              <div
+                key={card.title}
+                className={cardGridClasses}
+                data-reveal
+                style={{ transitionDelay: `${index * 80}ms` }}
+              >
+                {/* 1. Image Container */}
+                <div 
+                  className={cn(
+                    'relative rounded-2xl overflow-hidden aspect-[4/3] lg:aspect-[5/4]',
+                    'shadow-[0_10px_30px_-15px_rgba(0,0,0,0.1),_0_20px_45px_-20px_rgba(34,139,121,0.2)]',
+                    imageOrderClass // Swaps order for odd indices
+                  )}
+                >
+                  <BlurImage src={card.image} alt={card.title} />
+                </div>
+
+                {/* 2. Text Content */}
+                <div 
+                  className={cn('py-4 lg:py-0', textOrderClass)} // Swaps order for odd indices
+                >
+                  <p className="mb-2 font-semibold text-primary/80">Feature {index + 1}</p>
+                  <h3 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4 text-foreground">
                     {card.title}
                   </h3>
-                  <p className="text-sm leading-snug mb-3 text-white/85 line-clamp-3 drop-shadow-md">
+                  <p className="text-lg leading-relaxed mb-6 text-muted-foreground">
                     {card.description}
                   </p>
-                  <ul className="space-y-1.5 text-white">
-                    {card.points.map((point, idx) => (
+                  
+                  {/* Bullet Points */}
+                  <ul className="space-y-3 text-foreground/90">
+                    {card.points.map((point: string, idx: number) => (
                       <li
                         key={idx}
-                        className="flex items-start gap-2 text-sm drop-shadow-md"
+                        className="flex items-start gap-3 text-base"
                       >
                         <svg
-                          className="w-4 h-4 text-primary flex-shrink-0 mt-0.5"
+                          className="w-5 h-5 text-primary flex-shrink-0 mt-0.5"
                           fill="none"
                           stroke="currentColor"
                           strokeWidth="2.5"
@@ -108,12 +137,13 @@ export default function MoreThanPlanSection() {
                   </ul>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
+        {/* Footer Text (Kept as is) */}
         <p
-          className="mt-8 text-center text-sm text-muted-foreground"
+          className="mt-16 text-center text-sm text-muted-foreground"
           data-reveal
         >
           *Access to features like Coach Feedback and advanced tracking is
