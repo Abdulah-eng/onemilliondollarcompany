@@ -3,10 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Download, File, FileText, Image, Video, Music, Archive, Eye, FolderOpen } from 'lucide-react';
-import { sharedFiles } from '@/mockdata/mycoach/coachData';
+import { sharedFiles } from '@/mockdata/mycoach/coachData'; // Assuming this mock data structure
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import useMediaQuery from '@/hooks/use-media-query';
 
+// Helper functions (Unchanged)
 const getFileIcon = (fileName: string) => {
     const extension = fileName.split('.').pop()?.toLowerCase();
     switch (extension) {
@@ -77,13 +79,13 @@ const FileItem: React.FC<FileItemProps> = ({ file, index }) => {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
+            transition={{ duration: 0.3, delay: index * 0.05 }}
             className="group"
         >
-            <div className="flex items-center justify-between p-4 border rounded-xl bg-card hover:bg-accent/5 transition-all duration-300 hover:shadow-md hover:border-primary/20">
+            <div className="flex items-center justify-between p-4 border rounded-xl bg-card hover:bg-gradient-to-r hover:from-accent/5 hover:to-primary/5 transition-all duration-300 hover:shadow-lg hover:border-primary/20">
                 <div className="flex items-start gap-4 min-w-0 flex-1">
                     <div className={cn(
-                        "w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br transition-transform group-hover:scale-105",
+                        "w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br transition-transform group-hover:scale-[1.03]",
                         colorClass
                     )}>
                         <Icon className="w-6 h-6" />
@@ -95,23 +97,25 @@ const FileItem: React.FC<FileItemProps> = ({ file, index }) => {
                         <p className="text-sm text-muted-foreground overflow-hidden whitespace-nowrap text-ellipsis">
                             {file.description}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground opacity-70">
                             Shared {file.date}
                         </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-4">
-                    <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="opacity-60 hover:opacity-100 transition-all hover:bg-primary/10"
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="opacity-70 hover:opacity-100 transition-all hover:bg-primary/10 p-2 h-auto"
+                        aria-label="View File"
                     >
                         <Eye className="w-4 h-4" />
                     </Button>
-                    <Button 
-                        variant="ghost" 
+                    <Button
+                        variant="ghost"
                         size="sm"
-                        className="opacity-60 hover:opacity-100 transition-all hover:bg-primary/10"
+                        className="opacity-70 hover:opacity-100 transition-all hover:bg-primary/10 p-2 h-auto"
+                        aria-label="Download File"
                     >
                         <Download className="w-4 h-4" />
                     </Button>
@@ -153,11 +157,16 @@ const FileList: React.FC<FileListProps> = ({ isDrawer = false }) => {
 
 interface UnifiedSharedFilesProps {
     className?: string;
+    onViewAll?: () => void;
 }
 
-const UnifiedSharedFiles: React.FC<UnifiedSharedFilesProps> = ({ className }) => {
+const UnifiedSharedFiles: React.FC<UnifiedSharedFilesProps> = ({ className, onViewAll }) => {
+    const isMobile = useMediaQuery('(max-width: 768px)');
+    // Limit files shown in the desktop widget view (3)
+    const filesToShow = isMobile ? sharedFiles.length : 3;
+
     return (
-        <Card className={cn("shadow-lg border-0 rounded-2xl animate-fade-in", className)}>
+        <Card className={cn("shadow-xl border-0 rounded-2xl animate-fade-in", className)}>
             <CardHeader className="p-6 pb-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -171,21 +180,30 @@ const UnifiedSharedFiles: React.FC<UnifiedSharedFilesProps> = ({ className }) =>
                             </p>
                         </div>
                     </div>
-                    {sharedFiles.length > 0 && (
-                        <Button variant="outline" size="sm" className="hover:bg-primary/5">
+                    {sharedFiles.length > filesToShow && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-primary/5"
+                            onClick={onViewAll}
+                        >
                             View All
                         </Button>
                     )}
                 </div>
             </CardHeader>
             <CardContent className="px-6 pb-6">
-                <FileList />
+                <div className="space-y-3">
+                    {sharedFiles.slice(0, filesToShow).map((file, index) => (
+                        <FileItem key={file.id} file={file} index={index} />
+                    ))}
+                </div>
             </CardContent>
         </Card>
     );
 };
 
-// Drawer Content Component for mobile
+// Drawer Content Component for mobile (Uses the un-truncated FileList)
 export const SharedFilesDrawerContent = () => {
     return (
         <div className="h-full overflow-y-auto p-6 space-y-6">
