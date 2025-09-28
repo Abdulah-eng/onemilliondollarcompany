@@ -27,6 +27,7 @@ export const useCustomerDetail = (customerId: string | null) => {
   const [loading, setLoading] = useState(false);
 
   const fetchCustomerDetail = async (id: string) => {
+    console.log('useCustomerDetail: Fetching customer detail for ID:', id);
     setLoading(true);
     try {
       // Fetch profile data
@@ -36,6 +37,8 @@ export const useCustomerDetail = (customerId: string | null) => {
         .eq('id', id)
         .single();
 
+      console.log('useCustomerDetail: Profile query result:', { profile, profileError });
+
       if (profileError) throw profileError;
 
       // Fetch onboarding details
@@ -44,6 +47,8 @@ export const useCustomerDetail = (customerId: string | null) => {
         .select('*')
         .eq('user_id', id)
         .maybeSingle();
+
+      console.log('useCustomerDetail: Onboarding query result:', { onboarding, onboardingError });
 
       if (onboardingError) throw onboardingError;
 

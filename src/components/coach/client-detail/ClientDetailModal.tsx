@@ -20,15 +20,18 @@ export default function ClientDetailModal({
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    if (client) {
+    if (client || loading) {
       const timer = setTimeout(() => setIsVisible(true), 10);
       return () => clearTimeout(timer);
     } else {
       setIsVisible(false);
     }
-  }, [client]);
+  }, [client, loading]);
 
-  if (!client && !loading) return null;
+  // Show modal if we have a selectedClientId (even if customer data is still loading)
+  const shouldShowModal = client || loading;
+  
+  if (!shouldShowModal) return null;
 
   // For mobile, the Drawer component handles its own layout correctly.
   if (isMobile) {
