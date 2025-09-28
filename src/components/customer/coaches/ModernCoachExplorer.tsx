@@ -25,9 +25,10 @@ interface CoachCardProps {
     onViewDetails: (coach: EnhancedCoach) => void;
     index: number;
     requestStatus?: 'pending' | 'accepted' | 'rejected' | null;
+    isRequestLoading?: boolean;
 }
 
-const ModernCoachCard: React.FC<CoachCardProps> = ({ coach, onRequest, onViewDetails, index, requestStatus }) => (
+const ModernCoachCard: React.FC<CoachCardProps> = ({ coach, onRequest, onViewDetails, index, requestStatus, isRequestLoading }) => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -107,14 +108,18 @@ const ModernCoachCard: React.FC<CoachCardProps> = ({ coach, onRequest, onViewDet
                                 onClick={() => onRequest(coach)} 
                                 size="sm"
                                 className="gap-2 flex-1"
-                                disabled={requestStatus === 'pending' || requestStatus === 'accepted'}
+                                disabled={requestStatus === 'pending' || requestStatus === 'accepted' || isRequestLoading}
                                 variant={requestStatus === 'rejected' ? 'outline' : 'default'}
                             >
-                                <MessageSquare className="w-4 h-4" />
+                                {isRequestLoading ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <Send className="w-4 h-4" />
+                                )}
                                 {requestStatus === 'pending' && 'Request Sent'}
                                 {requestStatus === 'accepted' && 'Already Your Coach'}
                                 {requestStatus === 'rejected' && 'Request Again'}
-                                {!requestStatus && 'Request Coach'}
+                                {!requestStatus && 'Send Request'}
                             </Button>
                         </div>
                     </div>
@@ -159,24 +164,29 @@ interface ModernCoachExplorerProps {
 
 const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachRequestSent }) => {
     const { coaches, loading, sendRequest, getRequestStatus } = useEnhancedCoaches();
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [selectedCoach, setSelectedCoach] = useState<EnhancedCoach | null>(null);
-    const [requestMessage, setRequestMessage] = useState('');
     const [isRequestLoading, setIsRequestLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [activeFilter, setActiveFilter] = useState<FilterOption>('All');
 
-    const handleRequest = (coach: EnhancedCoach) => {
+    const handleRequest = async (coach: EnhancedCoach) => {
         const requestStatus = getRequestStatus(coach.id);
         if (requestStatus === 'pending' || requestStatus === 'accepted') {
             return;
         }
         
-        setSelectedCoach(coach);
-        setIsDialogOpen(true);
-        setRequestMessage(`I'm interested in working with ${coach.name} because of their expertise and I'm looking to achieve my fitness goals.`);
+        setIsRequestLoading(true);
+        try {
+            await sendRequest(coach.id);
+            toast.success(`Request sent to ${coach.name}!`);
+            onNewCoachRequestSent(coach.name);
+        } catch (error) {
+            toast.error('Failed to send request. Please try again.');
+        } finally {
+            setIsRequestLoading(false);
+        }
     };
 
     const handleViewDetails = (coach: EnhancedCoach) => {
@@ -184,22 +194,6 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
         setIsDetailModalOpen(true);
     };
 
-    const handleSendRequest = async () => {
-        if (!selectedCoach || requestMessage.trim().length < 10) return;
-
-        setIsRequestLoading(true);
-        try {
-            await sendRequest(selectedCoach.id, requestMessage.trim());
-            toast.success(`Request sent to ${selectedCoach.name}!`);
-            onNewCoachRequestSent(selectedCoach.name);
-            setIsDialogOpen(false);
-            setRequestMessage('');
-        } catch (error) {
-            toast.error('Failed to send request. Please try again.');
-        } finally {
-            setIsRequestLoading(false);
-        }
-    };
 
     const mapSkillToCategory = (skill: string): FilterOption => {
         const fitnessSkills = ['strength training', 'hiit', 'yoga', 'pilates', 'bodybuilding', 'endurance', 'weight loss', 'functional training'];
@@ -297,6 +291,7 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
                                 onViewDetails={handleViewDetails}
                                 index={index}
                                 requestStatus={getRequestStatus(coach.id)}
+                                isRequestLoading={isRequestLoading}
                             />
                         ))}
                     </>
@@ -316,50 +311,6 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
             <Separator className="my-8" />
             <CoachHistorySection />
 
-            {/* Request Dialog */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Send Coach Request</DialogTitle>
-                        <DialogDescription>
-                            Send a personalized message to {selectedCoach?.name} to start your coaching journey.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="message">Your Message</Label>
-                            <Textarea
-                                id="message"
-                                placeholder="Tell the coach about your goals and why you'd like to work with them..."
-                                value={requestMessage}
-                                onChange={(e) => setRequestMessage(e.target.value)}
-                                rows={4}
-                                className="resize-none"
-                            />
-                            <p className="text-xs text-muted-foreground">
-                                Minimum 10 characters ({requestMessage.length}/10)
-                            </p>
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button 
-                            onClick={handleSendRequest}
-                            disabled={requestMessage.trim().length < 10 || isRequestLoading}
-                            className="gap-2"
-                        >
-                            {isRequestLoading ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                                <Send className="w-4 h-4" />
-                            )}
-                            Send Request
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
 
             {/* Coach Detail Modal */}
             <CoachDetailModal

@@ -83,8 +83,11 @@ export const useEnhancedCoaches = () => {
     }
   };
 
-  const sendRequest = async (coachId: string, message: string) => {
+  const sendRequest = async (coachId: string, message?: string) => {
     if (!user) throw new Error('User not authenticated');
+
+    // Use a default message if none provided
+    const requestMessage = message || "I'm interested in working with you as my coach to achieve my fitness and wellness goals.";
 
     try {
       const { error } = await supabase
@@ -92,7 +95,7 @@ export const useEnhancedCoaches = () => {
         .insert({
           customer_id: user.id,
           coach_id: coachId,
-          message,
+          message: requestMessage,
           status: 'pending'
         });
 

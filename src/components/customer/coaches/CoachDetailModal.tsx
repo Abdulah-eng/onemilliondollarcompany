@@ -149,8 +149,8 @@ export const CoachDetailModal: React.FC<CoachDetailModalProps> = ({
               <MessageSquare className="w-4 h-4" />
               {requestStatus === 'pending' && 'Request Sent'}
               {requestStatus === 'accepted' && 'Coach Assigned'}
-              {requestStatus === 'rejected' && 'Request Another Coach'}
-              {!requestStatus && 'Send Coach Request'}
+              {requestStatus === 'rejected' && 'Send Request'}
+              {!requestStatus && 'Send Request'}
             </Button>
           </div>
         </div>
