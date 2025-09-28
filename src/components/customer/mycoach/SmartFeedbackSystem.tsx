@@ -24,7 +24,7 @@ const getIcon = (type: FeedbackType) => {
         case 'success': return CheckCircle;
         case 'warning': return AlertCircle;
         case 'error': return X;
-        case 'info': 
+        case 'info':
         default: return Info;
     }
 };
@@ -59,10 +59,10 @@ const getStyles = (type: FeedbackType) => {
     }
 };
 
-const SmartFeedbackSystem: React.FC<SmartFeedbackSystemProps> = ({ 
-    message, 
-    isVisible, 
-    onDismiss, 
+const SmartFeedbackSystem: React.FC<SmartFeedbackSystemProps> = ({
+    message,
+    isVisible,
+    onDismiss,
     type = 'success',
     actionLabel,
     onAction,
@@ -90,20 +90,20 @@ const SmartFeedbackSystem: React.FC<SmartFeedbackSystemProps> = ({
                     initial={{ opacity: 0, y: 50, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 50, scale: 0.95 }}
-                    transition={{ 
-                        type: "spring", 
-                        stiffness: 400, 
+                    transition={{
+                        type: "spring",
+                        stiffness: 400,
                         damping: 30,
                         mass: 0.8
                     }}
                     className={cn(
                         "fixed inset-x-0 z-[100] mx-auto w-[calc(100%-2rem)] max-w-md",
                         "rounded-2xl shadow-2xl border-2",
-                        "transform-gpu", // GPU acceleration
+                        "transform-gpu",
                         styles.container
                     )}
-                    style={{ 
-                        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' 
+                    style={{
+                        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)'
                     }}
                 >
                     <div className="p-4">
@@ -114,7 +114,7 @@ const SmartFeedbackSystem: React.FC<SmartFeedbackSystemProps> = ({
                             )}>
                                 <Icon className="w-full h-full" />
                             </div>
-                            
+
                             <div className="flex-1 min-w-0">
                                 <p className={cn(
                                     "text-sm font-medium leading-relaxed",
@@ -122,7 +122,7 @@ const SmartFeedbackSystem: React.FC<SmartFeedbackSystemProps> = ({
                                 )}>
                                     {message}
                                 </p>
-                                
+
                                 {actionLabel && onAction && (
                                     <Button
                                         variant="ghost"
@@ -139,9 +139,9 @@ const SmartFeedbackSystem: React.FC<SmartFeedbackSystemProps> = ({
                                     </Button>
                                 )}
                             </div>
-                            
-                            <button 
-                                onClick={onDismiss} 
+
+                            <button
+                                onClick={onDismiss}
                                 className={cn(
                                     "flex-shrink-0 p-1 rounded-full transition-colors",
                                     "hover:bg-white/20 dark:hover:bg-black/20",
@@ -154,7 +154,7 @@ const SmartFeedbackSystem: React.FC<SmartFeedbackSystemProps> = ({
                             </button>
                         </div>
                     </div>
-                    
+
                     {/* Progress bar for auto-close */}
                     {autoClose && (
                         <motion.div
@@ -171,7 +171,7 @@ const SmartFeedbackSystem: React.FC<SmartFeedbackSystemProps> = ({
     );
 };
 
-// Hook for easier usage
+// Hook for easier usage (Unchanged)
 export const useSmartFeedback = () => {
     const [feedback, setFeedback] = React.useState<{
         isVisible: boolean;
@@ -186,7 +186,7 @@ export const useSmartFeedback = () => {
     });
 
     const showFeedback = React.useCallback((
-        message: string, 
+        message: string,
         type: FeedbackType = 'success',
         actionLabel?: string,
         onAction?: () => void
