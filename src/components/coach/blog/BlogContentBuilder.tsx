@@ -8,13 +8,11 @@ import { Type, Image, Video, Upload, X, GripVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-// NOTE: Item type is simplified to 'text' or 'file', 
-// but 'value' stores the local URL/path/text content.
 export interface BlogContentItem {
   id: string;
   type: 'text' | 'file'; // Simplified types
   mediaType?: 'image' | 'video'; // New field to distinguish file type
-  value: string; // Text content or local file URL
+  value: string; // Text content or local file URL (from URL.createObjectURL)
 }
 
 interface BlogContentBuilderProps {
@@ -23,8 +21,8 @@ interface BlogContentBuilderProps {
 }
 
 const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onContentChange }) => {
-  // Ref to track which file input to open/update
-  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const currentBlockId = useRef<string | null>(null); // To track which block initiated the upload
 
   const updateItem = useCallback((id: string, value: string) => {
     onContentChange(content.map(item => item.id === id ? { ...item, value } : item));
@@ -38,43 +36,43 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
     onContentChange([...content, { id: `c-${Date.now()}`, type, mediaType, value: '' }]);
   }, [content, onContentChange]);
 
-  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>, id: string, type: 'image' | 'video') => {
+  // Handler for when a file is selected (from the hidden input)
+  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      // Use FileReader or URL.createObjectURL for local preview
+    const id = currentBlockId.current;
+
+    if (file && id) {
       const localUrl = URL.createObjectURL(file);
+      const mediaType: 'image' | 'video' = file.type.startsWith('video') ? 'video' : 'image';
       
       onContentChange(content.map(item => 
-        item.id === id ? { ...item, value: localUrl, mediaType: type } : item
+        item.id === id ? { ...item, value: localUrl, mediaType: mediaType } : item
       ));
-      // Reset input value to allow selecting the same file again
-      event.target.value = '';
     }
+    
+    // Cleanup
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    currentBlockId.current = null;
   }, [content, onContentChange]);
   
+  // Function to trigger the hidden file input
+  const triggerFileExplorer = (e: React.MouseEvent, id: string, type: 'image' | 'video') => {
+    e.stopPropagation();
+    currentBlockId.current = id;
+    if (fileInputRef.current) {
+        // Set the correct accept attribute based on the button clicked
+        fileInputRef.current.accept = type === 'image' ? 'image/*' : 'video/*';
+        fileInputRef.current.click();
+    }
+  };
+
+
   const renderContentBlock = (item: BlogContentItem) => {
     const isText = item.type === 'text';
     const isFile = item.type === 'file';
     const mediaType = item.mediaType;
     const placeholderText = isText ? "Start typing your blog paragraph here..." : "Click to select file...";
     
-    // Hidden File Input for the current block
-    const HiddenFileInput = ({ type }: { type: 'image' | 'video' }) => (
-        <input
-            type="file"
-            ref={el => fileInputRefs.current[`${item.id}-${type}`] = el}
-            onChange={(e) => handleFileChange(e as any, item.id, type)}
-            accept={type === 'image' ? 'image/*' : 'video/*'}
-            className="hidden"
-        />
-    );
-    
-    // Helper function to trigger the hidden input
-    const triggerFileExplorer = (e: React.MouseEvent, type: 'image' | 'video') => {
-        e.stopPropagation();
-        fileInputRefs.current[`${item.id}-${type}`]?.click();
-    };
-
 
     return (
       <div 
@@ -108,17 +106,16 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
           {/* File Upload Block */}
           {isFile && (
             <div className="space-y-2">
-              <HiddenFileInput type={mediaType || 'image'} />
               
               {!item.value ? (
                 // Empty Upload Zone
                 <div 
                   className="w-full h-32 border-2 border-dashed border-muted-foreground/30 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={(e) => triggerFileExplorer(e, mediaType || 'image')} // Click to trigger upload
+                  onClick={(e) => triggerFileExplorer(e, item.id, item.mediaType || 'image')} // Click to trigger upload
                 >
                   <Upload className="h-6 w-6 text-muted-foreground" />
                   <span className="text-sm font-medium text-muted-foreground mt-1">
-                    Click to Upload {mediaType === 'video' ? 'Video' : 'Image'}
+                    Click to Upload {item.mediaType === 'video' ? 'Video File' : 'Image File'}
                   </span>
                 </div>
               ) : (
@@ -128,14 +125,12 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
                         <img src={item.value} alt="Preview" className="max-h-64 w-full object-contain" />
                     )}
                     {mediaType === 'video' && (
-                        <div className="p-4 text-center bg-muted">
-                            Video File Ready: {mediaType} (Click to replace)
-                        </div>
+                         <video src={item.value} controls className="max-h-64 w-full object-contain bg-black" />
                     )}
                     <Button 
                         variant="ghost" 
                         className="absolute top-2 right-2 bg-black/50 text-white hover:bg-black/70"
-                        onClick={(e) => triggerFileExplorer(e, mediaType || 'image')}
+                        onClick={(e) => triggerFileExplorer(e, item.id, item.mediaType || 'image')} // Click to replace
                     >
                         Replace
                     </Button>
@@ -152,6 +147,14 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
     <div className="space-y-6">
       <h3 className="text-2xl font-bold border-b pb-2">Post Content Editor ✍️</h3>
 
+      {/* HIDDEN GLOBAL FILE INPUT */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+
       <AnimatePresence initial={false}>
         {content.map(item => (
           <motion.div
@@ -166,7 +169,7 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
         ))}
       </AnimatePresence>
 
-      {/* Add Content Buttons (Simplified and Focused on Text/File) */}
+      {/* Add Content Buttons */}
       <div className="flex justify-center pt-6">
         <div className="flex gap-3 p-3.5 rounded-full border bg-muted/50 shadow-xl">
           <Button variant="secondary" onClick={() => addItem('text')} className="gap-2">
