@@ -37,17 +37,16 @@ export const useEnhancedCoaches = () => {
 
   const fetchCoaches = async () => {
     try {
+      // Use the secure function that excludes sensitive fields like email
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'coach');
+        .rpc('get_public_coach_profiles');
 
       if (error) throw error;
 
       const enhancedCoaches: EnhancedCoach[] = data.map(coach => ({
         id: coach.id,
         name: coach.full_name || 'Coach',
-        email: coach.email || '',
+        email: '', // Email is not included in public data for security
         bio: coach.bio || 'Experienced fitness and wellness coach ready to help you achieve your goals.',
         tagline: coach.tagline || 'Fitness & Wellness Coach',
         avatar_url: coach.avatar_url || '',

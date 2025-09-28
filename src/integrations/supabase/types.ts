@@ -193,6 +193,22 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      get_public_coach_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          avatar_url: string
+          bio: string
+          certifications: Json
+          created_at: string
+          full_name: string
+          id: string
+          role: string
+          skills: string[]
+          socials: Json
+          tagline: string
+          updated_at: string
+        }[]
+      }
     }
     Enums: {
       request_status: "pending" | "accepted" | "rejected"
