@@ -18,7 +18,6 @@ function BlurImage({ src, alt, className = '' }: { src: string; alt: string; cla
       <img
         src={src}
         alt={alt}
-        // NOTE: Removed rounded-2xl here since it might be contained by a full-section div
         className={cn(
           'w-full h-full object-cover transition-opacity duration-500', 
           loaded ? 'opacity-100' : 'opacity-0'
@@ -40,8 +39,8 @@ function FeatureCard({ feature, index }) {
       className={cn(
         'flex-shrink-0 w-11/12 sm:w-[320px] lg:w-[380px] snap-center',
         // Modern Card Look with semi-transparent background for overlay effect
-        // NOTE: Increased backdrop blur slightly for better contrast on mobile blurry background
-        'p-6 bg-white/95 backdrop-blur-md border border-gray-100/50 rounded-xl shadow-lg',
+        // Keeping a slightly opaque background and blur on cards to help with readability
+        'p-6 bg-white/90 backdrop-blur-sm border border-gray-100/50 rounded-xl shadow-lg', // Reduced opacity slightly, less blur
         'transition-all duration-300 hover:shadow-2xl hover:border-primary/50 hover:bg-white',
         // Spacing for mobile scroll and desktop overlay
         'lg:mb-6' 
@@ -69,8 +68,8 @@ export default function ModernFeatureSection() {
   const features = MORE_THAN_PLAN_CARDS.slice(0, 4); 
 
   return (
-    // NOTE: Removed bg-gray-50 from section, it's now handled by the image fallback
-    <section className="relative py-16 md:py-24 overflow-hidden bg-white">
+    // Section background changed to a light gray to complement the image if visible through cards
+    <section className="relative py-16 md:py-24 overflow-hidden bg-gray-100"> 
       
       {/* 1. Background Image - Mobile/Tablet (Covers whole section, Blurry) */}
       <div className="absolute inset-0 lg:hidden">
@@ -78,11 +77,10 @@ export default function ModernFeatureSection() {
           <BlurImage
             src={HeroImage} 
             alt="Comprehensive wellness platform dashboard"
-            // Apply blur and reduced opacity for a background effect
-            className="filter blur-md opacity-30" 
+            // Apply blur and a low opacity to let the image show but not dominate
+            className="filter blur-lg opacity-20" // Increased blur, slightly higher opacity for image presence
           />
-          {/* Subtle white-to-white gradient for soft edges if needed */}
-          <div className="absolute inset-0 bg-white/80" /> 
+          {/* Removed the bg-white/80 overlay here */}
         </div>
       </div>
       
@@ -108,15 +106,16 @@ export default function ModernFeatureSection() {
               <BlurImage
                 src={HeroImage} 
                 alt="Comprehensive wellness platform dashboard"
-                className="opacity-40" // Slightly more visible for desktop
+                className="opacity-25" // Adjusted opacity for desktop, allowing image to be visible but subtle
               />
-              {/* Gradient overlay for better card readability on desktop */}
-              <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent" />
+              {/* Desktop gradient overlay changed to provide a smooth transition from left to right, 
+                  matching the gray-100 background of the section */}
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-100/70 to-transparent" />
             </div>
           </div>
           
           {/* Feature Cards - Horizontal scroll on mobile, overlay on desktop */}
-          <div className="relative z-10">
+          <div className="relative z-20"> {/* Increased z-index to ensure cards are always above everything */}
             <div
               className={cn(
                 // Mobile/Tablet: Horizontal Scroll container setup
@@ -127,7 +126,6 @@ export default function ModernFeatureSection() {
               )}
             >
               {features.map((card, index) => (
-                // NOTE: Card width is automatically handled by the lg:grid-cols-2
                 <FeatureCard key={card.title} feature={card} index={index} />
               ))}
             </div>
