@@ -4,7 +4,7 @@ import useMediaQuery from '@/hooks/use-media-query';
 
 // Import from the strictly separated directories
 import CurrentCoachTab from '@/components/customer/mycoach/CurrentCoachTab';
-import ExplorerTab from '@/components/customer/coaches/ExplorerTab';
+import ExplorerTab from '@/components/customer/coaches/ExplorerTab'; // Assuming this component exists
 import CoachBioDrawer from '@/components/customer/mycoach/CoachBioDrawer';
 import { SharedFilesDrawerContent } from '@/components/customer/mycoach/UnifiedSharedFiles';
 import SmartFeedbackSystem from '@/components/customer/mycoach/SmartFeedbackSystem';
@@ -23,7 +23,6 @@ const MyCoach = () => {
     const [activeTab, setActiveTab] = useState(initialTab);
 
     const [isBioDrawerOpen, setIsBioDrawerOpen] = useState(false);
-    // 💡 Files Drawer management moved up for use in CurrentCoachTabProps
     const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false);
     const isMobile = useMediaQuery('(max-width: 768px)');
 
@@ -33,9 +32,8 @@ const MyCoach = () => {
         requested: false,
     });
 
-    // DRY: Helper to centralize showing the popup message
     const showPopup = (message: string, requested = false) => {
-        setFeedbackPopup({ isVisible: true, message, type: 'success', requested }); // 💡 Added type for completeness
+        setFeedbackPopup({ isVisible: true, message, type: 'success', requested });
         setTimeout(() => {
             setFeedbackPopup(prev => ({ ...prev, isVisible: false }));
         }, 5000);
@@ -97,7 +95,6 @@ const MyCoach = () => {
                             isMobile={isMobile}
                             onViewBio={() => setIsBioDrawerOpen(true)}
                             onRequestFeedback={handleFeedbackRequest}
-                            // 💡 Pass down function to open files drawer
                             onViewSharedFiles={() => setIsFilesDrawerOpen(true)}
                         />
                     </TabsContent>
@@ -114,7 +111,7 @@ const MyCoach = () => {
 
             {/* MODAL/DRAWER LAYERS (Non-Tab Overlays) */}
 
-            {/* Coach Bio Modal/Drawer (Triggered from CurrentCoachTab) */}
+            {/* Coach Bio Modal/Drawer */}
             {isMobile ? (
                 <Drawer open={isBioDrawerOpen} onOpenChange={setIsBioDrawerOpen}>
                     <DrawerContent><CoachBioDrawer /></DrawerContent>
@@ -125,7 +122,7 @@ const MyCoach = () => {
                 </Sheet>
             )}
 
-            {/* Shared Files Drawer for Mobile (Triggered from CurrentCoachTab or View All in Files Widget) */}
+            {/* Shared Files Drawer for Mobile */}
             {isMobile && (
                 <Drawer open={isFilesDrawerOpen} onOpenChange={setIsFilesDrawerOpen}>
                     <DrawerContent><SharedFilesDrawerContent /></DrawerContent>
