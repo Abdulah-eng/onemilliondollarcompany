@@ -1,6 +1,6 @@
 // src/components/customer/mycoach/SharedFilesDrawerContent.tsx
 import { Separator } from '@/components/ui/separator';
-import FileList from './FileListItem'; // Import the new FileList helper
+import FileList from './FileListItem'; // UPDATED IMPORT PATH
 
 const SharedFilesDrawerContent = () => {
     return (
