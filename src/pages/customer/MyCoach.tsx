@@ -4,7 +4,7 @@ import useMediaQuery from '@/hooks/use-media-query';
 
 // Import from the strictly separated directories
 import CurrentCoachTab from '@/components/customer/mycoach/CurrentCoachTab';
-import ExplorerTab from '@/components/customer/coaches/ExplorerTab'; // Assuming this component exists
+import ExplorerTab from '@/components/customer/coaches/ExplorerTab';
 import CoachBioDrawer from '@/components/customer/mycoach/CoachBioDrawer';
 import { SharedFilesDrawerContent } from '@/components/customer/mycoach/UnifiedSharedFiles';
 import SmartFeedbackSystem from '@/components/customer/mycoach/SmartFeedbackSystem';
@@ -67,12 +67,12 @@ const MyCoach = () => {
                 onValueChange={setActiveTab}
                 className="w-full"
             >
-                {/* 1. TAB LIST: Enhanced styling for a slightly more modern/separated look */}
+                {/* 1. TAB LIST: FIXED - Removed redundant 'disabled' prop to allow clicking back */}
                 <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-secondary/50 dark:bg-secondary/20 rounded-xl">
                     <TabsTrigger
                         value="myCoach"
                         onClick={() => setActiveTab('myCoach')}
-                        disabled={!hasCurrentCoach}
+                        // ❌ Removed disabled={!hasCurrentCoach}
                         className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-border/50 rounded-lg h-10 transition-all"
                     >
                         <User className="w-4 h-4 mr-2"/> My Coach
