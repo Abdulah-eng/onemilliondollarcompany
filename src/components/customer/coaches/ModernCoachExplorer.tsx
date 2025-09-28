@@ -167,15 +167,34 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
         }, 1500);
     };
 
+    // Map specialties to broader categories for filtering
+    const mapSpecialtyToCategory = (specialty: string): string => {
+        const lower = specialty.toLowerCase();
+        if (lower.includes('hiit') || lower.includes('strength') || lower.includes('endurance') || lower.includes('bodybuilding') || lower.includes('weight loss')) {
+            return 'fitness';
+        }
+        if (lower.includes('yoga') || lower.includes('mindfulness') || lower.includes('stress') || lower.includes('mental')) {
+            return 'mental health';
+        }
+        if (lower.includes('nutrition') || lower.includes('macro') || lower.includes('diet')) {
+            return 'nutrition';
+        }
+        return lower;
+    };
+
     // 💡 Comprehensive Filter Logic
     const filteredCoaches = allCoaches
         .filter(coach => {
-            // 1. Filter by Speciality
+            // 1. Filter by Category
             if (activeFilter !== 'All') {
-                if (!coach.specialties.some(s => s.toLowerCase().includes(activeFilter.toLowerCase()))) {
+                const hasMatchingSpecialty = coach.specialties.some(specialty => 
+                    mapSpecialtyToCategory(specialty) === activeFilter.toLowerCase()
+                );
+                if (!hasMatchingSpecialty) {
                     return false;
                 }
             }
+            
             // 2. Filter by Search Term
             if (searchTerm.trim() === '') {
                 return true;

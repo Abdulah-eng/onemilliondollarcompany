@@ -33,7 +33,7 @@ const MyCoach = () => {
     });
 
     const showPopup = (message: string, requested = false) => {
-        setFeedbackPopup({ isVisible: true, message, type: 'success', requested });
+        setFeedbackPopup({ isVisible: true, message, requested });
         setTimeout(() => {
             setFeedbackPopup(prev => ({ ...prev, isVisible: false }));
         }, 5000);
@@ -89,16 +89,27 @@ const MyCoach = () => {
                 {/* 2. TAB CONTENT */}
 
                 {/* --- CONTENT 1: MY COACH --- */}
-                {hasCurrentCoach && (
-                    <TabsContent value="myCoach" className="mt-6">
+                <TabsContent value="myCoach" className="mt-6">
+                    {hasCurrentCoach ? (
                         <CurrentCoachTab
                             isMobile={isMobile}
                             onViewBio={() => setIsBioDrawerOpen(true)}
                             onRequestFeedback={handleFeedbackRequest}
                             onViewSharedFiles={() => setIsFilesDrawerOpen(true)}
                         />
-                    </TabsContent>
-                )}
+                    ) : (
+                        <div className="text-center py-12">
+                            <h3 className="text-xl font-semibold mb-2">No Coach Assigned</h3>
+                            <p className="text-muted-foreground mb-4">Start by exploring available coaches to find your perfect match.</p>
+                            <button 
+                                onClick={() => setActiveTab('explore')}
+                                className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                            >
+                                Explore Coaches
+                            </button>
+                        </div>
+                    )}
+                </TabsContent>
 
                 {/* --- CONTENT 2: EXPLORE & HISTORY --- */}
                 <TabsContent value="explore" className="mt-6">
