@@ -68,24 +68,27 @@ export default function MoreThanPlanSection() {
               )}
               style={{ transitionDelay: `${index * 80}ms` }}
             >
-              <div className="absolute inset-0 transition-all duration-300 group-hover:scale-105">
-                <BlurImage src={card.image} alt={card.title} />
-                {/* Softer but still strong gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-transparent rounded-2xl" />
-              </div>
+              {/* Full Image */}
+              <BlurImage src={card.image} alt={card.title} />
 
-              {/* Content */}
-              <div className="relative z-10 flex flex-col justify-end h-full p-5 sm:p-6 min-h-[300px]">
-                <div>
+              {/* Subtle gradient behind text only */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent rounded-2xl" />
+
+              {/* Text aligned left */}
+              <div className="relative z-10 flex flex-col justify-center h-full p-5 sm:p-6 min-h-[300px]">
+                <div className="max-w-[60%]">
                   <h3 className="text-xl sm:text-2xl font-bold tracking-tight mb-2 text-white drop-shadow-lg">
                     {card.title}
                   </h3>
                   <p className="text-sm leading-snug mb-3 text-white/85 line-clamp-3 drop-shadow-md">
                     {card.description}
                   </p>
-                  <ul className="space-y-1.5 border-t border-white/25 pt-3 text-white">
+                  <ul className="space-y-1.5 text-white">
                     {card.points.map((point, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm drop-shadow-md">
+                      <li
+                        key={idx}
+                        className="flex items-start gap-2 text-sm drop-shadow-md"
+                      >
                         <svg
                           className="w-4 h-4 text-primary flex-shrink-0 mt-0.5"
                           fill="none"
