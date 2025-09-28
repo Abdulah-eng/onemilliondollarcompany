@@ -12,7 +12,7 @@ import FeedbackMessagePopup from '@/components/customer/mycoach/FeedbackMessageP
 // UI Components
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs'; 
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'; 
 
 import { coachInfo } from '@/mockdata/mycoach/coachData'; 
 import { User, Search } from 'lucide-react'; 
