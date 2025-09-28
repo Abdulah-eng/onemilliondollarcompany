@@ -3,7 +3,7 @@ import { Download, File } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { sharedFiles } from '@/mockdata/mycoach/coachData';
 
-// Reusable component for a single file entry
+// Reusable component for a single file item
 const FileItem: React.FC<{ file: (typeof sharedFiles)[0] }> = ({ file }) => (
     <div key={file.id} className="flex items-center justify-between p-4 border rounded-xl bg-gray-50 dark:bg-gray-800 min-w-0">
         <div className="flex items-start gap-4 min-w-0">
@@ -21,7 +21,7 @@ const FileItem: React.FC<{ file: (typeof sharedFiles)[0] }> = ({ file }) => (
     </div>
 );
 
-// Reusable component for the list wrapper
+// Reusable component for the file list wrapper (DRY)
 const FileList: React.FC = () => {
     return sharedFiles.length > 0 ? (
         <div className="space-y-4">
