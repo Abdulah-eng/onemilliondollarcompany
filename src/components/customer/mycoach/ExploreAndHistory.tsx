@@ -1,4 +1,4 @@
-// src/components/customer/mycoach/ExploreAndHistory.tsx (NEW)
+// src/components/customer/mycoach/ExploreAndHistory.tsx
 import CoachExplorerDrawer from './CoachExplorerDrawer';
 import { Button } from '@/components/ui/button';
 import { History } from 'lucide-react';
@@ -8,16 +8,16 @@ interface ExploreAndHistoryProps {
 }
 
 const CoachHistoryPlaceholder = () => (
-    <div className="p-6 bg-card rounded-xl shadow-md space-y-4">
+    <div className="p-6 bg-card rounded-xl shadow-md border space-y-4 mt-8">
         <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold">Coach History 🕰️</h3>
             <Button variant="outline" size="sm">
                 <History className="w-4 h-4 mr-2" />
-                View All Records
+                View Full History
             </Button>
         </div>
-        <p className="text-muted-foreground">
-            You are currently working with **Sophia Miller**. Previous coach records will appear here.
+        <p className="text-muted-foreground text-sm">
+            View records, programs, and messages from your past coaching relationships.
         </p>
         <div className="h-20 border border-dashed rounded-lg flex items-center justify-center text-sm text-muted-foreground">
             No past coaches on file.
@@ -29,15 +29,15 @@ const CoachHistoryPlaceholder = () => (
 const ExploreAndHistory: React.FC<ExploreAndHistoryProps> = ({ onNewCoachRequestSent }) => {
     return (
         <div className="space-y-8">
-            {/* Coach Explorer takes up the majority of the view */}
-            {/* NOTE: We now remove the 'onClose' prop from the Explorer since it's in a persistent tab */}
+            {/* Coach Explorer takes the main space. It now behaves like persistent tab content. */}
             <CoachExplorerDrawer 
-                // We fake the onClose for internal dialogs to work, but it just calls onNewCoachRequestSent
+                // The Explorer component is designed with a modal for the request, 
+                // so we pass a placeholder onClose to prevent errors, as the main Drawer/Sheet is gone.
                 onClose={() => {}} 
                 onNewCoachRequestSent={onNewCoachRequestSent}
             />
 
-            {/* Coach History (Future Expansion) */}
+            {/* Coach History Section */}
             <CoachHistoryPlaceholder />
         </div>
     );
