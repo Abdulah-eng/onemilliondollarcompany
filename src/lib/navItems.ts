@@ -8,7 +8,6 @@ import {
   Settings,
   Calendar,
   FileText,
-  FolderOpen,
   DollarSign
 } from 'lucide-react';
 
@@ -39,7 +38,6 @@ export const coachNavItems: NavItem[] = [
   { name: 'Programs', href: '/coach/programs', icon: Calendar },
   { name: 'Library', href: '/coach/library', icon: Library },
   { name: 'Blog', href: '/coach/blog', icon: FileText },
-  { name: 'Files', href: '/coach/files', icon: FolderOpen },
   { name: 'Income', href: '/coach/income', icon: DollarSign },
 ];
 
