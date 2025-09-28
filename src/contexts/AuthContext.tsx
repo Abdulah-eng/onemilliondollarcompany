@@ -119,10 +119,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [fetchProfile]);
 
   const signOut = async () => {
-    // Clear payment modal session storage on logout
-    sessionStorage.removeItem('paymentModalDismissed');
-    sessionStorage.removeItem('paymentModalShown');
-    await supabase.auth.signOut();
+    try {
+      // Clear payment modal session storage on logout
+      sessionStorage.removeItem('paymentModalDismissed');
+      sessionStorage.removeItem('paymentModalShown');
+      
+      // Force local session clear regardless of server response
+      await supabase.auth.signOut({ scope: 'local' });
+      
+      // Clear local state immediately
+      setUser(null);
+      setProfile(null);
+      
+      console.log('User signed out successfully');
+    } catch (error) {
+      console.error('Error during signOut:', error);
+      // Even if there's an error, clear local state
+      setUser(null);
+      setProfile(null);
+    }
   };
 
   const value = { user, profile, loading, signOut, refreshProfile };
