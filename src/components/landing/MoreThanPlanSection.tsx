@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { MORE_THAN_PLAN_CARDS } from '@/mockdata/landingpage/morethanplan';
 
-// Import only the single, visually striking image for the right column
-import HeroImage from '@/assets/more-than-plan-blogaccess.webp'; 
+// Import the background image
+import HeroImage from '@/assets/more-than-plan-hero.webp';
 
 // --- BlurImage Component (Kept as is for image loading) ---
 
@@ -30,24 +30,22 @@ function BlurImage({ src, alt, className = '' }: { src: string; alt: string; cla
   );
 }
 
-// --- Feature Card Component (Optimized for both scroll and stacking) ---
+// --- Feature Card Component (Optimized for overlay on background) ---
 
 function FeatureCard({ feature, index }) {
   return (
     <div
       key={feature.title}
-      // Mobile Scroll Styling
       className={cn(
-        'flex-shrink-0 w-11/12 sm:w-[320px] lg:w-full snap-center',
-        // Modern Card Look
-        'p-6 bg-white border border-gray-100 rounded-xl shadow-lg',
-        'transition-all duration-300 hover:shadow-2xl hover:border-primary/50',
-        // Spacing for stacked desktop view
-        'lg:mb-4' 
+        'flex-shrink-0 w-11/12 sm:w-[320px] lg:w-[380px] snap-center',
+        // Modern Card Look with semi-transparent background for overlay effect
+        'p-6 bg-white/95 backdrop-blur-sm border border-gray-100/50 rounded-xl shadow-lg',
+        'transition-all duration-300 hover:shadow-2xl hover:border-primary/50 hover:bg-white',
+        // Spacing for mobile scroll and desktop overlay
+        'lg:mb-6' 
       )}
     >
       <div className="p-3 rounded-full bg-primary/10 text-primary w-fit mb-4">
-        {/* Using a simple icon for consistency */}
         <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
@@ -56,19 +54,9 @@ function FeatureCard({ feature, index }) {
       <h3 className="text-xl font-bold text-gray-900 mb-2">
         {feature.title}
       </h3>
-      <p className="text-base text-muted-foreground line-clamp-3">
+      <p className="text-base text-muted-foreground">
         {feature.description}
       </p>
-      
-      {/* Optional: Add a subtle list of points below the description */}
-      <ul className="mt-4 space-y-1 text-sm text-gray-600">
-        {feature.points.slice(0, 2).map((point, idx) => (
-            <li key={idx} className="flex items-center gap-2">
-                <span className="text-primary">•</span>
-                <span>{point}</span>
-            </li>
-        ))}
-      </ul>
     </div>
   );
 }
@@ -94,33 +82,35 @@ export default function ModernFeatureSection() {
           </p>
         </div>
         
-        {/* Main Content Grid: Cards on Left, Image on Right */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-          
-          {/* Left Column: Features - HORIZONTAL SCROLL on Mobile/Tablet, STACKED on Desktop */}
-          <div
-            className={cn(
-              // Mobile/Tablet: Horizontal Scroll container setup
-              'flex gap-4 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 scroll-smooth pb-8',
-              'scroll-p-4', // Padding at the start of the scroll
-              // Desktop: Stacked Vertical (Removes flex/scroll behavior)
-              'lg:block lg:space-y-6 lg:mx-0 lg:px-0 lg:pb-0'
-            )}
-          >
-            {features.map((card, index) => (
-              <FeatureCard key={card.title} feature={card} index={index} />
-            ))}
-          </div>
-
-          {/* Right Column: Prominent Image */}
-          <div className="hidden lg:block lg:order-2 sticky top-20">
-            <div className="relative w-full aspect-[4/3] lg:aspect-[5/4]">
+        {/* Main Content: Single container with background image on right and overlaying cards */}
+        <div className="relative">
+          {/* Background Image - Desktop Only, positioned on right */}
+          <div className="hidden lg:block absolute top-0 right-0 w-1/2 h-full">
+            <div className="relative w-full h-full min-h-[600px]">
               <BlurImage
                 src={HeroImage} 
                 alt="Comprehensive wellness platform dashboard"
+                className="opacity-30"
               />
-              {/* Premium Image Shadow */}
-              <div className="absolute inset-0 rounded-2xl shadow-3xl shadow-primary/30" />
+              {/* Gradient overlay for better card readability */}
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-50 via-gray-50/80 to-transparent" />
+            </div>
+          </div>
+          
+          {/* Feature Cards - Horizontal scroll on mobile, overlay on desktop */}
+          <div className="relative z-10">
+            <div
+              className={cn(
+                // Mobile/Tablet: Horizontal Scroll container setup
+                'flex gap-4 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 scroll-smooth pb-8',
+                'scroll-p-4', // Padding at the start of the scroll
+                // Desktop: Stacked Vertical with positioning for overlay effect
+                'lg:block lg:space-y-6 lg:mx-0 lg:px-0 lg:pb-0 lg:max-w-2xl'
+              )}
+            >
+              {features.map((card, index) => (
+                <FeatureCard key={card.title} feature={card} index={index} />
+              ))}
             </div>
           </div>
         </div>
