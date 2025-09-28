@@ -15,6 +15,7 @@ export interface CoachRequestWithCustomer {
     full_name: string;
     email: string;
     plan: string;
+    avatar_url: string;
   };
 }
 
@@ -35,7 +36,8 @@ export const useCoachRequests = () => {
             id,
             full_name,
             email,
-            plan
+            plan,
+            avatar_url
           )
         `)
         .eq('coach_id', user.id)

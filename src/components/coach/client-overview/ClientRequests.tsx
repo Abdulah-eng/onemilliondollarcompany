@@ -69,27 +69,27 @@ const ClientRequests = ({ onClientClick }: ClientRequestsProps) => {
           >
             <div onClick={() => onClientClick(request.customer_id)} className="block">
               <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-xl cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-md font-semibold text-primary">
-                    New {request.customer?.plan || 'Customer'} Request
-                  </CardTitle>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
+                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                   <CardTitle className="text-md font-semibold text-primary">
+                     New Request
+                   </CardTitle>
+                   <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full border">
-                      <img className="aspect-square h-full w-full" src={`https://i.pravatar.cc/150?u=${request.customer_id}`} alt={request.customer?.full_name || 'Customer'} />
-                    </span>
-                    <div className="flex flex-col">
-                      <p className="text-lg font-bold">{request.customer?.full_name || 'New Customer'}</p>
-                      <p className="text-sm text-muted-foreground">{request.customer?.email || 'No email provided'}</p>
-                    </div>
-                  </div>
-                  {request.message && (
-                    <div className="bg-muted/50 p-3 rounded-lg">
-                      <p className="text-sm text-muted-foreground line-clamp-2">{request.message}</p>
-                    </div>
-                  )}
+                   <div className="flex items-center gap-3">
+                     <span className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full border">
+                       <img 
+                         className="aspect-square h-full w-full" 
+                         src={request.customer?.avatar_url || `https://i.pravatar.cc/150?u=${request.customer_id}`} 
+                         alt={request.customer?.full_name || 'Customer'} 
+                       />
+                     </span>
+                     <div className="flex flex-col">
+                       <p className="text-lg font-bold">{request.customer?.full_name || 'New Customer'}</p>
+                       <p className="text-sm text-muted-foreground">{request.customer?.email || 'No email provided'}</p>
+                       <p className="text-xs text-muted-foreground">{request.customer?.plan || 'Free Plan'}</p>
+                     </div>
+                   </div>
                   <div className="flex gap-2 pt-2">
                     <Button 
                       variant="ghost" 
