@@ -14,6 +14,10 @@ interface ClientRequestsProps {
 const ClientRequests = ({ onClientClick }: ClientRequestsProps) => {
   const [processingRequests, setProcessingRequests] = useState<Set<string>>(new Set());
   const { requests, loading, acceptRequest, rejectRequest } = useCoachRequests();
+  
+  console.log('ClientRequests: Component rendered');
+  console.log('ClientRequests: loading:', loading);
+  console.log('ClientRequests: requests:', requests);
 
   const handleRequestAction = async (requestId: string, action: 'accepted' | 'rejected') => {
     setProcessingRequests(prev => new Set([...prev, requestId]));
@@ -67,7 +71,10 @@ const ClientRequests = ({ onClientClick }: ClientRequestsProps) => {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
           >
-            <div onClick={() => onClientClick(request.customer_id)} className="block">
+            <div onClick={() => {
+              console.log('ClientRequests: Card clicked for customer:', request.customer_id);
+              onClientClick(request.customer_id);
+            }} className="block">
               <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-xl cursor-pointer">
                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                    <CardTitle className="text-md font-semibold text-primary">

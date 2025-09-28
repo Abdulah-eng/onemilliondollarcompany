@@ -25,8 +25,12 @@ export const useCoachRequests = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchRequests = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('useCoachRequests: No user found');
+      return;
+    }
 
+    console.log('useCoachRequests: Fetching requests for coach:', user.id);
     try {
       const { data, error } = await supabase
         .from('coach_requests')
@@ -44,8 +48,13 @@ export const useCoachRequests = () => {
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
+      console.log('useCoachRequests: Query result:', { data, error });
+
       if (error) throw error;
-      setRequests(data as CoachRequestWithCustomer[] || []);
+      
+      const requestsData = data as CoachRequestWithCustomer[] || [];
+      console.log('useCoachRequests: Setting requests:', requestsData);
+      setRequests(requestsData);
     } catch (error) {
       console.error('Error fetching requests:', error);
     } finally {

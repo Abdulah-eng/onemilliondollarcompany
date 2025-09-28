@@ -10,8 +10,13 @@ const ClientOverviewPage = () => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const { customer: selectedClient, loading: customerLoading } = useCustomerDetail(selectedClientId);
+  
+  console.log('ClientOverviewPage: selectedClientId:', selectedClientId);
+  console.log('ClientOverviewPage: selectedClient:', selectedClient);
+  console.log('ClientOverviewPage: customerLoading:', customerLoading);
 
   const handleClientRequestClick = (clientId: string) => {
+    console.log('ClientOverviewPage: Client clicked, setting selectedClientId:', clientId);
     setSelectedClientId(clientId);
   };
 
