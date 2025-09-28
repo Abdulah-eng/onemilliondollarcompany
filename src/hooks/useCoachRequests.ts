@@ -31,7 +31,7 @@ export const useCoachRequests = () => {
         .from('coach_requests')
         .select(`
           *,
-          customer:profiles(
+          customer:profiles!customer_id(
             id,
             full_name,
             email,
