@@ -1,7 +1,6 @@
-// src/components/customer/mycoach/SharedFilesCard.tsx (UPDATED)
+// src/components/customer/mycoach/SharedFilesCard.tsx
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-// Assuming the import path for the new helper is correct
-import FileList from './FileListItem'; 
+import FileList from './FileListItem'; // Import the new FileList helper
 
 const SharedFilesCard = () => {
     return (
