@@ -1,22 +1,39 @@
 'use client';
 
-import React, { useState } from 'react';
-import { CoachProfile, Certification, SocialLink } from '@/mockdata/settings/mockSettings';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { User, Tag, Award, Plus, Trash2, Link, Upload, Save } from 'lucide-react';
+import { User, Tag, Award, Plus, Trash2, Link, Upload, Save, Loader2, Brain } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useCoachProfile, CoachProfile, Certification, SocialLink } from '@/hooks/useCoachProfile';
+import { SkillsSelector } from '@/components/onboarding/SkillsSelector';
+import { toast } from 'sonner';
 
 interface ProfileSettingsProps {
-  profile: CoachProfile;
-  onUpdate: (updatedProfile: CoachProfile) => void;
+  onUpdate?: () => void;
 }
 
-const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) => {
-  const [formData, setFormData] = useState(profile);
+const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
+  const { profile, loading, error, updateProfile } = useCoachProfile();
+  const [formData, setFormData] = useState<CoachProfile>({
+    full_name: '',
+    tagline: '',
+    bio: '',
+    avatar_url: '',
+    skills: [],
+    certifications: [],
+    socials: []
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setFormData(profile);
+    }
+  }, [profile]);
 
   const handleCertChange = (id: string, field: keyof Certification, value: any) => {
     const newCerts = formData.certifications.map(c => 
@@ -36,10 +53,36 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) 
     setFormData({ ...formData, certifications: formData.certifications.filter(c => c.id !== id) });
   };
 
-  const handleSave = () => {
-    onUpdate(formData);
-    alert('Public Profile Updated! Clients can now see your changes.');
+  const handleSave = async () => {
+    setIsSubmitting(true);
+    try {
+      const success = await updateProfile(formData);
+      if (success) {
+        toast.success("Profile Updated! Clients can now see your changes.");
+        onUpdate?.();
+      }
+    } catch (err) {
+      toast.error("Failed to update profile. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-8">
+        <p className="text-destructive">Error loading profile: {error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -55,7 +98,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) 
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-4">
             <img 
-              src={formData.profileImageUrl} 
+              src={formData.avatar_url || 'https://placehold.co/100x100/A0E7E5/030712?text=CP'} 
               alt="Profile" 
               className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
             />
@@ -65,7 +108,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) 
           </div>
           
           <Label htmlFor="name">Full Name</Label>
-          <Input id="name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+          <Input id="name" value={formData.full_name} onChange={e => setFormData({ ...formData, full_name: e.target.value })} />
 
           <Label htmlFor="tagline">Tagline (Short Summary)</Label>
           <Input id="tagline" value={formData.tagline} onChange={e => setFormData({ ...formData, tagline: e.target.value })} placeholder="e.g., Elite Fitness Coach & Nutritionist" />
@@ -75,6 +118,22 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) 
         </CardContent>
       </Card>
       
+      {/* Skills */}
+      <Card className="shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Brain className="h-5 w-5" /> Skills & Specialties
+          </CardTitle>
+          <CardDescription>Select your areas of expertise to help clients find you.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SkillsSelector 
+            selectedSkills={formData.skills}
+            onSkillsChange={(skills) => setFormData({ ...formData, skills })}
+          />
+        </CardContent>
+      </Card>
+
       {/* Certifications */}
       <Card className="shadow-md">
         <CardHeader>
@@ -123,8 +182,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) 
       </Card>
 
       <div className="pt-4 flex justify-end">
-        <Button onClick={handleSave} size="lg" className="gap-2">
-          <Save className="h-5 w-5" /> Save Public Profile
+        <Button onClick={handleSave} size="lg" className="gap-2" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Save className="h-5 w-5" />
+          )}
+          {isSubmitting ? 'Saving...' : 'Save Public Profile'}
         </Button>
       </div>
     </div>

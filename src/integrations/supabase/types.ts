@@ -124,6 +124,8 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
+          certifications: Json | null
           coach_id: string | null
           created_at: string
           email: string | null
@@ -134,11 +136,16 @@ export type Database = {
           plan: string | null
           plan_expiry: string | null
           role: string
+          skills: string[] | null
+          socials: Json | null
           stripe_customer_id: string | null
+          tagline: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
+          certifications?: Json | null
           coach_id?: string | null
           created_at?: string
           email?: string | null
@@ -149,11 +156,16 @@ export type Database = {
           plan?: string | null
           plan_expiry?: string | null
           role?: string
+          skills?: string[] | null
+          socials?: Json | null
           stripe_customer_id?: string | null
+          tagline?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
+          certifications?: Json | null
           coach_id?: string | null
           created_at?: string
           email?: string | null
@@ -164,7 +176,10 @@ export type Database = {
           plan?: string | null
           plan_expiry?: string | null
           role?: string
+          skills?: string[] | null
+          socials?: Json | null
           stripe_customer_id?: string | null
+          tagline?: string | null
           updated_at?: string
         }
         Relationships: []

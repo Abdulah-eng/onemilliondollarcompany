@@ -5,17 +5,12 @@ import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProfileSettings from '@/components/coach/settings/ProfileSettings';
 import AccountSettings from '@/components/coach/settings/AccountSettings';
-import { mockProfile, mockAccount, CoachProfile, CoachAccount } from '@/mockdata/settings/mockSettings';
+import { mockAccount, CoachAccount } from '@/mockdata/settings/mockSettings';
 import { User, Lock } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const SettingsPage: React.FC = () => {
-  const [profile, setProfile] = useState<CoachProfile>(mockProfile);
   const [account, setAccount] = useState<CoachAccount>(mockAccount);
-
-  const handleProfileUpdate = useCallback((updatedProfile: CoachProfile) => {
-    setProfile(updatedProfile);
-  }, []);
 
   const handleAccountUpdate = useCallback((updatedAccount: CoachAccount) => {
     setAccount(updatedAccount);
@@ -45,7 +40,7 @@ const SettingsPage: React.FC = () => {
         
         <div className="mt-6">
           <TabsContent value="profile">
-            <ProfileSettings profile={profile} onUpdate={handleProfileUpdate} />
+            <ProfileSettings />
           </TabsContent>
 
           <TabsContent value="account">
