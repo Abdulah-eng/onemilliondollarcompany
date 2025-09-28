@@ -90,27 +90,9 @@ function FeatureItem({ feature, index }) {
         <h3 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground mb-4">
           {feature.title}
         </h3>
-        <p className="text-lg text-muted-foreground mb-6">
+        <p className="text-lg text-muted-foreground">
           {feature.description}
         </p>
-        
-        {/* Simple bullet points list */}
-        <ul className="space-y-3 text-base">
-          {feature.points.map((point, idx) => (
-            <li key={idx} className="flex items-start gap-3">
-              <svg 
-                className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2.5" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              <span className="text-gray-700">{point}</span>
-            </li>
-          ))}
-        </ul>
       </div>
     </div>
   );
