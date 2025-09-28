@@ -1,15 +1,15 @@
-// src/pages/customer/MyCoach.tsx (FINAL RESTRUCTURED CODE)
+// src/pages/customer/MyCoach.tsx
 import { useState } from 'react';
 import useMediaQuery from '@/hooks/use-media-query';
 
-// New Tab Content Components
-import MyCurrentCoach from '@/components/customer/mycoach/MyCurrentCoach';
-import ExploreAndHistory from '@/components/customer/mycoach/ExploreAndHistory';
-
-// Modal/Drawer/UI Components
-import FeedbackMessagePopup from '@/components/customer/mycoach/FeedbackMessagePopup';
+// Import from the strictly separated directories
+import CurrentCoachTab from '@/components/customer/mycoach/CurrentCoachTab'; // From mycoach folder
+import ExplorerTab from '@/components/customer/coaches/ExplorerTab'; // From coaches folder
 import CoachBioDrawer from '@/components/customer/mycoach/CoachBioDrawer';
 import SharedFilesDrawerContent from '@/components/customer/mycoach/SharedFilesDrawerContent';
+import FeedbackMessagePopup from '@/components/customer/mycoach/FeedbackMessagePopup';
+
+// UI Components
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs'; 
@@ -23,7 +23,7 @@ const MyCoach = () => {
     const [activeTab, setActiveTab] = useState(initialTab);
 
     const [isBioDrawerOpen, setIsBioDrawerOpen] = useState(false);
-    const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false); // Used only for the SharedFilesDrawer for mobile
+    const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false);
     const isMobile = useMediaQuery('(max-width: 768px)');
 
     const [feedbackPopup, setFeedbackPopup] = useState({
@@ -50,7 +50,6 @@ const MyCoach = () => {
 
     const handleNewCoachRequestSent = (coachName: string) => {
         showPopup(`Your request for ${coachName} has been sent! We'll process the switch shortly.`);
-        // After sending a request, switch back to the 'My Coach' tab if they have one.
         if (hasCurrentCoach) {
              setActiveTab('myCoach');
         }
@@ -71,7 +70,6 @@ const MyCoach = () => {
             >
                 {/* 1. TAB LIST */}
                 <TabsList className="grid w-full grid-cols-2">
-                    {/* Tab 1: My Current Coach (disabled if no coach assigned) */}
                     <TabsTrigger 
                         value="myCoach" 
                         onClick={() => setActiveTab('myCoach')}
@@ -79,7 +77,6 @@ const MyCoach = () => {
                     >
                         <User className="w-4 h-4 mr-2"/> My Coach
                     </TabsTrigger>
-                    {/* Tab 2: Explore Coaches & History */}
                     <TabsTrigger value="explore" onClick={() => setActiveTab('explore')}>
                         <Search className="w-4 h-4 mr-2"/> Explore & History
                     </TabsTrigger>
@@ -90,7 +87,7 @@ const MyCoach = () => {
                 {/* --- CONTENT 1: MY COACH --- */}
                 {hasCurrentCoach && (
                     <TabsContent value="myCoach">
-                        <MyCurrentCoach
+                        <CurrentCoachTab
                             isMobile={isMobile}
                             onViewBio={() => setIsBioDrawerOpen(true)}
                             onRequestFeedback={handleFeedbackRequest}
@@ -100,7 +97,7 @@ const MyCoach = () => {
                 
                 {/* --- CONTENT 2: EXPLORE & HISTORY --- */}
                 <TabsContent value="explore">
-                    <ExploreAndHistory
+                    <ExplorerTab
                         onNewCoachRequestSent={handleNewCoachRequestSent}
                     />
                 </TabsContent>
@@ -109,7 +106,7 @@ const MyCoach = () => {
 
             {/* MODAL/DRAWER LAYERS (Non-Tab Overlays) */}
             
-            {/* Coach Bio Modal/Drawer (Triggered from MyCurrentCoach Header) */}
+            {/* Coach Bio Modal/Drawer (Triggered from CurrentCoachTab) */}
             {isMobile ? (
                 <Drawer open={isBioDrawerOpen} onOpenChange={setIsBioDrawerOpen}>
                     <DrawerContent><CoachBioDrawer /></DrawerContent>
@@ -120,7 +117,7 @@ const MyCoach = () => {
                 </Sheet>
             )}
 
-            {/* Shared Files Drawer for Mobile (Currently unused, but kept if trigger is added later) */}
+            {/* Shared Files Drawer for Mobile (Kept for completeness) */}
             {isMobile && (
                 <Drawer open={isFilesDrawerOpen} onOpenChange={setIsFilesDrawerOpen}>
                     <DrawerContent><SharedFilesDrawerContent /></DrawerContent>
