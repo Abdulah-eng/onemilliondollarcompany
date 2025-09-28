@@ -70,7 +70,7 @@ export default function ModernFeatureSection() {
         </div>
 
         {/* Layout: Cards above image */}
-        <div className="lg:flex lg:items-start lg:gap-8">
+        <div className="lg:flex lg:items-start lg:gap-8 relative">
           {/* Feature Cards */}
           <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 scroll-smooth pb-8 scroll-p-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:w-3/5 lg:mx-0 lg:px-0 lg:pb-0 z-20">
             {features.map((card) => (
@@ -78,8 +78,8 @@ export default function ModernFeatureSection() {
             ))}
           </div>
 
-          {/* Hero Image - Right side on desktop */}
-          <div className="hidden lg:block lg:w-1/2 relative mt-8 lg:mt-0 lg:-ml-12">
+          {/* Hero Image - Right side, slightly bigger */}
+          <div className="hidden lg:block lg:w-3/5 relative mt-8 lg:mt-0 lg:-ml-16">
             <div className="relative w-full aspect-[5/4] rounded-2xl overflow-hidden shadow-xl">
               <BlurImage src={HeroImage} alt="Comprehensive wellness platform dashboard" />
             </div>
