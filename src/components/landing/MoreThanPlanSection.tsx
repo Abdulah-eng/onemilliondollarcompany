@@ -78,9 +78,9 @@ export default function ModernFeatureSection() {
             ))}
           </div>
 
-          {/* Hero Image - Right side, slightly bigger */}
-          <div className="hidden lg:block lg:w-3/5 relative mt-8 lg:mt-0 lg:-ml-16">
-            <div className="relative w-full aspect-[5/4] rounded-2xl overflow-hidden shadow-xl">
+          {/* Hero Image - Right side, behind cards and slightly bigger + centered */}
+          <div className="hidden lg:block lg:w-3/5 relative mt-0 lg:-ml-16">
+            <div className="absolute top-1/2 -translate-y-1/2 right-0 w-[110%] aspect-[5/4] rounded-2xl overflow-hidden shadow-xl z-10">
               <BlurImage src={HeroImage} alt="Comprehensive wellness platform dashboard" />
             </div>
           </div>
