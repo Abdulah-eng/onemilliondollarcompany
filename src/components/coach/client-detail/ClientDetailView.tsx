@@ -3,33 +3,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Weight, Heart, Ruler, Calendar, MapPin, Target,
-  Dumbbell, Utensils, XCircle, CheckCircle,
+  Dumbbell, Utensils, XCircle, CheckCircle, Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
-// Mock data representing an incoming client request from the onboarding flow
-const mockClientData = {
-  id: 'request_123',
-  name: 'Emily Clark',
-  plan: 'Trial',
-  profilePicture: 'https://i.pravatar.cc/150?u=emily-clark',
-  personalInfo: {
-    age: 25,
-    gender: 'Female',
-    height: '165 cm',
-    weight: '68 kg',
-  },
-  goals: ['Weight Loss', 'Increased Energy'],
-  preferences: {
-    injuries: ['None'],
-    allergies: ['Shellfish'],
-    dislikes: ['Heavy lifting'],
-    preferredProgramType: ['Fitness'],
-  },
-};
+const ClientDetailView = ({ client, onClose, loading = false }) => {
+  
+  if (loading) {
+    return (
+      <div className="flex flex-col h-full items-center justify-center p-6">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Loading customer details...</p>
+      </div>
+    );
+  }
 
-const ClientDetailView = ({ client = mockClientData, onClose }) => {
+  if (!client) {
+    return (
+      <div className="flex flex-col h-full items-center justify-center p-6">
+        <p className="text-muted-foreground">No customer data available</p>
+      </div>
+    );
+  }
 
   const handleAccept = () => {
     // TODO: Implement logic to accept the client request
