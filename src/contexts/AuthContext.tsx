@@ -119,6 +119,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [fetchProfile]);
 
   const signOut = async () => {
+    // Clear payment modal session storage on logout
+    sessionStorage.removeItem('paymentModalDismissed');
+    sessionStorage.removeItem('paymentModalShown');
     await supabase.auth.signOut();
   };
 
