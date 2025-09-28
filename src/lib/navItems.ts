@@ -8,7 +8,8 @@ import {
   Settings,
   Calendar,
   FileText,
-  FolderOpen
+  FolderOpen,
+  DollarSign
 } from 'lucide-react';
 
 export interface NavItem {
@@ -39,6 +40,7 @@ export const coachNavItems: NavItem[] = [
   { name: 'Library', href: '/coach/library', icon: Library },
   { name: 'Blog', href: '/coach/blog', icon: FileText },
   { name: 'Files', href: '/coach/files', icon: FolderOpen },
+  { name: 'Income', href: '/coach/income', icon: DollarSign },
 ];
 
 export const coachBottomNavItems: NavItem[] = [

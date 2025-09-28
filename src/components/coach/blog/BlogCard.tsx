@@ -39,7 +39,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, onEdit, onDelete }) => {
           )}
 
           <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-white flex items-center gap-1">
-            <Icon className="h-3 w-3" /> {details.tag}
+            <Icon className="h-3 w-3" /> {details.label}
           </div>
           
           <span className={cn(
