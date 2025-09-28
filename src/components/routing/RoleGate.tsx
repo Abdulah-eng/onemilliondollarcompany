@@ -73,7 +73,7 @@ const RoleGate = ({ allowedRole, children }: RoleGateProps) => {
   const handleUpgrade = () => {
     setShowPaymentModal(false);
     sessionStorage.setItem('paymentModalDismissed', 'true');
-    navigate('/customer/cancel-subscription'); // Reuse existing payment page
+    navigate('/customer/payment/update-plan');
   };
 
   const handleClose = () => {

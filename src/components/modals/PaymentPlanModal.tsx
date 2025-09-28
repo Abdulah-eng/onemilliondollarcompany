@@ -50,7 +50,7 @@ const PaymentPlanModal = ({
               className="w-full flex items-center gap-2"
             >
               <Sparkles className="h-4 w-4" />
-              Choose Premium Plan
+              Choose a payment plan
             </Button>
           </div>
           
