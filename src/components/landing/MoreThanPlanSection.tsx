@@ -1,15 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-// Assuming MORE_THAN_PLAN_CARDS has an array of objects with { title, description, image, points }
-// The type structure for the mock data is assumed to be an array of:
-// interface CardType {
-//   title: string;
-//   description: string;
-//   image: string;
-//   points: string[];
-// }
-// declare const MORE_THAN_PLAN_CARDS: CardType[];
-declare const MORE_THAN_PLAN_CARDS: any[]; // Use 'any' as the actual type isn't provided
+import { MORE_THAN_PLAN_CARDS } from '@/mockdata/landingpage/morethanplan.js';
 
 // --- BlurImage Component (Slightly modified to fit new container structure) ---
 
