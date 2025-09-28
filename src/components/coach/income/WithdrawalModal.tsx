@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+// NOTE: Removed DialogTrigger import
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Wallet, Send, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { IncomeStats } from '@/mockdata/income/mockIncome';
@@ -12,11 +13,12 @@ import { IncomeStats } from '@/mockdata/income/mockIncome';
 interface WithdrawalModalProps {
   stats: IncomeStats;
   onWithdraw: (amount: number) => void;
+  isOpen: boolean; // Must be controlled by parent
+  setIsOpen: (open: boolean) => void; // Must be controlled by parent
 }
 
-const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ stats, onWithdraw }) => {
+const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ stats, onWithdraw, isOpen, setIsOpen }) => {
   const [amount, setAmount] = useState<number | ''>('');
-  const [isOpen, setIsOpen] = useState(false);
   const maxWithdrawal = stats.currentBalance;
 
   const handleWithdraw = () => {
@@ -33,12 +35,8 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ stats, onWithdraw }) 
   const isInvalid = amountNumber > maxWithdrawal;
 
   return (
+    // Dialog is now controlled via isOpen/setIsOpen props
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button size="lg" className="w-full md:w-auto gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-md">
-          <Wallet className="h-5 w-5" /> Withdraw Funds
-        </Button>
-      </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
