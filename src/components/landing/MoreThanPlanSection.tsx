@@ -1,10 +1,25 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-// We only need the data array, not all the individual images
 import { MORE_THAN_PLAN_CARDS } from '@/mockdata/landingpage/morethanplan';
 
-// Import only the single image we will use for the main visual
-import HeroImage from '@/assets/more-than-plan-blogaccess.webp';
+// --- Image Imports for Alternating Layout ---
+// NOTE: We need all 4 images for the alternating pattern. 
+// If you only want to use ONE image total, we'd go back to the single image layout, 
+// but the alternating pattern is much more modern and engaging.
+// Assuming your mockdata now looks like the version *before* my last suggestion 
+// (which had the image path in the card object), but I'll import directly 
+// here to show the necessary structure.
+import BlogAccessImage from '@/assets/more-than-plan-blogaccess.webp';
+import CoachFeedbackImage from '@/assets/more-than-plan-coachfeedback.webp';
+import ReflectTrackImage from '@/assets/more-than-plan-reflectandtrack.webp';
+import KnowledgeImage from '@/assets/more-than-plan-knowledge.webp';
+
+const FEATURE_IMAGES = [
+  BlogAccessImage,
+  CoachFeedbackImage,
+  ReflectTrackImage,
+  KnowledgeImage,
+];
 
 // --- BlurImage Component (Kept as is for image loading) ---
 
@@ -14,13 +29,13 @@ function BlurImage({ src, alt, className = '' }: { src: string; alt: string; cla
   return (
     <div className={cn('relative w-full h-full', className)}>
       {!loaded && (
-        <div className="absolute inset-0 w-full h-full bg-gray-200 animate-pulse rounded-2xl" />
+        <div className="absolute inset-0 w-full h-full bg-gray-200 animate-pulse rounded-xl" />
       )}
       <img
         src={src}
         alt={alt}
         className={cn(
-          'w-full h-full object-cover rounded-2xl transition-opacity duration-500',
+          'w-full h-full object-cover rounded-xl transition-opacity duration-500',
           loaded ? 'opacity-100' : 'opacity-0'
         )}
         loading="lazy"
@@ -31,100 +46,103 @@ function BlurImage({ src, alt, className = '' }: { src: string; alt: string; cla
   );
 }
 
-// --- FeatureCard Component for the list of 4 features ---
+// --- FeatureItem Component (The core alternating block) ---
 
-// This card is now designed to look modern and stack well on desktop, 
-// but still function in a horizontally scrollable container on mobile.
-function FeatureCard({ title, description, index }) {
+function FeatureItem({ feature, index }) {
+  const isImageLeft = index % 2 !== 0; // Odd index (1, 3, ...) puts the image on the left
+
   return (
     <div
-      key={title}
-      // Mobile styling for horizontal scroll
       className={cn(
-        'flex-shrink-0 w-[85%] sm:w-72 md:w-full', // Ensure it only takes partial width on mobile
-        'p-5 border border-gray-100 rounded-xl bg-white shadow-lg md:shadow-none',
-        'hover:shadow-xl hover:border-primary/50 transition duration-300',
-        // Delayed reveal animation (optional)
-        { 'md:mt-0 mt-4': index > 0 } // Add some top margin between stacked cards on mobile
+        'grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-center py-10',
+        'border-b border-gray-100 last:border-b-0' // Visual separation
       )}
     >
-      <div className="p-3 rounded-full bg-primary/10 text-primary w-fit mb-3">
-        {/* Simple checkmark icon */}
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
+      {/* Image Column */}
+      <div
+        className={cn(
+          'md:col-span-5',
+          'order-1', // Image always first on mobile
+          { 'md:order-1': isImageLeft, 'md:order-2': !isImageLeft } // Order swap for desktop
+        )}
+      >
+        <div className="relative w-full aspect-[4/3] lg:aspect-[5/4]">
+          <BlurImage
+            src={FEATURE_IMAGES[index]}
+            alt={feature.title}
+          />
+          {/* Subtle 3D lift/shadow */}
+          <div className="absolute inset-0 rounded-xl shadow-2xl shadow-primary/20" />
+        </div>
       </div>
-      <h3 className="text-xl font-bold text-gray-900 mb-2">
-        {title}
-      </h3>
-      <p className="text-base text-muted-foreground">
-        {description}
-      </p>
+
+      {/* Text Content Column */}
+      <div
+        className={cn(
+          'md:col-span-7',
+          'order-2', // Text always second on mobile
+          { 'md:order-2 md:pl-10': isImageLeft, 'md:order-1 md:pr-10': !isImageLeft } // Order swap for desktop
+        )}
+      >
+        <p className="mb-1 text-sm font-medium uppercase tracking-wider text-primary">
+          {`Feature ${index + 1}`}
+        </p>
+        <h3 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground mb-4">
+          {feature.title}
+        </h3>
+        <p className="text-lg text-muted-foreground mb-6">
+          {feature.description}
+        </p>
+        
+        {/* Simple bullet points list */}
+        <ul className="space-y-3 text-base">
+          {feature.points.map((point, idx) => (
+            <li key={idx} className="flex items-start gap-3">
+              <svg 
+                className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="text-gray-700">{point}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
 
-// --- Main ModernFeatureSection Component ---
+// --- Main Component ---
 
 export default function ModernFeatureSection() {
-  const features = MORE_THAN_PLAN_CARDS.slice(0, 4); // Only need the first 4 features
-
   return (
-    <section className="relative py-12 md:py-24 bg-white">
+    <section className="relative py-16 md:py-24 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
-          <p className="mb-2 font-semibold text-primary">Everything You Need</p>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tighter text-foreground">
+        {/* Header (More focused and clean) */}
+        <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20">
+          <p className="mb-2 font-semibold text-primary">Beyond the Workout</p>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter text-foreground">
             More Than Just a Plan
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-4 text-xl text-muted-foreground">
             Go beyond workouts. Learn, connect, reflect, and track your full
             wellness journey with tools designed to support lasting change.
           </p>
         </div>
         
-        {/* Content Grid: Mobile Stacks, Desktop is 2-Column */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 items-start">
-          
-          {/* Left Column: Features - HORIZONTAL SCROLL on mobile, STACKED on desktop */}
-          <div
-            className={cn(
-              // Mobile: Horizontal Scroll
-              'flex gap-4 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 scroll-smooth pb-4 md:pb-0',
-              'scroll-p-4', // Padding at the start of the scroll
-              // Desktop: Stacked Vertical
-              'md:block md:space-y-6 md:mx-0 md:px-0 md:order-1'
-            )}
-          >
-            {features.map((card, index) => (
-              <FeatureCard
-                key={card.title}
-                title={card.title}
-                description={card.description}
-                index={index}
-              />
-            ))}
-          </div>
-
-          {/* Right Column: Image - Full width on mobile, right column on desktop */}
-          <div className="order-1 md:order-2 p-4 md:p-0">
-            <div className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square">
-              <BlurImage
-                src={HeroImage} // Use the single imported image
-                alt="Comprehensive wellness platform dashboard"
-              />
-              {/* Modern, soft shadow effect */}
-              <div className="absolute inset-0 rounded-2xl shadow-2xl shadow-primary/30" />
-            </div>
-          </div>
-
+        {/* Alternating Feature List */}
+        <div>
+          {MORE_THAN_PLAN_CARDS.map((card, index) => (
+            <FeatureItem key={card.title} feature={card} index={index} />
+          ))}
         </div>
 
-        <p
-          className="mt-12 text-center text-sm text-muted-foreground"
-        >
+        <p className="mt-16 text-center text-sm text-muted-foreground">
           *Access to features like Coach Feedback and advanced tracking is
           available on our Premium plan.
         </p>
