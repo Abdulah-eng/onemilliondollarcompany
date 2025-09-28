@@ -1,4 +1,4 @@
- // src/pages/customer/MyCoach.tsx (UPDATED)
+// src/pages/customer/MyCoach.tsx (UPDATED)
 import { useState } from 'react';
 import useMediaQuery from '@/hooks/use-media-query';
 import CoachMainHeader from '@/components/customer/mycoach/CoachMainHeader';
@@ -9,13 +9,14 @@ import RequestFeedbackFab from '@/components/customer/mycoach/RequestFeedbackFab
 import FeedbackMessagePopup from '@/components/customer/mycoach/FeedbackMessagePopup';
 import CoachBioDrawer from '@/components/customer/mycoach/CoachBioDrawer';
 import CoachExplorerDrawer from '@/components/customer/mycoach/CoachExplorerDrawer'; // NEW IMPORT
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer'; // Added DrawerHeader/Title
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'; // Added SheetHeader/Title
+import ExploreCoachesCard from '@/components/customer/mycoach/ExploreCoachesCard'; // NEW IMPORT
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import SharedFilesDrawerContent from '@/components/customer/mycoach/SharedFilesDrawerContent';
 import { coachInfo } from '@/mockdata/mycoach/coachData'; // Import coachInfo
 
 const MyCoach = () => {
-    // Current Coach Bio Drawer State
+    // Coach Bio Drawer State (for clicking on the current coach's header)
     const [isBioDrawerOpen, setIsBioDrawerOpen] = useState(false);
     // NEW: Coach Explorer Drawer/Sheet State
     const [isExplorerOpen, setIsExplorerOpen] = useState(false);
@@ -44,24 +45,25 @@ const MyCoach = () => {
                 requested: true,
             });
         }
-        // Automatically hide the message after 5 seconds
         setTimeout(() => {
             setFeedbackPopup(prev => ({ ...prev, isVisible: false }));
         }, 5000);
     };
-    
+
     // NEW: Handler for successful coach request from the explorer
     const handleNewCoachRequestSent = (coachName: string) => {
+        // Show success message
         setFeedbackPopup({
             isVisible: true,
             message: `Your request to switch to ${coachName} has been sent! We'll process it shortly.`,
-            requested: true, // Mark this as a pending request (though different type)
+            requested: true,
         });
+
         setTimeout(() => {
             setFeedbackPopup(prev => ({ ...prev, isVisible: false }));
         }, 5000);
     };
-    
+
     // Determine which component (Drawer or Sheet) to use for the Explorer
     const ExplorerWrapper = isMobile ? Drawer : Sheet;
     const ExplorerContent = isMobile ? DrawerContent : SheetContent;
@@ -81,10 +83,11 @@ const MyCoach = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Content Column */}
                 <div className="lg:col-span-2 space-y-6">
-                    <CoachMainHeader 
-                        onClick={() => setIsBioDrawerOpen(true)} 
-                        onExploreMore={() => setIsExplorerOpen(true)} // NEW PROP HANDLER
-                    />
+                    <CoachMainHeader onClick={() => setIsBioDrawerOpen(true)} />
+                    
+                    {/* NEW: Explore Coaches Card */}
+                    <ExploreCoachesCard onExplore={() => setIsExplorerOpen(true)} />
+
                     <TodaysMessage />
                     <CoachUpdates />
                 </div>
@@ -110,18 +113,20 @@ const MyCoach = () => {
                 </Sheet>
             )}
 
-            {/* NEW: Coach Explorer Modal/Drawer */}
+            {/* NEW: Coach Explorer Modal/Drawer (Triggered by the new card) */}
             <ExplorerWrapper open={isExplorerOpen} onOpenChange={setIsExplorerOpen}>
                 <ExplorerContent className={isMobile ? "h-[90%] max-h-[90vh]" : "w-full sm:max-w-md"}>
                     <ExplorerHeader>
                         <ExplorerTitle>Find a New Coach</ExplorerTitle>
                     </ExplorerHeader>
+                    {/* We pass the onClose function to allow the CoachExplorerDrawer to close the main modal when a request is sent */}
                     <CoachExplorerDrawer 
                         onClose={() => setIsExplorerOpen(false)}
                         onNewCoachRequestSent={handleNewCoachRequestSent} 
                     />
                 </ExplorerContent>
             </ExplorerWrapper>
+
 
             {/* Shared Files Drawer for Mobile (Existing Logic) */}
             {isMobile && (
