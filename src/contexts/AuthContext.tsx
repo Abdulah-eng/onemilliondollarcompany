@@ -13,6 +13,10 @@ export interface Profile {
   full_name?: string;
   avatar_url?: string;
   phone?: string;
+  plan?: string | null;
+  plan_expiry?: string | null;
+  stripe_customer_id?: string | null;
+  coach_id?: string | null;
   created_at: string;
   updated_at: string;
 }
