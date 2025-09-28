@@ -4,7 +4,7 @@ import React, { useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Type, Upload, X, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+import { Type, Upload, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -36,7 +36,6 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
     onContentChange([...content, { id: `c-${Date.now()}`, type, value: '' }]);
   }, [content, onContentChange]);
 
-  // NEW: Function to move a block up or down
   const moveBlock = useCallback((index: number, direction: 'up' | 'down') => {
     const newContent = [...content];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
@@ -98,10 +97,8 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
             <ChevronUp className="h-4 w-4" />
           </Button>
 
-          <Button variant="ghost" size="icon" className="h-8 w-8 cursor-grab text-muted-foreground hover:bg-muted">
-            <GripVertical className="h-4 w-4" />
-          </Button>
-          
+          {/* REMOVED GRIP ICON */}
+
           <Button 
             variant="ghost" 
             size="icon" 
