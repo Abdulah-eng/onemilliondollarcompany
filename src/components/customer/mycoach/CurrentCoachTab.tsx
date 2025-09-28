@@ -12,8 +12,7 @@ interface CurrentCoachTabProps {
     isMobile: boolean;
     onViewBio: () => void;
     onRequestFeedback: () => void;
-    // 💡 New prop to handle mobile view for files
-    onViewSharedFiles: () => void;
+    onViewSharedFiles: () => void; // Added for mobile file access
 }
 
 const CurrentCoachTab: React.FC<CurrentCoachTabProps> = ({ isMobile, onViewBio, onRequestFeedback, onViewSharedFiles }) => {
@@ -46,7 +45,7 @@ const CurrentCoachTab: React.FC<CurrentCoachTabProps> = ({ isMobile, onViewBio, 
                 {/* Shared Files Column (Desktop/Tablet) */}
                 <div className={cn(
                     "lg:col-span-1",
-                    isMobile ? 'hidden' : 'block' // Hide on mobile since we use the button/drawer
+                    isMobile ? 'hidden' : 'block'
                 )}>
                     <UnifiedSharedFiles />
                 </div>
