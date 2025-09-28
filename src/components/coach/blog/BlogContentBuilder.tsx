@@ -1,4 +1,3 @@
-```tsx
 'use client';
 
 import React, { useCallback, useRef } from 'react';
@@ -172,4 +171,3 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
 };
 
 export default BlogContentBuilder;
-```
