@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+// Assuming you'll use the first card's image as the main image
 import { MORE_THAN_PLAN_CARDS } from '@/mockdata/landingpage/morethanplan';
 
-function BlurImage({ src, alt }: { src: string; alt: string }) {
+// --- BlurImage Component (Kept as is for image loading) ---
+
+function BlurImage({ src, alt, className = '' }: { src: string; alt: string; className?: string }) {
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <div className="absolute inset-0">
+    <div className={cn('relative w-full h-full', className)}>
       {!loaded && (
-        <div className="w-full h-full bg-gray-200 animate-pulse rounded-2xl" />
+        <div className="absolute inset-0 w-full h-full bg-gray-200 animate-pulse rounded-2xl" />
       )}
       <img
         src={src}
@@ -25,93 +28,95 @@ function BlurImage({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export default function MoreThanPlanSection() {
+// --- FeatureCard Component for the list of 4 features ---
+
+function FeatureCard({ title, description, icon: Icon }) {
   return (
-    <section className="relative pt-20 pb-28 bg-gradient-to-b from-[#BFEDE6]/40 via-[#DDF5F0]/35 to-white">
+    <div className="flex items-start gap-4 p-4 border border-gray-100 rounded-xl shadow-sm bg-white hover:border-primary/50 transition duration-300">
+      <div className="p-2.5 rounded-full bg-primary/10 text-primary flex-shrink-0 mt-0.5">
+        {/* Replace with your actual icon component or SVG */}
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M5 13l4 4L19 7" // Example icon path
+          />
+        </svg>
+      </div>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-1">
+          {title}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          {description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// --- Main ModernFeatureSection Component ---
+
+export default function ModernFeatureSection() {
+  const mainImage = MORE_THAN_PLAN_CARDS[0].image; // Use the first feature's image for the main visual
+
+  return (
+    <section className="relative py-12 md:py-20 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-14 items-center"
-          data-reveal
-        >
-          <div>
-            <p className="mb-2 font-semibold text-primary">Everything You Need</p>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tighter text-foreground">
-              More Than Just a Plan
-            </h2>
-          </div>
-          <div>
-            <p className="text-lg text-muted-foreground">
-              Go beyond workouts. Learn, connect, reflect, and track your full
-              wellness journey with tools designed to support lasting change.
-            </p>
-          </div>
+        
+        {/* Header (Kept similar to original) */}
+        <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
+          <p className="mb-2 font-semibold text-primary">Everything You Need</p>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tighter text-foreground">
+            More Than Just a Plan
+          </h2>
+          <p className="mt-4 text-lg text-muted-foreground">
+            Go beyond workouts. Learn, connect, reflect, and track your full
+            wellness journey with tools designed to support lasting change.
+          </p>
         </div>
+        
+        {/* Content Grid: Mobile Stacks, Desktop is 2-Column */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
+          
+          {/* Left Column: Features (Mobile First: Full Width) */}
+          <div className="space-y-6 order-2 md:order-1">
+            {MORE_THAN_PLAN_CARDS.map((card) => (
+              // Using a FeatureCard component for cleaner presentation
+              <FeatureCard
+                key={card.title}
+                title={card.title}
+                description={card.description}
+                // NOTE: The original mock data doesn't have an icon field, so a simple checkmark icon is used in FeatureCard
+                // If you have actual icons, pass them here: icon={card.IconComponent}
+              />
+            ))}
+          </div>
 
-        {/* Cards */}
-        <div
-          className={cn(
-            'flex gap-2 overflow-x-auto snap-x snap-mandatory -mx-2 px-2 scroll-px-2',
-            'lg:grid lg:grid-cols-4 lg:gap-2 lg:overflow-visible lg:mx-0 lg:px-0',
-            'pb-8'
-          )}
-          data-reveal
-        >
-          {MORE_THAN_PLAN_CARDS.map((card, index) => (
-            <div
-              key={card.title}
-              className={cn(
-                'relative flex-shrink-0 w-[90%] sm:w-72 lg:w-auto',
-                'rounded-2xl snap-center overflow-hidden transition-all duration-300 group',
-                'shadow-[0_8px_20px_-10px_rgba(0,0,0,0.1),_0_15px_30px_-15px_rgba(34,139,121,0.15)]',
-                'hover:shadow-[0_8px_25px_-12px_rgba(0,0,0,0.15),_0_20px_40px_-20px_rgba(34,139,121,0.2)] hover:-translate-y-0.5'
-              )}
-              style={{ transitionDelay: `${index * 80}ms` }}
-            >
-              <div className="absolute inset-0 transition-all duration-300 group-hover:scale-105">
-                <BlurImage src={card.image} alt={card.title} />
-                {/* Softer but still strong gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-transparent rounded-2xl" />
-              </div>
-
-              {/* Content */}
-              <div className="relative z-10 flex flex-col justify-end h-full p-5 sm:p-6 min-h-[300px]">
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight mb-2 text-white drop-shadow-lg">
-                    {card.title}
-                  </h3>
-                  <p className="text-sm leading-snug mb-3 text-white/85 line-clamp-3 drop-shadow-md">
-                    {card.description}
-                  </p>
-                  <ul className="space-y-1.5 border-t border-white/25 pt-3 text-white">
-                    {card.points.map((point, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm drop-shadow-md">
-                        <svg
-                          className="w-4 h-4 text-primary flex-shrink-0 mt-0.5"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                        <span>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+          {/* Right Column: Image (Mobile First: Full Width, Order 1) */}
+          <div className="order-1 md:order-2">
+            <div className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square">
+              {/* Aspect ratio ensures the image container maintains a modern, blocky shape */}
+              <BlurImage
+                src={mainImage}
+                alt="Comprehensive wellness platform features"
+                className="w-full h-full"
+              />
+              {/* Optional: Add a subtle shadow/depth to the image */}
+              <div className="absolute inset-0 rounded-2xl shadow-2xl shadow-primary/20" />
             </div>
-          ))}
+          </div>
+
         </div>
 
         <p
-          className="mt-8 text-center text-sm text-muted-foreground"
-          data-reveal
+          className="mt-12 text-center text-sm text-muted-foreground"
         >
           *Access to features like Coach Feedback and advanced tracking is
           available on our Premium plan.
