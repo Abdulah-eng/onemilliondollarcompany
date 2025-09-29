@@ -1,7 +1,8 @@
 // src/pages/coach/ProgramBuilder.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import ProgramDetails from '@/components/coach/createprogram/ProgramDetails';
 import FitnessBuilder from '@/components/coach/createprogram/builders/FitnessBuilder';
@@ -10,19 +11,50 @@ import MentalHealthBuilder from '@/components/coach/createprogram/mentalhealth/M
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check } from 'lucide-react';
+import { useProgramMutations } from '@/hooks/useProgramMutations';
+import { Program, ProgramCategory } from '@/types/program';
 
 type Step = 'program-details' | 'fitness-builder' | 'nutrition-builder' | 'mental-health-builder';
 
 interface ProgramData {
-  category: 'fitness' | 'nutrition' | 'mental health';
+  category: ProgramCategory;
   title: string;
   description: string;
   plan: any;
 }
 
 const ProgramBuilder = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { createProgram, updateProgram, getProgramById, loading } = useProgramMutations();
   const [step, setStep] = useState<Step>('program-details');
   const [programData, setProgramData] = useState<Partial<ProgramData>>({});
+  const [existingProgram, setExistingProgram] = useState<Program | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Load existing program data if editing
+  useEffect(() => {
+    const loadProgram = async () => {
+      if (id) {
+        setIsEditing(true);
+        const program = await getProgramById(id);
+        if (program) {
+          setExistingProgram(program);
+          setProgramData({
+            category: program.category,
+            title: program.name,
+            description: program.description,
+            plan: {}, // TODO: Load existing plan data from program.plan
+          });
+        } else {
+          // Program not found, redirect to programs list
+          navigate('/coach/programs');
+        }
+      }
+    };
+
+    loadProgram();
+  }, [id, getProgramById, navigate]);
 
   const handleProgramDetailsNext = (data: any) => {
     setProgramData(prev => ({ ...prev, ...data }));
@@ -40,15 +72,35 @@ const ProgramBuilder = () => {
     }
   };
 
-  const handleSaveProgram = (planData: any) => {
+  const handleSaveProgram = async (planData: any) => {
     const finalProgram = {
       ...programData,
       plan: planData,
     };
-    console.log('Final Program Data:', finalProgram);
-    alert('Program saved!');
-    setStep('program-details');
-    setProgramData({});
+
+    let result;
+    if (isEditing && existingProgram) {
+      // Update existing program
+      result = await updateProgram({
+        id: existingProgram.id,
+        name: finalProgram.title || existingProgram.name,
+        description: finalProgram.description || existingProgram.description,
+        category: finalProgram.category || existingProgram.category,
+        plan: planData,
+      });
+    } else {
+      // Create new program
+      result = await createProgram({
+        name: finalProgram.title || 'Untitled Program',
+        description: finalProgram.description || '',
+        category: finalProgram.category || 'fitness',
+        plan: planData,
+      });
+    }
+
+    if (result) {
+      navigate('/coach/programs');
+    }
   };
 
   const renderStep = () => {
@@ -83,7 +135,9 @@ const ProgramBuilder = () => {
     <div className="container mx-auto p-4 md:p-8">
       {step === 'program-details' && (
         <>
-          <h1 className="text-4xl font-bold">Create New Program</h1>
+          <h1 className="text-4xl font-bold">
+            {isEditing ? 'Edit Program' : 'Create New Program'}
+          </h1>
           <Separator className="my-8" />
         </>
       )}

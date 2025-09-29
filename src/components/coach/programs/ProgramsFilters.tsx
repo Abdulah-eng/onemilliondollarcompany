@@ -25,10 +25,7 @@ import {
   PlusCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-// Types
-export type ProgramStatus = 'active' | 'scheduled' | 'draft' | 'normal';
-export type ProgramCategory = 'fitness' | 'nutrition' | 'mental health';
+import { Program, ProgramStatus, ProgramCategory } from '@/types/program';
 
 interface ProgramsFiltersProps {
   searchQuery: string;

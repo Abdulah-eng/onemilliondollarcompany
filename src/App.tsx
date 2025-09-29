@@ -179,6 +179,11 @@ const ThemedApp = () => {
                       <ProgramBuilder />
                     </Suspense>
                   } />
+                  <Route path="/coach/programs/edit/:id" element={ // ✅ New route for editing a program
+                    <Suspense fallback={<LoadingScreen />}>
+                      <ProgramBuilder />
+                    </Suspense>
+                  } />
                   <Route path="/coach/library" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <CoachLibraryPage />

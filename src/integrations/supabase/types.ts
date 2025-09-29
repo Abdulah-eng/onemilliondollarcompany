@@ -184,6 +184,63 @@ export type Database = {
         }
         Relationships: []
       }
+      programs: {
+        Row: {
+          assigned_to: string | null
+          category: Database["public"]["Enums"]["program_category"]
+          coach_id: string
+          created_at: string
+          description: string
+          id: string
+          name: string
+          plan: Json | null
+          scheduled_date: string | null
+          status: Database["public"]["Enums"]["program_status"]
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category: Database["public"]["Enums"]["program_category"]
+          coach_id: string
+          created_at?: string
+          description: string
+          id?: string
+          name: string
+          plan?: Json | null
+          scheduled_date?: string | null
+          status?: Database["public"]["Enums"]["program_status"]
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: Database["public"]["Enums"]["program_category"]
+          coach_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          plan?: Json | null
+          scheduled_date?: string | null
+          status?: Database["public"]["Enums"]["program_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programs_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programs_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -211,6 +268,8 @@ export type Database = {
       }
     }
     Enums: {
+      program_category: "fitness" | "nutrition" | "mental health"
+      program_status: "active" | "scheduled" | "draft" | "normal"
       request_status: "pending" | "accepted" | "rejected"
     }
     CompositeTypes: {
@@ -339,6 +398,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      program_category: ["fitness", "nutrition", "mental health"],
+      program_status: ["active", "scheduled", "draft", "normal"],
       request_status: ["pending", "accepted", "rejected"],
     },
   },
