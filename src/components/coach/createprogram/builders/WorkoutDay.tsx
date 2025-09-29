@@ -17,6 +17,7 @@ export interface WorkoutDayItem {
   comment?: string;
   sets: number[];
   reps: number[];
+  restTimeSeconds?: number;
 }
 
 interface WorkoutDayProps {
@@ -77,6 +78,12 @@ const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onAd
   const handleUpdateComment = (itemIndex: number, comment: string) => {
     const newItems = [...items];
     newItems[itemIndex].comment = comment;
+    onItemsChange(newItems);
+  };
+
+  const handleUpdateRestTime = (itemIndex: number, restTime: string) => {
+    const newItems = [...items];
+    newItems[itemIndex].restTimeSeconds = parseInt(restTime) || 0;
     onItemsChange(newItems);
   };
 
@@ -184,11 +191,26 @@ const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onAd
                         </Button>
                       </motion.div>
                     ))}
-                    <Button variant="outline" className="w-full gap-2" onClick={() => handleAddSet(itemIndex)}>
-                      <Plus className="h-4 w-4" /> Add Set
-                    </Button>
-                  </div>
-                )}
+                     <Button variant="outline" className="w-full gap-2" onClick={() => handleAddSet(itemIndex)}>
+                       <Plus className="h-4 w-4" /> Add Set
+                     </Button>
+                     
+                     <div className="mt-4 space-y-2">
+                       <Label>Rest Time Between Sets</Label>
+                       <div className="flex gap-2 items-center">
+                         <Input
+                           type="number"
+                           placeholder="90"
+                           value={item.restTimeSeconds || ''}
+                           onChange={(e) => handleUpdateRestTime(itemIndex, e.target.value)}
+                           className="w-20"
+                           min="0"
+                         />
+                         <span className="text-sm text-muted-foreground">seconds</span>
+                       </div>
+                     </div>
+                   </div>
+                 )}
                 
                 <div className="mt-4 space-y-2">
                   <Label>Optional Comment</Label>
