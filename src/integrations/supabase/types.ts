@@ -14,6 +14,67 @@ export type Database = {
   }
   public: {
     Tables: {
+      coach_offers: {
+        Row: {
+          coach_id: string
+          created_at: string
+          customer_id: string
+          duration_months: number
+          expires_at: string
+          id: string
+          message_id: string
+          price: number
+          status: Database["public"]["Enums"]["offer_status"]
+          updated_at: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          customer_id: string
+          duration_months: number
+          expires_at?: string
+          id?: string
+          message_id: string
+          price: number
+          status?: Database["public"]["Enums"]["offer_status"]
+          updated_at?: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          customer_id?: string
+          duration_months?: number
+          expires_at?: string
+          id?: string
+          message_id?: string
+          price?: number
+          status?: Database["public"]["Enums"]["offer_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_offers_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_offers_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_offers_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_requests: {
         Row: {
           coach_id: string
@@ -53,6 +114,96 @@ export type Database = {
           {
             foreignKeyName: "coach_requests_customer_id_fkey"
             columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          coach_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          status: Database["public"]["Enums"]["conversation_status"]
+          updated_at: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          status?: Database["public"]["Enums"]["conversation_status"]
+          updated_at?: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          status?: Database["public"]["Enums"]["conversation_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          message_type: Database["public"]["Enums"]["message_type"]
+          metadata: Json | null
+          sender_id: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          message_type?: Database["public"]["Enums"]["message_type"]
+          metadata?: Json | null
+          sender_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          message_type?: Database["public"]["Enums"]["message_type"]
+          metadata?: Json | null
+          sender_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -316,6 +467,9 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "coach" | "customer"
+      conversation_status: "active" | "archived"
+      message_type: "text" | "offer" | "system"
+      offer_status: "pending" | "accepted" | "rejected" | "expired"
       program_category: "fitness" | "nutrition" | "mental health"
       program_status: "active" | "scheduled" | "draft" | "normal"
       request_status: "pending" | "accepted" | "rejected"
@@ -447,6 +601,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "coach", "customer"],
+      conversation_status: ["active", "archived"],
+      message_type: ["text", "offer", "system"],
+      offer_status: ["pending", "accepted", "rejected", "expired"],
       program_category: ["fitness", "nutrition", "mental health"],
       program_status: ["active", "scheduled", "draft", "normal"],
       request_status: ["pending", "accepted", "rejected"],

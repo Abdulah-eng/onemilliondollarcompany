@@ -38,6 +38,7 @@ const CoachLibraryPage = lazy(() => import("./pages/coach/LibraryPage"));
 const CoachBlogPage = lazy(() => import("./pages/coach/BlogPage"));
 const IncomePage = lazy(() => import("./pages/coach/IncomePage"));
 const CoachSettingsPage = lazy(() => import("./pages/coach/SettingsPage"));
+const CoachMessagesPage = lazy(() => import("./pages/coach/MessagesPage"));
 
 const MyProgramsPage = lazy(() => import("./pages/customer/MyProgramsPage"));
 const ViewProgramPage = lazy(() => import("./pages/customer/ViewProgramPage"));
@@ -46,6 +47,7 @@ const ProgressPage = lazy(() => import("./pages/customer/ProgressPage"));
 const MyCoachPage = lazy(() => import("./pages/customer/MyCoach"));
 const BlogPage = lazy(() => import("./pages/customer/BlogPage"));
 const ProfilePage = lazy(() => import("./pages/customer/Profile"));
+const CustomerMessagesPage = lazy(() => import("./pages/customer/MessagesPage"));
 const UpdatePaymentPlanPage = lazy(() => import("./pages/customer/UpdatePaymentPlanPage"));
 const CancelSubscriptionPage = lazy(() => import("./pages/customer/CancelSubscriptionPage"));
 
@@ -189,6 +191,16 @@ const ThemedApp = () => {
                       <CoachLibraryPage />
                     </Suspense>
                   } />
+                  <Route path="/coach/messages" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <CoachMessagesPage />
+                    </Suspense>
+                  } />
+                  <Route path="/coach/messages/:conversationId" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <CoachMessagesPage />
+                    </Suspense>
+                  } />
                   <Route path="/coach/blog" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <CoachBlogPage />
@@ -232,6 +244,16 @@ const ThemedApp = () => {
                   <Route path="/customer/progress" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <ProgressPage />
+                    </Suspense>
+                  } />
+                  <Route path="/customer/messages" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <CustomerMessagesPage />
+                    </Suspense>
+                  } />
+                  <Route path="/customer/messages/:conversationId" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <CustomerMessagesPage />
                     </Suspense>
                   } />
                   <Route path="/customer/my-coach" element={

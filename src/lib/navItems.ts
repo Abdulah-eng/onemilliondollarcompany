@@ -8,7 +8,8 @@ import {
   Settings,
   Calendar,
   FileText,
-  DollarSign
+  DollarSign,
+  MessageSquare
 } from 'lucide-react';
 
 export interface NavItem {
@@ -22,8 +23,8 @@ export const customerNavItems: NavItem[] = [
   { name: 'Home', href: '/customer/dashboard', icon: Home },
   { name: 'My Programs', href: '/customer/programs', icon: BookOpen },
   { name: 'Library', href: '/customer/library', icon: Library },
-  // --- FIX: Added the missing colon after 'name' ---
   { name: 'Progress', href: '/customer/progress', icon: TrendingUp },
+  { name: 'Messages', href: '/customer/messages', icon: MessageSquare },
   { name: 'My Coach', href: '/customer/my-coach', icon: Users },
   { name: 'Blog', href: '/customer/blog', icon: FileText },
 ];
@@ -37,6 +38,7 @@ export const coachNavItems: NavItem[] = [
   { name: 'Clients', href: '/coach/clients', icon: Users },
   { name: 'Programs', href: '/coach/programs', icon: Calendar },
   { name: 'Library', href: '/coach/library', icon: Library },
+  { name: 'Messages', href: '/coach/messages', icon: MessageSquare },
   { name: 'Blog', href: '/coach/blog', icon: FileText },
   { name: 'Income', href: '/coach/income', icon: DollarSign },
 ];
