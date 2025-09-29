@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
+import DOMPurify from 'dompurify';
 
 const BlogPost = ({ post, onBack }) => {
   if (!post) {
@@ -65,7 +66,7 @@ const BlogPost = ({ post, onBack }) => {
         </div>
 
         {/* Main Content */}
-        <div dangerouslySetInnerHTML={{ __html: post.content }} />
+        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
       </div>
     </motion.div>
   );

@@ -266,6 +266,14 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_user_role: {
+        Args: { user_id: string }
+        Returns: string
+      }
+      is_coach_customer_relationship: {
+        Args: { coach_user_id: string; customer_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       program_category: "fitness" | "nutrition" | "mental health"
