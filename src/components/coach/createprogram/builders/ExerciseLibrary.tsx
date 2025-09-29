@@ -14,7 +14,7 @@ interface ExerciseLibraryProps {
   setSearchQuery: (query: string) => void;
   searchResults: ExerciseItem[];
   onSelect: (item: ExerciseItem) => void;
-  onSearch: (query: string, filterType?: ExerciseType | 'all', muscleGroup?: string) => void;
+  onSearch: (query: string, filterType?: ExerciseType | 'all', muscleGroup?: string, equipment?: string) => void;
   allExercises: ExerciseItem[];
 }
 
@@ -54,6 +54,7 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
 }) => {
   const [filterType, setFilterType] = useState<ExerciseType | 'all'>('all');
   const [muscleGroupFilter, setMuscleGroupFilter] = useState<string>('all');
+  const [equipmentFilter, setEquipmentFilter] = useState<string>('all');
 
   // Get unique muscle groups from all exercises
   const uniqueMuscleGroups = React.useMemo(() => {
@@ -66,17 +67,29 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
     return Array.from(groups).sort();
   }, [allExercises]);
 
+  // Get unique equipment from all exercises
+  const uniqueEquipment = React.useMemo(() => {
+    const equipment = new Set<string>();
+    allExercises.forEach(exercise => {
+      exercise.equipment?.forEach(eq => {
+        if (eq) equipment.add(eq);
+      });
+    });
+    return Array.from(equipment).sort();
+  }, [allExercises]);
+
   useEffect(() => {
-    onSearch(searchQuery, filterType, muscleGroupFilter);
-  }, [searchQuery, filterType, muscleGroupFilter, onSearch]);
+    onSearch(searchQuery, filterType, muscleGroupFilter, equipmentFilter);
+  }, [searchQuery, filterType, muscleGroupFilter, equipmentFilter, onSearch]);
 
   const handleClearFilters = () => {
     setFilterType('all');
     setMuscleGroupFilter('all');
+    setEquipmentFilter('all');
     setSearchQuery('');
   };
 
-  const hasActiveFilters = filterType !== 'all' || muscleGroupFilter !== 'all' || searchQuery.length > 0;
+  const hasActiveFilters = filterType !== 'all' || muscleGroupFilter !== 'all' || equipmentFilter !== 'all' || searchQuery.length > 0;
 
   return (
     <div className="space-y-3 sm:space-y-4 lg:space-y-2 h-full flex flex-col p-3 sm:p-4 lg:p-2">
@@ -136,6 +149,25 @@ const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({
                     <div className="flex items-center gap-2 capitalize">
                       <Zap className="h-3 w-3" />
                       {group}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Equipment Filter - New */}
+            <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
+              <SelectTrigger className="flex-1 sm:w-44 lg:w-full h-11 sm:h-10 lg:h-8 text-base sm:text-sm lg:text-xs">
+                <Dumbbell className="h-4 w-4 lg:h-3 lg:w-3 text-muted-foreground mr-2" />
+                <SelectValue placeholder="Equipment" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Equipment</SelectItem>
+                {uniqueEquipment.map((eq) => (
+                  <SelectItem key={eq} value={eq}>
+                    <div className="flex items-center gap-2">
+                      <Dumbbell className="h-3 w-3" />
+                      {eq}
                     </div>
                   </SelectItem>
                 ))}

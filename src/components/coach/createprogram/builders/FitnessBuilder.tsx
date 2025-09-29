@@ -52,7 +52,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
 
 
   // Handle exercise search with enhanced filtering (no change needed to search logic itself)
-  const handleSearch = useCallback((query: string, filterType?: any, muscleGroup?: string) => {
+  const handleSearch = useCallback((query: string, filterType?: any, muscleGroup?: string, equipment?: string) => {
     let filtered = mockExercises;
 
     if (filterType && filterType !== 'all') {
@@ -67,6 +67,14 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
       );
     }
 
+    if (equipment && equipment !== 'all') {
+      filtered = filtered.filter(exercise => 
+        exercise.equipment?.some(eq => 
+          eq.toLowerCase() === equipment.toLowerCase()
+        )
+      );
+    }
+
     if (query.trim()) {
       const searchTerm = query.toLowerCase();
       filtered = filtered.filter(exercise =>
@@ -74,6 +82,9 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
         exercise.description.toLowerCase().includes(searchTerm) ||
         exercise.muscleGroups.some(group => 
           group.toLowerCase().includes(searchTerm)
+        ) ||
+        exercise.equipment?.some(eq => 
+          eq.toLowerCase().includes(searchTerm)
         )
       );
     }

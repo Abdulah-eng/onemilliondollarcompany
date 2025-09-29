@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import { MultiSelect } from '@/components/ui/multi-select';
+import { MUSCLE_GROUPS, EQUIPMENT_OPTIONS } from '@/constants/fitness';
 import { cn } from '@/lib/utils';
 import { ProgramCategory } from '@/mockdata/createprogram/mockExercises';
 
@@ -16,8 +18,8 @@ interface ProgramDetailsForm {
   category: ProgramCategory;
   title: string;
   description: string;
-  muscleGroups?: string;
-  equipment?: string;
+  muscleGroups?: string[];
+  equipment?: string[];
   benefits?: string;
   allergies?: string;
 }
@@ -36,10 +38,16 @@ const categoryOptions = [
 
 const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) => {
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<ProgramDetailsForm>({
-    defaultValues: initialData,
+    defaultValues: {
+      ...initialData,
+      muscleGroups: initialData?.muscleGroups || [],
+      equipment: initialData?.equipment || [],
+    },
   });
 
   const selectedCategory = watch('category');
+  const muscleGroups = watch('muscleGroups') || [];
+  const equipment = watch('equipment') || [];
 
   const handleCategorySelect = (category: ProgramCategory) => {
     setValue('category', category);
@@ -108,18 +116,20 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
         <>
           <div className="space-y-2">
             <Label htmlFor="muscleGroups">Muscle Groups</Label>
-            <Input
-              id="muscleGroups"
-              placeholder="e.g., Chest, Back, Legs"
-              {...register('muscleGroups')}
+            <MultiSelect
+              options={MUSCLE_GROUPS}
+              selected={muscleGroups}
+              onChange={(selected) => setValue('muscleGroups', selected)}
+              placeholder="Select muscle groups..."
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="equipment">Equipment Needed</Label>
-            <Input
-              id="equipment"
-              placeholder="e.g., Dumbbells, Bands"
-              {...register('equipment')}
+            <MultiSelect
+              options={EQUIPMENT_OPTIONS}
+              selected={equipment}
+              onChange={(selected) => setValue('equipment', selected)}
+              placeholder="Select equipment..."
             />
           </div>
           <div className="space-y-2">
@@ -148,10 +158,11 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
         <>
           <div className="space-y-2">
             <Label htmlFor="equipment">Equipment Needed</Label>
-            <Input
-              id="equipment"
-              placeholder="e.g., Yoga mat, meditation app"
-              {...register('equipment')}
+            <MultiSelect
+              options={EQUIPMENT_OPTIONS}
+              selected={equipment}
+              onChange={(selected) => setValue('equipment', selected)}
+              placeholder="Select equipment..."
             />
           </div>
           <div className="space-y-2">
