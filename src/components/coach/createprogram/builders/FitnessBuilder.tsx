@@ -100,8 +100,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
     const newItem: WorkoutDayItem = {
       id: `${exercise.id}-${Date.now()}`,
       exercise: exercise,
-      sets: [0],
-      reps: [0],
+      sets: [{ reps: "" }],
       comment: '',
     };
     // ⭐ USE COMPOUND KEY for adding item

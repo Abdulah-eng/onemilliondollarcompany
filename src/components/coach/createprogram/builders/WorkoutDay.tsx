@@ -15,8 +15,7 @@ export interface WorkoutDayItem {
   id: string;
   exercise: ExerciseItem;
   comment?: string;
-  sets: number[];
-  reps: number[];
+  sets: { reps: string }[];
   restTimeSeconds?: number;
 }
 
@@ -52,17 +51,15 @@ const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onAd
     onItemsChange(newItems);
   };
 
-  const handleUpdateSetsReps = (itemIndex: number, setIndex: number, type: 'sets' | 'reps', value: string) => {
+  const handleUpdateReps = (itemIndex: number, setIndex: number, value: string) => {
     const newItems = [...items];
-    const numericValue = parseInt(value) || 0;
-    newItems[itemIndex][type][setIndex] = numericValue;
+    newItems[itemIndex].sets[setIndex].reps = value;
     onItemsChange(newItems);
   };
 
   const handleAddSet = (itemIndex: number) => {
     const newItems = [...items];
-    newItems[itemIndex].sets.push(0);
-    newItems[itemIndex].reps.push(0);
+    newItems[itemIndex].sets.push({ reps: "" });
     onItemsChange(newItems);
   };
 
@@ -70,7 +67,6 @@ const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onAd
     const newItems = [...items];
     if (newItems[itemIndex].sets.length > 1) {
       newItems[itemIndex].sets.splice(setIndex, 1);
-      newItems[itemIndex].reps.splice(setIndex, 1);
       onItemsChange(newItems);
     }
   };
@@ -158,39 +154,30 @@ const WorkoutDay: React.FC<WorkoutDayProps> = ({ day, items, onItemsChange, onAd
                    </Button>
                  </div>
 
-                {item.exercise.type === 'exercise' && (
-                  <div className="space-y-3">
-                    {item.sets.map((setVal, setIndex) => (
-                      <motion.div
-                        key={setIndex}
-                        className="flex gap-2 items-end"
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                      >
-                        <div className="flex-1">
-                          <label className="block text-xs text-muted-foreground">Set {setIndex + 1}</label>
-                          <div className="flex gap-2">
-                            <Input
-                              type="number"
-                              placeholder="Sets"
-                              value={item.sets[setIndex]}
-                              onChange={(e) => handleUpdateSetsReps(itemIndex, setIndex, 'sets', e.target.value)}
-                              className="w-full text-base"
-                            />
-                            <Input
-                              type="number"
-                              placeholder="Reps"
-                              value={item.reps[setIndex]}
-                              onChange={(e) => handleUpdateSetsReps(itemIndex, setIndex, 'reps', e.target.value)}
-                              className="w-full text-base"
-                            />
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="icon" onClick={() => handleRemoveSet(itemIndex, setIndex)}>
-                          <X className="h-4 w-4 text-muted-foreground" />
-                        </Button>
-                      </motion.div>
-                    ))}
+                 {item.exercise.type === 'exercise' && (
+                   <div className="space-y-3">
+                     {item.sets.map((set, setIndex) => (
+                       <motion.div
+                         key={setIndex}
+                         className="flex gap-2 items-end"
+                         initial={{ opacity: 0, y: -10 }}
+                         animate={{ opacity: 1, y: 0 }}
+                       >
+                         <div className="flex-1">
+                           <label className="block text-xs text-muted-foreground">Set {setIndex + 1}</label>
+                           <Input
+                             type="text"
+                             placeholder="e.g., 12 or 8-12"
+                             value={set.reps}
+                             onChange={(e) => handleUpdateReps(itemIndex, setIndex, e.target.value)}
+                             className="w-full text-base"
+                           />
+                         </div>
+                         <Button variant="ghost" size="icon" onClick={() => handleRemoveSet(itemIndex, setIndex)}>
+                           <X className="h-4 w-4 text-muted-foreground" />
+                         </Button>
+                       </motion.div>
+                     ))}
                      <Button variant="outline" className="w-full gap-2" onClick={() => handleAddSet(itemIndex)}>
                        <Plus className="h-4 w-4" /> Add Set
                      </Button>
