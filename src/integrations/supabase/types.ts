@@ -241,14 +241,46 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      can_view_coach_public_profile: {
+        Args: { coach_id: string; viewer_id: string }
+        Returns: boolean
+      }
       current_user_is_coach: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      get_primary_user_role: {
+        Args: { _user_id: string }
+        Returns: string
       }
       get_public_coach_profiles: {
         Args: Record<PropertyKey, never>
@@ -270,12 +302,20 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_coach_customer_relationship: {
         Args: { coach_user_id: string; customer_user_id: string }
         Returns: boolean
       }
     }
     Enums: {
+      app_role: "admin" | "coach" | "customer"
       program_category: "fitness" | "nutrition" | "mental health"
       program_status: "active" | "scheduled" | "draft" | "normal"
       request_status: "pending" | "accepted" | "rejected"
@@ -406,6 +446,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "coach", "customer"],
       program_category: ["fitness", "nutrition", "mental health"],
       program_status: ["active", "scheduled", "draft", "normal"],
       request_status: ["pending", "accepted", "rejected"],
