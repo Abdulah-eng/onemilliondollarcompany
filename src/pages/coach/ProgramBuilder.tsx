@@ -44,7 +44,7 @@ const ProgramBuilder = () => {
             category: program.category,
             title: program.name,
             description: program.description,
-            plan: {}, // TODO: Load existing plan data from program.plan
+            plan: program.plan || {}, // Load existing plan data from program.plan
           });
         } else {
           // Program not found, redirect to programs list
@@ -116,15 +116,15 @@ const ProgramBuilder = () => {
         );
       case 'fitness-builder':
         return (
-          <FitnessBuilder {...commonBuilderProps} />
+          <FitnessBuilder {...commonBuilderProps} initialData={programData.plan} />
         );
       case 'nutrition-builder': 
         return (
-          <NutritionBuilder {...commonBuilderProps} />
+          <NutritionBuilder {...commonBuilderProps} initialData={programData.plan} />
         );
       case 'mental-health-builder': 
         return (
-          <MentalHealthBuilder {...commonBuilderProps} />
+          <MentalHealthBuilder {...commonBuilderProps} initialData={programData.plan} />
         );
       default:
         return null;

@@ -28,15 +28,16 @@ const initialDayData = (): { [key in MealSection]: NutritionDayItem[] } => ({
 interface NutritionBuilderProps {
   onBack: () => void;
   onSave: (data: any) => void;
+  initialData?: any;
 }
 
-const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave }) => {
+const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave, initialData }) => {
   // ⭐ ADD WEEK STATE
   const [activeWeek, setActiveWeek] = useState(1); 
   const [activeDay, setActiveDay] = useState(INITIAL_WEEK_DAY);
   
   // ⭐ UPDATE DATA STRUCTURE to use the compound key: { "W#_DayName": { breakfast: [] } }
-  const [nutritionData, setNutritionData] = useState<{ [key: string]: { [key in MealSection]: NutritionDayItem[] } }>({});
+  const [nutritionData, setNutritionData] = useState<{ [key: string]: { [key in MealSection]: NutritionDayItem[] } }>(initialData || {});
   
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<RecipeItem[]>(mockRecipes);

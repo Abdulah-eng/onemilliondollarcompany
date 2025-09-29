@@ -19,15 +19,16 @@ const INITIAL_WEEK_DAY = 'Monday';
 interface FitnessBuilderProps {
   onBack: () => void;
   onSave: (data: any) => void;
+  initialData?: any;
 }
 
-const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave }) => {
+const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave, initialData }) => {
   // ⭐ ADD WEEK STATE
   const [activeWeek, setActiveWeek] = useState(1); 
   const [activeDay, setActiveDay] = useState(INITIAL_WEEK_DAY);
   
   // ⭐ UPDATE DATA STRUCTURE to use the compound key
-  const [workoutData, setWorkoutData] = useState<{ [key: string]: WorkoutDayItem[] }>({}); 
+  const [workoutData, setWorkoutData] = useState<{ [key: string]: WorkoutDayItem[] }>(initialData || {}); 
   
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<ExerciseItem[]>(mockExercises);

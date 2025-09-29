@@ -26,15 +26,16 @@ const initialDayData = (): { [key in MentalHealthSection]: MentalHealthDayItem[]
 interface MentalHealthBuilderProps {
   onBack: () => void;
   onSave: (data: any) => void;
+  initialData?: any;
 }
 
-const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSave }) => {
+const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSave, initialData }) => {
   // ⭐ ADD WEEK STATE
   const [activeWeek, setActiveWeek] = useState(1); 
   const [activeDay, setActiveDay] = useState(INITIAL_WEEK_DAY);
   
   // ⭐ UPDATE DATA STRUCTURE to use the compound key: { "W1_Monday": { morning: [] } }
-  const [mhData, setMhData] = useState<{ [key: string]: { [key in MentalHealthSection]: MentalHealthDayItem[] } }>({});
+  const [mhData, setMhData] = useState<{ [key: string]: { [key in MentalHealthSection]: MentalHealthDayItem[] } }>(initialData || {});
   
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<MentalHealthActivity[]>(mockMentalHealthActivities);

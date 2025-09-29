@@ -12,4 +12,5 @@ export interface Program {
   updatedAt: string;
   assignedTo: string | null;
   scheduledDate?: string;
+  plan?: any; // JSON data for the program plan
 }
