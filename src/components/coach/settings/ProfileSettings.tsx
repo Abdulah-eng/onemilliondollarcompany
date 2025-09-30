@@ -6,11 +6,25 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { User, Tag, Award, Plus, Trash2, Link, Upload, Save, Loader2, Brain } from 'lucide-react';
+import { User, Tag, Award, Plus, Trash2, Link, Upload, Save, Loader2, Brain, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCoachProfile, CoachProfile, Certification, SocialLink } from '@/hooks/useCoachProfile';
 import { SkillsSelector } from '@/components/onboarding/SkillsSelector';
 import { toast } from 'sonner';
+import { z } from 'zod';
+
+const profileSchema = z.object({
+  full_name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100, 'Name too long'),
+  tagline: z.string().trim().max(150, 'Tagline cannot exceed 150 characters').optional(),
+  bio: z.string().trim().max(2000, 'Bio cannot exceed 2000 characters').optional(),
+  skills: z.array(z.string()).min(1, 'Select at least one skill').max(10, 'Maximum 10 skills allowed'),
+  certifications: z.array(z.object({
+    id: z.string(),
+    name: z.string().trim().min(1, 'Certification name required').max(200, 'Name too long'),
+    issuer: z.string().trim().max(200, 'Issuer name too long').optional(),
+    year: z.number().int().min(1900).max(new Date().getFullYear() + 1, 'Invalid year')
+  }))
+});
 
 interface ProfileSettingsProps {
   onUpdate?: () => void;
@@ -28,6 +42,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
     socials: []
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (profile) {
@@ -54,6 +69,20 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
   };
 
   const handleSave = async () => {
+    // Validate form data
+    const result = profileSchema.safeParse(formData);
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path.join('.');
+        errors[field] = err.message;
+      });
+      setValidationErrors(errors);
+      toast.error('Please fix the validation errors');
+      return;
+    }
+
+    setValidationErrors({});
     setIsSubmitting(true);
     try {
       const success = await updateProfile(formData);
@@ -107,14 +136,73 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
             </Button>
           </div>
           
-          <Label htmlFor="name">Full Name</Label>
-          <Input id="name" value={formData.full_name} onChange={e => setFormData({ ...formData, full_name: e.target.value })} />
+          <div>
+            <Label htmlFor="name">Full Name</Label>
+            <Input 
+              id="name" 
+              value={formData.full_name} 
+              onChange={e => {
+                setFormData({ ...formData, full_name: e.target.value });
+                setValidationErrors({ ...validationErrors, full_name: '' });
+              }}
+              maxLength={100}
+              className={validationErrors.full_name ? 'border-destructive' : ''}
+            />
+            {validationErrors.full_name && (
+              <p className="text-sm text-destructive mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {validationErrors.full_name}
+              </p>
+            )}
+          </div>
 
-          <Label htmlFor="tagline">Tagline (Short Summary)</Label>
-          <Input id="tagline" value={formData.tagline} onChange={e => setFormData({ ...formData, tagline: e.target.value })} placeholder="e.g., Elite Fitness Coach & Nutritionist" />
+          <div>
+            <Label htmlFor="tagline">Tagline (Short Summary)</Label>
+            <Input 
+              id="tagline" 
+              value={formData.tagline} 
+              onChange={e => {
+                setFormData({ ...formData, tagline: e.target.value });
+                setValidationErrors({ ...validationErrors, tagline: '' });
+              }}
+              placeholder="e.g., Elite Fitness Coach & Nutritionist" 
+              maxLength={150}
+              className={validationErrors.tagline ? 'border-destructive' : ''}
+            />
+            {validationErrors.tagline && (
+              <p className="text-sm text-destructive mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {validationErrors.tagline}
+              </p>
+            )}
+          </div>
 
-          <Label htmlFor="bio">Professional Bio</Label>
-          <Textarea id="bio" value={formData.bio} onChange={e => setFormData({ ...formData, bio: e.target.value })} rows={5} placeholder="Write a compelling bio to land clients..." />
+          <div>
+            <Label htmlFor="bio">Professional Bio</Label>
+            <Textarea 
+              id="bio" 
+              value={formData.bio} 
+              onChange={e => {
+                setFormData({ ...formData, bio: e.target.value });
+                setValidationErrors({ ...validationErrors, bio: '' });
+              }}
+              rows={5} 
+              placeholder="Write a compelling bio to land clients..." 
+              maxLength={2000}
+              className={validationErrors.bio ? 'border-destructive' : ''}
+            />
+            <div className="flex justify-between items-center mt-1">
+              {validationErrors.bio && (
+                <p className="text-sm text-destructive flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  {validationErrors.bio}
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground ml-auto">
+                {formData.bio.length}/2000
+              </p>
+            </div>
+          </div>
         </CardContent>
       </Card>
       
@@ -129,8 +217,17 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
         <CardContent>
           <SkillsSelector 
             selectedSkills={formData.skills}
-            onSkillsChange={(skills) => setFormData({ ...formData, skills })}
+            onSkillsChange={(skills) => {
+              setFormData({ ...formData, skills });
+              setValidationErrors({ ...validationErrors, skills: '' });
+            }}
           />
+          {validationErrors.skills && (
+            <p className="text-sm text-destructive mt-2 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              {validationErrors.skills}
+            </p>
+          )}
         </CardContent>
       </Card>
 

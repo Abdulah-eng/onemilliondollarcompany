@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Send } from 'lucide-react';
+import { z } from 'zod';
+import { toast } from 'sonner';
+
+const messageSchema = z.string()
+  .trim()
+  .min(1, 'Message cannot be empty')
+  .max(2000, 'Message cannot exceed 2000 characters');
 
 interface MessageInputProps {
   onSend: (message: string) => void;
@@ -18,8 +25,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim() && !disabled) {
-      onSend(message.trim());
+    
+    // Validate message
+    const result = messageSchema.safeParse(message);
+    if (!result.success) {
+      toast.error(result.error.errors[0].message);
+      return;
+    }
+    
+    if (!disabled) {
+      onSend(result.data);
       setMessage('');
     }
   };
@@ -39,6 +54,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         onKeyPress={handleKeyPress}
         placeholder={placeholder}
         disabled={disabled}
+        maxLength={2000}
         className="flex-1"
       />
       <Button 
