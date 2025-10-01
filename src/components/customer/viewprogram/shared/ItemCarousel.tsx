@@ -20,7 +20,7 @@ export default function ItemCarousel({ items, selectedItemId, onSelectItem }: It
   return (
     <div className="relative">
       {/* Added pt-3 so ring at top won't get cut off */}
-      <div className="flex space-x-4 overflow-x-auto overflow-y-visible pt-3 pb-6 scrollbar-hide -mx-4 px-4">
+      <div className="flex space-x-4 overflow-x-auto overflow-y-visible pt-3 pb-6 scrollbar-hide-tablet -mx-4 px-4">
         {items.map((item) => {
           const isSelected = item.id === selectedItemId;
 

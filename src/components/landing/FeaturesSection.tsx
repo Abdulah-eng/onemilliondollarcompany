@@ -19,14 +19,14 @@ export default function FeaturesSection() {
         </div>
 
         {/* Cards */}
-        <div
-          className={cn(
-            "flex gap-6 overflow-x-auto px-4 sm:px-6 lg:px-8",
-            "lg:grid lg:grid-cols-3 lg:gap-8 lg:max-w-7xl lg:mx-auto lg:overflow-visible",
-            "scrollbar-hide scroll-px-4 snap-x snap-mandatory"
-          )}
-          data-reveal
-        >
+        <div
+          className={cn(
+            "flex gap-6 overflow-x-auto px-4 sm:px-6 lg:px-8",
+            "lg:grid lg:grid-cols-3 lg:gap-8 lg:max-w-7xl lg:mx-auto lg:overflow-visible",
+            "scrollbar-hide-tablet scroll-px-4 snap-x snap-mandatory"
+          )}
+          data-reveal
+        >
           {FEATURE_CARDS.map((feature, index) => (
             <div
               key={feature.title}

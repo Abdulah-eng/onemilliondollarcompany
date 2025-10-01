@@ -22,7 +22,7 @@ export default function SmartInsights({ insights }: { insights: SmartInsight[] }
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
         >
-            <div className="flex overflow-x-auto space-x-4 pb-4 scrollbar-hide">
+            <div className="flex overflow-x-auto space-x-4 pb-4 scrollbar-hide-tablet">
                 {insights.map(insight => <InsightCard key={insight.id} insight={insight} />)}
             </div>
         </motion.div>

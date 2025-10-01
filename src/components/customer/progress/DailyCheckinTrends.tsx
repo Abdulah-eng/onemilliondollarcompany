@@ -58,7 +58,7 @@ export default function DailyCheckinTrends({ checkins, onCardClick }: DailyCheck
     return (
         <div>
             <h2 className="text-xl font-bold tracking-tight mb-4">Daily Check-in Trends</h2>
-            <div className="flex overflow-x-auto space-x-4 pb-4 -mx-4 px-4 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent">
+            <div className="flex overflow-x-auto space-x-4 pb-4 -mx-4 px-4 scrollbar-hide-tablet lg:scrollbar-thin lg:scrollbar-thumb-muted-foreground/20 lg:scrollbar-track-transparent">
                 {trendData.map((trend) => (
                     <CheckinTrendCard 
                         key={trend.title}

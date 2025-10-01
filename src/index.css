@@ -133,4 +133,22 @@
   input[type="number"].no-spinner {
     -moz-appearance: textfield;
   }
+
+  /* Responsive scrollbar hiding for iPad and below */
+  @media (max-width: 1024px) {
+    .scrollbar-hide-tablet {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .scrollbar-hide-tablet::-webkit-scrollbar {
+      display: none;
+    }
+    .custom-scrollbar {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+  }
 }

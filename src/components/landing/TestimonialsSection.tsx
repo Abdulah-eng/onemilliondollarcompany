@@ -93,14 +93,14 @@ export default function TestimonialsSection() {
         <div
           ref={trackRef}
           role="list"
-          className="
-            flex items-stretch gap-6
-            overflow-x-auto overflow-y-hidden
-            snap-x snap-mandatory
-            [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
-            scroll-px-4
-            pb-12 lg:pb-16
-          "
+          className="
+            flex items-stretch gap-6
+            overflow-x-auto overflow-y-hidden
+            snap-x snap-mandatory
+            scrollbar-hide-tablet
+            scroll-px-4
+            pb-12 lg:pb-16
+          "
         >
           {TESTIMONIALS.map((t, idx) => (
             <article
