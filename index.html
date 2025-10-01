@@ -17,10 +17,55 @@
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
     <!-- Preconnect to Google Fonts for faster font loading -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     
-    <!-- Preload critical font file to break dependency chain -->
+    <!-- Inline critical font CSS to eliminate render-blocking request -->
+    <style>
+      @font-face {
+        font-family: 'Figtree';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url(https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2) format('woff2');
+      }
+      @font-face {
+        font-family: 'Figtree';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url(https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2) format('woff2');
+      }
+      @font-face {
+        font-family: 'Figtree';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url(https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2) format('woff2');
+      }
+      @font-face {
+        font-family: 'Figtree';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url(https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2) format('woff2');
+      }
+      @font-face {
+        font-family: 'Figtree';
+        font-style: normal;
+        font-weight: 800;
+        font-display: swap;
+        src: url(https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2) format('woff2');
+      }
+      @font-face {
+        font-family: 'Figtree';
+        font-style: normal;
+        font-weight: 900;
+        font-display: swap;
+        src: url(https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2) format('woff2');
+      }
+    </style>
+    
+    <!-- Preload the actual font file for fastest loading -->
     <link 
       rel="preload" 
       as="font"
@@ -28,17 +73,6 @@
       href="https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2"
       crossorigin
     />
-    
-    <!-- Load Figtree font asynchronously to prevent render blocking -->
-    <link 
-      rel="stylesheet" 
-      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap"
-      media="print"
-      onload="this.media='all'"
-    />
-    <noscript>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap" />
-    </noscript>
   </head>
 
   <body>
