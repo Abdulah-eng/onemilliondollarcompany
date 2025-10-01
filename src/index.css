@@ -1,10 +1,11 @@
 /* ✅ 1. Figtree font is loaded in index.html for optimal performance */
 
+/* Import external CSS before Tailwind to avoid build errors */
+@import 'react-circular-progressbar/dist/styles.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import 'react-circular-progressbar/dist/styles.css';
 
 @layer base {
   /* ==========================================================================

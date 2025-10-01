@@ -76,6 +76,34 @@
   </head>
 
   <body>
+    <!-- Instant loading skeleton for improved FCP -->
+    <style>
+      #app-loader {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #3DD9C1, #0E7D71);
+        z-index: 9999;
+      }
+      #app-loader .logo {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: white;
+        font-family: 'Figtree', system-ui, sans-serif;
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.05); }
+      }
+    </style>
+    
+    <div id="app-loader">
+      <div class="logo">TrainWise<span style="color: #FAF5F0;">Studio</span></div>
+    </div>
+    
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
