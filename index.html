@@ -20,12 +20,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     
-    <!-- Preload font CSS with low priority to eliminate render blocking -->
+    <!-- Preload critical font file to break dependency chain -->
     <link 
       rel="preload" 
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap"
+      as="font"
+      type="font/woff2"
+      href="https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2"
+      crossorigin
     />
+    
+    <!-- Load Figtree font asynchronously to prevent render blocking -->
     <link 
       rel="stylesheet" 
       href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap"
