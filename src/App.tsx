@@ -6,10 +6,12 @@ import { useAuth, AuthProvider } from "./contexts/AuthContext";
 import { OnboardingProvider } from "./contexts/OnboardingContext";
 import { ThemeProvider } from "next-themes";
 import { Loader2 } from "lucide-react";
+import StripeSyncHandler from "@/components/system/StripeSyncHandler";
 
 // --- LAYOUTS ---
 import AppShell from "@/components/layouts/AppShell";
 import RoleGate from "@/components/routing/RoleGate";
+import SubscriptionGate from "@/components/routing/SubscriptionGate";
 
 // --- PAGES (Lazy Loaded) ---
 import LandingPage from "./pages/public/LandingPage";
@@ -22,6 +24,7 @@ const PrivacyPage = lazy(() => import("./pages/legal/PrivacyPage"));
 const GetStartedPage = lazy(() => import("./pages/auth/GetStartedPage"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage"));
+const UpdatePasswordPage = lazy(() => import("./pages/auth/UpdatePasswordPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const GoalSelectionStep = lazy(() => import("./pages/onboarding/GoalSelectionStep"));
 const PersonalInfoStep = lazy(() => import("./pages/onboarding/PersonalInfoStep"));
@@ -96,7 +99,7 @@ const ThemedApp = () => {
   const location = useLocation();
   
   // Pages that should always use light theme
-  const lightThemePages = ['/', '/login', '/get-started', '/forgot-password'];
+  const lightThemePages = ['/', '/login', '/get-started', '/forgot-password', '/update-password'];
   const shouldForceLightTheme = lightThemePages.includes(location.pathname);
   
   return (
@@ -107,6 +110,7 @@ const ThemedApp = () => {
       forcedTheme={shouldForceLightTheme ? "light" : undefined}
     >
       <Toaster richColors position="top-right" />
+      <StripeSyncHandler />
       <Routes>
         {/* 1. Landing Page (Outside AuthProvider for performance) */}
         <Route path="/" element={<LandingPage />} />
@@ -142,6 +146,11 @@ const ThemedApp = () => {
                 <Route path="/forgot-password" element={
                   <Suspense fallback={<LoadingScreen />}>
                     <ForgotPasswordPage />
+                  </Suspense>
+                } />
+                <Route path="/update-password" element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <UpdatePasswordPage />
                   </Suspense>
                 } />
               </Route>
@@ -232,19 +241,25 @@ const ThemedApp = () => {
                     </Suspense>
                   } />
                   <Route path="/customer/programs" element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <MyProgramsPage />
-                    </Suspense>
+                    <SubscriptionGate>
+                      <Suspense fallback={<LoadingScreen />}>
+                        <MyProgramsPage />
+                      </Suspense>
+                    </SubscriptionGate>
                   } />
                   <Route path="/customer/library" element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <LibraryPage />
-                    </Suspense>
+                    <SubscriptionGate>
+                      <Suspense fallback={<LoadingScreen />}>
+                        <LibraryPage />
+                      </Suspense>
+                    </SubscriptionGate>
                   } />
                   <Route path="/customer/progress" element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <ProgressPage />
-                    </Suspense>
+                    <SubscriptionGate>
+                      <Suspense fallback={<LoadingScreen />}>
+                        <ProgressPage />
+                      </Suspense>
+                    </SubscriptionGate>
                   } />
                   <Route path="/customer/messages" element={
                     <Suspense fallback={<LoadingScreen />}>

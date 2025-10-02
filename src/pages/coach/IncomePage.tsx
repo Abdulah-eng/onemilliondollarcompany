@@ -6,18 +6,22 @@ import StatCard from '@/components/coach/income/StatCard';
 import ClientTable from '@/components/coach/income/ClientTable';
 import TransactionHistory from '@/components/coach/income/TransactionHistory';
 import WithdrawalModal from '@/components/coach/income/WithdrawalModal';
+import { useCoachPayouts } from '@/hooks/useCoachPayouts';
 import WithdrawFAB from '@/components/coach/income/WithdrawFAB'; // Import the new FAB
 import { mockIncomeStats, mockClientEarnings, mockTransactions, IncomeStats, Transaction } from '@/mockdata/income/mockIncome';
 import { DollarSign, Clock, ArrowUp, Wallet, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCoachPayouts } from '@/hooks/useCoachPayouts';
 
 const IncomePage: React.FC = () => {
   const [stats, setStats] = useState<IncomeStats>(mockIncomeStats);
   const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control the modal
+  const { payouts, refetch, requestWithdrawal } = useCoachPayouts();
 
-  const handleWithdraw = useCallback((amount: number) => {
+  const handleWithdraw = useCallback(async (amount: number) => {
     if (amount > 0 && amount <= stats.currentBalance) {
+      await requestWithdrawal(Math.round(amount * 100));
       const newTransaction: Transaction = {
         id: `tx-${Date.now()}`,
         type: 'Withdrawal',
@@ -26,17 +30,15 @@ const IncomePage: React.FC = () => {
         date: new Date().toISOString(),
         status: 'Pending',
       };
-
       setStats(prev => ({
         ...prev,
         currentBalance: prev.currentBalance - amount,
         pendingPayout: prev.pendingPayout + amount,
       }));
       setTransactions(prev => [newTransaction, ...prev]);
-
-      alert(`Withdrawal request for $${amount.toFixed(2)} submitted successfully! Processing may take 1-3 days.`);
+      refetch();
     }
-  }, [stats.currentBalance]);
+  }, [stats.currentBalance, requestWithdrawal, refetch]);
 
   const openWithdrawalModal = () => {
     setIsModalOpen(true);
@@ -82,6 +84,21 @@ const IncomePage: React.FC = () => {
         {/* Transaction History (Mobile: Full width, Desktop: 2/5 width) */}
         <div className="lg:col-span-2">
           <TransactionHistory transactions={transactions} />
+          <div className="mt-6">
+            <h3 className="font-semibold mb-2">Payouts</h3>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              {payouts.map(p => (
+                <div key={p.id} className="flex justify-between border rounded-lg p-3">
+                  <span>{p.period_start} - {p.period_end}</span>
+                  <span>${(p.net_amount_cents/100).toFixed(2)} ({p.status})</span>
+                </div>
+              ))}
+              {payouts.length === 0 && (
+                <div className="text-muted-foreground">No payouts yet.</div>
+              )}
+              <Button variant="outline" size="sm" onClick={() => refetch()}>Refresh</Button>
+            </div>
+          </div>
         </div>
 
         {/* Client Earnings Table (Mobile: Full width, Desktop: 3/5 width) */}

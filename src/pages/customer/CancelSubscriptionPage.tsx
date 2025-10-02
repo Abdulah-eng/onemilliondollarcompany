@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import CancellationSurvey from '@/components/customer/payment/CancellationSurvey';
 import { customerProfile } from '@/mockdata/profile/profileData';
+import { cancelSubscriptionAtPeriodEnd } from '@/lib/stripe/api';
 
 const steps = [
   { id: 'survey', label: 'Survey' },
@@ -40,9 +41,13 @@ const CancelSubscriptionPage = () => {
 
   const handleFinalCancel = async () => {
     setIsProcessing(true);
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    setIsProcessing(false);
-    setStep('success');
+    try {
+      await cancelSubscriptionAtPeriodEnd();
+      setIsProcessing(false);
+      setStep('success');
+    } catch (e) {
+      setIsProcessing(false);
+    }
   };
 
   const handleKeepSubscription = () => {

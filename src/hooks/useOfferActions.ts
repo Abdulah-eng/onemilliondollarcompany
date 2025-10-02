@@ -28,7 +28,7 @@ export const useOfferActions = () => {
 
       if (updateError) throw updateError;
 
-      // Update customer's coach_id and plan in profiles
+      // Update customer's coach_id and plan in profiles (commission logic applied by backend via webhooks)
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 

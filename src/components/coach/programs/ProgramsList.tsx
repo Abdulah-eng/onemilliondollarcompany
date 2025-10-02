@@ -172,7 +172,12 @@ const ProgramsList = () => {
                     <div className="hidden md:grid grid-cols-4 items-center gap-4 p-4">
                       {/* Program Name */}
                       <div className="col-span-2 flex flex-col">
-                        <span className="font-semibold text-lg group-hover:text-primary transition-colors">{program.name}</span>
+                        <span className="font-semibold text-lg group-hover:text-primary transition-colors flex items-center gap-2">
+                          {program.name}
+                          {program.isAIGenerated && (
+                            <Badge variant="secondary" className="text-[10px]">AI</Badge>
+                          )}
+                        </span>
                         <span className="text-sm text-muted-foreground truncate">{program.description}</span>
                       </div>
 
@@ -216,7 +221,12 @@ const ProgramsList = () => {
                     {/* Mobile View */}
                     <div className="md:hidden p-4 flex flex-col gap-2">
                       <div className="flex justify-between items-center">
-                        <h3 className="text-xl font-bold group-hover:text-primary">{program.name}</h3>
+                        <h3 className="text-xl font-bold group-hover:text-primary flex items-center gap-2">
+                          {program.name}
+                          {program.isAIGenerated && (
+                            <Badge variant="secondary" className="text-[10px]">AI</Badge>
+                          )}
+                        </h3>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8" disabled={mutationLoading}>

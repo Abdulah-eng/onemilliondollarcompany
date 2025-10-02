@@ -64,7 +64,7 @@ export const usePaymentPlan = () => {
     if (!profile?.id) return { error: 'No user found' };
 
     const trialExpiry = new Date();
-    trialExpiry.setDate(trialExpiry.getDate() + 7); // 7 days from now
+    trialExpiry.setDate(trialExpiry.getDate() + 14); // 14 days from now
 
     const { error } = await supabase
       .from('profiles')

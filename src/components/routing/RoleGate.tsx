@@ -62,6 +62,14 @@ const RoleGate = ({ allowedRole, children }: RoleGateProps) => {
     return <Navigate to="/onboarding/step-1" replace />;
   }
 
+  // For coach role, prompt to complete profile on first login if missing basics
+  if (allowedRole === 'coach') {
+    const coachNeedsProfile = !profile.full_name;
+    if (coachNeedsProfile && window.location.pathname !== '/coach/settings') {
+      return <Navigate to="/coach/settings" replace />;
+    }
+  }
+
   const handleStartTrial = async () => {
     const { error } = await startTrial();
     if (!error) {

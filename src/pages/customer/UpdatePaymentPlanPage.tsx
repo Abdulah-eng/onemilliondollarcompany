@@ -2,16 +2,29 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import PlanSelectionCard from '@/components/customer/payment/PlanSelectionCard';
 import PaymentMethodCard from '@/components/customer/payment/PaymentMethodCard';
 import UpdatePaymentMethodForm from '@/components/customer/payment/UpdatePaymentMethodForm';
 import { toast } from 'sonner';
+import { createCheckoutSession } from '@/lib/stripe/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 const UpdatePaymentPlanPage = () => {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState('');
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState('usd');
+
+  const currencyOptions = [
+    { value: 'usd', label: 'USD - $29.99/month', price: '$29.99' },
+    { value: 'nok', label: 'NOK - 299 kr/month', price: '299 kr' },
+    { value: 'sek', label: 'SEK - 299 kr/month', price: '299 kr' },
+    { value: 'dkk', label: 'DKK - 199 kr/month', price: '199 kr' },
+  ];
 
   const handlePlanSelect = (planKey: string) => {
     setSelectedPlan(planKey);
@@ -28,11 +41,25 @@ const UpdatePaymentPlanPage = () => {
     }
 
     setIsProcessing(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsProcessing(false);
-
-    toast.success('Plan updated successfully!');
-    navigate('/customer/settings');
+    try {
+      // Map UI plan keys to backend price keys
+      const planKeyMap: Record<string, { priceKey: string; trialDays?: number }> = {
+        premium: { priceKey: 'platform_monthly' },
+        standard: { priceKey: 'platform_monthly', trialDays: 14 },
+        basic: { priceKey: 'platform_monthly' }, // TODO: replace with one-time price id support
+      };
+      const mapped = planKeyMap[selectedPlan] || { priceKey: selectedPlan };
+      const { checkoutUrl } = await createCheckoutSession({
+        ...mapped,
+        currency: selectedCurrency,
+        stripeCustomerId: profile?.stripe_customer_id ?? null,
+        userId: profile?.id,
+      });
+      window.location.href = checkoutUrl;
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to start checkout');
+      setIsProcessing(false);
+    }
   };
 
   if (showPaymentForm) {
@@ -80,18 +107,38 @@ const UpdatePaymentPlanPage = () => {
 
         <div className="space-y-6 lg:sticky lg:top-4">
           <PaymentMethodCard onUpdate={handleUpdatePaymentMethod} />
+          
+          <div className="p-3 sm:p-4 bg-muted rounded-lg space-y-3 sm:space-y-4">
+            <h3 className="text-base sm:text-lg font-semibold">Currency Selection</h3>
+            <div className="space-y-2">
+              <Label htmlFor="currency-select">Choose Currency</Label>
+              <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+                <SelectTrigger id="currency-select" className="w-full">
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currencyOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           {selectedPlan && (
             <div className="p-3 sm:p-4 bg-muted rounded-lg space-y-3 sm:space-y-4">
               <h3 className="text-base sm:text-lg font-semibold">Plan Update Summary</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">
-                Your new plan will take effect immediately and you’ll be charged the prorated amount.
+                Your new plan will take effect immediately and you'll be charged the prorated amount.
               </p>
               <Button
                 onClick={handleConfirmUpdate}
                 disabled={isProcessing}
                 className="w-full"
               >
-                {isProcessing ? 'Processing...' : 'Confirm Plan Update'}
+                {isProcessing ? 'Processing...' : `Subscribe ${currencyOptions.find(opt => opt.value === selectedCurrency)?.price}/mo`}
               </Button>
             </div>
           )}

@@ -92,6 +92,17 @@ export const OnboardingProvider = ({ children }: { children: React.ReactNode }) 
   const [state, setState] = useState(initialOnboardingState);
   const [loading, setLoading] = useState(false);
 
+  // Rehydrate from localStorage to prevent losing progress on route changes/hard reloads
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('onboarding_state');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setState(prev => ({ ...prev, ...parsed }));
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
     if (profile) {
       setState(prevState => ({
@@ -103,7 +114,11 @@ export const OnboardingProvider = ({ children }: { children: React.ReactNode }) 
   }, [profile]);
 
   const updateState = useCallback((step: keyof OnboardingState, data: any) => {
-    setState(prevState => ({ ...prevState, [step]: data }));
+    setState(prevState => {
+      const next = { ...prevState, [step]: data } as OnboardingState;
+      try { localStorage.setItem('onboarding_state', JSON.stringify(next)); } catch {}
+      return next;
+    });
   }, []);
 
   const clearState = useCallback(() => setState(initialOnboardingState), []);
@@ -155,6 +170,7 @@ export const OnboardingProvider = ({ children }: { children: React.ReactNode }) 
       // Refresh the profile to update the auth state with new data
       await refreshProfile();
       toast.success("Welcome! Your profile is complete.");
+      try { localStorage.removeItem('onboarding_state'); } catch {}
     } catch (error) {
       toast.error(error.message || "Could not complete setup.");
       throw error;

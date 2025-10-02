@@ -13,4 +13,5 @@ export interface Program {
   assignedTo: string | null;
   scheduledDate?: string;
   plan?: any; // JSON data for the program plan
+  isAIGenerated?: boolean; // display badge when true
 }
