@@ -1,7 +1,6 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { splitVendorChunkPlugin } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -23,7 +22,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
     react(),
-    splitVendorChunkPlugin(),
+    // Removed splitVendorChunkPlugin - we're using custom manualChunks instead
     mode === 'development' && (async () => {
       try {
         const { componentTagger } = await import("lovable-tagger");
@@ -34,32 +33,35 @@ export default defineConfig(({ mode }) => {
     })(),
     ].filter(Boolean),
     resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
     },
     optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'chart.js', 'react-chartjs-2', 'react-circular-progressbar']
+      include: ['react', 'react-dom', 'react-router-dom', 'chart.js', 'react-chartjs-2', 'react-circular-progressbar']
     },
     build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
-          supabase: ['@supabase/supabase-js'],
-          charts: ['recharts', 'chart.js', 'react-chartjs-2', 'react-circular-progressbar'],
-          motion: ['framer-motion']
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Keep React together to prevent multiple instances
+            'react-vendor': ['react', 'react-dom', 'react/jsx-runtime'],
+            'router': ['react-router-dom'],
+            'ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
+            'supabase': ['@supabase/supabase-js'],
+            'charts': ['recharts', 'chart.js', 'react-chartjs-2'],
+            'motion': ['framer-motion']
+          }
+        },
+        onwarn(warning, warn) {
+          if ((warning as any).code === 'MODULE_LEVEL_DIRECTIVE') {
+            return
+          }
+          warn(warning as any)
         }
       },
-      onwarn(warning, warn) {
-        if ((warning as any).code === 'MODULE_LEVEL_DIRECTIVE') {
-          return
-        }
-        warn(warning as any)
-      }
-    }
+      minify: true,
+      chunkSizeWarningLimit: 1000,
     }
   };
 });

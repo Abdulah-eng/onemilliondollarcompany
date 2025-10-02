@@ -44,7 +44,7 @@ export default function PhotoProgressCard({ photos }: { photos: PhotoEntry[] }) 
       {olderPhotos.length > 0 && (
         <>
           <h4 className="text-lg font-semibold mb-3">Snapshots</h4>
-          <div className="flex overflow-x-auto space-x-4 pb-2 scrollbar-hide">
+          <div className="flex overflow-x-auto space-x-4 pb-2 scrollbar-hide-tablet">
             {olderPhotos.map((photo) => (
               <div key={photo.id} className="flex-shrink-0 w-32 group relative">
                 <img 

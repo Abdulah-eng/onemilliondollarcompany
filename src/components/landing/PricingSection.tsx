@@ -47,10 +47,10 @@ const PricingSection = () => {
         </div>
 
         {/* Responsive Grid for Cards */}
-        <div
-          className="relative mt-8 grid grid-flow-col auto-cols-[90%] sm:auto-cols-[380px] lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-3 gap-8 overflow-x-auto lg:overflow-visible pb-8 pt-10 lg:py-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          data-reveal
-        >
+        <div
+          className="relative mt-8 grid grid-flow-col auto-cols-[90%] sm:auto-cols-[380px] lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-3 gap-8 overflow-x-auto lg:overflow-visible pb-8 pt-10 lg:py-0 scrollbar-hide-tablet"
+          data-reveal
+        >
           {plans.map((plan: any) => (
             <div
               key={plan.name}

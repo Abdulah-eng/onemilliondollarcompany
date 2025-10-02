@@ -169,7 +169,7 @@ export default function HorizontalCalendar({
       <div
         ref={scrollRef}
         className={cn(
-          "flex overflow-x-auto gap-2 py-2 scrollbar-hide scroll-smooth -mx-4 px-4",
+          "flex overflow-x-auto gap-2 py-2 scrollbar-hide-tablet scroll-smooth -mx-4 px-4",
           !isMobile && "snap-x snap-mandatory"
         )}
       >

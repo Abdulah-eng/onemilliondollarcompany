@@ -56,7 +56,23 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   }, [conversations, userRole, user]);
 
   const getOtherUser = (conversation: ConversationWithProfiles) => {
-    return user?.id === conversation.coach_id ? conversation.customer : conversation.coach;
+    const other = user?.id === conversation.coach_id ? conversation.customer : conversation.coach;
+    // DEBUG: Log which participant we resolved for this row
+    console.debug('[ConversationList] Other user resolved:', {
+      conversationId: conversation.id,
+      selected: user?.id === conversation.coach_id ? 'customer' : 'coach',
+      id: other?.id,
+      full_name: other?.full_name,
+      email: other?.email,
+      avatar_url: other?.avatar_url,
+    });
+    return other;
+  };
+
+  const getDisplayName = (fullName?: string, email?: string) => {
+    if (fullName && fullName.trim().length > 0) return fullName;
+    if (email && email.includes('@')) return email.split('@')[0];
+    return 'Unknown User';
   };
 
   const getStatusBadge = (conversation: ConversationWithProfiles) => {
@@ -107,16 +123,16 @@ export const ConversationList: React.FC<ConversationListProps> = ({
             >
               <div className="flex items-start gap-3">
                 <Avatar className="w-10 h-10">
-                  <AvatarImage src={otherUser?.avatar_url} />
+                  <AvatarImage src={otherUser?.avatar_url || undefined} />
                   <AvatarFallback>
-                    {otherUser?.full_name?.split(' ').map(n => n[0]).join('') || '?'}
+                    {otherUser?.full_name?.split(' ').map(n => n[0]).join('') || (otherUser?.email ? otherUser.email[0].toUpperCase() : '?')}
                   </AvatarFallback>
                 </Avatar>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <h3 className="font-medium text-sm truncate">
-                      {otherUser?.full_name || 'Unknown User'}
+                      {getDisplayName(otherUser?.full_name, otherUser?.email)}
                     </h3>
                     {getStatusBadge(conversation)}
                   </div>

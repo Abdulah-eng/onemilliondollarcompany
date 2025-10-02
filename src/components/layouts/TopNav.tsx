@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { useConversations } from '@/hooks/useConversations';
 
 interface TopNavProps {
   title?: string;
@@ -20,6 +21,7 @@ const TopNav = ({ title }: TopNavProps) => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { conversations } = useConversations();
 
   const handleSignOut = async () => {
     await signOut();
@@ -31,6 +33,20 @@ const TopNav = ({ title }: TopNavProps) => {
     const path = location.pathname;
     const segments = path.split('/').filter(Boolean);
     const lastSegment = segments[segments.length - 1];
+    
+    // Special handling for messages page - show participant name instead of conversation ID
+    if (segments.includes('messages') && lastSegment && lastSegment !== 'messages') {
+      const conversationId = lastSegment;
+      const conversation = conversations.find(c => c.id === conversationId);
+      if (conversation) {
+        const otherUser = user?.id === conversation.coach_id ? conversation.customer : conversation.coach;
+        if (otherUser?.full_name) return otherUser.full_name;
+        if (otherUser?.email) return otherUser.email.split('@')[0];
+        return 'Unknown User';
+      }
+      return 'Messages';
+    }
+    
     if (lastSegment === 'dashboard') return 'Dashboard';
     return lastSegment ? lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1).replace('-', ' ') : 'TrainWise';
   };

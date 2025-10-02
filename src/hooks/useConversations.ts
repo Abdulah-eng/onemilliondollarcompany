@@ -13,11 +13,13 @@ export interface ConversationWithProfiles {
     id: string;
     full_name: string;
     avatar_url: string;
+    email?: string;
   };
   customer?: {
     id: string;
     full_name: string;
     avatar_url: string;
+    email?: string;
   };
   last_message?: {
     content: string;
@@ -37,27 +39,163 @@ export const useConversations = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      // NOTE: Some RLS policies may block direct joins on profiles.
+      // We fetch bare conversations first, then hydrate participants via RPC.
+      const { data: convs, error: convError } = await supabase
         .from('conversations')
-        .select(`
-          *,
-          coach:profiles!conversations_coach_id_fkey(id, full_name, avatar_url),
-          customer:profiles!conversations_customer_id_fkey(id, full_name, avatar_url),
-          messages(content, created_at, message_type)
+        .select(`*
+          , messages(content, created_at, message_type)
         `)
+        .or(`coach_id.eq.${user.id},customer_id.eq.${user.id}`)
         .eq('status', 'active')
+        .order('created_at', { foreignTable: 'messages', ascending: false })
+        .limit(1, { foreignTable: 'messages' })
         .order('updated_at', { ascending: false });
 
-      if (error) throw error;
+      if (convError) throw convError;
 
-      // Process conversations to add last message
+      // Get unique participant IDs from conversations
+      const coachIds = Array.from(new Set(convs.map(c => c.coach_id)));
+      const customerIds = Array.from(new Set(convs.map(c => c.customer_id)));
+      const allIds = Array.from(new Set([...coachIds, ...customerIds]));
+
+      console.log('[useConversations] Participant IDs to fetch:', allIds);
+
+      // Try direct profiles table query first
+      console.log('[useConversations] Querying profiles table with IDs:', allIds);
+      let profilesMapArr: any[] = [];
+      let profilesError: any = null;
+      
+      const { data: directProfiles, error: directError } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url, email')
+        .in('id', allIds);
+      
+      console.log('[useConversations] Direct profiles query result:', { data: directProfiles, error: directError });
+      
+      if (directError) {
+        console.warn('[useConversations] Direct profiles query failed, trying RPC fallback:', directError);
+        // Fallback to RPC if direct query fails (RLS might be blocking)
+        const { data: rpcProfiles, error: rpcError } = await supabase
+          .rpc('get_public_profiles', { ids: allIds });
+        
+        console.log('[useConversations] RPC profiles query result:', { data: rpcProfiles, error: rpcError });
+        
+        if (rpcError) {
+          console.error('[useConversations] Both direct and RPC queries failed:', { directError, rpcError });
+          throw directError; // Use the first error
+        }
+        
+        profilesMapArr = rpcProfiles || [];
+        profilesError = rpcError;
+      } else {
+        profilesMapArr = directProfiles || [];
+        profilesError = directError;
+      }
+      
+      if (profilesError) {
+        console.error('[useConversations] Profiles query error:', profilesError);
+        throw profilesError;
+      }
+
+      const profilesById: Record<string, { id: string; full_name?: string; avatar_url?: string; email?: string }> = {};
+      (profilesMapArr || []).forEach((p: any) => { 
+        profilesById[p.id] = p;
+        console.log('[useConversations] Fetched profile:', { 
+          id: p.id, 
+          full_name: p.full_name, 
+          email: p.email,
+          avatar_url: p.avatar_url,
+          raw: p
+        });
+      });
+      
+      console.log('[useConversations] Final profilesById mapping:', profilesById);
+      console.log('[useConversations] Available profile IDs:', Object.keys(profilesById));
+
+      const data = convs.map(c => ({
+        ...c,
+        coach: profilesById[c.coach_id] || null,
+        customer: profilesById[c.customer_id] || null,
+      }));
+
+      // DEBUG: Log final processed conversations
+      console.log('[useConversations] Final conversations with profiles:', data.map(c => ({
+        id: c.id,
+        coach_id: c.coach_id,
+        coach_name: c.coach?.full_name || 'MISSING',
+        coach_email: c.coach?.email || 'MISSING',
+        customer_id: c.customer_id,
+        customer_name: c.customer?.full_name || 'MISSING',
+        customer_email: c.customer?.email || 'MISSING',
+      })));
+
+      // DEBUG: Log raw conversations with joined profiles
+      console.log('[useConversations] Raw conversations from DB:', data);
+
+      // Process conversations to add last message and deduplicate
       const processedConversations = data.map(conv => ({
         ...conv,
-        last_message: conv.messages?.[conv.messages.length - 1] || null,
+        last_message: conv.messages?.[0] || null,
         unread_count: 0 // TODO: Implement unread count logic
       }));
 
-      setConversations(processedConversations);
+      // DEBUG: Check for duplicates before deduplication
+      const conversationIds = processedConversations.map(c => c.id);
+      const uniqueIds = new Set(conversationIds);
+      if (conversationIds.length !== uniqueIds.size) {
+        console.warn('[useConversations] Found duplicate conversations:', {
+          total: conversationIds.length,
+          unique: uniqueIds.size,
+          duplicates: conversationIds.filter((id, index) => conversationIds.indexOf(id) !== index)
+        });
+      }
+
+      // Merge conversations with the same participant (same other user)
+      const mergedConversations = processedConversations.reduce((acc, conv) => {
+        const otherUserId = user?.id === conv.coach_id ? conv.customer_id : conv.coach_id;
+        const existing = acc.find(c => {
+          const existingOtherUserId = user?.id === c.coach_id ? c.customer_id : c.coach_id;
+          return existingOtherUserId === otherUserId;
+        });
+
+        if (!existing) {
+          acc.push(conv);
+        } else {
+          // Merge with existing conversation - keep the one with the most recent activity
+          const existingLastMessage = existing.last_message?.created_at || existing.updated_at;
+          const currentLastMessage = conv.last_message?.created_at || conv.updated_at;
+          
+          if (new Date(currentLastMessage) > new Date(existingLastMessage)) {
+            // Replace with more recent conversation
+            const index = acc.findIndex(c => {
+              const existingOtherUserId = user?.id === c.coach_id ? c.customer_id : c.coach_id;
+              return existingOtherUserId === otherUserId;
+            });
+            acc[index] = conv;
+          }
+        }
+        return acc;
+      }, [] as typeof processedConversations);
+
+      console.log('[useConversations] Merged conversations by participant:', {
+        before: processedConversations.length,
+        after: mergedConversations.length
+      });
+
+      // DEBUG: Log simplified view for UI
+      console.table(processedConversations.map(c => ({
+        id: c.id,
+        coach_id: c.coach_id,
+        coach_name: c.coach?.full_name,
+        coach_email: c.coach?.email,
+        customer_id: c.customer_id,
+        customer_name: c.customer?.full_name,
+        customer_email: c.customer?.email,
+        last_message: c.last_message?.content,
+      })));
+
+      setConversations(mergedConversations);
     } catch (err) {
       console.error('Error fetching conversations:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch conversations');
@@ -76,8 +214,8 @@ export const useConversations = () => {
         })
         .select(`
           *,
-          coach:profiles!conversations_coach_id_fkey(id, full_name, avatar_url),
-          customer:profiles!conversations_customer_id_fkey(id, full_name, avatar_url)
+          coach:profiles!conversations_coach_id_fkey(id, full_name, avatar_url, email),
+          customer:profiles!conversations_customer_id_fkey(id, full_name, avatar_url, email)
         `)
         .single();
 
@@ -98,8 +236,8 @@ export const useConversations = () => {
         .from('conversations')
         .select(`
           *,
-          coach:profiles!conversations_coach_id_fkey(id, full_name, avatar_url),
-          customer:profiles!conversations_customer_id_fkey(id, full_name, avatar_url)
+          coach:profiles!conversations_coach_id_fkey(id, full_name, avatar_url, email),
+          customer:profiles!conversations_customer_id_fkey(id, full_name, avatar_url, email)
         `)
         .eq('coach_id', coachId)
         .eq('customer_id', customerId)

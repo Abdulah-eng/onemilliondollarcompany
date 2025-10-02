@@ -421,6 +421,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_customer_pii: {
+        Args: { customer_user_id: string }
+        Returns: boolean
+      }
       can_view_coach_public_profile: {
         Args: { coach_id: string; viewer_id: string }
         Returns: boolean
@@ -428,6 +432,19 @@ export type Database = {
       current_user_is_coach: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      get_customer_safe_fields: {
+        Args: { customer_user_id: string }
+        Returns: {
+          avatar_url: string
+          created_at: string
+          full_name: string
+          id: string
+          onboarding_complete: boolean
+          plan: string
+          plan_expiry: string
+          role: string
+        }[]
       }
       get_primary_user_role: {
         Args: { _user_id: string }

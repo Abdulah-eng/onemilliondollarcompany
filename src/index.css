@@ -1,11 +1,11 @@
-/* ✅ 1. Import the "Figtree" font for a modern, clean look */
-@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap');
+/* ✅ 1. Figtree font is loaded in index.html for optimal performance */
+
+/* Import external CSS before Tailwind to avoid build errors */
+@import 'react-circular-progressbar/dist/styles.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import 'react-circular-progressbar/dist/styles.css';
 
 @layer base {
   /* ==========================================================================
@@ -132,5 +132,23 @@
 
   input[type="number"].no-spinner {
     -moz-appearance: textfield;
+  }
+
+  /* Responsive scrollbar hiding for iPad and below */
+  @media (max-width: 1024px) {
+    .scrollbar-hide-tablet {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .scrollbar-hide-tablet::-webkit-scrollbar {
+      display: none;
+    }
+    .custom-scrollbar {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
   }
 }

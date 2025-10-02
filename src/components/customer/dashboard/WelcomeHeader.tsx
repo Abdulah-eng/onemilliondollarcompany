@@ -1,21 +1,26 @@
 // src/components/customer/dashboard/WelcomeHeader.tsx
 import { Card, CardContent } from '@/components/ui/card';
 import { Flame } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 /*
-TODO: Backend Integration Notes
-- `userName`: Fetch from `profiles.full_name`.
-- `quote`: Fetch a random quote from a `motivational_quotes` table.
-- `streak`: Calculate from `activity_logs`.
+Notes:
+- Name is sourced from `profiles.full_name` via AuthContext; falls back to email username.
+- Quote and streak remain mocked here until those data sources are implemented.
 */
 const mockData = {
-  userName: 'Alex',
   quote: "The secret of getting ahead is getting started.",
   streak: 7,
 };
 
 const WelcomeHeader = () => {
-  const { userName, quote, streak } = mockData;
+  const { profile, user } = useAuth();
+  const { quote, streak } = mockData;
+  const displayName = (() => {
+    if (profile?.full_name && profile.full_name.trim().length > 0) return profile.full_name;
+    const email = user?.email || '';
+    return email.includes('@') ? email.split('@')[0] : 'User';
+  })();
   const timeOfDay = new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening';
 
   return (
@@ -23,7 +28,7 @@ const WelcomeHeader = () => {
       <CardContent className="p-6">
         {/* FIX: The text content is now wrapped in a div with padding on the right */}
         <div className="pr-28"> {/* This padding prevents overlap with the badge */}
-          <h1 className="text-2xl font-bold">Good {timeOfDay}, {userName} 👋</h1>
+          <h1 className="text-2xl font-bold">Good {timeOfDay}, {displayName} 👋</h1>
           <p className="opacity-80 mt-1 text-sm italic">"{quote}"</p>
         </div>
         
