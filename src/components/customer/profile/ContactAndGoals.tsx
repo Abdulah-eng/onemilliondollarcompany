@@ -1,18 +1,43 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Mail, Phone, MapPin, Calendar } from 'lucide-react';
-import { customerProfile } from '@/mockdata/profile/profileData';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useProfileUpdates } from '@/hooks/useProfileUpdates';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const ContactAndGoals = () => {
-  const { personalInfo, goals } = customerProfile;
-  const [phone, setPhone] = useState(personalInfo.phoneNumber || '');
-  const [location, setLocation] = useState(personalInfo.location || '');
-  const [goalEdits, setGoalEdits] = useState<string[]>(goals);
+  const { user } = useAuth();
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [location, setLocation] = useState('');
+  const [joinedDate, setJoinedDate] = useState('');
+  const [goalEdits, setGoalEdits] = useState<string[]>([]);
   const { updateProfile, updateOnboarding, loading } = useProfileUpdates();
+
+  useEffect(() => {
+    const run = async () => {
+      if (!user) return;
+      const { data: p } = await supabase
+        .from('profiles')
+        .select('email, phone, created_at')
+        .eq('id', user.id)
+        .single();
+      setEmail(p?.email || '');
+      setPhone((p as any)?.phone || '');
+      setJoinedDate(p?.created_at || '');
+      const { data: ob } = await supabase
+        .from('onboarding_details')
+        .select('goals, location')
+        .eq('user_id', user.id)
+        .single();
+      setGoalEdits(ob?.goals || []);
+      setLocation((ob as any)?.location || '');
+    };
+    run();
+  }, [user]);
 
   const handleSave = async () => {
     const ok = await updateProfile({ phone });
@@ -35,7 +60,7 @@ const ContactAndGoals = () => {
         <ul className="space-y-3">
           <li className="flex items-center gap-3 text-sm text-muted-foreground">
             <Mail className="w-4 h-4 shrink-0" />
-            <span>{personalInfo.email}</span>
+            <span>{email}</span>
           </li>
           <li className="flex items-center gap-3 text-sm text-muted-foreground">
             <Phone className="w-4 h-4 shrink-0" />
@@ -47,7 +72,7 @@ const ContactAndGoals = () => {
           </li>
           <li className="flex items-center gap-3 text-sm text-muted-foreground">
             <Calendar className="w-4 h-4 shrink-0" />
-            <span>{personalInfo.joinedDate}</span>
+            <span>{joinedDate ? new Date(joinedDate).toLocaleDateString() : ''}</span>
           </li>
         </ul>
       </Card>

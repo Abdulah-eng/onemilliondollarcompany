@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   LineChart,
@@ -16,6 +16,7 @@ import {
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import FitnessTrendChart from "./charts/FitnessTrendChart";
 import MentalHealthTrendChart from "./charts/MentalHealthTrendChart";
+import { supabase } from '@/integrations/supabase/client';
 
 // --- Types ---
 interface DashboardProps {
@@ -206,20 +207,50 @@ DailyTrendCard.displayName = "DailyTrendCard";
 const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
   const [selectedRange, setSelectedRange] = useState("4w");
   const [weightRange, setWeightRange] = useState("1m");
+  const [dailyCheckIns, setDailyCheckIns] = useState([]);
+  const [programEntries, setProgramEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const dailyCheckIns = client.dailyCheckIn || [];
-  const fitness = client.fitness || { adherence: 0, progression: [] };
-  const weight = client.weightTrend || [];
-  const nutrition = Array.isArray(client.nutrition)
-    ? client.nutrition
-    : client.nutrition
-    ? [client.nutrition]
-    : [];
-  const mentalHealth = Array.isArray(client.mentalHealth)
-    ? client.mentalHealth
-    : client.mentalHealth
-    ? [client.mentalHealth]
-    : [];
+  // Fetch real data from database
+  useEffect(() => {
+    const fetchClientData = async () => {
+      if (!client?.id) return;
+      
+      try {
+        setLoading(true);
+        
+        // Fetch daily check-ins
+        const { data: checkins } = await supabase
+          .from('daily_checkins')
+          .select('*')
+          .eq('user_id', client.id)
+          .order('date', { ascending: false })
+          .limit(180);
+
+        // Fetch program entries
+        const { data: entries } = await supabase
+          .from('program_entries')
+          .select('*')
+          .eq('user_id', client.id)
+          .order('date', { ascending: false })
+          .limit(180);
+
+        setDailyCheckIns(checkins || []);
+        setProgramEntries(entries || []);
+      } catch (error) {
+        console.error('Error fetching client data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClientData();
+  }, [client?.id]);
+
+  const fitness = { adherence: 0, progression: [] };
+  const weight = [];
+  const nutrition = [];
+  const mentalHealth = [];
 
   // Dummy Data Memoized
   const dummyDailyCheckIns = useMemo(() => {
@@ -371,7 +402,43 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
     []
   );
 
-  const dailyData = dailyCheckIns.length > 0 ? dailyCheckIns : dummyDailyCheckIns;
+  // Transform daily check-ins data for charts
+  const dailyData = useMemo(() => {
+    if (dailyCheckIns.length > 0) {
+      return dailyCheckIns.map(checkin => ({
+        date: checkin.date,
+        water: checkin.water_liters || 0,
+        sleep: checkin.sleep_hours || 0,
+        mood: checkin.mood || 0,
+        energy: checkin.energy || 0,
+        stress: 0, // Not in daily_checkins table
+        anxiety: 0, // Not in daily_checkins table
+      }));
+    }
+    return dummyDailyCheckIns;
+  }, [dailyCheckIns]);
+
+  // Transform program entries for nutrition data
+  const nutritionData = useMemo(() => {
+    if (programEntries.length > 0) {
+      return programEntries.map(entry => ({
+        date: new Date(entry.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        protein: entry.protein || 0,
+        carbs: entry.carbs || 0,
+        fat: entry.fat || 0,
+        calories: entry.calories || 0,
+      }));
+    }
+    return dummyNutrition;
+  }, [programEntries]);
+
+  if (loading) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Loading progress data...
+      </div>
+    );
+  }
 
   return (
     <>
@@ -454,7 +521,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
           <h3 className="text-lg font-semibold text-foreground mb-4">Nutrition Overview</h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dummyNutrition.slice(-7)}>
+              <BarChart data={nutritionData.slice(-7)}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="date" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
                 <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />

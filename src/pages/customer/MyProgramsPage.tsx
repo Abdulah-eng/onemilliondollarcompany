@@ -4,23 +4,20 @@ import { TaskCard } from "@/components/customer/programsoverview/TaskCard";
 import HorizontalCalendar from "@/components/customer/programsoverview/HorizontalCalendar";
 import SlideInDetail from "@/components/customer/programsoverview/SlideInDetail";
 import { ScheduledProgramCard } from "@/components/customer/programsoverview/ScheduledProgramCard";
-import {
-  mockPrograms,
-  generateDailySchedule,
-  ScheduledTask,
-  Program, // Import Program type
-} from "@/mockdata/programs/mockprograms";
+import { useCustomerPrograms } from "@/hooks/useCustomerPrograms";
 import { isSameDay, parseISO, addDays } from "date-fns";
 
 type TabType = "active" | "scheduled";
 
 export default function MyProgramsPage() {
   const [tab, setTab] = useState<TabType>("active");
-  const [selectedTask, setSelectedTask] = useState<ScheduledTask | null>(null);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isMobile, setIsMobile] = useState<boolean>(
     typeof window !== "undefined" ? window.innerWidth < 1024 : false
   );
+
+  const { activeProgram, scheduledPrograms, loading } = useCustomerPrograms();
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
@@ -28,28 +25,40 @@ export default function MyProgramsPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const dailySchedule = useMemo(() => generateDailySchedule(mockPrograms), []);
-
-  const activeProgram = useMemo(
-    () => mockPrograms.find((p) => p.status === "active"),
-    []
-  );
-
-  // ✅ Filter for scheduled programs
-  const scheduledPrograms = useMemo(
-    () => mockPrograms.filter((p) => p.status === "scheduled"),
-    []
-  );
+  // Generate daily schedule from active program
+  const dailySchedule = useMemo(() => {
+    if (!activeProgram?.plan?.schedule) return [];
+    
+    const schedule = activeProgram.plan.schedule;
+    const startDate = activeProgram.scheduled_date ? parseISO(activeProgram.scheduled_date) : new Date();
+    
+    return schedule.map((day: any, index: number) => {
+      const date = addDays(startDate, index);
+      return {
+        id: `${activeProgram.id}-${index}`,
+        date,
+        title: day.workout || day.nutrition || day.mindfulness || 'Daily Task',
+        programTitle: activeProgram.name,
+        programId: activeProgram.id,
+        type: activeProgram.category === 'fitness' ? 'fitness' : 
+              activeProgram.category === 'nutrition' ? 'nutrition' : 'mental',
+        weekNumber: Math.floor(index / 7) + 1,
+        status: 'pending' as const,
+        content: [day.workout, day.nutrition, day.mindfulness].filter(Boolean),
+        progress: 0
+      };
+    });
+  }, [activeProgram]);
 
   const programStartDate = useMemo(
-    () => (activeProgram?.startDate ? parseISO(activeProgram.startDate) : undefined),
+    () => (activeProgram?.scheduled_date ? parseISO(activeProgram.scheduled_date) : undefined),
     [activeProgram]
   );
 
   const programEndDate = useMemo(
     () =>
-      programStartDate && activeProgram?.weeks
-        ? addDays(programStartDate, activeProgram.weeks.length * 7 - 1)
+      programStartDate && activeProgram?.plan?.weeks
+        ? addDays(programStartDate, activeProgram.plan.weeks * 7 - 1)
         : undefined,
     [programStartDate, activeProgram]
   );
@@ -59,21 +68,33 @@ export default function MyProgramsPage() {
   );
   
   // ✅ Handler to create a preview "task" from a scheduled program
-  const handleScheduledProgramClick = (program: Program) => {
-    const mockTask: ScheduledTask = {
+  const handleScheduledProgramClick = (program: any) => {
+    const task = {
       id: program.id,
-      date: parseISO(program.startDate!),
-      title: program.title,
-      programTitle: program.title,
+      date: program.scheduled_date ? parseISO(program.scheduled_date) : new Date(),
+      title: program.name,
+      programTitle: program.name,
       programId: program.id,
-      type: program.type,
+      type: program.category === 'fitness' ? 'fitness' : 
+            program.category === 'nutrition' ? 'nutrition' : 'mental',
       weekNumber: 1, // Placeholder
-      status: "pending",
-      content: ["Program preview..."], // Placeholder
+      status: "pending" as const,
+      content: [program.description], // Placeholder
       progress: 0,
     };
-    setSelectedTask(mockTask);
+    setSelectedTask(task);
   };
+
+  if (loading) {
+    return (
+      <div className="w-full max-w-5xl mx-auto px-4 py-8 space-y-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold tracking-tight">Loading Programs...</h1>
+          <p className="text-muted-foreground">Please wait while we load your programs.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-8 space-y-8">

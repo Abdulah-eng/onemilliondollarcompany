@@ -1,12 +1,15 @@
 // src/components/customer/mycoach/CurrentCoachTab.tsx
+import { useState, useEffect } from 'react';
 import ModernCoachDashboard from './ModernCoachDashboard';
 import EnhancedCoachUpdates from './EnhancedCoachUpdates';
 import UnifiedSharedFiles from './UnifiedSharedFiles';
 import RequestFeedbackFab from './RequestFeedbackFab';
 import { Button } from '@/components/ui/button';
-import { File } from 'lucide-react';
+import { File, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CurrentCoachTabProps {
     isMobile: boolean;
@@ -16,6 +19,73 @@ interface CurrentCoachTabProps {
 }
 
 const CurrentCoachTab: React.FC<CurrentCoachTabProps> = ({ isMobile, onViewBio, onRequestFeedback, onViewSharedFiles }) => {
+    const { profile } = useAuth();
+    const [coach, setCoach] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCoachData = async () => {
+            if (!profile?.coach_id) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                setLoading(true);
+                
+                // Fetch coach profile data
+                const { data: coachData, error } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, bio, avatar_url, skills, certifications, socials')
+                    .eq('id', profile.coach_id)
+                    .eq('role', 'coach')
+                    .single();
+
+                if (error) {
+                    console.error('Error fetching coach data:', error);
+                    return;
+                }
+
+                setCoach({
+                    id: coachData.id,
+                    name: coachData.full_name || 'Your Coach',
+                    bio: coachData.bio || 'Dedicated to helping you achieve your health and fitness goals.',
+                    specialties: coachData.skills || ['Fitness', 'Nutrition'],
+                    profileImageUrl: coachData.avatar_url || '',
+                    skills: coachData.skills || [],
+                    certifications: coachData.certifications || [],
+                    socials: coachData.socials || [],
+                });
+            } catch (error) {
+                console.error('Error fetching coach data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCoachData();
+    }, [profile?.coach_id]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                    <p className="text-muted-foreground">Loading your coach information...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!coach) {
+        return (
+            <div className="text-center py-12">
+                <h3 className="text-xl font-semibold mb-2">No Coach Assigned</h3>
+                <p className="text-muted-foreground">You don't have a coach assigned yet.</p>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-8">
             {/* Mobile View: Files button is placed here */}
@@ -39,12 +109,7 @@ const CurrentCoachTab: React.FC<CurrentCoachTabProps> = ({ isMobile, onViewBio, 
                 {/* Main Content Column */}
                 <div className="lg:col-span-2 space-y-8">
                     <ModernCoachDashboard 
-                        coach={{
-                            name: 'Your Coach',
-                            bio: 'Dedicated to helping you achieve your health and fitness goals.',
-                            specialties: ['Fitness', 'Nutrition'],
-                            profileImageUrl: '',
-                        }}
+                        coach={coach}
                         isMobile={isMobile}
                         onViewBio={onViewBio}
                         onRequestFeedback={onRequestFeedback}

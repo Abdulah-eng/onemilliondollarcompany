@@ -72,14 +72,18 @@ export default function HeroProgressSnapshot({
 
   // UPDATED: Chart data logic now aggregates for 30-day view
   const chartData = useMemo(() => {
-    if (!selectedGoal) return [];
-    
-    const dataKeyMap = { IMPROVE_SLEEP: 'sleepHours', BUILD_MUSCLE: 'protein', IMPROVE_NUTRITION: 'protein' };
+    if (!selectedGoal) return [] as Array<{ date: string; value: number }>;
+
+    // Align keys with live data structure
+    const dataKeyMap = { IMPROVE_SLEEP: 'sleep_hours', BUILD_MUSCLE: 'protein', IMPROVE_NUTRITION: 'protein' } as const;
     const dataKey = dataKeyMap[selectedGoal.type as keyof typeof dataKeyMap];
-    
-    const sourceDataMap = { IMPROVE_SLEEP: dailyCheckins, BUILD_MUSCLE: nutrition.macros, IMPROVE_NUTRITION: nutrition.macros };
-    const sourceData = sourceDataMap[selectedGoal.type as keyof typeof sourceDataMap];
-    
+
+    const safeDaily = Array.isArray(dailyCheckins) ? dailyCheckins : [];
+    const safeMacros = Array.isArray(nutrition?.macros) ? nutrition.macros : [];
+
+    const sourceDataMap = { IMPROVE_SLEEP: safeDaily, BUILD_MUSCLE: safeMacros, IMPROVE_NUTRITION: safeMacros } as const;
+    const sourceData = sourceDataMap[selectedGoal.type as keyof typeof sourceDataMap] || [];
+
     const slicedData = sourceData.slice(-timeRange);
 
     // Aggregate data into weekly averages for the 30-day view
@@ -99,11 +103,11 @@ export default function HeroProgressSnapshot({
     }
 
     // Return daily data for 7 and 14-day views
-    return slicedData.map(d => ({
+    return slicedData.map((d: any) => ({
       date: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      value: d[dataKey as keyof typeof d] as number,
+      value: Number(d?.[dataKey] ?? 0),
     }));
-  }, [selectedGoal, timeRange, dailyCheckins, nutrition.macros]);
+  }, [selectedGoal, timeRange, dailyCheckins, nutrition?.macros]);
 
   const mainMetric = useMemo(() => {
     if (!chartData || chartData.length === 0) return { value: 'N/A', unit: '' };

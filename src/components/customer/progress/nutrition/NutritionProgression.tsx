@@ -112,8 +112,9 @@ const EnhancedNutritionTooltip = ({ active, payload, label }: TooltipProps<numbe
 
 export default function NutritionProgression({ data }: { data: ProgressData['nutrition'] }) {
     const [activeTrend, setActiveTrend] = useState('7D');
-    const todayData = data.macros[data.macros.length - 1];
-    const totalCaloriesToday = Math.round(todayData.protein * 4 + todayData.carbs * 4 + todayData.fat * 9);
+    const safeMacros = Array.isArray(data?.macros) ? data.macros : [];
+    const todayData = safeMacros[safeMacros.length - 1] || { protein: 0, carbs: 0, fat: 0 } as any;
+    const totalCaloriesToday = Math.round((todayData.protein || 0) * 4 + (todayData.carbs || 0) * 4 + (todayData.fat || 0) * 9);
 
     const trendData = DUMMY_TREND_DATA[activeTrend as keyof typeof DUMMY_TREND_DATA];
     
@@ -124,8 +125,9 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
     const avgCaloriesConsumed = Math.round(trendData.reduce((sum, d) => sum + d.consumed, 0) / trendData.length);
     const avgCaloriesBurned = Math.round(trendData.reduce((sum, d) => sum + d.burned, 0) / trendData.length);
 
-    const caloriePercentage = Math.min(100, (totalCaloriesToday / data.recommended.kcal) * 100);
-    const fatPercentage = Math.min(100, (todayData.fat / data.recommended.fat) * 100);
+    const recommended = (data as any)?.recommended || { kcal: 2000, protein: 120, fat: 70, carbs: 250 };
+    const caloriePercentage = Math.min(100, (totalCaloriesToday / recommended.kcal) * 100);
+    const fatPercentage = Math.min(100, ((todayData.fat || 0) / recommended.fat) * 100);
 
     return (
         <motion.div
@@ -199,7 +201,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     <div className="absolute flex flex-col items-center top-6">
                         <span role="img" aria-label="calories" className="text-2xl mb-1">🔥</span>
                         <span className="text-2xl font-bold text-gray-800">{totalCaloriesToday}</span>
-                        <span className="text-sm text-gray-500">of {data.recommended.kcal} kcal</span>
+                        <span className="text-sm text-gray-500">of {recommended.kcal} kcal</span>
                     </div>
                 </div>
 
@@ -213,12 +215,12 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                 className="h-full rounded-full"
                                 style={{ backgroundColor: MACRO_COLORS.protein }}
                                 initial={{ width: 0 }}
-                                animate={{ width: `${Math.min(100, (todayData.protein / data.recommended.protein) * 100)}%` }}
+                                animate={{ width: `${Math.min(100, ((todayData.protein || 0) / recommended.protein) * 100)}%` }}
                                 transition={{ duration: 0.8, delay: 0.2 }}
                             />
                         </div>
                         <div className="text-xs text-gray-500">
-                            {todayData.protein} / {data.recommended.protein} g
+                            {todayData.protein || 0} / {recommended.protein} g
                         </div>
                     </div>
 
@@ -231,12 +233,12 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                 className="h-full rounded-full"
                                 style={{ backgroundColor: MACRO_COLORS.fat }}
                                 initial={{ width: 0 }}
-                                animate={{ width: `${Math.min(100, (todayData.fat / data.recommended.fat) * 100)}%` }}
+                                animate={{ width: `${Math.min(100, ((todayData.fat || 0) / recommended.fat) * 100)}%` }}
                                 transition={{ duration: 0.8, delay: 0.4 }}
                             />
                         </div>
                         <div className="text-xs text-gray-500">
-                            {todayData.fat} / {data.recommended.fat} g
+                            {todayData.fat || 0} / {recommended.fat} g
                         </div>
                     </div>
 
@@ -249,12 +251,12 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                 className="h-full rounded-full"
                                 style={{ backgroundColor: MACRO_COLORS.carbs }}
                                 initial={{ width: 0 }}
-                                animate={{ width: `${Math.min(100, (todayData.carbs / data.recommended.carbs) * 100)}%` }}
+                                animate={{ width: `${Math.min(100, ((todayData.carbs || 0) / recommended.carbs) * 100)}%` }}
                                 transition={{ duration: 0.8, delay: 0.6 }}
                             />
                         </div>
                         <div className="text-xs text-gray-500">
-                            {todayData.carbs} / {data.recommended.carbs} g
+                            {todayData.carbs || 0} / {recommended.carbs} g
                         </div>
                     </div>
                 </div>

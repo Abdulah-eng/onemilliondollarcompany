@@ -20,26 +20,7 @@ import {
 } from 'lucide-react';
 
 interface ClientProfileTabProps {
-  client: {
-    name: string;
-    age: number;
-    height: number;
-    weight: number;
-    goals: string[];
-    plan: string;
-    daysRemaining: number;
-    programs: Program[]; // Updated client type to include programs
-    trends?: {
-      moodValue: number;
-      moodChange: number;
-      sleepValue: number;
-      sleepChange: number;
-      energyValue: number;
-      energyChange: number;
-      waterValue: number;
-      waterChange: number;
-    };
-  };
+  client: any | null;
 }
 
 // ✅ New type definition for Program
@@ -52,17 +33,14 @@ interface Program {
 
 const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
   const handleCopyInfo = () => {
-    const info = `Client: ${client.name}\nAge: 28\nHeight: 180cm\nWeight: 72kg\nGoals: Build muscle, Lose fat`;
+    const info = `Client: ${client?.full_name || client?.name || 'Customer'}\nAge: 28\nHeight: 180cm\nWeight: 72kg\nGoals: Build muscle, Lose fat`;
     navigator.clipboard.writeText(info);
   };
 
-  // ✅ Mock programs data for demonstration
-  const programs: Program[] = [
-    { id: '1', name: '30-Day Strength Builder', status: 'active' },
-    { id: '2', name: 'Beginner Yoga Flow', status: 'active' },
-    { id: '3', name: 'Summer Shred Program', status: 'scheduled', startDate: '2025-10-01' },
-    { id: '4', name: 'Marathon Training Plan', status: 'scheduled', startDate: '2025-11-15' },
-  ];
+  // Fetch programs assigned to this client from DB when available
+  const programs: Program[] = Array.isArray((client as any)?.programs)
+    ? (client as any).programs
+    : [];
 
   const activePrograms = programs.filter(p => p.status === 'active');
   const scheduledPrograms = programs.filter(p => p.status === 'scheduled');
@@ -140,13 +118,13 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <InfoItem icon={User} label="Name" value={client.name} />
-            <InfoItem icon={Calendar} label="Age" value="28 years old" />
-            <InfoItem icon={Heart} label="Gender" value="Male" />
-            <InfoItem icon={Ruler} label="Height" value="180 cm" />
-            <InfoItem icon={Weight} label="Weight" value="72 kg" />
-            <InfoItem icon={Phone} label="Phone" value="+47 12345678" />
-            <InfoItem icon={Mail} label="Email" value="john@example.com" />
+            <InfoItem icon={User} label="Name" value={client?.full_name || client?.name || '—'} />
+            <InfoItem icon={Calendar} label="Age" value={client?.personalInfo?.age ? `${client.personalInfo.age} years old` : 'Not provided'} />
+            <InfoItem icon={Heart} label="Gender" value={client?.personalInfo?.gender || 'Not provided'} />
+            <InfoItem icon={Ruler} label="Height" value={client?.personalInfo?.height || 'Not provided'} />
+            <InfoItem icon={Weight} label="Weight" value={client?.personalInfo?.weight || 'Not provided'} />
+            <InfoItem icon={Phone} label="Phone" value={client?.phone || 'Not provided'} />
+            <InfoItem icon={Mail} label="Email" value={client?.email || 'Not provided'} />
             {/* Premium Plan Info */}
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -154,7 +132,7 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
                 Membership
               </div>
               <Badge className="rounded-full px-3 py-1 text-xs bg-yellow-100 text-yellow-700 border-yellow-200">
-                {client.plan || 'Premium'} • {client.daysRemaining || 28} days left
+                {(client?.plan || 'Premium')} • {28} days left
               </Badge>
             </div>
           </div>
@@ -173,31 +151,41 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
           <div>
             <h4 className="text-sm font-medium text-muted-foreground mb-2">Primary Goals</h4>
             <div className="flex flex-wrap gap-2">
-              <Badge className="rounded-full px-3 py-1 text-xs bg-blue-100 text-blue-700 border-blue-200">
-                Build muscle
-              </Badge>
-              <Badge className="rounded-full px-3 py-1 text-xs bg-blue-100 text-blue-700 border-blue-200">
-                Lose fat
-              </Badge>
-              <Badge className="rounded-full px-3 py-1 text-xs bg-blue-100 text-blue-700 border-blue-200">
-                Improve endurance
-              </Badge>
+              {client?.goals && client.goals.length > 0 ? (
+                client.goals.map((goal: string, index: number) => (
+                  <Badge key={index} className="rounded-full px-3 py-1 text-xs bg-blue-100 text-blue-700 border-blue-200">
+                    {goal}
+                  </Badge>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No goals specified</p>
+              )}
             </div>
           </div>
 
           <div>
-            <h4 className="text-sm font-medium text-muted-foreground mb-2">Preferences</h4>
-            <p className="text-sm">Low-carb diet, Morning workouts, Strength training focus</p>
+            <h4 className="text-sm font-medium text-muted-foreground mb-2">Training Preferences</h4>
+            <p className="text-sm">
+              {client?.preferences?.likes && client.preferences.likes.length > 0 
+                ? client.preferences.likes.join(', ')
+                : 'No preferences specified'
+              }
+            </p>
           </div>
 
           <div>
-            <h4 className="text-sm font-medium text-muted-foreground mb-2">Dislikes</h4>
-            <p className="text-sm">Sugar, Late-night snacks, Cardio-only sessions</p>
+            <h4 className="text-sm font-medium text-muted-foreground mb-2">Training Dislikes</h4>
+            <p className="text-sm">
+              {client?.preferences?.dislikes && client.preferences.dislikes.length > 0 
+                ? client.preferences.dislikes.join(', ')
+                : 'No dislikes specified'
+              }
+            </p>
           </div>
 
           <div>
             <h4 className="text-sm font-medium text-muted-foreground mb-2">Meditation Experience</h4>
-            <p className="text-sm">2 years of daily practice</p>
+            <p className="text-sm">{client?.preferences?.meditationExperience || 'Not specified'}</p>
           </div>
         </CardContent>
       </Card>
@@ -214,21 +202,30 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
           <div>
             <h4 className="text-sm font-medium text-muted-foreground mb-2">Allergies</h4>
             <div className="flex flex-wrap gap-2">
-              <Badge className="rounded-full px-3 py-1 text-xs bg-amber-100 text-amber-700 border-amber-200">
-                Peanuts
-              </Badge>
-              <Badge className="rounded-full px-3 py-1 text-xs bg-amber-100 text-amber-700 border-amber-200">
-                Gluten
-              </Badge>
+              {client?.preferences?.allergies && client.preferences.allergies.length > 0 ? (
+                client.preferences.allergies.map((allergy: string, index: number) => (
+                  <Badge key={index} className="rounded-full px-3 py-1 text-xs bg-amber-100 text-amber-700 border-amber-200">
+                    {allergy}
+                  </Badge>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No allergies specified</p>
+              )}
             </div>
           </div>
 
           <div>
             <h4 className="text-sm font-medium text-muted-foreground mb-2">Past Injuries</h4>
             <div className="flex flex-wrap gap-2">
-              <Badge className="rounded-full px-3 py-1 text-xs bg-rose-100 text-rose-700 border-rose-200">
-                Knee injury (2022)
-              </Badge>
+              {client?.preferences?.injuries && client.preferences.injuries.length > 0 ? (
+                client.preferences.injuries.map((injury: string, index: number) => (
+                  <Badge key={index} className="rounded-full px-3 py-1 text-xs bg-rose-100 text-rose-700 border-rose-200">
+                    {injury}
+                  </Badge>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No injuries specified</p>
+              )}
             </div>
           </div>
         </CardContent>

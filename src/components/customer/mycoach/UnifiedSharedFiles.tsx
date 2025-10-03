@@ -1,12 +1,14 @@
 // src/components/customer/mycoach/UnifiedSharedFiles.tsx
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Download, File, FileText, Image, Video, Music, Archive, Eye, FolderOpen } from 'lucide-react';
-import { sharedFiles } from '@/mockdata/mycoach/coachData'; // Assuming this mock data structure
+import { Download, File, FileText, Image, Video, Music, Archive, Eye, FolderOpen, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import useMediaQuery from '@/hooks/use-media-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Helper functions (Unchanged)
 const getFileIcon = (fileName: string) => {
@@ -66,8 +68,17 @@ const getFileTypeColor = (fileName: string) => {
     }
 };
 
+interface SharedFile {
+    id: string;
+    name: string;
+    description: string;
+    date: string;
+    file_url?: string;
+    file_type?: string;
+}
+
 interface FileItemProps {
-    file: (typeof sharedFiles)[0];
+    file: SharedFile;
     index: number;
 }
 
@@ -129,8 +140,8 @@ interface FileListProps {
     isDrawer?: boolean;
 }
 
-const FileList: React.FC<FileListProps> = ({ isDrawer = false }) => {
-    if (sharedFiles.length === 0) {
+const FileList: React.FC<FileListProps & { files: SharedFile[] }> = ({ isDrawer = false, files }) => {
+    if (files.length === 0) {
         return (
             <Card className="shadow-lg border-0 rounded-2xl">
                 <CardContent className="flex flex-col items-center justify-center p-12 text-center">
@@ -148,7 +159,7 @@ const FileList: React.FC<FileListProps> = ({ isDrawer = false }) => {
 
     return (
         <div className="space-y-3">
-            {sharedFiles.map((file, index) => (
+            {files.map((file, index) => (
                 <FileItem key={file.id} file={file} index={index} />
             ))}
         </div>
@@ -161,9 +172,58 @@ interface UnifiedSharedFilesProps {
 }
 
 const UnifiedSharedFiles: React.FC<UnifiedSharedFilesProps> = ({ className, onViewAll }) => {
+    const { profile } = useAuth();
     const isMobile = useMediaQuery('(max-width: 768px)');
+    const [sharedFiles, setSharedFiles] = useState<SharedFile[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchSharedFiles = async () => {
+            if (!profile?.coach_id) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                setLoading(true);
+                
+                // For now, we'll use a placeholder since we don't have a shared_files table yet
+                // In a real implementation, you would fetch from a shared_files table
+                // const { data } = await supabase
+                //     .from('shared_files')
+                //     .select('*')
+                //     .eq('coach_id', profile.coach_id)
+                //     .eq('customer_id', profile.id)
+                //     .order('created_at', { ascending: false });
+
+                // For now, return empty array to show "no files" state
+                setSharedFiles([]);
+            } catch (error) {
+                console.error('Error fetching shared files:', error);
+                setSharedFiles([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSharedFiles();
+    }, [profile?.coach_id]);
+
     // Limit files shown in the desktop widget view (3)
     const filesToShow = isMobile ? sharedFiles.length : 3;
+
+    if (loading) {
+        return (
+            <Card className={cn("shadow-xl border-0 rounded-2xl animate-fade-in", className)}>
+                <CardContent className="flex items-center justify-center p-12">
+                    <div className="text-center">
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                        <p className="text-muted-foreground">Loading shared files...</p>
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
 
     return (
         <Card className={cn("shadow-xl border-0 rounded-2xl animate-fade-in", className)}>
@@ -193,11 +253,7 @@ const UnifiedSharedFiles: React.FC<UnifiedSharedFilesProps> = ({ className, onVi
                 </div>
             </CardHeader>
             <CardContent className="px-6 pb-6">
-                <div className="space-y-3">
-                    {sharedFiles.slice(0, filesToShow).map((file, index) => (
-                        <FileItem key={file.id} file={file} index={index} />
-                    ))}
-                </div>
+                <FileList files={sharedFiles.slice(0, filesToShow)} />
             </CardContent>
         </Card>
     );
@@ -205,6 +261,46 @@ const UnifiedSharedFiles: React.FC<UnifiedSharedFilesProps> = ({ className, onVi
 
 // Drawer Content Component for mobile (Uses the un-truncated FileList)
 export const SharedFilesDrawerContent = () => {
+    const { profile } = useAuth();
+    const [sharedFiles, setSharedFiles] = useState<SharedFile[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchSharedFiles = async () => {
+            if (!profile?.coach_id) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                setLoading(true);
+                
+                // For now, return empty array to show "no files" state
+                setSharedFiles([]);
+            } catch (error) {
+                console.error('Error fetching shared files:', error);
+                setSharedFiles([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSharedFiles();
+    }, [profile?.coach_id]);
+
+    if (loading) {
+        return (
+            <div className="h-full overflow-y-auto p-6 space-y-6">
+                <div className="flex items-center justify-center h-32">
+                    <div className="text-center">
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                        <p className="text-muted-foreground">Loading shared files...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="h-full overflow-y-auto p-6 space-y-6">
             <div className="flex items-center gap-3 mb-4">
@@ -219,7 +315,7 @@ export const SharedFilesDrawerContent = () => {
                 </div>
             </div>
             <Separator />
-            <FileList isDrawer={true} />
+            <FileList isDrawer={true} files={sharedFiles} />
         </div>
     );
 };

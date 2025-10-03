@@ -15,12 +15,66 @@ const ClientCard = () => {
   useEffect(() => {
     const run = async () => {
       if (!clientId) return;
-      const { data } = await supabase
+      
+      // Load client profile
+      const { data: profile } = await supabase
         .from('profiles')
-        .select('id, full_name, email, avatar_url, plan, plan_expiry, coach_id')
+        .select('id, full_name, email, avatar_url, plan, plan_expiry, coach_id, phone')
         .eq('id', clientId)
         .single();
-      setClient(data);
+
+      // Load client onboarding details (personal info, goals, preferences)
+      const { data: onboardingDetails } = await supabase
+        .from('onboarding_details')
+        .select('*')
+        .eq('user_id', clientId)
+        .single();
+
+      // Load programs assigned to client
+      const { data: programs } = await supabase
+        .from('programs')
+        .select('id, name, status, scheduled_date')
+        .eq('assigned_to', clientId)
+        .order('created_at', { ascending: false });
+
+      // Calculate age from date of birth
+      const calculateAge = (dob: string | null) => {
+        if (!dob) return null;
+        const today = new Date();
+        const birthDate = new Date(dob);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        return age;
+      };
+
+      setClient({
+        ...profile,
+        // Personal info from onboarding_details
+        personalInfo: {
+          age: calculateAge(onboardingDetails?.dob || null),
+          height: onboardingDetails?.height ? `${onboardingDetails.height} cm` : 'Not provided',
+          weight: onboardingDetails?.weight ? `${onboardingDetails.weight} kg` : 'Not provided',
+          gender: onboardingDetails?.gender || 'Not provided',
+        },
+        // Goals and preferences from onboarding_details
+        goals: onboardingDetails?.goals || [],
+        preferences: {
+          injuries: onboardingDetails?.injuries || [],
+          allergies: onboardingDetails?.allergies || [],
+          dislikes: onboardingDetails?.training_dislikes || [],
+          likes: onboardingDetails?.training_likes || [],
+          meditationExperience: onboardingDetails?.meditation_experience || 'Not specified',
+        },
+        programs: (programs || []).map(p => ({
+          id: p.id,
+          name: p.name,
+          status: p.status as any,
+          startDate: p.scheduled_date || undefined,
+        })),
+      });
     };
     run();
   }, [clientId]);

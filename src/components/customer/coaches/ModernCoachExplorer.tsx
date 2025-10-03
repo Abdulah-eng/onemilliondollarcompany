@@ -1,9 +1,9 @@
 // src/components/customer/coaches/ModernCoachExplorer.tsx
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CircleUserRound, Zap, MessageSquare, Star, Send, Search, Filter, History, Loader2, Clock, Eye, Bot } from 'lucide-react';
-import { generateAIPersonalPlan } from '@/lib/ai/plan';
+import { useAIPlanGeneration } from '@/hooks/useAIPlanGeneration';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { useEnhancedCoaches, EnhancedCoach } from '@/hooks/useEnhancedCoaches';
 import { CoachDetailModal } from './CoachDetailModal';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Define the available filter options
 type FilterOption = 'All' | 'Fitness' | 'Nutrition' | 'Mental Health';
@@ -31,30 +32,29 @@ interface CoachCardProps {
 
 const ModernCoachCard: React.FC<CoachCardProps> = ({ coach, onRequest, onViewDetails, index, requestStatus, isRequestLoading }) => (
     <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        // Prevent repeated mount animations that can cause jitter when parent re-renders
+        initial={false}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.05 }}
+        transition={{ duration: 0.2 }}
         className="group"
     >
-        <Card className="shadow-lg border-0 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 z-0" />
+        <Card className="shadow-lg border-0 rounded-2xl overflow-hidden transition-shadow duration-200 hover:shadow-xl">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 z-0" />
             <CardContent className="relative p-6 z-10">
                 <div className="flex flex-col sm:flex-row items-start gap-4">
                     <div className="relative flex-shrink-0">
-                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center ring-2 ring-primary/10 group-hover:ring-primary/20 transition-all shadow-md">
+                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center ring-2 ring-primary/10 shadow-md">
                             {coach.profileImageUrl ? (
                                 <img
                                     src={coach.profileImageUrl}
                                     alt={coach.name}
-                                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                                    className="object-cover w-full h-full"
                                 />
                             ) : (
                                 <CircleUserRound className="w-8 h-8 text-primary/70" />
                             )}
                         </div>
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-background flex items-center justify-center">
-                            <div className="absolute inset-0 rounded-full bg-green-500 animate-pulse opacity-75" />
-                        </div>
+                        <div className="pointer-events-none absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-background" />
                     </div>
                     
                     <div className="flex-1 min-w-0">
@@ -164,7 +164,9 @@ interface ModernCoachExplorerProps {
 }
 
 const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachRequestSent }) => {
+    const { user } = useAuth();
     const { coaches, loading, sendRequest, getRequestStatus } = useEnhancedCoaches();
+    const { generateAndSavePlan, loading: aiLoading } = useAIPlanGeneration();
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [selectedCoach, setSelectedCoach] = useState<EnhancedCoach | null>(null);
@@ -208,16 +210,17 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
         return 'Fitness'; // Default
     };
 
-    const filteredCoaches = coaches.filter(coach => {
-        const matchesSearch = coach.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             coach.bio.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             coach.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
-        
-        const matchesFilter = activeFilter === 'All' || 
-                             coach.skills.some(skill => mapSkillToCategory(skill) === activeFilter);
-        
-        return matchesSearch && matchesFilter;
-    });
+    const filteredCoaches = useMemo(() => {
+        const term = searchTerm.toLowerCase();
+        return coaches.filter(coach => {
+            const matchesSearch = coach.name.toLowerCase().includes(term) ||
+                                 coach.bio.toLowerCase().includes(term) ||
+                                 coach.skills.some(skill => skill.toLowerCase().includes(term));
+            const matchesFilter = activeFilter === 'All' ||
+                                 coach.skills.some(skill => mapSkillToCategory(skill) === activeFilter);
+            return matchesSearch && matchesFilter;
+        });
+    }, [coaches, searchTerm, activeFilter]);
 
     if (loading) {
         return (
@@ -229,13 +232,18 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
 
     const handleFreeAICoach = async () => {
         try {
-            // In a real flow, use current user id from auth
-            const plan = await generateAIPersonalPlan({ userId: 'me' as any });
-            toast.success('Your free AI plan has been generated!');
-            // Navigate or open modal to show plan (placeholder redirect)
+            if (!user) {
+                toast.error('Please log in to generate your AI plan.');
+                return;
+            }
+            
+            await generateAndSavePlan();
+            toast.success('Your free AI plan has been generated and saved!');
+            // Navigate to programs page to see the generated plan
             window.location.href = '/customer/programs';
-        } catch {
-            toast.error('Failed to generate AI plan.');
+        } catch (error) {
+            console.error('AI plan generation error:', error);
+            toast.error('Failed to generate AI plan. Please try again.');
         }
     };
 
@@ -251,8 +259,19 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
                         </div>
                         <p className="text-sm text-muted-foreground">Get a personalized starter plan powered by AI at no cost.</p>
                     </div>
-                    <Button onClick={handleFreeAICoach} className="bg-emerald-600 hover:bg-emerald-700">
-                        Generate Free Plan
+                    <Button 
+                        onClick={handleFreeAICoach} 
+                        disabled={aiLoading}
+                        className="bg-emerald-600 hover:bg-emerald-700"
+                    >
+                        {aiLoading ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Generating...
+                            </>
+                        ) : (
+                            'Generate Free Plan'
+                        )}
                     </Button>
                 </CardContent>
             </Card>

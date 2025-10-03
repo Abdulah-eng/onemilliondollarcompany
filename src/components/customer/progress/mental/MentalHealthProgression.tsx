@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ComposedChart, Line, Area, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import { BrainCircuit, Sun, Moon, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ProgressData } from '@/mockdata/progress/mockProgressData';
 
 // Define colors for mental health metrics
 const MENTAL_HEALTH_COLORS = {
@@ -15,28 +14,54 @@ const MENTAL_HEALTH_COLORS = {
     foreground: '#262626', // Charcoal/dark text
 };
 
-// DUMMY TREND DATA for mental health
-const DUMMY_MENTAL_HEALTH_TREND_DATA = {
-    '7D': [
-        { date: 'Dec 1', sleepHours: 7.5, stressLevel: 6, energyLevel: 7, meditationMinutes: 20, journalingCompleted: true, mood: 'good' },
-        { date: 'Dec 2', sleepHours: 6.8, stressLevel: 7, energyLevel: 6, meditationMinutes: 15, journalingCompleted: false, mood: 'neutral' },
-        { date: 'Dec 3', sleepHours: 8.0, stressLevel: 5, energyLevel: 8, meditationMinutes: 25, journalingCompleted: true, mood: 'great' },
-        { date: 'Dec 4', sleepHours: 7.0, stressLevel: 6, energyLevel: 7, meditationMinutes: 20, journalingCompleted: true, mood: 'good' },
-        { date: 'Dec 5', sleepHours: 7.2, stressLevel: 6, energyLevel: 7, meditationMinutes: 10, journalingCompleted: false, mood: 'neutral' },
-        { date: 'Dec 6', sleepHours: 6.5, stressLevel: 8, energyLevel: 5, meditationMinutes: 0, journalingCompleted: true, mood: 'bad' },
-        { date: 'Dec 7', sleepHours: 7.8, stressLevel: 5, energyLevel: 8, meditationMinutes: 30, journalingCompleted: true, mood: 'great' },
-    ],
-    '30D': [
-        { date: 'Week 1', sleepHours: 7.2, stressLevel: 6.5, energyLevel: 7.0, meditationMinutes: 100, journalingCompleted: true, mood: 'good' },
-        { date: 'Week 2', sleepHours: 7.0, stressLevel: 6.0, energyLevel: 7.5, meditationMinutes: 90, journalingCompleted: true, mood: 'good' },
-        { date: 'Week 3', sleepHours: 6.9, stressLevel: 7.0, energyLevel: 6.8, meditationMinutes: 80, journalingCompleted: false, mood: 'neutral' },
-        { date: 'Week 4', sleepHours: 7.5, stressLevel: 5.5, energyLevel: 8.0, meditationMinutes: 120, journalingCompleted: true, mood: 'great' },
-    ],
-    '90D': [
-        { date: 'Month 1', sleepHours: 7.1, stressLevel: 6.8, energyLevel: 7.2, meditationMinutes: 350, journalingCompleted: true, mood: 'good' },
-        { date: 'Month 2', sleepHours: 7.3, stressLevel: 6.2, energyLevel: 7.5, meditationMinutes: 400, journalingCompleted: true, mood: 'great' },
-        { date: 'Month 3', sleepHours: 7.0, stressLevel: 6.5, energyLevel: 7.0, meditationMinutes: 380, journalingCompleted: true, mood: 'good' },
-    ],
+// Helper function to generate trend data from daily check-ins
+const generateTrendData = (dailyCheckins: any[], timeframe: string) => {
+    if (!dailyCheckins || dailyCheckins.length === 0) return [];
+    
+    const now = new Date();
+    let daysToShow = 7;
+    
+    switch (timeframe) {
+        case '7D':
+            daysToShow = 7;
+            break;
+        case '30D':
+            daysToShow = 30;
+            break;
+        case '90D':
+            daysToShow = 90;
+            break;
+        default:
+            daysToShow = 7;
+    }
+    
+    // Get the last N days of data
+    const recentData = dailyCheckins.slice(-daysToShow);
+    
+    return recentData.map((checkin, index) => {
+        const date = new Date(checkin.date);
+        let dateLabel = '';
+        
+        if (timeframe === '7D') {
+            dateLabel = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        } else if (timeframe === '30D') {
+            const weekNumber = Math.floor(index / 7) + 1;
+            dateLabel = `Week ${weekNumber}`;
+        } else {
+            const monthNumber = Math.floor(index / 30) + 1;
+            dateLabel = `Month ${monthNumber}`;
+        }
+        
+        return {
+            date: dateLabel,
+            sleepHours: checkin.sleep_hours || 0,
+            stressLevel: checkin.stress || 0,
+            energyLevel: checkin.energy || 0,
+            meditationMinutes: 0, // Not in daily_checkins table
+            journalingCompleted: false, // Not in daily_checkins table
+            mood: checkin.mood || 'neutral',
+        };
+    });
 };
 
 // Helper to calculate meditation streak
@@ -104,15 +129,33 @@ const MentalHealthTooltip = ({ active, payload, label }: TooltipProps<any, any>)
 
 export default function MentalHealthProgression({ mentalHealth, dailyCheckins }) {
     const [activeTrend, setActiveTrend] = useState('7D');
-    const trendData = DUMMY_MENTAL_HEALTH_TREND_DATA[activeTrend];
+    
+    // Generate trend data from real daily check-ins
+    const trendData = useMemo(() => {
+        return generateTrendData(dailyCheckins || [], activeTrend);
+    }, [dailyCheckins, activeTrend]);
 
-    const latestData = trendData[trendData.length - 1];
-    const avgSleepHours = (trendData.reduce((sum, d) => sum + d.sleepHours, 0) / trendData.length).toFixed(1);
-    const avgStressLevel = (trendData.reduce((sum, d) => sum + d.stressLevel, 0) / trendData.length).toFixed(1);
-    const avgEnergyLevel = (trendData.reduce((sum, d) => sum + d.energyLevel, 0) / trendData.length).toFixed(1);
+    // Handle empty data case
+    if (!dailyCheckins || dailyCheckins.length === 0) {
+        return (
+            <div className="w-full bg-white text-gray-900 rounded-2xl p-4 sm:p-8 space-y-8 shadow-xl">
+                <div className="text-center">
+                    <h3 className="text-2xl font-bold tracking-tight">Mental Wellness</h3>
+                    <p className="text-sm text-gray-500 mt-2">
+                        No mental health data available yet. Start logging your daily check-ins to see your progress here.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
-    const meditationStreak = getMeditationStreak(DUMMY_MENTAL_HEALTH_TREND_DATA['7D']);
-    const journalingStreak = getJournalingStreak(DUMMY_MENTAL_HEALTH_TREND_DATA['7D']);
+    const latestData = trendData[trendData.length - 1] || { sleepHours: 0, stressLevel: 0, energyLevel: 0 };
+    const avgSleepHours = trendData.length > 0 ? (trendData.reduce((sum, d) => sum + d.sleepHours, 0) / trendData.length).toFixed(1) : '0.0';
+    const avgStressLevel = trendData.length > 0 ? (trendData.reduce((sum, d) => sum + d.stressLevel, 0) / trendData.length).toFixed(1) : '0.0';
+    const avgEnergyLevel = trendData.length > 0 ? (trendData.reduce((sum, d) => sum + d.energyLevel, 0) / trendData.length).toFixed(1) : '0.0';
+
+    const meditationStreak = getMeditationStreak(trendData);
+    const journalingStreak = getJournalingStreak(trendData);
     const yogaStreak = getYogaStreak();
 
     return (
@@ -244,7 +287,7 @@ export default function MentalHealthProgression({ mentalHealth, dailyCheckins })
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
-                    {Object.keys(DUMMY_MENTAL_HEALTH_TREND_DATA).map(timeframe => (
+                    {['7D', '30D', '90D'].map(timeframe => (
                         <button
                             key={timeframe}
                             onClick={() => setActiveTrend(timeframe)}

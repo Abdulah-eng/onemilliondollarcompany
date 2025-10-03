@@ -5,10 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search } from "lucide-react";
 
-// Import all your mock data
-import { mockExerciseGuides } from "@/mockdata/library/mockexercises";
-import { mockRecipes } from "@/mockdata/library/mockrecipes";
-import { mockMentalHealthGuides } from "@/mockdata/library/mockmentalexercises";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 import LibraryCard, { LibraryItem } from "@/components/customer/library/LibraryCard";
 import LibraryDetailView from "@/components/customer/library/LibraryDetailView";
@@ -16,10 +14,13 @@ import LibraryDetailView from "@/components/customer/library/LibraryDetailView";
 type LibraryTab = 'all' | 'fitness' | 'nutrition' | 'mental';
 
 export default function LibraryPage() {
+  const { profile } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<LibraryTab>('all');
   const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
    useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -27,12 +28,42 @@ export default function LibraryPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const libraryItems = useMemo<LibraryItem[]>(() => {
-    const exercises = mockExerciseGuides.map(item => ({ id: item.id, type: 'fitness' as const, name: item.name, imageUrl: item.imageUrl, data: item }));
-    const recipes = mockRecipes.map(item => ({ id: item.id, type: 'nutrition' as const, name: item.name, imageUrl: item.imageUrl, data: item }));
-    const mental = mockMentalHealthGuides.map(item => ({ id: item.id, type: 'mental' as const, name: item.name, imageUrl: item.imageUrl, data: item }));
-    return [...exercises, ...recipes, ...mental];
-  }, []);
+  useEffect(() => {
+    const fetchLibraryItems = async () => {
+      if (!profile?.coach_id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        
+        // Only fetch library items from the customer's assigned coach
+        const { data } = await supabase
+          .from('library_items')
+          .select('id, category, name, hero_image_url, details')
+          .eq('coach_id', profile.coach_id)
+          .order('updated_at', { ascending: false })
+          .limit(100);
+          
+        const mapped = (data || []).map((row: any) => ({
+          id: row.id,
+          type: row.category === 'exercise' ? 'fitness' : row.category === 'recipe' ? 'nutrition' : 'mental',
+          name: row.name,
+          imageUrl: row.hero_image_url,
+          data: row.details || {},
+        })) as LibraryItem[];
+        
+        setLibraryItems(mapped);
+      } catch (error) {
+        console.error('Error fetching library items:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLibraryItems();
+  }, [profile?.coach_id]);
 
   const filteredItems = useMemo(() => {
     return libraryItems
@@ -43,11 +74,33 @@ export default function LibraryPage() {
       .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [searchQuery, activeTab, libraryItems]);
 
+  if (loading) {
+    return (
+      <div className="w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold tracking-tight">Library</h1>
+          <p className="text-muted-foreground text-lg">Loading your coach's content...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile?.coach_id) {
+    return (
+      <div className="w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold tracking-tight">Library</h1>
+          <p className="text-muted-foreground text-lg">You need to be assigned to a coach to access the library.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
       <div className="text-center space-y-2">
         <h1 className="text-4xl font-bold tracking-tight">Library</h1>
-        <p className="text-muted-foreground text-lg">Explore exercises, recipes, and wellness guides.</p>
+        <p className="text-muted-foreground text-lg">Explore exercises, recipes, and wellness guides from your coach.</p>
       </div>
 
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm py-4 space-y-4">

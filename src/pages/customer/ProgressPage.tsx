@@ -1,6 +1,6 @@
 // src/pages/customer/ProgressPage.tsx
 import { useState } from 'react';
-import { mockProgressData } from '@/mockdata/progress/mockProgressData';
+import { useCustomerProgress } from '@/hooks/useCustomerProgress';
 
 // --- NEW & UPDATED COMPONENT IMPORTS ---
 import HeroProgressSnapshot from '@/components/customer/progress/HeroProgressSnapshot';
@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import NutritionProgression from '@/components/customer/progress/nutrition/NutritionProgression';
 
 export default function ProgressPage() {
-  const data = mockProgressData;
+  const { progressData: data, loading } = useCustomerProgress();
 
   // State for the detail modal
   const [modalData, setModalData] = useState<{ title: string; content: React.ReactNode } | null>(null);
@@ -27,7 +27,7 @@ export default function ProgressPage() {
   };
 
   // Defensive programming: ensure data exists
-  if (!data || !data.dailyCheckins || !data.nutrition?.macros) {
+  if (loading) {
     return (
       <div className="w-full max-w-4xl mx-auto px-4 py-8">
         <div className="text-center">
@@ -38,13 +38,24 @@ export default function ProgressPage() {
     );
   }
 
+  if (!data || !data.dailyCheckins || !data.nutrition?.macros) {
+    return (
+      <div className="w-full max-w-4xl mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold tracking-tight">No Progress Data</h1>
+          <p className="text-muted-foreground">Start your wellness journey to see your progress here.</p>
+        </div>
+      </div>
+    );
+  }
+
   // Calculate averages for Hero card
   const last7DaysCheckins = data.dailyCheckins.slice(-7);
   const avgSleep = last7DaysCheckins.length > 0 
-    ? last7DaysCheckins.reduce((sum, day) => sum + day.sleepHours, 0) / last7DaysCheckins.length 
+    ? last7DaysCheckins.reduce((sum, day) => sum + (day.sleep_hours || 0), 0) / last7DaysCheckins.length 
     : 0;
   const avgEnergy = last7DaysCheckins.length > 0
-    ? last7DaysCheckins.reduce((sum, day) => sum + day.energyLevel, 0) / last7DaysCheckins.length
+    ? last7DaysCheckins.reduce((sum, day) => sum + (day.energy || 0), 0) / last7DaysCheckins.length
     : 0;
   
   // --- NEW: Calculate averages for goal progression ---

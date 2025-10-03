@@ -2,53 +2,16 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Users, BookOpenCheck, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Link } from 'react-router-dom';
-
-/*
-TODO: Backend Integration Notes
-- [cite_start]`coachName`: This is a static value ("Train Wise") as there is only one coach[cite: 4].
-- All metrics should be fetched and dynamically updated.
-*/
-const mockData = {
-  coachName: 'Train Wise',
-  metrics: [
-    {
-      title: 'Total Clients',
-      value: '1,004',
-      icon: Users,
-      trend: 'up',
-      trendValue: '+25%',
-      description: 'Since last month',
-    },
-    {
-      title: 'Total Earning',
-      value: '$29.4K',
-      icon: DollarSign,
-      trend: 'up',
-      trendValue: '10%',
-      description: 'Updated last month',
-    },
-    {
-      title: 'Active Programs',
-      value: '502',
-      icon: BookOpenCheck,
-      trend: 'up',
-      trendValue: '+5%',
-      description: 'Active clients',
-    },
-    {
-      title: 'Retention Rate',
-      value: '78%',
-      icon: TrendingUp,
-      trend: 'up',
-      trendValue: '+2%',
-      description: 'Monthly retention',
-    },
-  ],
-};
+import { useCoachDashboardStats } from '@/hooks/useCoachDashboard';
 
 const CoachHeader = () => {
-  const { coachName, metrics } = mockData;
+  const { stats } = useCoachDashboardStats();
+  const metrics = [
+    { title: 'Total Clients', value: String(stats.totalClients), icon: Users, trend: 'up', trendValue: '', description: 'Since last month' },
+    { title: 'Total Earning', value: `$${stats.totalEarning.toLocaleString()}`, icon: DollarSign, trend: 'up', trendValue: '', description: 'All time net' },
+    { title: 'Active Programs', value: String(stats.activePrograms), icon: BookOpenCheck, trend: 'up', trendValue: '', description: 'Active clients' },
+    { title: 'Retention Rate', value: `${stats.retentionRate}%`, icon: TrendingUp, trend: 'up', trendValue: '', description: 'Subscribed customers' },
+  ];
   const timeOfDay = new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening';
 
   const StatCard = ({ title, value, icon: Icon, trend, trendValue, description }) => {
@@ -80,7 +43,7 @@ const CoachHeader = () => {
       <Card className="relative border-none bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-lg animate-fade-in-down overflow-hidden rounded-xl">
         <CardContent className="p-6">
           <div className="pr-28">
-            <h1 className="text-2xl font-bold">Good {timeOfDay}, {coachName} 👋</h1>
+            <h1 className="text-2xl font-bold">Good {timeOfDay}, Coach 👋</h1>
             <p className="opacity-80 mt-1 text-sm italic">"Ready to make an impact today?"</p>
           </div>
         </CardContent>

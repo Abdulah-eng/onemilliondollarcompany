@@ -40,8 +40,10 @@ const MyCoach = () => {
             if (!user) return;
 
             try {
-                // Check if user has coach_id in profile OR has an accepted request
-                const hasCoachId = profile?.coach_id;
+                setLoading(true);
+                
+                // Check if user has coach_id in profile
+                const hasCoachId = !!profile?.coach_id;
                 
                 // Also check for accepted requests
                 const { data: acceptedRequest } = await supabase
@@ -51,19 +53,20 @@ const MyCoach = () => {
                     .eq('status', 'accepted')
                     .single();
 
-                const hasCoach = hasCoachId || acceptedRequest;
-                setHasCurrentCoach(!!hasCoach);
+                const hasCoach = hasCoachId || !!acceptedRequest;
+                setHasCurrentCoach(hasCoach);
                 
-                // No automatic tab switching - let users navigate manually
+                // Don't force tab switching - let users navigate freely
             } catch (error) {
                 console.error('Error checking coach status:', error);
+                setHasCurrentCoach(false);
             } finally {
                 setLoading(false);
             }
         };
 
         checkCoachStatus();
-    }, [user, profile]);
+    }, [user, profile]); // Removed activeTab from dependencies
 
     const showPopup = (message: string, requested = false) => {
         setFeedbackPopup({ isVisible: true, message, requested });
@@ -111,7 +114,7 @@ const MyCoach = () => {
                 onValueChange={setActiveTab}
                 className="w-full"
             >
-                {/* 1. TAB LIST: FIXED - Removed redundant 'disabled' prop to allow clicking back */}
+                {/* 1. TAB LIST: Fixed tab visibility and styling */}
                 <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-secondary/50 dark:bg-secondary/20 rounded-xl">
                     <TabsTrigger
                         value="myCoach"
@@ -121,11 +124,7 @@ const MyCoach = () => {
                     </TabsTrigger>
                     <TabsTrigger
                         value="explore"
-                        className={`data-[state=active]:bg-background/80 data-[state=active]:shadow-md data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-border/50 rounded-lg h-10 transition-all ${
-                            !hasCurrentCoach && activeTab === 'myCoach' 
-                                ? 'ring-2 ring-primary/50 ring-offset-2 ring-offset-background animate-pulse' 
-                                : ''
-                        }`}
+                        className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-border/50 rounded-lg h-10 transition-all"
                     >
                         <Search className="w-4 h-4 mr-2"/> Explore & History
                     </TabsTrigger>

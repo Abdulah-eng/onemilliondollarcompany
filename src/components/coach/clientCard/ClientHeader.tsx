@@ -5,16 +5,7 @@ import { Award, Clock, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface ClientHeaderProps {
-  client: {
-    name: string;
-    profilePicture: string;
-    plan: string;
-    status: string;
-    color: string;
-    insights: { adherence: string };
-    dailyCheckIn?: any[];
-    trends?: any;
-  };
+  client: any | null;
 }
 
 const ClientHeader: React.FC<ClientHeaderProps> = ({ client }) => {
@@ -24,6 +15,11 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ client }) => {
 
   const hasNewFeedback = true;
   const onTrack = true;
+
+  // Safeguards for not-yet-loaded client
+  const name = client?.full_name || client?.name || 'Customer';
+  const avatar = client?.avatar_url || client?.profilePicture || 'https://placehold.co/96x96';
+  const adherence = client?.insights?.adherence || '—';
 
   return (
     <motion.div
@@ -37,15 +33,15 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ client }) => {
         <div className="flex items-center gap-4 flex-1">
           <motion.img
             className="h-16 w-16 sm:h-18 sm:w-18 rounded-full object-cover border border-border shadow-sm"
-            src={client.profilePicture}
-            alt={client.name}
+            src={avatar}
+            alt={name}
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.4, delay: 0.1 }}
           />
           <div>
             <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground">
-              {client.name}
+              {name}
             </h1>
             <div className="flex flex-wrap items-center gap-2 mt-1">
               {onTrack && (
@@ -67,7 +63,7 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ client }) => {
       <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center">
         {[
           { icon: Calendar, label: 'Last Check-in', value: lastCheckIn },
-          { icon: Award, label: 'Adherence', value: client.insights.adherence },
+          { icon: Award, label: 'Adherence', value: adherence },
           { icon: Clock, label: 'Program Days', value: '28 remaining' },
         ].map((stat, i) => (
           <motion.div

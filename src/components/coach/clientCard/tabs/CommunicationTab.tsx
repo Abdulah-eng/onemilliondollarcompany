@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 import { Send, Clock, MessageSquare, ArrowLeft } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Message {
   id: number;
@@ -114,47 +116,97 @@ const ThreadListItem: React.FC<{
   );
 };
 
-const CommunicationTab: React.FC<CommunicationTabProps> = () => {
+const CommunicationTab: React.FC<CommunicationTabProps> = ({ client }) => {
   const isMobile = useIsMobile();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [threads, setThreads] = useState<Thread[]>([
-    {
-      id: 1,
-      title: 'Weekly check-in: energy + workouts',
-      type: 'check-in',
-      createdAt: '2024-09-10T09:00:00Z',
-      respondable: true,
-      messages: [
-        { id: 101, author: 'coach', content: 'Hvordan føles treningen?', date: '2024-09-10T09:00:00Z' },
-        { id: 102, author: 'client', content: 'Bra! Litt sliten på onsdag.', date: '2024-09-10T14:22:00Z' },
-      ],
-    },
-    {
-      id: 2,
-      title: 'Feedback on meal plan',
-      type: 'feedback',
-      createdAt: '2024-09-08T11:30:00Z',
-      respondable: true,
-      messages: [
-        { id: 201, author: 'client', content: 'The new meal plan is great. The smoothie recipes are a lifesaver!', date: '2024-09-08T11:30:00Z' },
-        { id: 202, author: 'coach', content: 'Glad to hear it! Let me know if you have any questions.', date: '2024-09-08T15:00:00Z' },
-      ],
-    },
-    {
-      id: 3,
-      title: 'Quick question about macros',
-      type: 'message',
-      createdAt: '2024-09-07T10:00:00Z',
-      respondable: true,
-      messages: [
-        { id: 301, author: 'client', content: 'What are the recommended macros for a high-intensity workout day?', date: '2024-09-07T10:00:00Z' },
-      ],
-    },
-  ]);
+  const { user } = useAuth();
+  const [threads, setThreads] = useState<Thread[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [activeThreadId, setActiveThreadId] = useState<number | null>(null);
   const [replyText, setReplyText] = useState('');
   const [showThreadList, setShowThreadList] = useState(true);
+
+  // Fetch conversations and messages from database
+  useEffect(() => {
+    const fetchConversations = async () => {
+      if (!client?.id || !user?.id) return;
+      
+      try {
+        setLoading(true);
+        
+        // Get conversation between coach and client
+        const { data: conversation } = await supabase
+          .from('conversations')
+          .select('*')
+          .eq('coach_id', user.id)
+          .eq('customer_id', client.id)
+          .single();
+
+        if (conversation) {
+          // Get messages for this conversation
+          const { data: messages } = await supabase
+            .from('messages')
+            .select('*, sender:profiles(full_name)')
+            .eq('conversation_id', conversation.id)
+            .order('created_at', { ascending: true });
+
+          // Get coach check-ins for this client
+          const { data: checkins } = await supabase
+            .from('coach_checkins')
+            .select('*')
+            .eq('coach_id', user.id)
+            .eq('customer_id', client.id)
+            .order('created_at', { ascending: false });
+
+          // Transform data into threads format
+          const threadsData: Thread[] = [];
+
+          // Add check-ins as threads
+          checkins?.forEach((checkin, index) => {
+            threadsData.push({
+              id: 1000 + index, // Use high IDs to avoid conflicts
+              title: checkin.message || 'Check-in request',
+              type: 'check-in',
+              createdAt: checkin.created_at,
+              respondable: checkin.status === 'open',
+              messages: checkin.status === 'completed' ? [
+                { id: 2000 + index, author: 'coach', content: checkin.message || 'Check-in request', date: checkin.created_at },
+                { id: 2001 + index, author: 'client', content: 'Check-in completed', date: checkin.created_at },
+              ] : [
+                { id: 2000 + index, author: 'coach', content: checkin.message || 'Check-in request', date: checkin.created_at },
+              ],
+            });
+          });
+
+          // Add conversation messages as a thread
+          if (messages && messages.length > 0) {
+            threadsData.push({
+              id: 1,
+              title: 'General conversation',
+              type: 'message',
+              createdAt: conversation.created_at,
+              respondable: true,
+              messages: messages.map((msg, index) => ({
+                id: 3000 + index,
+                author: msg.sender_id === user.id ? 'coach' : 'client',
+                content: msg.content,
+                date: msg.created_at,
+              })),
+            });
+          }
+
+          setThreads(threadsData);
+        }
+      } catch (error) {
+        console.error('Error fetching conversations:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConversations();
+  }, [client?.id, user?.id]);
 
   const handleThreadSelect = (id: number) => {
     setActiveThreadId(id);
@@ -209,9 +261,19 @@ const CommunicationTab: React.FC<CommunicationTabProps> = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className={`overflow-y-auto flex-1 ${isMobile ? 'px-3 pb-3 space-y-2' : 'space-y-3 p-4'}`}>
-          {threads.map((t) => (
-            <ThreadListItem key={t.id} thread={t} onSelect={handleThreadSelect} active={activeThreadId === t.id} />
-          ))}
+          {loading ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Loading conversations...
+            </div>
+          ) : threads.length > 0 ? (
+            threads.map((t) => (
+              <ThreadListItem key={t.id} thread={t} onSelect={handleThreadSelect} active={activeThreadId === t.id} />
+            ))
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No conversations yet. Start a conversation with your client.
+            </div>
+          )}
         </CardContent>
       </Card>
 

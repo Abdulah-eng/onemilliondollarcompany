@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import { ProgressData } from '@/mockdata/progress/mockProgressData';
 import {
   AreaChart,
   Area,
@@ -45,8 +44,9 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 export default function FitnessProgression({
   data,
 }: {
-  data: ProgressData['fitnessProgression'];
+  data: any; // Changed from ProgressData['fitnessProgression'] to any for flexibility
 }) {
+  // Handle case where data is empty or undefined
   if (!data || !data.exercises || data.exercises.length === 0) {
     return (
       <div className="w-full flex flex-col gap-8 text-gray-900 dark:text-white">
@@ -56,7 +56,7 @@ export default function FitnessProgression({
               Fitness Progress
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              No fitness data available yet.
+              No fitness data available yet. Start logging your workouts to see your progress here.
             </p>
           </div>
         </div>
