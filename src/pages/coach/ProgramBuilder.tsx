@@ -21,6 +21,8 @@ interface ProgramData {
   title: string;
   description: string;
   plan: any;
+  assignedTo?: string | null;
+  scheduledDate?: string | null;
 }
 
 const ProgramBuilder = () => {
@@ -87,6 +89,8 @@ const ProgramBuilder = () => {
         description: finalProgram.description || existingProgram.description,
         category: finalProgram.category || existingProgram.category,
         plan: planData,
+        assignedTo: finalProgram.assignedTo ?? existingProgram.assignedTo ?? null,
+        scheduledDate: finalProgram.scheduledDate ?? existingProgram.scheduledDate ?? null,
       });
     } else {
       // Create new program
@@ -95,6 +99,8 @@ const ProgramBuilder = () => {
         description: finalProgram.description || '',
         category: finalProgram.category || 'fitness',
         plan: planData,
+        assignedTo: finalProgram.assignedTo ?? null,
+        scheduledDate: finalProgram.scheduledDate ?? null,
       });
     }
 

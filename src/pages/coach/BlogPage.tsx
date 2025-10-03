@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BlogPost, BlogCategory, mockBlogPosts } from '@/mockdata/blog/mockBlog';
+import { BlogPost, BlogCategory } from '@/mockdata/blog/mockBlog';
+import { useCoachBlog } from '@/hooks/useCoachBlog';
 import BlogHeader from '@/components/coach/blog/BlogHeader';
 import BlogList from '@/components/coach/blog/BlogList';
 import BlogFAB from '@/components/coach/blog/BlogFAB';
@@ -13,7 +14,23 @@ type BlogView = 'list' | 'creator';
 const BlogPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<BlogCategory | null>(null); 
   const [searchTerm, setSearchTerm] = useState('');
-  const [blogData, setBlogData] = useState<BlogPost[]>(mockBlogPosts);
+  const [blogData, setBlogData] = useState<BlogPost[]>([]);
+  const { posts, createOrUpdate, remove, refetch } = useCoachBlog();
+
+  useEffect(() => {
+    // Map db posts to UI type
+    const mapped = (posts || []).map((p: any) => ({
+      id: p.id,
+      title: p.title,
+      introduction: p.introduction || '',
+      content: p.content || '',
+      category: p.category || null,
+      coverUrl: p.cover_url || null,
+      createdAt: p.created_at,
+      updatedAt: p.updated_at,
+    })) as BlogPost[];
+    setBlogData(mapped);
+  }, [posts]);
   const [view, setView] = useState<BlogView>('list');
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
 
@@ -49,23 +66,24 @@ const BlogPage: React.FC = () => {
 
   const handleBackToList = () => setView('list');
 
-  const handleDeletePost = (id: string) => {
+  const handleDeletePost = async (id: string) => {
     if (window.confirm('Delete this blog post?')) {
-      setBlogData(prev => prev.filter(post => post.id !== id));
+      await remove(id);
+      refetch();
     }
   };
 
-  const handlePostSubmit = (newPost: BlogPost) => {
-    setBlogData(prev => {
-      const i = prev.findIndex(post => post.id === newPost.id);
-      if (i > -1) {
-        const updated = [...prev];
-        updated[i] = newPost;
-        return updated;
-      }
-      return [...prev, newPost];
+  const handlePostSubmit = async (newPost: BlogPost) => {
+    await createOrUpdate({
+      id: newPost.id?.startsWith('mock') ? undefined : newPost.id,
+      title: newPost.title,
+      introduction: newPost.introduction,
+      content: newPost.content,
+      category: newPost.category,
+      cover_url: (newPost as any).coverUrl || null,
     });
     setView('list');
+    refetch();
   };
 
   return (

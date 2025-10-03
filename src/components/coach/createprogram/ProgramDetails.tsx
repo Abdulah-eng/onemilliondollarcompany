@@ -22,6 +22,8 @@ interface ProgramDetailsForm {
   equipment?: string[];
   benefits?: string;
   allergies?: string;
+  assignedTo?: string | null;
+  scheduledDate?: string | null;
 }
 
 interface ProgramDetailsProps {
@@ -42,6 +44,8 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
       ...initialData,
       muscleGroups: initialData?.muscleGroups || [],
       equipment: initialData?.equipment || [],
+      assignedTo: (initialData as any)?.assignedTo ?? null,
+      scheduledDate: (initialData as any)?.scheduledDate ?? null,
     },
   });
 
@@ -175,6 +179,28 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
           </div>
         </>
       )}
+
+      {/* Inline Next Button (kept) */}
+      {/* Assignment and Scheduling (optional) */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="assignedTo">Assign to Client (optional)</Label>
+          <Input
+            id="assignedTo"
+            placeholder="Enter customer ID"
+            {...register('assignedTo')}
+          />
+          <p className="text-xs text-muted-foreground">Paste customer id to pre-assign this program.</p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="scheduledDate">Schedule Date (optional)</Label>
+          <Input
+            id="scheduledDate"
+            type="date"
+            {...register('scheduledDate')}
+          />
+        </div>
+      </div>
 
       {/* Inline Next Button (kept) */}
       <Button

@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { CircleUserRound, Zap, MessageSquare, Star, Send, Search, Filter, History, Loader2, Clock, Eye } from 'lucide-react';
+import { CircleUserRound, Zap, MessageSquare, Star, Send, Search, Filter, History, Loader2, Clock, Eye, Bot } from 'lucide-react';
+import { generateAIPersonalPlan } from '@/lib/ai/plan';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -226,8 +227,35 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
         );
     }
 
+    const handleFreeAICoach = async () => {
+        try {
+            // In a real flow, use current user id from auth
+            const plan = await generateAIPersonalPlan({ userId: 'me' as any });
+            toast.success('Your free AI plan has been generated!');
+            // Navigate or open modal to show plan (placeholder redirect)
+            window.location.href = '/customer/programs';
+        } catch {
+            toast.error('Failed to generate AI plan.');
+        }
+    };
+
     return (
         <div className="space-y-8">
+            {/* Free AI Coach Highlight */}
+            <Card className="border-2 border-emerald-300/40 bg-emerald-50/40">
+                <CardContent className="p-6 flex items-center justify-between gap-4">
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <Bot className="w-5 h-5 text-emerald-600" />
+                            <span className="text-sm font-semibold text-emerald-700">Free AI Coach</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">Get a personalized starter plan powered by AI at no cost.</p>
+                    </div>
+                    <Button onClick={handleFreeAICoach} className="bg-emerald-600 hover:bg-emerald-700">
+                        Generate Free Plan
+                    </Button>
+                </CardContent>
+            </Card>
             {/* Search and Filter */}
             <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-1">

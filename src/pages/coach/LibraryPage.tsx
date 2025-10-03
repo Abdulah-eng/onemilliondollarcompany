@@ -1,19 +1,43 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LibraryItem, LibraryCategory, mockLibrary } from '@/mockdata/library/mockLibrary';
+import { LibraryItem, LibraryCategory } from '@/mockdata/library/mockLibrary';
 import LibraryHeader from '@/components/coach/library/LibraryHeader';
 import LibraryList from '@/components/coach/library/LibraryList';
 import LibraryCreatorPage from './LibraryCreatorPage';
 import LibraryFAB from '@/components/coach/library/LibraryFAB';
+import { useCoachLibrary } from '@/hooks/useCoachLibrary';
 
 type LibraryView = 'list' | 'creator';
 
 const LibraryPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<LibraryCategory | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [libraryData, setLibraryData] = useState<LibraryItem[]>(mockLibrary);
+  const { items, refetch, removeItem } = useCoachLibrary();
+  const [libraryData, setLibraryData] = useState<LibraryItem[]>([]);
+
+  useEffect(() => {
+    // Map DB rows to UI LibraryItem shape; keep details in item-specific fields if present
+    const mapped = (items || []).map((row: any) => {
+      const base = {
+        id: row.id,
+        category: row.category as LibraryCategory,
+        name: row.name,
+        introduction: row.introduction || '',
+        isCustom: true,
+      } as any;
+      const details = row.details || {};
+      if (row.category === 'exercise') {
+        return { ...base, muscleGroup: details.muscleGroup || '', howTo: details.howTo || [] } as LibraryItem;
+      }
+      if (row.category === 'recipe') {
+        return { ...base, allergies: details.allergies || '', ingredients: details.ingredients || [], stepByStep: details.stepByStep || [] } as LibraryItem;
+      }
+      return { ...base, content: details.content || [] } as LibraryItem; // mental health
+    });
+    setLibraryData(mapped);
+  }, [items]);
   const [view, setView] = useState<LibraryView>('list');
   const [editingItem, setEditingItem] = useState<LibraryItem | null>(null);
 
@@ -53,23 +77,16 @@ const LibraryPage: React.FC = () => {
 
   const handleBackToList = () => setView('list');
 
-  const handleDeleteItem = (id: string) => {
+  const handleDeleteItem = async (id: string) => {
     if (window.confirm('Are you sure you want to permanently delete this content?')) {
-      setLibraryData(prev => prev.filter(item => item.id !== id));
+      await removeItem(id);
+      await refetch();
     }
   };
 
-  const handleItemSubmit = (newItem: LibraryItem) => {
-    setLibraryData(prev => {
-      const i = prev.findIndex(item => item.id === newItem.id);
-      if (i > -1) {
-        const updated = [...prev];
-        updated[i] = newItem;
-        return updated;
-      }
-      return [...prev, newItem];
-    });
-    setActiveCategory(newItem.category);
+  const handleItemSubmit = async (_newItem: LibraryItem) => {
+    // Submission handled inside creator page via hook; this page only switches back
+    await refetch();
     setView('list');
   };
 

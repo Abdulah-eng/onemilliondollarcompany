@@ -7,11 +7,13 @@ import { OnboardingProvider } from "./contexts/OnboardingContext";
 import { ThemeProvider } from "next-themes";
 import { Loader2 } from "lucide-react";
 import StripeSyncHandler from "@/components/system/StripeSyncHandler";
+import AuthLinkHandler from "@/components/system/AuthLinkHandler";
 
 // --- LAYOUTS ---
 import AppShell from "@/components/layouts/AppShell";
 import RoleGate from "@/components/routing/RoleGate";
 import SubscriptionGate from "@/components/routing/SubscriptionGate";
+import AdminGate from "@/components/routing/AdminGate";
 
 // --- PAGES (Lazy Loaded) ---
 import LandingPage from "./pages/public/LandingPage";
@@ -47,6 +49,7 @@ const MyProgramsPage = lazy(() => import("./pages/customer/MyProgramsPage"));
 const ViewProgramPage = lazy(() => import("./pages/customer/ViewProgramPage"));
 const LibraryPage = lazy(() => import("./pages/customer/LibraryPage"));
 const ProgressPage = lazy(() => import("./pages/customer/ProgressPage"));
+const ProgramHistoryPage = lazy(() => import("./pages/customer/ProgramHistoryPage"));
 const MyCoachPage = lazy(() => import("./pages/customer/MyCoach"));
 const BlogPage = lazy(() => import("./pages/customer/BlogPage"));
 const ProfilePage = lazy(() => import("./pages/customer/Profile"));
@@ -111,6 +114,7 @@ const ThemedApp = () => {
     >
       <Toaster richColors position="top-right" />
       <StripeSyncHandler />
+      <AuthLinkHandler />
       <Routes>
         {/* 1. Landing Page (Outside AuthProvider for performance) */}
         <Route path="/" element={<LandingPage />} />
@@ -258,6 +262,13 @@ const ThemedApp = () => {
                     <SubscriptionGate>
                       <Suspense fallback={<LoadingScreen />}>
                         <ProgressPage />
+                      </Suspense>
+                    </SubscriptionGate>
+                  } />
+                  <Route path="/customer/history" element={
+                    <SubscriptionGate>
+                      <Suspense fallback={<LoadingScreen />}>
+                        <ProgramHistoryPage />
                       </Suspense>
                     </SubscriptionGate>
                   } />

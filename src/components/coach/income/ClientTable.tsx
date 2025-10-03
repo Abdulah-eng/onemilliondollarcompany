@@ -1,14 +1,18 @@
 'use client';
 
 import React from 'react';
-import { ClientEarning } from '@/mockdata/income/mockIncome';
+export interface ClientEarningUI {
+  id: string;
+  name: string;
+  totalEarnings: number;
+  activeContracts: number;
+  lastPaymentDate: string;
+}
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { User, DollarSign, Calendar } from 'lucide-react';
 
-interface ClientTableProps {
-  earnings: ClientEarning[];
-}
+interface ClientTableProps { earnings: ClientEarningUI[]; }
 
 const ClientTable: React.FC<ClientTableProps> = ({ earnings }) => {
   return (

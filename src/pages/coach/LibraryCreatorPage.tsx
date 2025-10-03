@@ -6,6 +6,7 @@ import ExerciseForm from '@/components/coach/library/creation/ExerciseForm';
 import RecipeForm from '@/components/coach/library/creation/RecipeForm';
 import MentalHealthForm from '@/components/coach/library/creation/MentalHealthForm';
 import LibraryCreationWrapper from '@/components/coach/library/creation/LibraryCreationWrapper';
+import { useCoachLibrary } from '@/hooks/useCoachLibrary';
 
 interface LibraryCreatorPageProps {
   onBack: () => void;
@@ -15,6 +16,7 @@ interface LibraryCreatorPageProps {
 }
 
 const LibraryCreatorPage: React.FC<LibraryCreatorPageProps> = ({ onBack, onSubmit, initialItem, activeCategory }) => {
+  const { upsertItem } = useCoachLibrary();
   const [formData, setFormData] = useState<Partial<LibraryItem>>({});
 
   useEffect(() => {
@@ -26,25 +28,41 @@ const LibraryCreatorPage: React.FC<LibraryCreatorPageProps> = ({ onBack, onSubmi
     setFormData(prev => ({ ...prev, [field]: value }));
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.name || !formData.introduction) {
       alert("Please fill in Name and Introduction.");
       return;
     }
     
-    const newId = formData.id || `custom-${Date.now()}`;
+    // Build details per category
+    let details: any = {};
+    if (activeCategory === 'exercise') {
+      details = {
+        muscleGroup: (formData as any).muscleGroup || '',
+        howTo: (formData as any).howTo || [],
+      };
+    } else if (activeCategory === 'recipe') {
+      details = {
+        allergies: (formData as any).allergies || '',
+        ingredients: (formData as any).ingredients || [],
+        stepByStep: (formData as any).stepByStep || [],
+      };
+    } else if (activeCategory === 'mental health') {
+      details = {
+        content: (formData as any).content || [],
+      };
+    }
 
-    // Simple type coercion to finalize the item
-    const finalItem = {
-      ...formData,
-      id: newId,
+    await upsertItem({
+      id: (formData as any).id,
+      name: formData.name,
       category: activeCategory,
-      isCustom: true,
-      name: formData.name || '',
-      introduction: formData.introduction || '',
-    } as LibraryItem;
+      introduction: formData.introduction,
+      hero_image_url: (formData as any).heroImageUrl || null,
+      details,
+    } as any);
 
-    onSubmit(finalItem);
+    onSubmit({ ...(formData as any), category: activeCategory } as LibraryItem);
   };
 
   const renderForm = () => {

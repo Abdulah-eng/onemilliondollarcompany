@@ -22,6 +22,8 @@ import MentalHealthProgramView from "@/components/customer/viewprogram/mentalhea
 
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useProgramEntries } from "@/hooks/useProgramEntries";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Helper components remain the same
 const LoadingSpinner = () => (
@@ -43,6 +45,8 @@ export default function ViewProgramPage() {
   const { type, id } = useParams<{ type: string; id: string }>();
   const [programData, setProgramData] = useState<ProgramData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { profile } = useAuth();
+  const { completeToday } = useProgramEntries(id);
 
   useEffect(() => {
     setLoading(true);
@@ -105,11 +109,17 @@ export default function ViewProgramPage() {
         {renderProgramView()}
       </div>
 
-      <div className="sticky bottom-[calc(15vh+env(safe-area-inset-bottom)+1rem)] md:bottom-4 z-40 md:z-50 flex w-full justify-center px-0">
-        <Button size="lg" className="h-12 w-full max-w-md rounded-xl font-bold shadow-lg">
-          {getButtonText()}
-        </Button>
-      </div>
+      {profile && (
+        <div className="sticky bottom-[calc(15vh+env(safe-area-inset-bottom)+1rem)] md:bottom-4 z-40 md:z-50 flex w-full justify-center px-0">
+          <Button
+            size="lg"
+            className="h-12 w-full max-w-md rounded-xl font-bold shadow-lg"
+            onClick={() => completeToday({ program_id: id || null, type: (programData?.type as any) || 'fitness' })}
+          >
+            {getButtonText()}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

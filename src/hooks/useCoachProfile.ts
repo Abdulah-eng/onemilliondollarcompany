@@ -25,6 +25,8 @@ export interface CoachProfile {
   skills: string[];
   certifications: Certification[];
   socials: SocialLink[];
+  price_min_cents?: number | null;
+  price_max_cents?: number | null;
 }
 
 export const useCoachProfile = () => {

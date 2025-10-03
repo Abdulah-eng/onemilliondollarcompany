@@ -32,6 +32,20 @@ export const ChatView: React.FC<ChatViewProps> = ({
     scrollToBottom();
   }, [messages]);
 
+  // Handle Stripe redirect for one-time offer payments success
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const offerStatus = params.get('offer_status');
+    if (offerStatus === 'paid') {
+      toast.success('Payment successful! Offer accepted.');
+      // Clean the URL params
+      const url = new URL(window.location.href);
+      url.searchParams.delete('offer_status');
+      url.searchParams.delete('session_id');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
+
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;
 

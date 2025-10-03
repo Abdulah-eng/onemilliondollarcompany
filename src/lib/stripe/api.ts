@@ -17,16 +17,20 @@ export async function createCheckoutSession(params: {
   return await postJson(withBase('/api/stripe/create-checkout-session'), params);
 }
 
-export async function cancelSubscriptionAtPeriodEnd(): Promise<{ success: boolean }> {
-  return await postJson(withBase('/api/stripe/cancel-at-period-end'));
+export async function cancelSubscriptionAtPeriodEnd(subscriptionId: string): Promise<{ success: boolean; current_period_end?: number; error?: string }> {
+  return await postJson(withBase('/api/stripe/cancel-at-period-end'), { subscriptionId });
 }
 
-export async function resumeSubscription(): Promise<{ success: boolean }> {
-  return await postJson(withBase('/api/stripe/resume'));
+export async function resumeSubscription(subscriptionId: string): Promise<{ success: boolean; error?: string }> {
+  return await postJson(withBase('/api/stripe/resume'), { subscriptionId });
 }
 
 export async function syncCheckoutSession(sessionId: string): Promise<{ ok?: boolean; error?: string; plan_expiry?: number; user_id?: string }> {
   return await getJson(withBase(`/api/stripe/sync?session_id=${encodeURIComponent(sessionId)}`));
+}
+
+export async function createOfferCheckoutSession(offerId: string): Promise<CheckoutSessionResponse> {
+  return await postJson(withBase('/api/stripe/create-offer-checkout'), { offerId });
 }
 
 

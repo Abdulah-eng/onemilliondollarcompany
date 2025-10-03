@@ -87,6 +87,16 @@ export const useCoachRequests = () => {
 
       if (profileError) throw profileError;
 
+      // Create a coach feedback prompt for this customer
+      try {
+        await supabase.from('coach_checkins').insert({
+          coach_id: request.coach_id,
+          customer_id: request.customer_id,
+          message: 'Welcome! Share your progress at week 1.',
+          due_date: new Date().toISOString().slice(0,10),
+        });
+      } catch {}
+
       // Remove from pending requests
       setRequests(prev => prev.filter(r => r.id !== requestId));
       return true;

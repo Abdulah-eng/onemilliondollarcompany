@@ -26,6 +26,7 @@ export const useCoachPrograms = () => {
           assigned_to,
           scheduled_date,
           plan,
+          is_ai_generated,
           created_at,
           updated_at
         `)
@@ -45,6 +46,8 @@ export const useCoachPrograms = () => {
         updatedAt: program.updated_at,
         assignedTo: program.assigned_to,
         scheduledDate: program.scheduled_date || undefined,
+        plan: program.plan || undefined,
+        isAIGenerated: Boolean(program.is_ai_generated),
       }));
 
       setPrograms(transformedPrograms);

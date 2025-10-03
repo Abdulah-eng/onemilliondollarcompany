@@ -43,8 +43,7 @@ export const usePaymentPlan = () => {
       );
 
       // Check if user has used trial (plan was 'trial' at some point)
-      const hasUsedTrial = profile.plan === 'trial' || 
-        (planExpired && profile.plan === 'trial');
+      const hasUsedTrial = Boolean((profile as any).has_used_trial) || profile.plan === 'trial' || (planExpired && profile.plan === 'trial');
 
       const needsUpgrade = !hasActivePlan && profile.onboarding_complete;
 
@@ -70,7 +69,8 @@ export const usePaymentPlan = () => {
       .from('profiles')
       .update({
         plan: 'trial',
-        plan_expiry: trialExpiry.toISOString()
+        plan_expiry: trialExpiry.toISOString(),
+        has_used_trial: true
       })
       .eq('id', profile.id);
 

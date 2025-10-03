@@ -8,6 +8,7 @@ import { MessageWithSender } from '@/hooks/useMessages';
 import { useOfferActions } from '@/hooks/useOfferActions';
 import { toast } from 'sonner';
 import { DollarSign, Clock, Check, X } from 'lucide-react';
+import { createOfferCheckoutSession } from '@/lib/stripe/api';
 import { cn } from '@/lib/utils';
 
 interface OfferMessageProps {
@@ -30,8 +31,9 @@ export const OfferMessage: React.FC<OfferMessageProps> = ({
     if (!offer) return;
 
     try {
-      await acceptOffer(offer.id);
-      toast.success("You are now working with this coach!");
+      // Redirect to Stripe Checkout for one-time payment
+      const { checkoutUrl } = await createOfferCheckoutSession(offer.id);
+      window.location.href = checkoutUrl;
     } catch (error) {
       toast.error("Failed to accept offer. Please try again.");
     }

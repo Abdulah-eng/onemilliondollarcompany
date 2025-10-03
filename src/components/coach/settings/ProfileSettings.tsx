@@ -23,7 +23,9 @@ const profileSchema = z.object({
     name: z.string().trim().min(1, 'Certification name required').max(200, 'Name too long'),
     issuer: z.string().trim().max(200, 'Issuer name too long').optional(),
     year: z.number().int().min(1900).max(new Date().getFullYear() + 1, 'Invalid year')
-  }))
+  })),
+  price_min_cents: z.number().int().min(0).max(10000000).optional(),
+  price_max_cents: z.number().int().min(0).max(10000000).optional(),
 });
 
 interface ProfileSettingsProps {
@@ -39,7 +41,9 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
     avatar_url: '',
     skills: [],
     certifications: [],
-    socials: []
+    socials: [],
+    price_min_cents: null,
+    price_max_cents: null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -202,6 +206,30 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
                 {formData.bio.length}/2000
               </p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Pricing */}
+      <Card className="shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Tag className="h-5 w-5" /> Price Range (USD)
+          </CardTitle>
+          <CardDescription>Let customers know your typical price range.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <div>
+            <Label>Minimum (per package)</Label>
+            <Input type="number" value={(formData.price_min_cents ?? 0) / 100}
+              onChange={e => setFormData({ ...formData, price_min_cents: Math.round((Number(e.target.value) || 0) * 100) })}
+              placeholder="e.g., 99.00" />
+          </div>
+          <div>
+            <Label>Maximum (per package)</Label>
+            <Input type="number" value={(formData.price_max_cents ?? 0) / 100}
+              onChange={e => setFormData({ ...formData, price_max_cents: Math.round((Number(e.target.value) || 0) * 100) })}
+              placeholder="e.g., 499.00" />
           </div>
         </CardContent>
       </Card>

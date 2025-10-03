@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import StatCard from '@/components/coach/income/StatCard';
 import ClientTable from '@/components/coach/income/ClientTable';
@@ -8,16 +8,32 @@ import TransactionHistory from '@/components/coach/income/TransactionHistory';
 import WithdrawalModal from '@/components/coach/income/WithdrawalModal';
 import { useCoachPayouts } from '@/hooks/useCoachPayouts';
 import WithdrawFAB from '@/components/coach/income/WithdrawFAB'; // Import the new FAB
-import { mockIncomeStats, mockClientEarnings, mockTransactions, IncomeStats, Transaction } from '@/mockdata/income/mockIncome';
+import { useCoachClientEarnings } from '@/hooks/useCoachClientEarnings';
+import { IncomeStats, Transaction } from '@/mockdata/income/mockIncome';
 import { DollarSign, Clock, ArrowUp, Wallet, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCoachPayouts } from '@/hooks/useCoachPayouts';
 
 const IncomePage: React.FC = () => {
-  const [stats, setStats] = useState<IncomeStats>(mockIncomeStats);
-  const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
+  const [stats, setStats] = useState<IncomeStats>({ currentBalance: 0, totalEarned: 0, lastMonthIncome: 0, pendingPayout: 0 });
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control the modal
   const { payouts, refetch, requestWithdrawal } = useCoachPayouts();
+  const { rows: clientEarnings } = useCoachClientEarnings();
+
+  // Compute balances from payouts (net amounts) as a basic polish
+  const computed = useMemo(() => {
+    const totalNet = payouts.reduce((acc, p) => acc + (p.net_amount_cents || 0), 0) / 100;
+    const pending = payouts.filter(p => p.status === 'pending').reduce((acc, p) => acc + (p.net_amount_cents || 0), 0) / 100;
+    return { totalNet, pending };
+  }, [payouts]);
+
+  useEffect(() => {
+    setStats(prev => ({
+      ...prev,
+      totalEarned: computed.totalNet,
+      pendingPayout: computed.pending,
+    }));
+  }, [computed.totalNet, computed.pending]);
 
   const handleWithdraw = useCallback(async (amount: number) => {
     if (amount > 0 && amount <= stats.currentBalance) {
@@ -56,7 +72,7 @@ const IncomePage: React.FC = () => {
       </motion.div>
 
       {/* Stats Section (Mobile: 2 cols, Desktop: 4 cols) */}
-      <div className="grid gap-4 **grid-cols-2** lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Current Balance"
           value={stats.currentBalance}
@@ -103,7 +119,13 @@ const IncomePage: React.FC = () => {
 
         {/* Client Earnings Table (Mobile: Full width, Desktop: 3/5 width) */}
         <div className="lg:col-span-3">
-          <ClientTable earnings={mockClientEarnings} />
+          <ClientTable earnings={clientEarnings.map(r => ({
+            id: r.customer_id,
+            name: r.customer_name || 'Customer',
+            totalEarnings: r.total_earned_cents / 100,
+            activeContracts: r.active_contracts,
+            lastPaymentDate: r.last_payout_at || new Date().toISOString(),
+          }))} />
         </div>
       </div>
       

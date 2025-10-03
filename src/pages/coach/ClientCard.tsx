@@ -1,7 +1,8 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockClientData } from '@/mockdata/clientCard/mockClientData';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import ClientHeader from '@/components/coach/clientCard/ClientHeader';
 import ClientProfileTab from '@/components/coach/clientCard/tabs/ClientProfileTab';
 import ProgressProgramsTab from '@/components/coach/clientCard/tabs/ProgressProgramsTab';
@@ -9,8 +10,20 @@ import CommunicationTab from '@/components/coach/clientCard/tabs/CommunicationTa
 import ClientActionButton from '@/components/coach/clientCard/ClientActionButton';
 
 const ClientCard = () => {
-  const location = useLocation();
-  const client = location.state?.client || mockClientData;
+  const { clientId } = useParams();
+  const [client, setClient] = useState<any>(null);
+  useEffect(() => {
+    const run = async () => {
+      if (!clientId) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, avatar_url, plan, plan_expiry, coach_id')
+        .eq('id', clientId)
+        .single();
+      setClient(data);
+    };
+    run();
+  }, [clientId]);
 
   return (
     <div className="relative w-full px-4 py-6 space-y-6">

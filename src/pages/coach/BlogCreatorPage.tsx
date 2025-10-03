@@ -76,8 +76,9 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
     
     const combinedContent = JSON.stringify(contentItems);
 
-    const finalPost: BlogPost = {
-      id: formData.id || `blog-${Date.now()}`,
+    // Do NOT generate a fake id here; let DB generate UUID on insert
+    const finalPost: any = {
+      id: isEditing ? formData.id : undefined,
       category: formData.category as BlogCategory,
       title: formData.title,
       introduction: formData.introduction,

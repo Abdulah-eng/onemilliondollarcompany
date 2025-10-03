@@ -8,6 +8,10 @@ const StripeSyncHandler = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || !import.meta.env.VITE_API_BASE_URL) {
+      // eslint-disable-next-line no-console
+      console.warn('[Stripe] Missing envs: VITE_STRIPE_PUBLISHABLE_KEY or VITE_API_BASE_URL');
+    }
     const params = new URLSearchParams(location.search);
     const status = params.get('status');
     const sessionId = params.get('session_id');

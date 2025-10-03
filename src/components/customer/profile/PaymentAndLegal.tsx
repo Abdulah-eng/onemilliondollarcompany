@@ -2,7 +2,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { loadStripe } from '@stripe/stripe-js';
 import { useAuth } from '@/contexts/AuthContext';
-import { createCheckoutSession, syncCheckoutSession } from '@/lib/stripe/api';
+import { createCheckoutSession, syncCheckoutSession, cancelSubscriptionAtPeriodEnd, resumeSubscription } from '@/lib/stripe/api';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
@@ -21,7 +21,7 @@ const PaymentAndLegal = () => {
   const [selectedCurrency, setSelectedCurrency] = useState('usd');
 
   const currencyOptions = [
-    { value: 'usd', label: 'USD - $29.99/month', price: '$29.99' },
+  { value: 'usd', label: 'USD - $49.99/month', price: '$49.99' },
     { value: 'nok', label: 'NOK - 299 kr/month', price: '299 kr' },
     { value: 'sek', label: 'SEK - 299 kr/month', price: '299 kr' },
     { value: 'dkk', label: 'DKK - 199 kr/month', price: '199 kr' },
@@ -38,6 +38,42 @@ const PaymentAndLegal = () => {
       userId: profile?.id,
     });
     window.location.href = checkoutUrl;
+  };
+
+  const handleCancelAtPeriodEnd = async () => {
+    try {
+      if (!profile?.stripe_subscription_id) {
+        alert('No active subscription found.');
+        return;
+      }
+      const res = await cancelSubscriptionAtPeriodEnd(profile.stripe_subscription_id);
+      if (res?.success) {
+        alert('Your subscription will be canceled at the end of the current period.');
+        window.location.reload();
+      } else {
+        alert(res?.error || 'Failed to schedule cancellation');
+      }
+    } catch (e: any) {
+      alert(e?.message || 'Failed to schedule cancellation');
+    }
+  };
+
+  const handleResume = async () => {
+    try {
+      if (!profile?.stripe_subscription_id) {
+        alert('No active subscription found.');
+        return;
+      }
+      const res = await resumeSubscription(profile.stripe_subscription_id);
+      if (res?.success) {
+        alert('Your subscription has been resumed.');
+        window.location.reload();
+      } else {
+        alert(res?.error || 'Failed to resume subscription');
+      }
+    } catch (e: any) {
+      alert(e?.message || 'Failed to resume subscription');
+    }
   };
 
   // After redirect from Stripe success, sync immediately then refresh
@@ -123,13 +159,23 @@ const PaymentAndLegal = () => {
                     Update Plan
                   </Button>
                   <Button 
-                    variant="destructive" 
+                  variant="destructive" 
                     size="sm" 
                     className="ml-2"
-                    onClick={() => navigate('/customer/payment/cancel-subscription')}
+                  onClick={handleCancelAtPeriodEnd}
                   >
                     Cancel Subscription
                   </Button>
+                {profile?.stripe_subscription_id && (
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    className="ml-2"
+                    onClick={handleResume}
+                  >
+                    Resume Subscription
+                  </Button>
+                )}
                   <Button 
                     variant="secondary" 
                     size="sm" 

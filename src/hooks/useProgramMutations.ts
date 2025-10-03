@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Program, ProgramStatus, ProgramCategory } from '@/types/program';
 import { toast } from 'sonner';
+import { supabase as sb } from '@/integrations/supabase/client';
 
 interface CreateProgramData {
   name: string;
@@ -44,6 +45,36 @@ export const useProgramMutations = () => {
         })
         .select()
         .single();
+      // If assigned to a client, send a system message notifying assignment
+      if (result?.assigned_to) {
+        try {
+          // Find or create conversation
+          const { data: convo } = await sb
+            .from('conversations')
+            .select('id')
+            .eq('coach_id', profile.id)
+            .eq('customer_id', result.assigned_to)
+            .single();
+          let conversationId = convo?.id;
+          if (!conversationId) {
+            const { data: newConvo } = await sb
+              .from('conversations')
+              .insert({ coach_id: profile.id, customer_id: result.assigned_to })
+              .select('id')
+              .single();
+            conversationId = newConvo?.id;
+          }
+          if (conversationId) {
+            await sb.from('messages').insert({
+              conversation_id: conversationId,
+              sender_id: profile.id,
+              content: `A new program "${result.name}" has been assigned to you.`,
+              type: 'system',
+            });
+          }
+        } catch {}
+      }
+
 
       if (error) throw error;
 
