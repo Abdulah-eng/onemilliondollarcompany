@@ -7,7 +7,7 @@ import ClientTable from '@/components/coach/income/ClientTable';
 import TransactionHistory from '@/components/coach/income/TransactionHistory';
 import WithdrawalModal from '@/components/coach/income/WithdrawalModal';
 import { useCoachPayouts } from '@/hooks/useCoachPayouts';
-import WithdrawFAB from '@/components/coach/income/WithdrawFAB'; // Import the new FAB
+import WithdrawFAB from '@/components/coach/income/WithdrawFAB';
 import { useCoachClientEarnings } from '@/hooks/useCoachClientEarnings';
 import { IncomeStats, Transaction } from '@/mockdata/income/mockIncome';
 import { DollarSign, Clock, ArrowUp, Wallet, CheckCircle } from 'lucide-react';

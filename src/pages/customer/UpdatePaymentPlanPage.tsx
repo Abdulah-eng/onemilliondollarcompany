@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -20,15 +20,22 @@ const UpdatePaymentPlanPage = () => {
   const [selectedCurrency, setSelectedCurrency] = useState('usd');
 
   const currencyOptions = [
-    { value: 'usd', label: 'USD - $29.99/month', price: '$29.99' },
-    { value: 'nok', label: 'NOK - 299 kr/month', price: '299 kr' },
-    { value: 'sek', label: 'SEK - 299 kr/month', price: '299 kr' },
-    { value: 'dkk', label: 'DKK - 199 kr/month', price: '199 kr' },
+    { value: 'usd', label: 'USD - $49.99/month', price: '$49.99' },
+    { value: 'nok', label: 'NOK - 499 kr/month', price: '499 kr' },
+    { value: 'sek', label: 'SEK - 499 kr/month', price: '499 kr' },
+    { value: 'dkk', label: 'DKK - 349 kr/month', price: '349 kr' },
   ];
 
   const handlePlanSelect = (planKey: string) => {
     setSelectedPlan(planKey);
   };
+
+  // Auto-select the plan on mount
+  useEffect(() => {
+    if (!selectedPlan) {
+      setSelectedPlan('all-access');
+    }
+  }, [selectedPlan]);
 
   const handleUpdatePaymentMethod = () => {
     setShowPaymentForm(true);
@@ -44,9 +51,10 @@ const UpdatePaymentPlanPage = () => {
     try {
       // Map UI plan keys to backend price keys
       const planKeyMap: Record<string, { priceKey: string; trialDays?: number }> = {
+        'all-access': { priceKey: 'platform_monthly' },
         premium: { priceKey: 'platform_monthly' },
         standard: { priceKey: 'platform_monthly', trialDays: 14 },
-        basic: { priceKey: 'platform_monthly' }, // TODO: replace with one-time price id support
+        basic: { priceKey: 'platform_monthly' },
       };
       const mapped = planKeyMap[selectedPlan] || { priceKey: selectedPlan };
       const { checkoutUrl } = await createCheckoutSession({
@@ -79,7 +87,7 @@ const UpdatePaymentPlanPage = () => {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
+    <div className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
         <Button
           variant="ghost"
@@ -92,26 +100,26 @@ const UpdatePaymentPlanPage = () => {
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Update Plan</h1>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Choose a new plan that fits your needs
+            Complete access to transform your health and wellness
           </p>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="grid gap-8 lg:grid-cols-5">
+        <div className="lg:col-span-3">
           <PlanSelectionCard
             onSelectPlan={handlePlanSelect}
             selectedPlan={selectedPlan}
           />
         </div>
 
-        <div className="space-y-6 lg:sticky lg:top-4">
+        <div className="space-y-6 lg:col-span-2">
           <PaymentMethodCard onUpdate={handleUpdatePaymentMethod} />
           
-          <div className="p-3 sm:p-4 bg-muted rounded-lg space-y-3 sm:space-y-4">
-            <h3 className="text-base sm:text-lg font-semibold">Currency Selection</h3>
+          <div className="p-4 bg-card border rounded-xl space-y-4">
+            <h3 className="text-lg font-semibold">Currency</h3>
             <div className="space-y-2">
-              <Label htmlFor="currency-select">Choose Currency</Label>
+              <Label htmlFor="currency-select">Select Your Currency</Label>
               <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
                 <SelectTrigger id="currency-select" className="w-full">
                   <SelectValue placeholder="Select currency" />
@@ -128,18 +136,22 @@ const UpdatePaymentPlanPage = () => {
           </div>
 
           {selectedPlan && (
-            <div className="p-3 sm:p-4 bg-muted rounded-lg space-y-3 sm:space-y-4">
-              <h3 className="text-base sm:text-lg font-semibold">Plan Update Summary</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Your new plan will take effect immediately and you'll be charged the prorated amount.
+            <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl space-y-4">
+              <h3 className="text-lg font-semibold">Ready to Transform?</h3>
+              <p className="text-sm text-muted-foreground">
+                Your subscription starts immediately with full access to all features.
               </p>
               <Button
                 onClick={handleConfirmUpdate}
                 disabled={isProcessing}
-                className="w-full"
+                size="lg"
+                className="w-full h-12 text-base"
               >
-                {isProcessing ? 'Processing...' : `Subscribe ${currencyOptions.find(opt => opt.value === selectedCurrency)?.price}/mo`}
+                {isProcessing ? 'Processing...' : `Subscribe - ${currencyOptions.find(opt => opt.value === selectedCurrency)?.price}/mo`}
               </Button>
+              <p className="text-xs text-center text-muted-foreground">
+                Cancel anytime • Secure payment
+              </p>
             </div>
           )}
         </div>

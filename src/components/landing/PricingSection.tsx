@@ -5,25 +5,18 @@ import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const PricingSection = () => {
-  const plans = PLANS.map((p: any) => {
-    let icon;
-    if (p.name === 'Premium') icon = Sparkles;
-    else if (p.name === 'Standard') icon = User;
-    else icon = ShieldCheck;
-
-    return {
-      name: p.name,
-      price: p.price,
-      oldPrice: p.oldPrice,
-      period: p.period === 'One-Time' ? 'one-time' : `/${p.period}`,
-      description: p.summary,
-      features: p.features.filter((f: any) => f.included),
-      cta: p.ctaText,
-      featured: p.popular,
-      badge: p.popular ? 'Most Popular' : null,
-      icon: icon,
-    };
-  });
+  const plan = {
+    name: PLANS[0].name,
+    price: PLANS[0].price,
+    oldPrice: PLANS[0].oldPrice,
+    period: `/${PLANS[0].period}`,
+    description: PLANS[0].summary,
+    features: PLANS[0].features,
+    cta: PLANS[0].ctaText,
+    featured: true,
+    badge: 'Complete Access',
+    icon: Sparkles,
+  };
 
   return (
     <section
@@ -31,108 +24,85 @@ const PricingSection = () => {
       className="light relative py-20 bg-gradient-to-t from-[#DDF5F0] via-[#B2E0D9]/50 to-white overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12" data-reveal>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tighter text-foreground mb-4">
-            Choose Your Transformation Plan
-          </h2>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Start your journey with the perfect plan for your goals. No hidden fees, just pure value.
-          </p>
-          <div className="mt-6 flex justify-center items-center gap-x-4 sm:gap-x-6 text-sm text-muted-foreground">
-            <span>✓ 14-day free trial on Standard</span>
-            <span className="text-primary">•</span>
-            <span>✓ Cancel anytime</span>
-          </div>
-        </div>
+        {/* Header */}
+        <div className="text-center mb-12" data-reveal>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tighter text-foreground mb-4">
+            Complete Access to Transform Your Life
+          </h2>
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+            Everything you need for fitness, nutrition, and mental wellness - all in one plan
+          </p>
+          <div className="mt-6 flex justify-center items-center gap-x-4 sm:gap-x-6 text-sm text-muted-foreground">
+            <span>✓ Unlimited access to all features</span>
+            <span className="text-primary">•</span>
+            <span>✓ Cancel anytime</span>
+          </div>
+        </div>
 
-        {/* Responsive Grid for Cards */}
-        <div
-          className="relative mt-8 grid grid-flow-col auto-cols-[90%] sm:auto-cols-[380px] lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-3 gap-8 overflow-x-auto lg:overflow-visible pb-8 pt-10 lg:py-0 scrollbar-hide-tablet"
-          data-reveal
-        >
-          {plans.map((plan: any) => (
-            <div
-              key={plan.name}
-              className={cn(
-                'relative p-8 rounded-3xl border flex flex-col transition-all duration-300',
-                plan.featured
-                  ? 'text-white border-primary/30 lg:scale-105 shadow-2xl shadow-primary/20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-700 via-gray-900 to-black'
-                  : 'bg-card border-border shadow-lg hover:shadow-xl'
-              )}
-            >
-              {plan.badge && (
-                <div
-                  className={cn(
-                    "absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 text-xs font-semibold px-4 py-1 rounded-full uppercase tracking-wider shadow-lg",
-                    plan.featured
-                      ? "bg-primary text-white" // Solid badge color for Premium
-                      : "bg-gradient-to-r from-primary to-orange-400 text-white"
-                  )}
-                >
-                  {plan.badge}
-                </div>
-              )}
+        {/* Single Centered Plan Card */}
+        <div className="flex justify-center" data-reveal>
+          <div
+            className="relative p-10 rounded-3xl border flex flex-col transition-all duration-300 max-w-xl w-full text-white border-primary/30 lg:scale-105 shadow-2xl shadow-primary/20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-700 via-gray-900 to-black"
+          >
+            {plan.badge && (
+              <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 text-sm font-semibold px-5 py-1.5 rounded-full uppercase tracking-wider shadow-lg bg-primary text-white">
+                {plan.badge}
+              </div>
+            )}
 
-              <div className="flex-grow pt-4">
-                {plan.icon && <plan.icon className="w-8 h-8 mb-4 text-primary drop-shadow-[0_2px_4px_rgba(251,146,60,0.5)]" />}
-                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                <p
-                  className={cn(
-                    'text-sm h-10',
-                    plan.featured ? 'text-white/70' : 'text-muted-foreground'
-                  )}
-                >
-                  {plan.description}
-                </p>
+            <div className="flex-grow pt-6">
+              {plan.icon && (
+                <div className="flex justify-center mb-6">
+                  <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
+                    <plan.icon className="w-10 h-10 text-primary drop-shadow-[0_2px_8px_rgba(251,146,60,0.6)]" />
+                  </div>
+                </div>
+              )}
+              <h3 className="text-3xl font-bold mb-3 text-center">{plan.name}</h3>
+              <p className="text-base text-white/70 text-center mb-6">
+                {plan.description}
+              </p>
 
-                <div className="my-8 flex items-end gap-2">
-                  <span className="text-4xl font-extrabold tracking-tight">{plan.price}</span>
-                  {plan.oldPrice && (
-                    <span
-                      className={cn(
-                        'text-xl line-through',
-                        plan.featured ? 'text-white/50' : 'text-muted-foreground/80'
-                      )}
-                    >
-                      {plan.oldPrice}
-                    </span>
-                  )}
-                  <span
-                    className={cn(
-                      'text-sm',
-                      plan.featured ? 'text-white/70' : 'text-muted-foreground'
-                    )}
-                  >
-                    {plan.period}
-                  </span>
-                </div>
-
-                <ul className="space-y-4 text-left">
-                  {plan.features.map((feature: any, i: number) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">
-                        {Array.isArray(feature.text) ? feature.text.join(' ') : feature.text}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <Link 
-                to="/get-started"
-                className={cn(
-                  'w-full mt-8 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md px-8',
-                  plan.featured
-                    ? 'text-white bg-primary hover:bg-primary/90 border-0 shadow-lg shadow-primary/30' // Solid color button
-                    : 'bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20'
+              <div className="my-8 flex flex-col items-center gap-2">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-6xl font-extrabold tracking-tight">{plan.price}</span>
+                  <span className="text-white/70 text-xl">{plan.period}</span>
+                </div>
+                {plan.oldPrice && (
+                  <div className="text-xl text-white/50 line-through">
+                    {plan.oldPrice}
+                  </div>
                 )}
-              >
-                {plan.cta}
-              </Link>
-            </div>
-          ))}
+              </div>
+
+              <ul className="space-y-4 text-left mb-8">
+                {plan.features.map((feature: any, i: number) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                    <span className="text-base">
+                      {Array.isArray(feature.text) ? feature.text.join(' ') : feature.text}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <Link 
+              to="/get-started"
+              className="w-full mt-4 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-base font-semibold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-14 px-8 text-white bg-primary hover:bg-primary/90 border-0 shadow-lg shadow-primary/30"
+            >
+              {plan.cta}
+            </Link>
+
+            <div className="flex items-center justify-center gap-6 text-sm text-white/60 mt-4">
+              <span className="flex items-center gap-1">
+                <Check className="h-4 w-4" /> Cancel Anytime
+              </span>
+              <span className="flex items-center gap-1">
+                <Check className="h-4 w-4" /> Secure Payment
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
