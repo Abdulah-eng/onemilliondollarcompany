@@ -16,6 +16,7 @@ export interface Profile {
   plan?: string | null;
   plan_expiry?: string | null;
   stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
   coach_id?: string | null;
   created_at: string;
   updated_at: string;
