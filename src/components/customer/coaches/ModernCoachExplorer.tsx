@@ -16,6 +16,7 @@ import { useEnhancedCoaches, EnhancedCoach } from '@/hooks/useEnhancedCoaches';
 import { CoachDetailModal } from './CoachDetailModal';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePaymentPlan } from '@/hooks/usePaymentPlan';
 
 // Define the available filter options
 type FilterOption = 'All' | 'Fitness' | 'Nutrition' | 'Mental Health';
@@ -165,6 +166,7 @@ interface ModernCoachExplorerProps {
 
 const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachRequestSent }) => {
     const { user } = useAuth();
+    const { planStatus } = usePaymentPlan();
     const { coaches, loading, sendRequest, getRequestStatus } = useEnhancedCoaches();
     const { generateAndSavePlan, loading: aiLoading } = useAIPlanGeneration();
     const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -186,7 +188,9 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
             toast.success(`Request sent to ${coach.name}!`);
             onNewCoachRequestSent(coach.name);
         } catch (error) {
-            toast.error('Failed to send request. Please try again.');
+            console.error('Request error:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Failed to send request. Please try again.';
+            toast.error(errorMessage);
         } finally {
             setIsRequestLoading(false);
         }
@@ -230,15 +234,20 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
         );
     }
 
-    const handleFreeAICoach = async () => {
+    const handleAICoach = async () => {
         try {
             if (!user) {
                 toast.error('Please log in to generate your AI plan.');
                 return;
             }
+
+            if (!planStatus.hasActivePlan) {
+                toast.error('AI Coach requires a payment plan. Please upgrade to access this feature.');
+                return;
+            }
             
             await generateAndSavePlan();
-            toast.success('Your free AI plan has been generated and saved!');
+            toast.success('Your AI plan has been generated and saved!');
             // Navigate to programs page to see the generated plan
             window.location.href = '/customer/programs';
         } catch (error) {
@@ -249,28 +258,40 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
 
     return (
         <div className="space-y-8">
-            {/* Free AI Coach Highlight */}
-            <Card className="border-2 border-emerald-300/40 bg-emerald-50/40">
+            {/* AI Coach Highlight */}
+            <Card className={`border-2 ${planStatus.hasActivePlan ? 'border-emerald-300/40 bg-emerald-50/40' : 'border-amber-300/40 bg-amber-50/40'}`}>
                 <CardContent className="p-6 flex items-center justify-between gap-4">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <Bot className="w-5 h-5 text-emerald-600" />
-                            <span className="text-sm font-semibold text-emerald-700">Free AI Coach</span>
+                            <Bot className={`w-5 h-5 ${planStatus.hasActivePlan ? 'text-emerald-600' : 'text-amber-600'}`} />
+                            <span className={`text-sm font-semibold ${planStatus.hasActivePlan ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                AI Coach
+                            </span>
                         </div>
-                        <p className="text-sm text-muted-foreground">Get a personalized starter plan powered by AI at no cost.</p>
+                        <p className="text-sm text-muted-foreground">
+                            {planStatus.hasActivePlan 
+                                ? 'Get a personalized plan powered by AI.' 
+                                : 'Get a personalized plan powered by AI. Requires active subscription.'
+                            }
+                        </p>
                     </div>
                     <Button 
-                        onClick={handleFreeAICoach} 
-                        disabled={aiLoading}
-                        className="bg-emerald-600 hover:bg-emerald-700"
+                        onClick={handleAICoach} 
+                        disabled={aiLoading || !planStatus.hasActivePlan}
+                        className={`${planStatus.hasActivePlan 
+                            ? 'bg-emerald-600 hover:bg-emerald-700' 
+                            : 'bg-amber-600 hover:bg-amber-700'
+                        }`}
                     >
                         {aiLoading ? (
                             <>
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                 Generating...
                             </>
+                        ) : planStatus.hasActivePlan ? (
+                            'Generate AI Plan'
                         ) : (
-                            'Generate Free Plan'
+                            'Upgrade Required'
                         )}
                     </Button>
                 </CardContent>

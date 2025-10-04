@@ -59,7 +59,9 @@ export const useCoachProfile = () => {
           avatar_url: data.avatar_url || '',
           skills: data.skills || [],
           certifications: data.certifications || [],
-          socials: data.socials || []
+          socials: data.socials || [],
+          price_min_cents: data.price_min_cents || null,
+          price_max_cents: data.price_max_cents || null
         };
         setProfile(transformedProfile);
       }
@@ -83,7 +85,9 @@ export const useCoachProfile = () => {
           avatar_url: updatedProfile.avatar_url,
           skills: updatedProfile.skills,
           certifications: updatedProfile.certifications,
-          socials: updatedProfile.socials
+          socials: updatedProfile.socials,
+          price_min_cents: updatedProfile.price_min_cents,
+          price_max_cents: updatedProfile.price_max_cents
         })
         .eq('id', user.id);
 

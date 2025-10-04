@@ -6,10 +6,11 @@ import { LibraryItem, LibraryCategory } from '@/mockdata/library/mockLibrary';
 import LibraryHeader from '@/components/coach/library/LibraryHeader';
 import LibraryList from '@/components/coach/library/LibraryList';
 import LibraryCreatorPage from './LibraryCreatorPage';
+import LibraryViewer from '@/components/coach/library/LibraryViewer';
 import LibraryFAB from '@/components/coach/library/LibraryFAB';
 import { useCoachLibrary } from '@/hooks/useCoachLibrary';
 
-type LibraryView = 'list' | 'creator';
+type LibraryView = 'list' | 'creator' | 'viewer';
 
 const LibraryPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<LibraryCategory | null>(null);
@@ -40,6 +41,7 @@ const LibraryPage: React.FC = () => {
   }, [items]);
   const [view, setView] = useState<LibraryView>('list');
   const [editingItem, setEditingItem] = useState<LibraryItem | null>(null);
+  const [viewingItem, setViewingItem] = useState<LibraryItem | null>(null);
 
   // ... (Filtering Logic remains the same)
   const filteredItems = useMemo(() => {
@@ -75,7 +77,16 @@ const LibraryPage: React.FC = () => {
     setView('creator');
   };
 
-  const handleBackToList = () => setView('list');
+  const handleViewItem = (item: LibraryItem) => {
+    setViewingItem(item);
+    setView('viewer');
+  };
+
+  const handleBackToList = () => {
+    setView('list');
+    setEditingItem(null);
+    setViewingItem(null);
+  };
 
   const handleDeleteItem = async (id: string) => {
     if (window.confirm('Are you sure you want to permanently delete this content?')) {
@@ -114,14 +125,20 @@ const LibraryPage: React.FC = () => {
                 filteredItems={filteredItems}
                 onEdit={handleEditItem}
                 onDelete={handleDeleteItem}
+                onView={handleViewItem}
               />
             </motion.div>
-          ) : (
+          ) : view === 'creator' ? (
             <LibraryCreatorPage
               onBack={handleBackToList}
               onSubmit={handleItemSubmit}
               initialItem={editingItem ?? undefined}
               activeCategory={activeCategory || 'exercise'}
+            />
+          ) : (
+            <LibraryViewer
+              item={viewingItem!}
+              onBack={handleBackToList}
             />
           )}
         </motion.div>

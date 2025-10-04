@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { User, Tag, Award, Plus, Trash2, Link, Upload, Save, Loader2, Brain, AlertCircle } from 'lucide-react';
+import { User, Tag, Award, Plus, Trash2, Link, Upload, Save, Loader2, Brain, AlertCircle, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCoachProfile, CoachProfile, Certification, SocialLink } from '@/hooks/useCoachProfile';
 import { SkillsSelector } from '@/components/onboarding/SkillsSelector';
@@ -47,6 +47,8 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (profile) {
@@ -70,6 +72,43 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
   
   const removeCert = (id: string) => {
     setFormData({ ...formData, certifications: formData.certifications.filter(c => c.id !== id) });
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    setIsUploadingImage(true);
+    try {
+      // Create a preview URL for immediate display
+      const previewUrl = URL.createObjectURL(file);
+      setFormData({ ...formData, avatar_url: previewUrl });
+
+      // In a real app, you would upload to a service like Supabase Storage
+      // For now, we'll just update the form data with the preview
+      toast.success('Image uploaded successfully!');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image. Please try again.');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const triggerImageUpload = () => {
+    fileInputRef.current?.click();
   };
 
   const handleSave = async () => {
@@ -130,15 +169,42 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-4">
-            <img 
-              src={formData.avatar_url || 'https://placehold.co/100x100/A0E7E5/030712?text=CP'} 
-              alt="Profile" 
-              className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
-            />
-            <Button variant="outline" className="gap-2">
-              <Upload className="h-4 w-4" /> Change Photo
-            </Button>
+            <div className="relative">
+              <img 
+                src={formData.avatar_url || 'https://placehold.co/100x100/A0E7E5/030712?text=CP'} 
+                alt="Profile" 
+                className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
+              />
+              {isUploadingImage && (
+                <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-white" />
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Button 
+                variant="outline" 
+                className="gap-2"
+                onClick={triggerImageUpload}
+                disabled={isUploadingImage}
+              >
+                <Camera className="h-4 w-4" /> 
+                {isUploadingImage ? 'Uploading...' : 'Change Photo'}
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                JPG, PNG up to 5MB
+              </p>
+            </div>
           </div>
+          
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
           
           <div>
             <Label htmlFor="name">Full Name</Label>

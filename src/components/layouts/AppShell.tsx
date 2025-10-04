@@ -8,19 +8,24 @@ import {
   coachNavItems, 
   coachBottomNavItems, 
   customerNavItems, 
-  customerBottomNavItems 
+  customerBottomNavItems,
+  getCustomerNavItems
 } from '@/lib/navItems';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLibraryAccess } from '@/hooks/useLibraryAccess';
+import { usePaymentPlan } from '@/hooks/usePaymentPlan';
 
 const AppShell = () => {
   const { profile, loading } = useAuth();
+  const { shouldShowLink } = useLibraryAccess();
+  const { planStatus } = usePaymentPlan();
 
   if (loading) return <div>Loading...</div>;
   if (!profile) return null;
 
   const navByRole = {
     coach: { main: coachNavItems, bottom: coachBottomNavItems },
-    customer: { main: customerNavItems, bottom: customerBottomNavItems },
+    customer: { main: getCustomerNavItems(shouldShowLink, planStatus.hasActivePlan), bottom: customerBottomNavItems },
   };
 
   const navConfig = navByRole[profile.role as keyof typeof navByRole];

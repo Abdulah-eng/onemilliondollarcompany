@@ -125,32 +125,62 @@ export const OnboardingProvider = ({ children }: { children: React.ReactNode }) 
 
   const completeOnboarding = async (): Promise<void> => {
     if (!user) {
-      toast.error("Authentication error.");
+      toast.error("Authentication error. Please log in again.");
       return;
     }
     setLoading(true);
 
     try {
       let avatar_url = profile?.avatar_url;
+      
+      // Handle avatar upload if provided
       if (state.contactInfo.avatarFile) {
-        const file = state.contactInfo.avatarFile;
-        const filePath = `${user.id}/${Date.now()}_${file.name}`;
-        await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
-        avatar_url = supabase.storage.from('avatars').getPublicUrl(filePath).data.publicUrl;
+        try {
+          const file = state.contactInfo.avatarFile;
+          const filePath = `${user.id}/${Date.now()}_${file.name}`;
+          const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
+          
+          if (uploadError) {
+            console.error('Avatar upload error:', uploadError);
+            toast.error('Failed to upload avatar. Continuing without it.');
+          } else {
+            avatar_url = supabase.storage.from('avatars').getPublicUrl(filePath).data.publicUrl;
+          }
+        } catch (uploadError) {
+          console.error('Avatar upload error:', uploadError);
+          toast.error('Failed to upload avatar. Continuing without it.');
+        }
       }
 
+      // Update password if provided
       if (state.contactInfo.password) {
-        await supabase.auth.updateUser({ password: state.contactInfo.password });
+        try {
+          const { error: passwordError } = await supabase.auth.updateUser({ password: state.contactInfo.password });
+          if (passwordError) {
+            console.error('Password update error:', passwordError);
+            toast.error('Failed to update password. You can set it later in settings.');
+          }
+        } catch (passwordError) {
+          console.error('Password update error:', passwordError);
+          toast.error('Failed to update password. You can set it later in settings.');
+        }
       }
 
+      // Update profile
       const profileUpdate = {
         full_name: state.personalInfo.name,
         avatar_url,
         phone: state.contactInfo.phone,
         onboarding_complete: true,
       };
-      await supabase.from('profiles').update(profileUpdate).eq('id', user.id);
+      
+      const { error: profileError } = await supabase.from('profiles').update(profileUpdate).eq('id', user.id);
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        throw new Error('Failed to update profile. Please try again.');
+      }
 
+      // Update onboarding details
       const detailsUpdate = {
         user_id: user.id,
         weight: state.personalInfo.weight,
@@ -165,14 +195,20 @@ export const OnboardingProvider = ({ children }: { children: React.ReactNode }) 
         injuries: state.preferences.injuries,
         meditation_experience: state.preferences.meditationExperience,
       };
-      await supabase.from('onboarding_details').upsert(detailsUpdate, { onConflict: 'user_id' });
+      
+      const { error: detailsError } = await supabase.from('onboarding_details').upsert(detailsUpdate, { onConflict: 'user_id' });
+      if (detailsError) {
+        console.error('Onboarding details update error:', detailsError);
+        throw new Error('Failed to save preferences. Please try again.');
+      }
 
       // Refresh the profile to update the auth state with new data
       await refreshProfile();
       toast.success("Welcome! Your profile is complete.");
       try { localStorage.removeItem('onboarding_state'); } catch {}
     } catch (error) {
-      toast.error(error.message || "Could not complete setup.");
+      console.error('Onboarding completion error:', error);
+      toast.error(error.message || "Could not complete setup. Please try again.");
       throw error;
     } finally {
       setLoading(false);

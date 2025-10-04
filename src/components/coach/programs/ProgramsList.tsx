@@ -69,8 +69,7 @@ const ProgramsList = () => {
   const handleAction = useCallback(async (action: string, program: Program) => {
     switch (action) {
       case 'view':
-        console.log('View program:', program);
-        // TODO: Implement view program functionality
+        navigate(`/coach/programs/view/${program.id}`);
         break;
       case 'edit':
         navigate(`/coach/programs/edit/${program.id}`);

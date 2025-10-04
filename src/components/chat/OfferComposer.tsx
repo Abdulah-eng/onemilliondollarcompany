@@ -18,7 +18,7 @@ const offerSchema = z.object({
     .max(12, 'Duration cannot exceed 12 months'),
   message: z.string()
     .trim()
-    .min(10, 'Message must be at least 10 characters')
+    .min(5, 'Message must be at least 5 characters')
     .max(1000, 'Message cannot exceed 1000 characters')
 });
 
@@ -67,7 +67,8 @@ export const OfferComposer: React.FC<OfferComposerProps> = ({
   };
 
   const isValid = price && duration && message.trim() && 
-                  !isNaN(parseFloat(price)) && !isNaN(parseInt(duration));
+                  !isNaN(parseFloat(price)) && !isNaN(parseInt(duration)) &&
+                  message.trim().length >= 5;
 
   return (
     <Card>
@@ -149,7 +150,7 @@ export const OfferComposer: React.FC<OfferComposerProps> = ({
                 setMessage(e.target.value);
                 setErrors({ ...errors, message: undefined });
               }}
-              placeholder="Describe your coaching offer (10-1000 characters)..."
+              placeholder="Describe your coaching offer (5-1000 characters)..."
               rows={3}
               disabled={sending}
               maxLength={1000}
@@ -162,9 +163,16 @@ export const OfferComposer: React.FC<OfferComposerProps> = ({
                   {errors.message}
                 </p>
               )}
-              <p className="text-xs text-muted-foreground ml-auto">
-                {message.length}/1000
-              </p>
+              <div className="ml-auto flex items-center gap-2">
+                {message.trim().length > 0 && message.trim().length < 5 && (
+                  <p className="text-xs text-amber-600">
+                    {5 - message.trim().length} more characters needed
+                  </p>
+                )}
+                <p className={`text-xs ${message.length > 900 ? 'text-amber-600' : 'text-muted-foreground'}`}>
+                  {message.length}/1000
+                </p>
+              </div>
             </div>
           </div>
           

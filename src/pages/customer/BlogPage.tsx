@@ -69,6 +69,8 @@ const BlogPage = () => {
                                         date: new Date(latestPost.updated_at).toLocaleDateString(),
                                         readTime: '',
                                         slug: latestPost.id,
+                                        content: latestPost.content,
+                                        category: latestPost.category || 'fitness',
                                       }} onReadMore={handleReadMore} />
                                     )}
                                 </div>
@@ -82,6 +84,8 @@ const BlogPage = () => {
                                       date: new Date(p.updated_at).toLocaleDateString(),
                                       readTime: '',
                                       slug: p.id,
+                                      content: p.content,
+                                      category: p.category || 'fitness',
                                     }))} onReadMore={handleReadMore} />
                                 </div>
                             </div>
@@ -97,6 +101,8 @@ const BlogPage = () => {
                                     date: new Date(latestPost.updated_at).toLocaleDateString(),
                                     readTime: '',
                                     slug: latestPost.id,
+                                    content: latestPost.content,
+                                    category: latestPost.category || 'fitness',
                                   }} onReadMore={handleReadMore} />
                                 )}
                                 <div className="mt-8">
@@ -109,6 +115,8 @@ const BlogPage = () => {
                                       date: new Date(p.updated_at).toLocaleDateString(),
                                       readTime: '',
                                       slug: p.id,
+                                      content: p.content,
+                                      category: p.category || 'fitness',
                                     }))} onReadMore={handleReadMore} />
                                 </div>
                             </div>

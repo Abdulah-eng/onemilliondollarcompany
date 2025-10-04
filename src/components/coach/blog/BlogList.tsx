@@ -8,9 +8,10 @@ interface BlogListProps {
   filteredPosts: BlogPost[];
   onEdit: (post: BlogPost) => void;
   onDelete: (id: string) => void;
+  onView?: (post: BlogPost) => void;
 }
 
-const BlogList: React.FC<BlogListProps> = ({ filteredPosts, onEdit, onDelete }) => {
+const BlogList: React.FC<BlogListProps> = ({ filteredPosts, onEdit, onDelete, onView }) => {
   if (filteredPosts.length === 0) {
     return (
       <div className="py-20 text-center text-muted-foreground">
@@ -30,6 +31,7 @@ const BlogList: React.FC<BlogListProps> = ({ filteredPosts, onEdit, onDelete }) 
           post={post}
           onEdit={onEdit}
           onDelete={onDelete}
+          onView={onView}
         />
       ))}
     </div>

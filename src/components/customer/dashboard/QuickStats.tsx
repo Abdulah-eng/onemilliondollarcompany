@@ -1,56 +1,155 @@
 // src/components/customer/dashboard/QuickStats.tsx
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Lock, ArrowUp, ArrowDown } from 'lucide-react';
+import { Lock, ArrowUp, ArrowDown, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-/*
-TODO: Backend Integration Notes
-- `plan`: Fetch from a `subscriptions` table.
-- All stat values and trends need to be calculated from `daily_logs` and `activity_logs`.
-*/
-const mockData = {
-  plan: 'standard', // 'otp', 'standard', or 'premium'
-  stats: {
-    avgWater: '2.1 L',
-    avgEnergy: 'Good',
-    avgSleep: '7.5 hrs',
-    avgMood: 'Positive',
-    weightTrend: '-0.5 kg',
-    goalAdherence: 85,
-  },
-};
+import { useAuth } from '@/contexts/AuthContext';
+import { useDailyCheckins } from '@/hooks/useDailyCheckins';
+import { usePaymentPlan } from '@/hooks/usePaymentPlan';
+import { useWeightTracking } from '@/hooks/useWeightTracking';
 
 const QuickStats = () => {
-  const { plan, stats } = mockData;
-  const planLevels = { otp: 1, standard: 2, premium: 3 };
-  const userPlanLevel = planLevels[plan] || 0;
+  const { profile } = useAuth();
+  const { planStatus } = usePaymentPlan();
+  const { checkins } = useDailyCheckins();
+  const { getWeightTrend, getWeightHistory, entries: weightEntries, addWeightEntry } = useWeightTracking();
+  const [stats, setStats] = useState({
+    avgWater: '0.0 L',
+    avgEnergy: 'N/A',
+    avgSleep: '0.0 hrs',
+    avgMood: 'N/A',
+    weightTrend: '0.0 kg',
+    goalAdherence: 0,
+  });
+  const [loading, setLoading] = useState(true);
 
-  const statItems = [
-    { label: "Avg. Water", value: stats.avgWater, emoji: '💧', requiredPlan: 'otp', color: 'blue' },
-    { label: "Avg. Energy", value: stats.avgEnergy, emoji: '⚡️', requiredPlan: 'otp', color: 'green' },
-    { label: "Avg. Sleep", value: stats.avgSleep, emoji: '😴', requiredPlan: 'otp', color: 'indigo' },
-    { label: "Avg. Mood", value: stats.avgMood, emoji: '😊', requiredPlan: 'otp', color: 'rose' },
-    { label: "Weight Trend", value: stats.weightTrend, emoji: '⚖️', requiredPlan: 'premium', trend: 'down', color: 'sky' },
-    { label: "Goal Adherence", value: `${stats.goalAdherence}%`, emoji: '🎯', requiredPlan: 'premium', trend: 'up', color: 'purple' },
-  ];
+  // Test function to add sample weight data
+  const addSampleWeightData = async () => {
+    try {
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      // Add weight entries for testing
+      await addWeightEntry(70.5, today.toISOString().split('T')[0], 'Test entry - today');
+      await addWeightEntry(71.0, yesterday.toISOString().split('T')[0], 'Test entry - yesterday');
+      
+      console.log('Sample weight data added');
+      // Recalculate stats
+      calculateStats();
+    } catch (error) {
+      console.error('Failed to add sample weight data:', error);
+    }
+  };
 
-  return (
-    <div>
-        <h2 className="text-xl font-bold text-foreground mb-4">Your Weekly Stats</h2>
-        <div className="p-1 -m-1">
-            <div className="flex gap-3 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                {statItems.map((stat) => (
-                    <StatCard
-                    key={stat.label}
-                    {...stat}
-                    isLocked={planLevels[stat.requiredPlan] > userPlanLevel}
-                    />
-                ))}
-            </div>
-        </div>
-    </div>
-  );
+  // Determine user plan level based on profile plan and payment status
+  const getUserPlanLevel = () => {
+    if (!profile?.plan) return 0;
+    
+    // Map database plan values to plan levels
+    const planMapping = {
+      'trial': 1,
+      'platform_monthly': 3,  // This should be premium level
+      'platform_yearly': 3,   // This should be premium level
+      'standard': 2,
+      'premium': 3
+    };
+    
+    return planMapping[profile.plan] || 0;
+  };
+  
+  const userPlanLevel = getUserPlanLevel();
+
+
+  useEffect(() => {
+    const calculateStats = () => {
+      if (!checkins || checkins.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      // Get last 7 days of data
+      const last7Days = checkins.slice(-7);
+      
+      // Calculate averages
+      const avgWater = last7Days.reduce((sum, c) => sum + (c.water_liters || 0), 0) / last7Days.length;
+      const avgEnergy = last7Days.reduce((sum, c) => sum + (c.energy || 0), 0) / last7Days.length;
+      const avgSleep = last7Days.reduce((sum, c) => sum + (c.sleep_hours || 0), 0) / last7Days.length;
+      const avgMood = last7Days.reduce((sum, c) => sum + (c.mood || 0), 0) / last7Days.length;
+
+      // Calculate weight trend from real data
+      const weightTrend = getWeightTrend();
+      console.log('Weight trend calculation:', {
+        weightEntries: weightEntries.length,
+        entries: weightEntries,
+        trend: weightTrend
+      });
+
+      // Calculate goal adherence (simplified)
+      const completedDays = last7Days.filter(c => c.water_liters && c.energy && c.sleep_hours && c.mood).length;
+      const goalAdherence = Math.round((completedDays / last7Days.length) * 100);
+
+      setStats({
+        avgWater: `${avgWater.toFixed(1)} L`,
+        avgEnergy: avgEnergy > 3.5 ? 'Good' : avgEnergy > 2.5 ? 'Fair' : 'Low',
+        avgSleep: `${avgSleep.toFixed(1)} hrs`,
+        avgMood: avgMood > 3.5 ? 'Positive' : avgMood > 2.5 ? 'Neutral' : 'Low',
+        weightTrend: weightEntries.length === 0 ? 'No data' : weightEntries.length === 1 ? 'Need more data' : `${weightTrend > 0 ? '+' : ''}${weightTrend.toFixed(1)} kg`,
+        goalAdherence,
+      });
+      setLoading(false);
+    };
+
+    calculateStats();
+  }, [checkins, weightEntries]);
+
+  const statItems = [
+    { label: "Avg. Water", value: stats.avgWater, emoji: '💧', requiredPlan: 1, color: 'blue' },
+    { label: "Avg. Energy", value: stats.avgEnergy, emoji: '⚡️', requiredPlan: 1, color: 'green' },
+    { label: "Avg. Sleep", value: stats.avgSleep, emoji: '😴', requiredPlan: 1, color: 'indigo' },
+    { label: "Avg. Mood", value: stats.avgMood, emoji: '😊', requiredPlan: 1, color: 'rose' },
+    { label: "Weight Trend", value: stats.weightTrend, emoji: '⚖️', requiredPlan: 3, trend: 'down', color: 'sky' },
+    { label: "Goal Adherence", value: `${stats.goalAdherence}%`, emoji: '🎯', requiredPlan: 3, trend: 'up', color: 'purple' },
+  ];
+
+  if (loading) {
+    return (
+      <div>
+        <h2 className="text-xl font-bold text-foreground mb-4">Your Weekly Stats</h2>
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-foreground">Your Weekly Stats</h2>
+          {weightEntries.length === 0 && (
+            <button 
+              onClick={addSampleWeightData}
+              className="text-xs bg-primary/10 text-primary px-2 py-1 rounded hover:bg-primary/20"
+            >
+              Add Test Data
+            </button>
+          )}
+        </div>
+        <div className="p-1 -m-1">
+            <div className="flex gap-3 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {statItems.map((stat) => (
+                    <StatCard
+                    key={stat.label}
+                    {...stat}
+                    isLocked={stat.requiredPlan > userPlanLevel}
+                    />
+                ))}
+            </div>
+        </div>
+    </div>
+  );
 };
 
 // Updated themes to be fully responsive for both light and dark modes

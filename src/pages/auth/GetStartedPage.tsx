@@ -30,12 +30,26 @@ const GetStartedPage = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const { error } = await sendMagicLink(values.email);
-    if (error) {
-      toast.error(error.message || 'Failed to send login link.');
-    } else {
-      setIsSuccess(true);
-      toast.success('Check your email for your magic link!');
+    try {
+      const { error } = await sendMagicLink(values.email);
+      if (error) {
+        // Handle specific error cases
+        if (error.message.includes('Invalid email')) {
+          toast.error('Please enter a valid email address.');
+        } else if (error.message.includes('Too many requests')) {
+          toast.error('Too many requests. Please wait a moment before trying again.');
+        } else if (error.message.includes('Email rate limit exceeded')) {
+          toast.error('Please wait a few minutes before requesting another magic link.');
+        } else {
+          toast.error(error.message || 'Failed to send magic link. Please try again.');
+        }
+      } else {
+        setIsSuccess(true);
+        toast.success('Check your email for your magic link!');
+      }
+    } catch (error) {
+      console.error('Magic link error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
     }
   };
 

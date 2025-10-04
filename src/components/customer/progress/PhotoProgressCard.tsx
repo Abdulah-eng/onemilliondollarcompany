@@ -1,8 +1,14 @@
 // src/components/customer/progress/PhotoProgressCard.tsx
-import { PhotoEntry } from '@/mockdata/progress/mockProgressData';
 import { Button } from '@/components/ui/button';
 import { Camera, Maximize, GitCompare } from 'lucide-react';
 import { motion } from 'framer-motion';
+
+interface PhotoEntry {
+  id: string;
+  date: string;
+  imageUrl: string;
+  notes?: string;
+}
 
 export default function PhotoProgressCard({ photos }: { photos: PhotoEntry[] }) {
   const sortedPhotos = [...photos].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -24,11 +30,15 @@ export default function PhotoProgressCard({ photos }: { photos: PhotoEntry[] }) 
       {/* Latest Photo Section */}
       {latestPhoto && (
         <div className="mb-6 rounded-xl overflow-hidden relative group max-w-sm mx-auto md:max-w-md lg:max-w-xl">
-          <img 
-            src={latestPhoto.imageUrl} 
-            alt={`Latest progress photo taken on ${latestPhoto.date}`} 
-            className="w-full aspect-[3/4] object-cover" 
-          />
+          <img 
+            src={latestPhoto.imageUrl} 
+            alt={`Latest progress photo taken on ${latestPhoto.date}`} 
+            className="w-full aspect-[3/4] object-cover" 
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = 'https://placehold.co/400x300/6b7280/fff?text=Photo+Not+Found';
+            }}
+          />
           <div className="absolute top-0 left-0 p-3 bg-background/50 backdrop-blur-sm rounded-br-lg text-sm font-semibold text-foreground/80">
             Latest: {new Date(latestPhoto.date).toLocaleDateString()}
           </div>
@@ -47,11 +57,15 @@ export default function PhotoProgressCard({ photos }: { photos: PhotoEntry[] }) 
           <div className="flex overflow-x-auto space-x-4 pb-2 scrollbar-hide-tablet">
             {olderPhotos.map((photo) => (
               <div key={photo.id} className="flex-shrink-0 w-32 group relative">
-                <img 
-                  src={photo.imageUrl} 
-                  alt={`Progress photo on ${photo.date}`} 
-                  className="aspect-[3/4] w-full object-cover rounded-lg" 
-                />
+                <img 
+                  src={photo.imageUrl} 
+                  alt={`Progress photo on ${photo.date}`} 
+                  className="aspect-[3/4] w-full object-cover rounded-lg" 
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://placehold.co/128x171/6b7280/fff?text=Photo+Not+Found';
+                  }}
+                />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 rounded-lg">
                   <Button variant="ghost" className="h-10 w-10 p-0 text-white hover:bg-white/20 mb-2">
                     <Maximize className="h-6 w-6" />

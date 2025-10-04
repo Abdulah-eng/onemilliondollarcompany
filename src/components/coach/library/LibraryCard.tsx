@@ -4,7 +4,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card'; // Removed CardHeader and CardTitle as they are now used in CardContent
 import { Button } from '@/components/ui/button';
 import { LibraryItem } from '@/mockdata/library/mockLibrary';
-import { Dumbbell, Utensils, Feather, Trash2, Pencil } from 'lucide-react';
+import { Dumbbell, Utensils, Feather, Trash2, Pencil, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -12,9 +12,10 @@ interface LibraryCardProps {
   item: LibraryItem;
   onEdit: (item: LibraryItem) => void;
   onDelete: (id: string) => void;
+  onView?: (item: LibraryItem) => void;
 }
 
-const LibraryCard: React.FC<LibraryCardProps> = ({ item, onEdit, onDelete }) => {
+const LibraryCard: React.FC<LibraryCardProps> = ({ item, onEdit, onDelete, onView }) => {
   
   const getDetails = () => {
     let icon, primaryDetail, secondaryTag;
@@ -74,6 +75,11 @@ const LibraryCard: React.FC<LibraryCardProps> = ({ item, onEdit, onDelete }) => 
           
           {/* Action Overlay */}
           <div className='absolute top-0 right-0 p-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
+             {onView && (
+               <Button variant="ghost" size="icon" className='h-8 w-8 bg-background/70 hover:bg-background/90 text-blue-600' onClick={(e) => { e.stopPropagation(); onView(item); }}>
+                 <Eye className="h-4 w-4" />
+               </Button>
+             )}
              <Button variant="ghost" size="icon" className='h-8 w-8 bg-background/70 hover:bg-background/90 text-primary' onClick={(e) => { e.stopPropagation(); onEdit(item); }}>
                <Pencil className="h-4 w-4" />
              </Button>

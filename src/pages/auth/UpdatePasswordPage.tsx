@@ -36,13 +36,29 @@ const UpdatePasswordPage = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
-    const { error } = await updateUserPassword(values.password);
-    setIsSubmitting(false);
-    if (error) {
-      toast.error(error.message || 'Failed to update password.');
-    } else {
-      toast.success('Password updated successfully. Please log in.');
-      navigate('/login');
+    try {
+      const { error } = await updateUserPassword(values.password);
+      if (error) {
+        // Handle specific error cases
+        if (error.message.includes('Password should be at least')) {
+          toast.error('Password must be at least 8 characters long.');
+        } else if (error.message.includes('Invalid password')) {
+          toast.error('Password does not meet security requirements.');
+        } else if (error.message.includes('session_not_found')) {
+          toast.error('Session expired. Please request a new password reset link.');
+          navigate('/forgot-password');
+        } else {
+          toast.error(error.message || 'Failed to update password.');
+        }
+      } else {
+        toast.success('Password updated successfully. Please log in.');
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Password update error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

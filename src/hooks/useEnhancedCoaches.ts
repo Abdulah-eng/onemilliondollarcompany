@@ -90,21 +90,40 @@ export const useEnhancedCoaches = () => {
     const requestMessage = message || "I'm interested in working with you as my coach to achieve my fitness and wellness goals.";
 
     try {
-      const { error } = await supabase
+      // Check if active request already exists (pending or accepted)
+      const { data: existingRequest } = await supabase
+        .from('coach_requests')
+        .select('id, status')
+        .eq('customer_id', user.id)
+        .eq('coach_id', coachId)
+        .in('status', ['pending', 'accepted'])
+        .single();
+
+      if (existingRequest) {
+        throw new Error('You have already sent a request to this coach');
+      }
+
+      const { data, error } = await supabase
         .from('coach_requests')
         .insert({
           customer_id: user.id,
           coach_id: coachId,
           message: requestMessage,
           status: 'pending'
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Coach request error:', error);
+        throw new Error(`Failed to send request: ${error.message}`);
+      }
 
       // Refresh requests
       await fetchRequests();
-      return true;
+      return data;
     } catch (err) {
+      console.error('Send request error:', err);
       throw new Error(err instanceof Error ? err.message : 'Failed to send request');
     }
   };

@@ -14,6 +14,11 @@ interface Message {
   author: 'coach' | 'client' | 'system';
   content: string;
   date: string;
+  sender?: {
+    id: string;
+    full_name: string;
+    avatar_url: string;
+  };
 }
 
 interface Thread {
@@ -42,11 +47,33 @@ const MessageBubble: React.FC<{ m: Message }> = ({ m }) => {
     : `bg-muted/20 text-foreground self-start rounded-xl ${padding} ${maxWidth}`;
   
   return (
-    <div className={`flex ${isCoach ? 'justify-end' : 'justify-start'} mb-2`}>
-      <div className={classes}>
-        <div className={`text-sm ${isMobile ? 'leading-relaxed' : ''}`}>{m.content}</div>
-        <div className={`text-xs text-muted-foreground mt-1 text-right ${isMobile ? 'mt-2' : ''}`}>
-          {isMobile ? new Date(m.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : formatDate(m.date)}
+    <div className={`flex ${isCoach ? 'justify-end' : 'justify-start'} mb-2 gap-2`}>
+      {!isCoach && m.sender && (
+        <div className="w-8 h-8 rounded-full overflow-hidden bg-muted flex-shrink-0">
+          {m.sender.avatar_url ? (
+            <img 
+              src={m.sender.avatar_url} 
+              alt={m.sender.full_name} 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-xs font-medium">
+              {m.sender.full_name?.split(' ').map(n => n[0]).join('') || '?'}
+            </div>
+          )}
+        </div>
+      )}
+      <div className="flex flex-col">
+        {!isCoach && m.sender && (
+          <span className="text-xs text-muted-foreground mb-1">
+            {m.sender.full_name}
+          </span>
+        )}
+        <div className={classes}>
+          <div className={`text-sm ${isMobile ? 'leading-relaxed' : ''}`}>{m.content}</div>
+          <div className={`text-xs text-muted-foreground mt-1 text-right ${isMobile ? 'mt-2' : ''}`}>
+            {isMobile ? new Date(m.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : formatDate(m.date)}
+          </div>
         </div>
       </div>
     </div>
@@ -147,7 +174,7 @@ const CommunicationTab: React.FC<CommunicationTabProps> = ({ client }) => {
           // Get messages for this conversation
           const { data: messages } = await supabase
             .from('messages')
-            .select('*, sender:profiles(full_name)')
+            .select('*, sender:profiles!messages_sender_id_fkey(id, full_name, avatar_url)')
             .eq('conversation_id', conversation.id)
             .order('created_at', { ascending: true });
 
@@ -192,6 +219,7 @@ const CommunicationTab: React.FC<CommunicationTabProps> = ({ client }) => {
                 author: msg.sender_id === user.id ? 'coach' : 'client',
                 content: msg.content,
                 date: msg.created_at,
+                sender: msg.sender,
               })),
             });
           }

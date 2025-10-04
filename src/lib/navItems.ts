@@ -17,17 +17,34 @@ export interface NavItem {
   href: string;
   icon: React.ElementType;
   badge?: string | number;
+  conditional?: boolean; // For items that should be conditionally shown
 }
 
-export const customerNavItems: NavItem[] = [
-  { name: 'Home', href: '/customer/dashboard', icon: Home },
-  { name: 'My Programs', href: '/customer/programs', icon: BookOpen },
-  { name: 'Library', href: '/customer/library', icon: Library },
-  { name: 'Progress', href: '/customer/progress', icon: TrendingUp },
-  { name: 'Messages', href: '/customer/messages', icon: MessageSquare },
-  { name: 'My Coach', href: '/customer/my-coach', icon: Users },
-  { name: 'Blog', href: '/customer/blog', icon: FileText },
-];
+export const getCustomerNavItems = (showLibrary: boolean = true, showProgress: boolean = true): NavItem[] => {
+  const baseItems: NavItem[] = [
+    { name: 'Home', href: '/customer/dashboard', icon: Home },
+    { name: 'My Programs', href: '/customer/programs', icon: BookOpen },
+    { name: 'Messages', href: '/customer/messages', icon: MessageSquare },
+    { name: 'My Coach', href: '/customer/my-coach', icon: Users },
+    { name: 'Blog', href: '/customer/blog', icon: FileText },
+  ];
+
+  // Add Library if user has access
+  if (showLibrary) {
+    baseItems.splice(2, 0, { name: 'Library', href: '/customer/library', icon: Library, conditional: true });
+  }
+
+  // Add Progress if user has payment plan
+  if (showProgress) {
+    const insertIndex = showLibrary ? 3 : 2; // Insert after Library or after My Programs
+    baseItems.splice(insertIndex, 0, { name: 'Progress', href: '/customer/progress', icon: TrendingUp, conditional: true });
+  }
+
+  return baseItems;
+};
+
+// Keep the old export for backward compatibility, but it will always show library
+export const customerNavItems: NavItem[] = getCustomerNavItems(true);
 
 export const customerBottomNavItems: NavItem[] = [
   { name: 'Settings', href: '/customer/settings', icon: Settings },

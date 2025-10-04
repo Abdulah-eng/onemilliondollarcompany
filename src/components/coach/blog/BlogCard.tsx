@@ -4,7 +4,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BlogPost, BlogCategory, CATEGORY_DETAILS } from '@/mockdata/blog/mockBlog';
-import { Trash2, Pencil, Calendar } from 'lucide-react';
+import { Trash2, Pencil, Calendar, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -12,9 +12,10 @@ interface BlogCardProps {
   post: BlogPost;
   onEdit: (post: BlogPost) => void;
   onDelete: (id: string) => void;
+  onView?: (post: BlogPost) => void;
 }
 
-const BlogCard: React.FC<BlogCardProps> = ({ post, onEdit, onDelete }) => {
+const BlogCard: React.FC<BlogCardProps> = ({ post, onEdit, onDelete, onView }) => {
   const details = CATEGORY_DETAILS[post.category];
   const Icon = details.icon;
   const time = new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -50,6 +51,11 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, onEdit, onDelete }) => {
           </span>
 
           <div className='absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/30'>
+             {onView && (
+               <Button variant="default" size="icon" className='h-10 w-10 bg-blue-600 hover:bg-blue-700' onClick={(e) => { e.stopPropagation(); onView(post); }}>
+                 <Eye className="h-5 w-5" />
+               </Button>
+             )}
              <Button variant="default" size="icon" className='h-10 w-10' onClick={(e) => { e.stopPropagation(); onEdit(post); }}>
                <Pencil className="h-5 w-5" />
              </Button>

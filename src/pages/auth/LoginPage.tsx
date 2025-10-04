@@ -30,12 +30,26 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const { error } = await signInWithPassword(values.email, values.password);
-    if (error) {
-      toast.error(error.message || "Invalid login credentials.");
-    } else {
-      toast.success("Welcome back!");
-      // The onAuthStateChange listener in AuthContext will handle the redirection automatically.
+    try {
+      const { error } = await signInWithPassword(values.email, values.password);
+      if (error) {
+        // Handle specific error cases
+        if (error.message.includes('Invalid login credentials')) {
+          toast.error("Invalid email or password. Please check your credentials and try again.");
+        } else if (error.message.includes('Email not confirmed')) {
+          toast.error("Please check your email and click the confirmation link before logging in.");
+        } else if (error.message.includes('Too many requests')) {
+          toast.error("Too many login attempts. Please wait a moment before trying again.");
+        } else {
+          toast.error(error.message || "Login failed. Please try again.");
+        }
+      } else {
+        toast.success("Welcome back!");
+        // The onAuthStateChange listener in AuthContext will handle the redirection automatically.
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error("An unexpected error occurred. Please try again.");
     }
   };
 

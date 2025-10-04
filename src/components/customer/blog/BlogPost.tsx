@@ -66,7 +66,7 @@ const BlogPost = ({ post, onBack }) => {
         </div>
 
         {/* Main Content */}
-        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
+        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content || 'No content available.') }} />
       </div>
     </motion.div>
   );

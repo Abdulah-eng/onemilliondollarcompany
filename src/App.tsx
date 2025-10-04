@@ -39,6 +39,7 @@ const ClientOverviewPage = lazy(() => import("./pages/coach/ClientOverviewPage")
 const ClientCard = lazy(() => import("./pages/coach/ClientCard"));
 const CoachProgramsPage = lazy(() => import("./pages/coach/ProgramsPage"));
 const ProgramBuilder = lazy(() => import("./pages/coach/ProgramBuilder")); // ✅ Lazy-load the new page
+const ProgramViewPage = lazy(() => import("./pages/coach/ProgramViewPage")); // ✅ Lazy-load the program view page
 const CoachLibraryPage = lazy(() => import("./pages/coach/LibraryPage"));
 const CoachBlogPage = lazy(() => import("./pages/coach/BlogPage"));
 const IncomePage = lazy(() => import("./pages/coach/IncomePage"));
@@ -197,6 +198,11 @@ const ThemedApp = () => {
                   <Route path="/coach/programs/edit/:id" element={ // ✅ New route for editing a program
                     <Suspense fallback={<LoadingScreen />}>
                       <ProgramBuilder />
+                    </Suspense>
+                  } />
+                  <Route path="/coach/programs/view/:id" element={ // ✅ New route for viewing a program
+                    <Suspense fallback={<LoadingScreen />}>
+                      <ProgramViewPage />
                     </Suspense>
                   } />
                   <Route path="/coach/library" element={

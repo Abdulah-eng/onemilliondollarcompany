@@ -32,8 +32,8 @@ export const usePaymentPlan = () => {
       
       const hasActivePlan = Boolean(
         profile.plan && 
-        planExpiry && 
-        planExpiry > now
+        profile.plan !== 'trial' && // Exclude trial plans
+        (planExpiry ? planExpiry > now : true) // If no expiry, consider it active
       );
       
       const planExpired = Boolean(
@@ -46,6 +46,7 @@ export const usePaymentPlan = () => {
       const hasUsedTrial = Boolean((profile as any).has_used_trial) || profile.plan === 'trial' || (planExpired && profile.plan === 'trial');
 
       const needsUpgrade = !hasActivePlan && profile.onboarding_complete;
+
 
       setPlanStatus({
         hasActivePlan,

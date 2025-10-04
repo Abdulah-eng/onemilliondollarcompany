@@ -6,8 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Mail, Phone, Lock, Globe, DollarSign, Save } from 'lucide-react';
+import { Mail, Phone, Lock, Globe, DollarSign, Save, CreditCard, Building2, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 interface AccountSettingsProps {
   account: CoachAccount;
@@ -17,25 +19,62 @@ interface AccountSettingsProps {
 const AccountSettings: React.FC<AccountSettingsProps> = ({ account, onUpdate }) => {
   const [formData, setFormData] = useState(account);
   const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' });
+  const [payoutForm, setPayoutForm] = useState({
+    method: 'bank' as 'bank' | 'paypal' | 'stripe',
+    bankName: '',
+    accountNumber: '',
+    routingNumber: '',
+    paypalEmail: '',
+    stripeAccount: ''
+  });
+  const [isUpdatingPayout, setIsUpdatingPayout] = useState(false);
+  const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
 
   const handlePasswordChange = (e: React.MouseEvent) => {
     e.preventDefault();
     if (passwordForm.new !== passwordForm.confirm) {
-      alert("New password and confirmation do not match.");
+      toast.error("New password and confirmation do not match.");
       return;
     }
     if (passwordForm.new.length < 8) {
-      alert("Password must be at least 8 characters.");
+      toast.error("Password must be at least 8 characters.");
       return;
     }
     // Simulate API call for password change
-    alert("Password successfully updated!");
+    toast.success("Password successfully updated!");
     setPasswordForm({ current: '', new: '', confirm: '' });
   };
   
   const handleSave = () => {
     onUpdate(formData);
-    alert('Account Information Updated!');
+    toast.success('Account Information Updated!');
+  };
+
+  const handlePayoutUpdate = async () => {
+    setIsUpdatingPayout(true);
+    try {
+      // Simulate API call for payout method update
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const updatedAccount = {
+        ...formData,
+        payoutMethod: payoutForm.method,
+        payoutDetails: payoutForm.method === 'bank' 
+          ? `${payoutForm.bankName} - ****${payoutForm.accountNumber.slice(-4)}`
+          : payoutForm.method === 'paypal'
+          ? payoutForm.paypalEmail
+          : payoutForm.stripeAccount
+      };
+      
+      onUpdate(updatedAccount);
+      setFormData(updatedAccount);
+      setIsPayoutModalOpen(false);
+      toast.success('Payout method updated successfully!');
+    } catch (error) {
+      toast.error('Failed to update payout method. Please try again.');
+    } finally {
+      setIsUpdatingPayout(false);
+    }
   };
 
   return (
@@ -72,12 +111,128 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ account, onUpdate }) 
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label>Payout Method</Label>
-            <Input readOnly value={formData.payoutMethod} />
+            <div className="flex items-center gap-2">
+              {formData.payoutMethod === 'bank' && <Building2 className="h-4 w-4 text-muted-foreground" />}
+              {formData.payoutMethod === 'paypal' && <CreditCard className="h-4 w-4 text-muted-foreground" />}
+              {formData.payoutMethod === 'stripe' && <CreditCard className="h-4 w-4 text-muted-foreground" />}
+              <Input readOnly value={formData.payoutMethod.charAt(0).toUpperCase() + formData.payoutMethod.slice(1)} />
+            </div>
             <p className="text-sm text-muted-foreground">Current Details: {formData.payoutDetails}</p>
           </div>
-          <Button variant="outline" className="w-full">
-            Update Payout Method
-          </Button>
+          
+          <Dialog open={isPayoutModalOpen} onOpenChange={setIsPayoutModalOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="w-full">
+                Update Payout Method
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Update Payout Method</DialogTitle>
+                <DialogDescription>
+                  Choose how you'd like to receive your earnings.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div>
+                  <Label>Payout Method</Label>
+                  <Select 
+                    value={payoutForm.method} 
+                    onValueChange={(value: 'bank' | 'paypal' | 'stripe') => 
+                      setPayoutForm({ ...payoutForm, method: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="bank">Bank Transfer</SelectItem>
+                      <SelectItem value="paypal">PayPal</SelectItem>
+                      <SelectItem value="stripe">Stripe</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {payoutForm.method === 'bank' && (
+                  <div className="space-y-3">
+                    <div>
+                      <Label>Bank Name</Label>
+                      <Input 
+                        value={payoutForm.bankName}
+                        onChange={(e) => setPayoutForm({ ...payoutForm, bankName: e.target.value })}
+                        placeholder="e.g., Chase Bank"
+                      />
+                    </div>
+                    <div>
+                      <Label>Account Number</Label>
+                      <Input 
+                        value={payoutForm.accountNumber}
+                        onChange={(e) => setPayoutForm({ ...payoutForm, accountNumber: e.target.value })}
+                        placeholder="1234567890"
+                        type="password"
+                      />
+                    </div>
+                    <div>
+                      <Label>Routing Number</Label>
+                      <Input 
+                        value={payoutForm.routingNumber}
+                        onChange={(e) => setPayoutForm({ ...payoutForm, routingNumber: e.target.value })}
+                        placeholder="123456789"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {payoutForm.method === 'paypal' && (
+                  <div>
+                    <Label>PayPal Email</Label>
+                    <Input 
+                      value={payoutForm.paypalEmail}
+                      onChange={(e) => setPayoutForm({ ...payoutForm, paypalEmail: e.target.value })}
+                      placeholder="your-email@example.com"
+                      type="email"
+                    />
+                  </div>
+                )}
+
+                {payoutForm.method === 'stripe' && (
+                  <div>
+                    <Label>Stripe Account ID</Label>
+                    <Input 
+                      value={payoutForm.stripeAccount}
+                      onChange={(e) => setPayoutForm({ ...payoutForm, stripeAccount: e.target.value })}
+                      placeholder="acct_1234567890"
+                    />
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsPayoutModalOpen(false)}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handlePayoutUpdate}
+                    disabled={isUpdatingPayout}
+                    className="flex-1"
+                  >
+                    {isUpdatingPayout ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      'Update Method'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </CardContent>
       </Card>
       

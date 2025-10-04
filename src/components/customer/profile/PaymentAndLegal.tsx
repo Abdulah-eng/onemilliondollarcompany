@@ -9,35 +9,49 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { customerProfile } from '@/mockdata/profile/profileData';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { usePaymentInfo } from '@/hooks/usePaymentInfo';
+import { useCurrencyDetection } from '@/hooks/useCurrencyDetection';
 
 const PaymentAndLegal = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { payment, preferences } = customerProfile;
   const { profile } = useAuth();
-  const [selectedCurrency, setSelectedCurrency] = useState('usd');
+  const { paymentInfo, loading: paymentLoading } = usePaymentInfo();
+  const { detectedCurrency, currencyOptions, getCurrencyOption } = useCurrencyDetection();
+  const [selectedCurrency, setSelectedCurrency] = useState(detectedCurrency);
 
-  const currencyOptions = [
-  { value: 'usd', label: 'USD - $49.99/month', price: '$49.99' },
-    { value: 'nok', label: 'NOK - 299 kr/month', price: '299 kr' },
-    { value: 'sek', label: 'SEK - 299 kr/month', price: '299 kr' },
-    { value: 'dkk', label: 'DKK - 199 kr/month', price: '199 kr' },
-  ];
+  // Update selected currency when detected currency changes
+  useEffect(() => {
+    setSelectedCurrency(detectedCurrency);
+  }, [detectedCurrency]);
 
   const handleSubscribe = async () => {
-    const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-    if (!stripe) return;
-    const { checkoutUrl } = await createCheckoutSession({
-      priceKey: 'platform_monthly',
-      trialDays: 14,
-      stripeCustomerId: profile?.stripe_customer_id ?? null,
-      currency: selectedCurrency,
-      userId: profile?.id,
-    });
-    window.location.href = checkoutUrl;
+    try {
+      const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+      if (!stripe) {
+        alert('Failed to load Stripe. Please try again.');
+        return;
+      }
+      
+      const { checkoutUrl } = await createCheckoutSession({
+        priceKey: 'platform_monthly',
+        trialDays: 14,
+        stripeCustomerId: profile?.stripe_customer_id ?? null,
+        currency: selectedCurrency,
+        userId: profile?.id,
+      });
+      
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      } else {
+        alert('Failed to create checkout session. Please try again.');
+      }
+    } catch (error) {
+      console.error('Subscription error:', error);
+      alert('Failed to start subscription process. Please try again.');
+    }
   };
 
   const handleCancelAtPeriodEnd = async () => {
@@ -106,14 +120,30 @@ const PaymentAndLegal = () => {
           <AccordionItem value="item-1">
             <AccordionTrigger className="text-base font-medium">Payment & Subscription</AccordionTrigger>
             <AccordionContent className="p-4 space-y-6">
-              <div className="space-y-2 text-sm">
-                <p><strong>Current Plan:</strong> {payment.currentPlan.name}</p>
-                <p><strong>Price:</strong> {payment.currentPlan.price} / {payment.currentPlan.billingCycle}</p>
-                <p><strong>Next Billing:</strong> {payment.currentPlan.nextBillingDate}</p>
-              </div>
-              <div className="space-y-2 text-sm">
-                <p><strong>Card:</strong> {payment.paymentMethod.brand} ending in {payment.paymentMethod.last4}</p>
-                <p><strong>Expires:</strong> {payment.paymentMethod.expiry}</p>
+              {paymentLoading ? (
+                <div className="text-center py-4">Loading payment information...</div>
+              ) : paymentInfo ? (
+                <>
+                  <div className="space-y-2 text-sm">
+                    <p><strong>Current Plan:</strong> {paymentInfo.currentPlan.name}</p>
+                    <p><strong>Price:</strong> {paymentInfo.currentPlan.price} / {paymentInfo.currentPlan.billingCycle}</p>
+                    <p><strong>Next Billing:</strong> {paymentInfo.currentPlan.nextBillingDate}</p>
+                    <p><strong>Status:</strong> <span className={`capitalize ${paymentInfo.currentPlan.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>{paymentInfo.currentPlan.status}</span></p>
+                  </div>
+                  {paymentInfo.paymentMethod ? (
+                    <div className="space-y-2 text-sm">
+                      <p><strong>Card:</strong> {paymentInfo.paymentMethod.brand} ending in {paymentInfo.paymentMethod.last4}</p>
+                      <p><strong>Expires:</strong> {paymentInfo.paymentMethod.expiry}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      <p>No payment method on file</p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-4 text-muted-foreground">No payment information available</div>
+              )}
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button size="sm">Update Payment Method</Button>
@@ -182,7 +212,7 @@ const PaymentAndLegal = () => {
                     className="ml-2"
                     onClick={handleSubscribe}
                   >
-                    Subscribe {currencyOptions.find(opt => opt.value === selectedCurrency)?.price}/mo (14-day trial)
+                    Subscribe {getCurrencyOption(selectedCurrency).price}/mo (14-day trial)
                   </Button>
                 </div>
               </div>
@@ -194,9 +224,9 @@ const PaymentAndLegal = () => {
             <AccordionContent className="p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <Label htmlFor="theme-select">Theme</Label>
-                <Select>
+                <Select defaultValue="system">
                   <SelectTrigger id="theme-select" className="w-[120px]">
-                    <SelectValue placeholder={preferences.theme} />
+                    <SelectValue placeholder="System" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="light">Light</SelectItem>
@@ -207,11 +237,11 @@ const PaymentAndLegal = () => {
               </div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="new-messages">New Messages</Label>
-                <Switch checked={preferences.notifications.newMessages} />
+                <Switch defaultChecked />
               </div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="coach-feedback">Coach Feedback</Label>
-                <Switch checked={preferences.notifications.coachFeedback} />
+                <Switch defaultChecked />
               </div>
             </AccordionContent>
           </AccordionItem>

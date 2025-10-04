@@ -99,6 +99,10 @@ export const useCoachRequests = () => {
 
       // Remove from pending requests
       setRequests(prev => prev.filter(r => r.id !== requestId));
+      
+      // Show success message
+      console.log('Request accepted successfully for customer:', request.customer_id);
+      
       return true;
     } catch (error) {
       console.error('Error accepting request:', error);

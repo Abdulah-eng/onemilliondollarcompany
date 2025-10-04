@@ -1,8 +1,11 @@
 // src/components/customer/progress/FloatingActionButton.tsx
-import { useState, useRef } from 'react';
-import { Plus, Weight, Camera } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Plus, Weight, Camera, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -10,16 +13,65 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useWeightTracking } from '@/hooks/useWeightTracking';
+import { useProgressPhotos } from '@/hooks/useProgressPhotos';
+import { toast } from 'sonner';
 
 // Helper component for the weight scroller
 const WeightScroller = ({ onWeightChange, value }) => {
   const weights = Array.from({ length: 201 }, (_, i) => 30 + i); // 30-230
   const decimals = Array.from({ length: 10 }, (_, i) => i); // 0-9
+  const wholeNumberRef = useRef<HTMLDivElement>(null);
+  const decimalRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = (type: 'whole' | 'decimal') => {
+    const ref = type === 'whole' ? wholeNumberRef : decimalRef;
+    const container = ref.current;
+    if (!container) return;
+
+    const scrollTop = container.scrollTop;
+    const itemHeight = 48; // py-2 (8px) + text-2xl height
+    const index = Math.round(scrollTop / itemHeight);
+    
+    if (type === 'whole') {
+      const newWeight = weights[index] || 70;
+      const currentDecimal = Math.round((value * 10) % 10);
+      const newValue = newWeight + currentDecimal / 10;
+      console.log('Weight scroller - whole number changed:', { newWeight, currentDecimal, newValue });
+      onWeightChange(newValue);
+    } else {
+      const newDecimal = decimals[index] || 0;
+      const currentWhole = Math.floor(value);
+      const newValue = currentWhole + newDecimal / 10;
+      console.log('Weight scroller - decimal changed:', { newDecimal, currentWhole, newValue });
+      onWeightChange(newValue);
+    }
+  };
+
+  // Scroll to current value on mount
+  useEffect(() => {
+    if (wholeNumberRef.current) {
+      const wholeIndex = weights.indexOf(Math.floor(value));
+      if (wholeIndex !== -1) {
+        wholeNumberRef.current.scrollTop = wholeIndex * 48;
+      }
+    }
+    if (decimalRef.current) {
+      const decimalIndex = decimals.indexOf(Math.round((value * 10) % 10));
+      if (decimalIndex !== -1) {
+        decimalRef.current.scrollTop = decimalIndex * 48;
+      }
+    }
+  }, [value, weights, decimals]);
 
   return (
     <div className="flex justify-center items-center space-x-2 relative">
       <div className="absolute top-1/2 left-0 right-0 h-10 border-y-2 border-primary -translate-y-1/2 pointer-events-none z-10" />
-      <div className="h-40 overflow-y-scroll w-20 text-center custom-scrollbar">
+      <div 
+        ref={wholeNumberRef}
+        className="h-40 overflow-y-scroll w-20 text-center custom-scrollbar"
+        onScroll={() => handleScroll('whole')}
+      >
         {weights.map((w) => (
           <div
             key={w}
@@ -32,12 +84,16 @@ const WeightScroller = ({ onWeightChange, value }) => {
         ))}
       </div>
       <span className="text-2xl font-bold">.</span>
-      <div className="h-40 overflow-y-scroll w-20 text-center custom-scrollbar">
+      <div 
+        ref={decimalRef}
+        className="h-40 overflow-y-scroll w-20 text-center custom-scrollbar"
+        onScroll={() => handleScroll('decimal')}
+      >
         {decimals.map((d) => (
           <div
             key={d}
             className={`py-2 text-2xl font-bold ${
-              d === (value * 10) % 10 ? 'text-primary' : 'text-muted-foreground'
+              d === Math.round((value * 10) % 10) ? 'text-primary' : 'text-muted-foreground'
             }`}
           >
             {d}
@@ -59,22 +115,91 @@ export default function FloatingActionButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
   const [isWeightModalOpen, setIsWeightModalOpen] = useState(false);
-  const [previousWeight, setPreviousWeight] = useState(85.5);
-  const [currentWeight, setCurrentWeight] = useState(85.5);
+  const [currentWeight, setCurrentWeight] = useState(70.0);
+  const [weightNotes, setWeightNotes] = useState('');
+  const [photoNotes, setPhotoNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fileInputRef = useRef(null);
-  const cameraInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // Hooks for data management
+  const { addWeightEntry, getLatestWeight, refetch: refetchWeight } = useWeightTracking();
+  const { addProgressPhoto, refetch: refetchPhotos } = useProgressPhotos();
 
   const handlePhotoAction = () => {
     setIsOpen(false);
     setIsPhotoModalOpen(true);
   };
+  
   const handleWeighInAction = () => {
     setIsOpen(false);
     setIsWeightModalOpen(true);
+    // Set current weight to latest weight if available
+    const latestWeight = getLatestWeight();
+    if (latestWeight) {
+      setCurrentWeight(latestWeight);
+    }
   };
+  
   const handleCameraClick = () => cameraInputRef.current?.click();
   const handleLibraryClick = () => fileInputRef.current?.click();
+
+  const handleWeightSubmit = async () => {
+    if (currentWeight <= 0) {
+      toast.error('Please enter a valid weight');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await addWeightEntry(currentWeight, weightNotes || undefined);
+      toast.success('Weight recorded successfully!');
+      setIsWeightModalOpen(false);
+      setWeightNotes('');
+      // Refresh weight data
+      refetchWeight();
+    } catch (error) {
+      toast.error('Failed to record weight. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handlePhotoSubmit = async (imageUrl: string) => {
+    setIsSubmitting(true);
+    try {
+      await addProgressPhoto(imageUrl, photoNotes || undefined);
+      toast.success('Progress photo added successfully!');
+      setIsPhotoModalOpen(false);
+      setPhotoNotes('');
+      // Refresh photo data
+      refetchPhotos();
+    } catch (error) {
+      toast.error('Failed to add photo. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    try {
+      console.log('Processing file upload:', { name: file.name, size: file.size, type: file.type });
+      // Convert file to base64 for storage
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const imageUrl = e.target?.result as string;
+        if (imageUrl) {
+          console.log('File converted to base64, length:', imageUrl.length);
+          await handlePhotoSubmit(imageUrl);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('File upload error:', error);
+      toast.error('Failed to process image. Please try again.');
+    }
+  };
 
   // Attach handlers
   actionItems[0].action = handleWeighInAction;
@@ -134,10 +259,53 @@ export default function FloatingActionButton() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <Button onClick={handleCameraClick} className="w-full">📸 Take a Photo</Button>
-            <Button onClick={handleLibraryClick} className="w-full">🖼️ Select from Library</Button>
-            <input type="file" accept="image/*" capture="user" ref={cameraInputRef} style={{ display: 'none' }} />
-            <input type="file" accept="image/*" ref={fileInputRef} style={{ display: 'none' }} />
+            <div className="space-y-2">
+              <Label htmlFor="photo-notes">Notes (optional)</Label>
+              <Textarea
+                id="photo-notes"
+                placeholder="Add any notes about this progress photo..."
+                value={photoNotes}
+                onChange={(e) => setPhotoNotes(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <Button 
+              onClick={handleCameraClick} 
+              className="w-full"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              📸 Take a Photo
+            </Button>
+            <Button 
+              onClick={handleLibraryClick} 
+              className="w-full"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              🖼️ Select from Library
+            </Button>
+            <input 
+              type="file" 
+              accept="image/*" 
+              capture="user" 
+              ref={cameraInputRef} 
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFileUpload(file);
+              }}
+            />
+            <input 
+              type="file" 
+              accept="image/*" 
+              ref={fileInputRef} 
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFileUpload(file);
+              }}
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -148,15 +316,59 @@ export default function FloatingActionButton() {
           <DialogHeader>
             <DialogTitle>Record Your Weight</DialogTitle>
             <DialogDescription>
-              Your previous weight was <span className="font-bold">{previousWeight}kg</span>.
+              {getLatestWeight() ? (
+                <>Your previous weight was <span className="font-bold">{getLatestWeight()}kg</span>.</>
+              ) : (
+                'Record your current weight to start tracking your progress.'
+              )}
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col items-center py-4">
+          <div className="flex flex-col items-center py-4 space-y-4">
             <div className="text-4xl font-extrabold mb-4">
               {currentWeight.toFixed(1)} <span className="text-base font-normal">kg</span>
             </div>
             <WeightScroller value={currentWeight} onWeightChange={setCurrentWeight} />
-            <Button className="mt-6 w-full">Save Weight</Button>
+            
+            <div className="w-full space-y-2">
+              <Label htmlFor="weight-notes">Notes (optional)</Label>
+              <Textarea
+                id="weight-notes"
+                placeholder="Add any notes about this weight entry..."
+                value={weightNotes}
+                onChange={(e) => setWeightNotes(e.target.value)}
+                rows={2}
+              />
+            </div>
+            
+            {/* Alternative weight input for testing */}
+            <div className="w-full space-y-2">
+              <Label htmlFor="weight-input">Or enter weight manually:</Label>
+              <Input
+                id="weight-input"
+                type="number"
+                step="0.1"
+                min="30"
+                max="230"
+                value={currentWeight}
+                onChange={(e) => setCurrentWeight(parseFloat(e.target.value) || 70)}
+                placeholder="70.0"
+              />
+            </div>
+            
+            <Button 
+              onClick={handleWeightSubmit} 
+              className="mt-6 w-full"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Weight'
+              )}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

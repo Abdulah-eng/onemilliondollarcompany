@@ -8,6 +8,7 @@ import { useCustomerDetail } from '@/hooks/useCustomerDetail';
 
 const ClientOverviewPage = () => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const isMobile = useIsMobile();
   const { customer: selectedClient, loading: customerLoading } = useCustomerDetail(selectedClientId);
   
@@ -24,6 +25,11 @@ const ClientOverviewPage = () => {
     setSelectedClientId(null);
   };
 
+  const handleRequestAccepted = () => {
+    // Trigger refresh of client list when a request is accepted
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   return (
     <>
       <div className="w-full max-w-7xl mx-auto px-4 py-8 space-y-10">
@@ -34,11 +40,14 @@ const ClientOverviewPage = () => {
           </p>
         </div>
 
-        <ClientRequests onClientClick={handleClientRequestClick} />
+        <ClientRequests 
+          onClientClick={handleClientRequestClick} 
+          onRequestAccepted={handleRequestAccepted}
+        />
 
         <div className="space-y-6">
           <ClientFilters />
-          <ClientList />
+          <ClientList refreshTrigger={refreshTrigger} />
         </div>
       </div>
 

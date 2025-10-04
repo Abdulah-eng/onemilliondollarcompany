@@ -121,7 +121,11 @@ const PersonalInfoStep = () => {
     const hasNoErrors = Object.values(errors).every(e => e === '');
     const fieldsFilled = personalInfo.name && personalInfo.weight > 0 && personalInfo.height > 0 &&
                          personalInfo.gender && personalInfo.dob && personalInfo.country;
-    return hasNoErrors && fieldsFilled;
+    
+    // Additional validation for date of birth
+    const dobValid = personalInfo.dob && personalInfo.year && personalInfo.month && personalInfo.day;
+    
+    return hasNoErrors && fieldsFilled && dobValid;
   }, [personalInfo, errors]);
 
   return (

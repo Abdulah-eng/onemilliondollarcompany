@@ -21,11 +21,12 @@ export const useCoachClientEarnings = () => {
       if (!user) return;
       setLoading(true);
       try {
-        // Sum offers per customer for this coach. Assumes accepted or any status counted; adjust filter if needed
+        // Sum offers per customer for this coach. Only count completed/paid offers
         const { data, error } = await supabase
           .from('coach_offers')
           .select('customer_id, price, status, created_at, profiles!coach_offers_customer_id_fkey(full_name)')
-          .eq('coach_id', user.id);
+          .eq('coach_id', user.id)
+          .eq('status', 'completed'); // Only count completed offers
         if (error) throw error;
 
         const map = new Map<string, ClientEarningRow>();
@@ -40,7 +41,8 @@ export const useCoachClientEarnings = () => {
           };
           const amountCents = Math.round(Number(o.price || 0) * 100);
           prev.total_earned_cents += amountCents;
-          if (o.status === 'accepted' || o.status === 'pending') {
+          // Only count completed offers as active contracts
+          if (o.status === 'completed') {
             prev.active_contracts += 1;
           }
           // Use created_at as placeholder for last payout/earning time

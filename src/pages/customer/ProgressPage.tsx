@@ -1,6 +1,10 @@
 // src/pages/customer/ProgressPage.tsx
 import { useState } from 'react';
 import { useCustomerProgress } from '@/hooks/useCustomerProgress';
+import { usePaymentPlan } from '@/hooks/usePaymentPlan';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Crown, Lock } from 'lucide-react';
 
 // --- NEW & UPDATED COMPONENT IMPORTS ---
 import HeroProgressSnapshot from '@/components/customer/progress/HeroProgressSnapshot';
@@ -14,9 +18,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 
 // Corrected import path for the NutritionProgression component
 import NutritionProgression from '@/components/customer/progress/nutrition/NutritionProgression';
+import WeightTrendCard from '@/components/customer/progress/WeightTrendCard';
 
 export default function ProgressPage() {
   const { progressData: data, loading } = useCustomerProgress();
+  const { planStatus } = usePaymentPlan();
 
   // State for the detail modal
   const [modalData, setModalData] = useState<{ title: string; content: React.ReactNode } | null>(null);
@@ -25,6 +31,38 @@ export default function ProgressPage() {
   const handleCardClick = (title: string, content: React.ReactNode) => {
     setModalData({ title, content });
   };
+
+  // Check if user has payment plan access
+  if (!planStatus.hasActivePlan) {
+    return (
+      <div className="w-full max-w-4xl mx-auto px-4 py-8">
+        <div className="text-center space-y-6">
+          <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
+            <Lock className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <h1 className="text-4xl font-bold tracking-tight">Progress Tracking</h1>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Unlock detailed progress tracking and analytics with a paid plan. Track your fitness journey, monitor trends, and get personalized insights.
+          </p>
+          
+          <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5 max-w-md mx-auto">
+            <CardContent className="p-6 text-center space-y-4">
+              <div className="flex items-center justify-center gap-2">
+                <Crown className="w-6 h-6 text-primary" />
+                <h3 className="text-xl font-semibold">Upgrade to Track Progress</h3>
+              </div>
+              <p className="text-muted-foreground">
+                Get access to detailed analytics, progress photos, workout streaks, and personalized insights.
+              </p>
+              <Button className="mt-2">
+                Upgrade Now
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   // Defensive programming: ensure data exists
   if (loading) {
@@ -104,8 +142,9 @@ export default function ProgressPage() {
         {/* 6. Mental Health Progression */}
         <MentalHealthProgression mentalHealth={data.mentalHealth} dailyCheckins={data.dailyCheckins}/>
 
-        {/* 7. Photo Progress Card (Weight card removed) */}
-        <div className="grid grid-cols-1 gap-6">
+        {/* 7. Weight and Photo Progress Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <WeightTrendCard />
           <PhotoProgressCard photos={data.photoEntries} />
         </div>
       </div>

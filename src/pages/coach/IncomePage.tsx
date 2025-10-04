@@ -126,6 +126,12 @@ const IncomePage: React.FC = () => {
             activeContracts: r.active_contracts,
             lastPaymentDate: r.last_payout_at || new Date().toISOString(),
           }))} />
+          {clientEarnings.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              <p className="text-lg font-medium mb-2">No Completed Earnings Yet</p>
+              <p className="text-sm">Client income will appear here once their payment periods are complete.</p>
+            </div>
+          )}
         </div>
       </div>
       

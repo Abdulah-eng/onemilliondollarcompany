@@ -8,12 +8,14 @@ interface LibraryListProps {
   filteredItems: LibraryItem[]; // New prop for the filtered list
   onEdit: (item: LibraryItem) => void;
   onDelete: (id: string) => void;
+  onView?: (item: LibraryItem) => void;
 }
 
 const LibraryList: React.FC<LibraryListProps> = ({
   filteredItems,
   onEdit,
   onDelete,
+  onView,
 }) => {
   if (filteredItems.length === 0) {
     return (
@@ -32,6 +34,7 @@ const LibraryList: React.FC<LibraryListProps> = ({
           item={item}
           onEdit={onEdit}
           onDelete={onDelete}
+          onView={onView}
         />
       ))}
     </div>

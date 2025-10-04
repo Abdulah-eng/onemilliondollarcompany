@@ -43,20 +43,34 @@ export const useConversations = () => {
       // We fetch bare conversations first, then hydrate participants via RPC.
       const { data: convs, error: convError } = await supabase
         .from('conversations')
-        .select(`*
-          , messages(content, created_at, message_type)
-        `)
+        .select('*')
         .or(`coach_id.eq.${user.id},customer_id.eq.${user.id}`)
         .eq('status', 'active')
-        .order('created_at', { foreignTable: 'messages', ascending: false })
-        .limit(1, { foreignTable: 'messages' })
         .order('updated_at', { ascending: false });
 
       if (convError) throw convError;
 
+      // Fetch last messages for each conversation
+      const conversationsWithMessages = await Promise.all(
+        convs.map(async (conv) => {
+          const { data: lastMessage } = await supabase
+            .from('messages')
+            .select('content, created_at, message_type')
+            .eq('conversation_id', conv.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+          
+          return {
+            ...conv,
+            last_message: lastMessage
+          };
+        })
+      );
+
       // Get unique participant IDs from conversations
-      const coachIds = Array.from(new Set(convs.map(c => c.coach_id)));
-      const customerIds = Array.from(new Set(convs.map(c => c.customer_id)));
+      const coachIds = Array.from(new Set(conversationsWithMessages.map(c => c.coach_id)));
+      const customerIds = Array.from(new Set(conversationsWithMessages.map(c => c.customer_id)));
       const allIds = Array.from(new Set([...coachIds, ...customerIds]));
 
       console.log('[useConversations] Participant IDs to fetch:', allIds);
@@ -113,7 +127,7 @@ export const useConversations = () => {
       console.log('[useConversations] Final profilesById mapping:', profilesById);
       console.log('[useConversations] Available profile IDs:', Object.keys(profilesById));
 
-      const data = convs.map(c => ({
+      const data = conversationsWithMessages.map(c => ({
         ...c,
         coach: profilesById[c.coach_id] || null,
         customer: profilesById[c.customer_id] || null,
@@ -133,10 +147,9 @@ export const useConversations = () => {
       // DEBUG: Log raw conversations with joined profiles
       console.log('[useConversations] Raw conversations from DB:', data);
 
-      // Process conversations to add last message and deduplicate
+      // Process conversations to add unread count and deduplicate
       const processedConversations = data.map(conv => ({
         ...conv,
-        last_message: conv.messages?.[0] || null,
         unread_count: 0 // TODO: Implement unread count logic
       }));
 

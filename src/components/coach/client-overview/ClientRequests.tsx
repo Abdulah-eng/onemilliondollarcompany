@@ -2,18 +2,23 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { ArrowRight, CheckCircle, XCircle, Loader2, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useCoachRequests } from '@/hooks/useCoachRequests';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface ClientRequestsProps {
   onClientClick: (clientId: string) => void;
+  onRequestAccepted?: () => void;
 }
 
-const ClientRequests = ({ onClientClick }: ClientRequestsProps) => {
+const ClientRequests = ({ onClientClick, onRequestAccepted }: ClientRequestsProps) => {
   const [processingRequests, setProcessingRequests] = useState<Set<string>>(new Set());
+  const [acceptedClients, setAcceptedClients] = useState<Set<string>>(new Set());
   const { requests, loading, acceptRequest, rejectRequest } = useCoachRequests();
+  const navigate = useNavigate();
   
   console.log('ClientRequests: Component rendered');
   console.log('ClientRequests: loading:', loading);
@@ -33,6 +38,26 @@ const ClientRequests = ({ onClientClick }: ClientRequestsProps) => {
       if (!success) {
         // Handle error - could show toast notification
         console.error('Failed to process request');
+        toast.error('Failed to process request. Please try again.');
+      } else if (action === 'accepted') {
+        // Mark client as accepted
+        const request = requests.find(r => r.id === requestId);
+        if (request) {
+          setAcceptedClients(prev => new Set([...prev, request.customer_id]));
+          toast.success(`Request accepted! ${request.customer?.full_name || 'Client'} is now your client.`, {
+            action: {
+              label: 'Start Chat',
+              onClick: () => navigate(`/coach/messages?client=${request.customer_id}&name=${encodeURIComponent(request.customer?.full_name || 'Client')}`)
+            }
+          });
+        }
+        
+        // Notify parent component that a request was accepted
+        if (onRequestAccepted) {
+          onRequestAccepted();
+        }
+      } else if (action === 'rejected') {
+        toast.success('Request declined.');
       }
     } catch (error) {
       console.error('Error handling request:', error);
@@ -97,42 +122,71 @@ const ClientRequests = ({ onClientClick }: ClientRequestsProps) => {
                        <p className="text-xs text-muted-foreground">{request.customer?.plan || 'Free Plan'}</p>
                      </div>
                    </div>
-                  <div className="flex gap-2 pt-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="w-full text-green-600 hover:text-green-700"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRequestAction(request.id, 'accepted');
-                      }}
-                      disabled={processingRequests.has(request.id)}
-                    >
-                      {processingRequests.has(request.id) ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                      )}
-                      Accept
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="w-full text-red-600 hover:text-red-700"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRequestAction(request.id, 'rejected');
-                      }}
-                      disabled={processingRequests.has(request.id)}
-                    >
-                      {processingRequests.has(request.id) ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <XCircle className="h-4 w-4 mr-2" />
-                      )}
-                      Decline
-                    </Button>
-                  </div>
+                  {acceptedClients.has(request.customer_id) ? (
+                    <div className="flex gap-2 pt-2">
+                      <Button 
+                        variant="default" 
+                        size="sm" 
+                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/coach/messages?client=${request.customer_id}&name=${encodeURIComponent(request.customer?.full_name || 'Client')}`);
+                        }}
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        Start Chat
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onClientClick(request.customer_id);
+                        }}
+                      >
+                        <ArrowRight className="h-4 w-4 mr-2" />
+                        View Profile
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 pt-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-full text-green-600 hover:text-green-700"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRequestAction(request.id, 'accepted');
+                        }}
+                        disabled={processingRequests.has(request.id)}
+                      >
+                        {processingRequests.has(request.id) ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                        )}
+                        Accept
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-full text-red-600 hover:text-red-700"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRequestAction(request.id, 'rejected');
+                        }}
+                        disabled={processingRequests.has(request.id)}
+                      >
+                        {processingRequests.has(request.id) ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <XCircle className="h-4 w-4 mr-2" />
+                        )}
+                        Decline
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

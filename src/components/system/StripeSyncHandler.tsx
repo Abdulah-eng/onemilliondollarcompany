@@ -8,7 +8,8 @@ const StripeSyncHandler = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || !import.meta.env.VITE_API_BASE_URL) {
+    // Only show warning in production or when Stripe features are actually used
+    if (import.meta.env.PROD && (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || !import.meta.env.VITE_API_BASE_URL)) {
       // eslint-disable-next-line no-console
       console.warn('[Stripe] Missing envs: VITE_STRIPE_PUBLISHABLE_KEY or VITE_API_BASE_URL');
     }

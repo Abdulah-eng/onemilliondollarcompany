@@ -6,10 +6,11 @@ import { BlogPost, BlogCategory } from '@/mockdata/blog/mockBlog';
 import { useCoachBlog } from '@/hooks/useCoachBlog';
 import BlogHeader from '@/components/coach/blog/BlogHeader';
 import BlogList from '@/components/coach/blog/BlogList';
+import BlogViewer from '@/components/coach/blog/BlogViewer';
 import BlogFAB from '@/components/coach/blog/BlogFAB';
 import BlogCreatorPage from './BlogCreatorPage';
 
-type BlogView = 'list' | 'creator';
+type BlogView = 'list' | 'creator' | 'viewer';
 
 const BlogPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<BlogCategory | null>(null); 
@@ -33,6 +34,7 @@ const BlogPage: React.FC = () => {
   }, [posts]);
   const [view, setView] = useState<BlogView>('list');
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+  const [viewingPost, setViewingPost] = useState<BlogPost | null>(null);
 
   const filteredPosts = useMemo(() => {
     return blogData.filter(post => {
@@ -64,26 +66,45 @@ const BlogPage: React.FC = () => {
     setView('creator');
   };
 
-  const handleBackToList = () => setView('list');
+  const handleViewPost = (post: BlogPost) => {
+    setViewingPost(post);
+    setView('viewer');
+  };
+
+  const handleBackToList = () => {
+    setView('list');
+    setEditingPost(null);
+    setViewingPost(null);
+  };
 
   const handleDeletePost = async (id: string) => {
-    if (window.confirm('Delete this blog post?')) {
-      await remove(id);
-      refetch();
+    if (window.confirm('Are you sure you want to delete this blog post? This action cannot be undone.')) {
+      try {
+        await remove(id);
+        await refetch();
+      } catch (error) {
+        console.error('Error deleting blog post:', error);
+        alert('Failed to delete blog post. Please try again.');
+      }
     }
   };
 
   const handlePostSubmit = async (newPost: BlogPost) => {
-    await createOrUpdate({
-      id: newPost.id?.startsWith('mock') ? undefined : newPost.id,
-      title: newPost.title,
-      introduction: newPost.introduction,
-      content: newPost.content,
-      category: newPost.category,
-      cover_url: (newPost as any).coverUrl || null,
-    });
-    setView('list');
-    refetch();
+    try {
+      await createOrUpdate({
+        id: newPost.id?.startsWith('mock') ? undefined : newPost.id,
+        title: newPost.title,
+        introduction: newPost.introduction,
+        content: newPost.content,
+        category: newPost.category,
+        cover_url: (newPost as any).imageUrl || (newPost as any).coverUrl || null,
+      });
+      setView('list');
+      await refetch();
+    } catch (error) {
+      console.error('Error saving blog post:', error);
+      alert('Failed to save blog post. Please try again.');
+    }
   };
 
   return (
@@ -107,13 +128,21 @@ const BlogPage: React.FC = () => {
                 filteredPosts={filteredPosts}
                 onEdit={handleEditPost}
                 onDelete={handleDeletePost}
+                onView={handleViewPost}
               />
             </motion.div>
-          ) : (
+          ) : view === 'creator' ? (
             <BlogCreatorPage
                 onBack={handleBackToList}
                 onSubmit={handlePostSubmit}
                 initialPost={editingPost}
+            />
+          ) : (
+            <BlogViewer
+              post={viewingPost!}
+              onBack={handleBackToList}
+              onEdit={handleEditPost}
+              onDelete={handleDeletePost}
             />
           )}
         </motion.div>

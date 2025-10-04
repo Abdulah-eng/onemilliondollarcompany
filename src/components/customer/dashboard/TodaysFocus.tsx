@@ -1,49 +1,26 @@
 // src/components/customer/dashboard/TodaysProgram.tsx
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, Star, Flame, Salad, BrainCircuit, PlayCircle } from "lucide-react";
+import { Clock, Star, Flame, Salad, BrainCircuit, PlayCircle, Loader2 } from "lucide-react";
 import { ComponentType } from "react";
+import { useAuth } from '@/contexts/AuthContext';
+import { useCustomerPrograms } from '@/hooks/useCustomerPrograms';
+import { supabase } from '@/integrations/supabase/client';
 
-// --- Data Layer (Updated with more exercises for demonstration) ---
-const agendaItems = [
-  {
-    id: 1,
-    type: "fitness",
-    time: "Morning Workout",
-    details: {
-      title: "Full Body Strength",
-      exercises: [
-        { name: "Barbell Squats", sets: "4x5" },
-        { name: "Bench Press", sets: "3x8" },
-        { name: "Bent Over Rows", sets: "3x8" },
-        { name: "Overhead Press", sets: "4x10" },
-        { name: "Pull Ups", sets: "3xAMRAP" },
-      ],
-      duration: "60 min",
-      image: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1200",
-    },
-  },
-  {
-    id: 2,
-    type: "nutrition",
-    time: "12:30 PM",
-    details: {
-      title: "Protein Power Lunch",
-      meal: "Grilled Chicken & Quinoa Salad",
-      image: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=800",
-    },
-  },
-  {
-    id: 3,
-    type: "mental",
-    time: "4:00 PM",
-    details: {
-      title: "Mindful Afternoon Reset",
-      duration: "10 min",
-      image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=800",
-    },
-  },
-];
+// --- Data Layer (Now fetched from backend) ---
+interface ProgramItem {
+  id: string;
+  type: "fitness" | "nutrition" | "mental";
+  time: string;
+  details: {
+    title: string;
+    exercises?: Array<{ name: string; sets: string }>;
+    meal?: string;
+    duration?: string;
+    image: string;
+  };
+}
 
 // --- Configuration (Unchanged) ---
 const programConfig: {
@@ -72,16 +49,134 @@ const programConfig: {
 
 // --- Main Component ---
 const TodaysProgram = () => {
-  const primaryProgram = agendaItems[0];
-  const secondaryPrograms = agendaItems.slice(1);
-  const primaryConfig = programConfig[primaryProgram.type];
+  const { user } = useAuth();
+  const { activeProgram, loading } = useCustomerPrograms();
+  const [agendaItems, setAgendaItems] = useState<ProgramItem[]>([]);
+  const [loadingPrograms, setLoadingPrograms] = useState(true);
+
+  useEffect(() => {
+    const fetchTodaysPrograms = async () => {
+      if (!user || !activeProgram) {
+        setLoadingPrograms(false);
+        return;
+      }
+
+      try {
+        setLoadingPrograms(true);
+        
+        // Get today's date
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Fetch program entries for today
+        const { data: entries } = await supabase
+          .from('program_entries')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('date', today)
+          .order('created_at', { ascending: true });
+
+        if (entries && entries.length > 0) {
+          const programs: ProgramItem[] = entries.map((entry, index) => {
+            const plan = activeProgram.plan;
+            const schedule = plan.schedule || {};
+            const daySchedule = schedule[today] || {};
+            
+            // Determine program type based on entry type
+            let type: "fitness" | "nutrition" | "mental" = "fitness";
+            if (entry.type === 'nutrition') type = "nutrition";
+            if (entry.type === 'mental_health') type = "mental";
+            
+            // Get exercises for fitness programs
+            const exercises = entry.type === 'fitness' && entry.data?.exercises 
+              ? entry.data.exercises.map((ex: any) => ({
+                  name: ex.name || 'Exercise',
+                  sets: ex.sets || '3x10'
+                }))
+              : undefined;
+
+            return {
+              id: entry.id,
+              type,
+              time: 'Morning', // Default time since scheduled_time doesn't exist
+              details: {
+                title: entry.notes || `${type.charAt(0).toUpperCase() + type.slice(1)} Program`,
+                exercises,
+                meal: entry.type === 'nutrition' ? entry.data?.meal : undefined,
+                duration: '30 min', // Default duration
+                image: getDefaultImage(type),
+              },
+            };
+          });
+          
+          setAgendaItems(programs);
+        } else {
+          // No programs for today, show empty state
+          setAgendaItems([]);
+        }
+      } catch (error) {
+        console.error('Error fetching today\'s programs:', error);
+        setAgendaItems([]);
+      } finally {
+        setLoadingPrograms(false);
+      }
+    };
+
+    fetchTodaysPrograms();
+  }, [user, activeProgram]);
+
+  const getDefaultImage = (type: string) => {
+    switch (type) {
+      case 'fitness': return 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1200';
+      case 'nutrition': return 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=800';
+      case 'mental': return 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=800';
+      default: return 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1200';
+    }
+  };
+
+  if (loading || loadingPrograms) {
+    return (
+      <div className="w-full max-w-5xl mx-auto space-y-8">
+        <div className="px-2">
+          <h2 className="text-2xl font-bold text-foreground">Today's Focus 💪</h2>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  if (agendaItems.length === 0) {
+    return (
+      <div className="w-full max-w-5xl mx-auto space-y-8">
+        <div className="px-2">
+          <h2 className="text-2xl font-bold text-foreground">Today's Focus 💪</h2>
+        </div>
+        <Card className="p-8 text-center">
+          <h3 className="text-lg font-semibold mb-2">No programs scheduled for today</h3>
+          <p className="text-muted-foreground">Check back tomorrow or contact your coach for new programs.</p>
+        </Card>
+      </div>
+    );
+  }
+
+  const primaryProgram = agendaItems[0];
+  const secondaryPrograms = agendaItems.slice(1);
+  const primaryConfig = programConfig[primaryProgram.type];
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-8">
-      <div className="px-2">
-        <p className="text-sm text-muted-foreground">Tuesday, 26 August 2025</p>
+      <div className="px-2">
+        <p className="text-sm text-muted-foreground">
+          {new Date().toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}
+        </p>
         <h2 className="text-2xl font-bold text-foreground">Today's Focus 💪</h2>
-      </div>
+      </div>
 
       {/* Primary Program Card (Full Width) */}
       <Card className="relative w-full overflow-hidden border-0 shadow-xl rounded-3xl group">
