@@ -1,5 +1,4 @@
 import ProfileHeader from '@/components/customer/profile/ProfileHeader';
-import ContactAndGoals from '@/components/customer/profile/ContactAndGoals';
 import PersonalInfoSection from '@/components/customer/profile/PersonalInfoSection';
 import PaymentAndLegal from '@/components/customer/profile/PaymentAndLegal';
 import PaymentHistoryTable from '@/components/customer/profile/PaymentHistoryTable';
@@ -15,7 +14,6 @@ const ProfilePage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <ProfileHeader />
-          <ContactAndGoals />
           <PersonalInfoSection />
         </div>
         <div className="lg:col-span-1 space-y-6">
