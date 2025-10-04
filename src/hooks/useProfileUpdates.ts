@@ -11,6 +11,16 @@ export interface UpdateProfilePayload {
 export interface UpdateOnboardingPayload {
   goals?: string[];
   location?: string | null;
+  weight?: number | null;
+  height?: number | null;
+  gender?: string | null;
+  dob?: string | null;
+  country?: string | null;
+  allergies?: string[];
+  training_likes?: string[];
+  training_dislikes?: string[];
+  injuries?: string[];
+  meditation_experience?: string | null;
 }
 
 export const useProfileUpdates = () => {
@@ -54,6 +64,16 @@ export const useProfileUpdates = () => {
           user_id: user.id,
           goals: payload.goals,
           location: payload.location,
+          weight: payload.weight,
+          height: payload.height,
+          gender: payload.gender,
+          dob: payload.dob,
+          country: payload.country,
+          allergies: payload.allergies,
+          training_likes: payload.training_likes,
+          training_dislikes: payload.training_dislikes,
+          injuries: payload.injuries,
+          meditation_experience: payload.meditation_experience,
         }, { onConflict: 'user_id' })
         .select('*')
         .single();

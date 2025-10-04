@@ -434,6 +434,20 @@ $$;
 revoke all on function public.get_public_profiles(uuid[]) from public;
 grant execute on function public.get_public_profiles(uuid[]) to authenticated, anon;
 
+-- Add location field to onboarding_details if missing
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'onboarding_details'
+      and column_name = 'location'
+  ) then
+    alter table public.onboarding_details
+      add column location text;
+  end if;
+end $$;
+
 -- Weight tracking table for progress monitoring
 create table if not exists public.weight_entries (
   id uuid primary key default gen_random_uuid(),
