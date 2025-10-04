@@ -25,10 +25,10 @@ const BlogPage: React.FC = () => {
       title: p.title,
       introduction: p.introduction || '',
       content: p.content || '',
-      category: p.category || null,
-      coverUrl: p.cover_url || null,
+      category: p.category || 'fitness',
+      imageUrl: p.cover_url || undefined,
       createdAt: p.created_at,
-      updatedAt: p.updated_at,
+      isPublished: p.is_published ?? true,
     })) as BlogPost[];
     setBlogData(mapped);
   }, [posts]);

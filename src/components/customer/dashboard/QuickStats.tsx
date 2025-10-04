@@ -32,12 +32,10 @@ const QuickStats = () => {
       yesterday.setDate(yesterday.getDate() - 1);
       
       // Add weight entries for testing
-      await addWeightEntry(70.5, today.toISOString().split('T')[0], 'Test entry - today');
-      await addWeightEntry(71.0, yesterday.toISOString().split('T')[0], 'Test entry - yesterday');
+      await addWeightEntry(70.5, today.toISOString().split('T')[0]);
+      await addWeightEntry(71.0, yesterday.toISOString().split('T')[0]);
       
       console.log('Sample weight data added');
-      // Recalculate stats
-      calculateStats();
     } catch (error) {
       console.error('Failed to add sample weight data:', error);
     }

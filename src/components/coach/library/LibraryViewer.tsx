@@ -60,7 +60,7 @@ const LibraryViewer: React.FC<LibraryViewerProps> = ({ item, onBack }) => {
                 <h3 className="text-lg font-semibold mb-2">How to Perform</h3>
                 <ol className="list-decimal list-inside space-y-2">
                   {item.howTo.map((step, index) => (
-                    <li key={index} className="text-muted-foreground">{step}</li>
+                    <li key={index} className="text-muted-foreground">{step.value}</li>
                   ))}
                 </ol>
               </div>
@@ -79,7 +79,7 @@ const LibraryViewer: React.FC<LibraryViewerProps> = ({ item, onBack }) => {
                 <h3 className="text-lg font-semibold mb-2">Ingredients</h3>
                 <ul className="list-disc list-inside space-y-1">
                   {item.ingredients.map((ingredient, index) => (
-                    <li key={index} className="text-muted-foreground">{ingredient}</li>
+                    <li key={index} className="text-muted-foreground">{ingredient.quantity} {ingredient.name}</li>
                   ))}
                 </ul>
               </div>
@@ -106,7 +106,7 @@ const LibraryViewer: React.FC<LibraryViewerProps> = ({ item, onBack }) => {
                   {item.content.map((contentItem, index) => (
                     <div key={index} className="p-3 bg-muted rounded-lg">
                       <p className="text-sm font-medium">{contentItem.type}</p>
-                      <p className="text-muted-foreground">{contentItem.text}</p>
+                      <p className="text-muted-foreground">{contentItem.value}</p>
                     </div>
                   ))}
                 </div>

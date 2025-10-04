@@ -149,7 +149,7 @@ const BlogViewer: React.FC<BlogViewerProps> = ({ post, onBack, onEdit, onDelete 
               <div>
                 <span className="font-medium">Last Updated:</span>
                 <span className="ml-2 text-muted-foreground">
-                  {new Date(post.updatedAt).toLocaleString()}
+                  {new Date(post.createdAt).toLocaleString()}
                 </span>
               </div>
               <div>

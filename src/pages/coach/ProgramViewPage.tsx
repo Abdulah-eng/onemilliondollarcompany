@@ -165,14 +165,14 @@ const ProgramViewPage = () => {
           </Card>
         )}
 
-        {/* Program Summary */}
-        {program.summary && (
+        {/* Program Description */}
+        {program.description && (
           <Card>
             <CardHeader>
-              <CardTitle>Program Summary</CardTitle>
+              <CardTitle>Program Description</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">{program.summary}</p>
+              <p className="text-muted-foreground">{program.description}</p>
             </CardContent>
           </Card>
         )}

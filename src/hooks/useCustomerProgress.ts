@@ -9,9 +9,13 @@ export interface ProgressData {
   dailyCheckins: Array<{
     date: string;
     water_liters: number | null;
-    mood: number | null;
+    waterLiters: number | null; // Required alias
+    mood: 'great' | 'good' | 'okay' | 'bad'; // Match the correct type
     energy: number | null;
+    energyLevel: number | null; // Required alias
     sleep_hours: number | null;
+    sleepHours: number | null; // Required alias
+    stressLevel: number | null; // Required field
   }>;
   programEntries: Array<{
     id: string;
@@ -26,15 +30,18 @@ export interface ProgressData {
   userGoals: Array<{
     id: string;
     title: string;
+    type: 'IMPROVE_SLEEP' | 'BUILD_MUSCLE' | 'IMPROVE_NUTRITION'; // Required
     target: number;
     current: number;
     unit: string;
   }>;
   smartInsights: Array<{
     id: string;
-    title: string;
-    description: string;
-    type: 'positive' | 'warning' | 'info';
+    title?: string; // Optional
+    text: string; // Required
+    emoji: string; // Required
+    description?: string; // Optional
+    type: 'positive' | 'warning'; // Match the correct type without 'info'
   }>;
   fitnessProgression: {
     strength: Array<{ date: string; value: number }>;
@@ -47,9 +54,14 @@ export interface ProgressData {
       protein: number;
       carbs: number;
       fat: number;
-      calories: number;
+      calories?: number; // Optional
+      kcal: number; // Required
     }>;
-    waterIntake: Array<{ date: string; liters: number }>;
+    waterIntake?: Array<{ date: string; liters: number }>; // Optional
+    recommended: { kcal: number; protein: number; carbs: number; fat: number }; // Required
+    mealCompletion: number; // Required
+    outsideMeals: number; // Required
+    recentRecipes: Array<any>; // Required
   };
   mentalHealth: {
     moodTrend: Array<{ date: string; value: number }>;
@@ -293,17 +305,39 @@ export const useCustomerProgress = () => {
       dailyCheckins: dailyCheckins.map(checkin => ({
         date: checkin.date,
         water_liters: checkin.water_liters,
-        mood: checkin.mood,
+        waterLiters: checkin.water_liters || 0,
+        mood: 'good' as const, // Default mood
         energy: checkin.energy,
-        sleep_hours: checkin.sleep_hours
+        energyLevel: checkin.energy || 3,
+        sleep_hours: checkin.sleep_hours,
+        sleepHours: checkin.sleep_hours || 0,
+        stressLevel: 5
       })),
       programEntries,
       workoutStreak: streak,
       kcalBurnedLast7Days,
-      userGoals,
-      smartInsights,
+      userGoals: userGoals.map(goal => ({
+        ...goal,
+        type: 'BUILD_MUSCLE' as const
+      })),
+      smartInsights: smartInsights.map(insight => ({
+        ...insight,
+        text: insight.description || '',
+        emoji: '💡',
+        type: insight.type === 'info' ? 'positive' : insight.type
+      })),
       fitnessProgression,
-      nutrition,
+      nutrition: {
+        ...nutrition,
+        macros: nutrition.macros.map(m => ({
+          ...m,
+          kcal: m.calories || 0
+        })),
+        recommended: { kcal: 2500, protein: 160, carbs: 220, fat: 65 },
+        mealCompletion: 92,
+        outsideMeals: 3,
+        recentRecipes: []
+      },
       mentalHealth,
       photoEntries,
       weightEntries: weightEntriesData

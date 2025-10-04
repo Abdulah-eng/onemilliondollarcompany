@@ -5,16 +5,21 @@ import { useAuth } from '@/contexts/AuthContext';
 export interface CustomerProgram {
   id: string;
   name: string;
+  title: string; // Required - will be set to name
   description: string;
-  status: 'active' | 'scheduled' | 'draft' | 'normal';
+  status: 'active' | 'scheduled' | 'purchased'; // Match Program status type
   category: 'fitness' | 'nutrition' | 'mental health';
+  type: 'fitness' | 'nutrition' | 'mental'; // Required - mapped to match ProgramTaskType
   coach_id: string;
   assigned_to: string | null;
   scheduled_date: string | null;
+  startDate: string | null; // Required - will be set to scheduled_date
   plan: any;
   created_at: string;
   updated_at: string;
   coach_name?: string;
+  imageUrl: string; // Required - will have default
+  weeks: any[]; // Required - will be empty array or program weeks
 }
 
 export const useCustomerPrograms = () => {
@@ -38,10 +43,23 @@ export const useCustomerPrograms = () => {
       
       if (error) throw error;
       
-      const programsWithCoach = (data || []).map(program => ({
-        ...program,
-        coach_name: program.coach?.full_name || 'Unknown Coach'
-      }));
+      const programsWithCoach = (data || []).map(program => {
+        // Map status to match Program type
+        let mappedStatus: 'active' | 'scheduled' | 'purchased' = 'purchased';
+        if (program.status === 'active') mappedStatus = 'active';
+        else if (program.status === 'scheduled') mappedStatus = 'scheduled';
+        
+        return {
+          ...program,
+          coach_name: program.coach?.full_name || 'Unknown Coach',
+          title: program.name, // Add title alias
+          status: mappedStatus, // Map status
+          type: program.category === 'mental health' ? 'mental' : program.category as 'fitness' | 'nutrition' | 'mental', // Map type properly
+          startDate: program.scheduled_date, // Add startDate alias
+          imageUrl: program.plan?.imageUrl || 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1200', // Add default image
+          weeks: program.plan?.weeks || [], // Add default empty weeks array
+        };
+      });
       
       setPrograms(programsWithCoach);
     } catch (e) {

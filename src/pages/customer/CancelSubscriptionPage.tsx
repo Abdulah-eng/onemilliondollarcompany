@@ -13,6 +13,7 @@ import {
 import CancellationSurvey from '@/components/customer/payment/CancellationSurvey';
 import { customerProfile } from '@/mockdata/profile/profileData';
 import { cancelSubscriptionAtPeriodEnd } from '@/lib/stripe/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 const steps = [
   { id: 'survey', label: 'Survey' },
@@ -23,6 +24,7 @@ const steps = [
 
 const CancelSubscriptionPage = () => {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [step, setStep] = useState<
     'survey' | 'pause-prompt' | 'confirmation' | 'success'
   >('survey');
@@ -42,7 +44,10 @@ const CancelSubscriptionPage = () => {
   const handleFinalCancel = async () => {
     setIsProcessing(true);
     try {
-      await cancelSubscriptionAtPeriodEnd();
+      if (!profile?.stripe_subscription_id) {
+        throw new Error('No subscription ID found');
+      }
+      await cancelSubscriptionAtPeriodEnd(profile.stripe_subscription_id);
       setIsProcessing(false);
       setStep('success');
     } catch (e) {

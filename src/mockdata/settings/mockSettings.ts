@@ -23,7 +23,7 @@ export interface CoachProfile {
 export interface CoachAccount {
   email: string;
   phone: string;
-  payoutMethod: 'Bank Transfer' | 'PayPal';
+  payoutMethod: 'bank' | 'paypal' | 'stripe' | 'Bank Transfer' | 'PayPal';
   payoutDetails: string; // e.g., last 4 digits of account/IBAN
   preferredLanguage: 'English' | 'Spanish' | 'German';
 }
