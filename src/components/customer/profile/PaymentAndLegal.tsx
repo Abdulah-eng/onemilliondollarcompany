@@ -163,7 +163,6 @@ const PaymentAndLegal = () => {
                     </div>
                   </DialogContent>
                 </Dialog>
-              </div>
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="currency-select">Choose Currency</Label>
