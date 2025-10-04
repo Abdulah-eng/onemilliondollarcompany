@@ -37,10 +37,20 @@ const AuthLinkHandler = () => {
           // Wait a moment for the auth state to update, then redirect appropriately
           setTimeout(() => {
             if (type === 'recovery') {
+              console.log('AuthLinkHandler: Redirecting to password recovery');
               navigate('/update-password', { replace: true });
             } else {
-              // For new users or magic link login, let the route guards handle the redirect
-              navigate('/', { replace: true });
+              // Check if we're already on an onboarding page (from emailRedirectTo)
+              if (location.pathname.startsWith('/onboarding')) {
+                console.log('AuthLinkHandler: Already on onboarding page, staying put');
+                // Stay on the current onboarding page, let the route guards handle it
+                return;
+              } else {
+                console.log('AuthLinkHandler: Redirecting to onboarding');
+                // For other cases, redirect to onboarding first
+                // The route guards will handle further redirection based on user state
+                navigate('/onboarding/step-1', { replace: true });
+              }
             }
           }, 100);
         } catch (error) {
