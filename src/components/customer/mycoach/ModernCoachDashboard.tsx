@@ -9,6 +9,8 @@ import { dailyMessage } from '@/mockdata/mycoach/coachData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import useMediaQuery from '@/hooks/use-media-query';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePaymentPlan } from '@/hooks/usePaymentPlan';
 
 interface CoachInfo {
     name: string;
@@ -34,6 +36,8 @@ const ModernCoachDashboard: React.FC<ModernCoachDashboardProps> = ({
     onViewSharedFiles 
 }) => {
     const [isDailyMessageVisible, setIsDailyMessageVisible] = useState(true);
+    const { profile } = useAuth();
+    const { planStatus } = usePaymentPlan();
 
     const handleDismissMessage = () => {
         setIsDailyMessageVisible(false);
@@ -106,9 +110,9 @@ const ModernCoachDashboard: React.FC<ModernCoachDashboardProps> = ({
                 </Card>
             </div>
 
-            {/* Today's Message (Swipe Dismissible on Mobile) */}
+            {/* Today's Message (Swipe Dismissible on Mobile) - gated to paying plan or active coach contract */}
             <AnimatePresence>
-                {isDailyMessageVisible && (
+                {isDailyMessageVisible && (planStatus.hasActivePlan || Boolean(profile?.coach_id)) && (
                     <motion.div
                         key="todays-message"
                         initial={{ opacity: 0, y: -20 }}

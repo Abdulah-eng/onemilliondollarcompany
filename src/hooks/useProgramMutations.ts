@@ -31,6 +31,26 @@ export const useProgramMutations = () => {
 
     try {
       setLoading(true);
+      // If assigning to a customer, verify active contract exists
+      if (data.assignedTo) {
+        const { data: contractCheck, error: contractErr } = await supabase
+          .from('contracts')
+          .select('id')
+          .eq('coach_id', profile.id)
+          .eq('customer_id', data.assignedTo)
+          .eq('status', 'active')
+          .limit(1)
+          .maybeSingle();
+        if (contractErr) {
+          console.error('Contract check failed:', contractErr);
+          toast.error('Could not verify contract. Try again.');
+          return null;
+        }
+        if (!contractCheck) {
+          toast.error('You can only assign programs to customers with an active contract.');
+          return null;
+        }
+      }
       const { data: result, error } = await supabase
         .from('programs')
         .insert({
@@ -109,6 +129,26 @@ export const useProgramMutations = () => {
 
     try {
       setLoading(true);
+      // If changing assignment, verify active contract exists
+      if (data.assignedTo) {
+        const { data: contractCheck, error: contractErr } = await supabase
+          .from('contracts')
+          .select('id')
+          .eq('coach_id', profile.id)
+          .eq('customer_id', data.assignedTo)
+          .eq('status', 'active')
+          .limit(1)
+          .maybeSingle();
+        if (contractErr) {
+          console.error('Contract check failed:', contractErr);
+          toast.error('Could not verify contract. Try again.');
+          return null;
+        }
+        if (!contractCheck) {
+          toast.error('You can only assign programs to customers with an active contract.');
+          return null;
+        }
+      }
       const { data: result, error } = await supabase
         .from('programs')
         .update({

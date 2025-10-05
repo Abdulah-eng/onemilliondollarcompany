@@ -56,13 +56,26 @@ drop policy if exists "Coaches can create their own programs" on public.programs
 create policy "Coaches can create their own programs"
 on public.programs
 for insert
-with check (auth.uid() = coach_id);
+with check (
+  auth.uid() = coach_id
+  and (
+    assigned_to is null
+    or public.is_coach_customer_relationship(coach_id, assigned_to)
+  )
+);
 
 drop policy if exists "Coaches can update their own programs" on public.programs;
 create policy "Coaches can update their own programs"
 on public.programs
 for update
-using (auth.uid() = coach_id);
+using (auth.uid() = coach_id)
+with check (
+  auth.uid() = coach_id
+  and (
+    assigned_to is null
+    or public.is_coach_customer_relationship(coach_id, assigned_to)
+  )
+);
 
 drop policy if exists "Coaches can delete their own programs" on public.programs;
 create policy "Coaches can delete their own programs"
@@ -93,6 +106,118 @@ create trigger update_programs_updated_at
 before update on public.programs
 for each row
 execute function public.update_updated_at_column();
+
+-- Coaching contracts
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'contract_status') then
+    create type public.contract_status as enum ('pending','active','completed','expired','cancelled');
+  end if;
+end $$;
+
+create table if not exists public.contracts (
+  id uuid primary key default gen_random_uuid(),
+  coach_id uuid not null references auth.users(id) on delete cascade,
+  customer_id uuid not null references auth.users(id) on delete cascade,
+  offer_id uuid,
+  status contract_status not null default 'pending',
+  start_date date not null,
+  end_date date not null,
+  price_cents integer not null check (price_cents > 0),
+  platform_fee_rate numeric(5,4) not null default 0.1500,
+  -- Contract document and signatures (optional)
+  document_url text,
+  coach_signed_at timestamptz,
+  customer_signed_at timestamptz,
+  payout_id uuid references public.payouts(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (coach_id, customer_id, start_date, end_date)
+);
+
+alter table public.contracts enable row level security;
+
+drop policy if exists "Contracts viewable by coach or customer" on public.contracts;
+create policy "Contracts viewable by coach or customer" on public.contracts
+  for select using (auth.uid() = coach_id or auth.uid() = customer_id);
+
+drop policy if exists "Contracts insertable by coach" on public.contracts;
+create policy "Contracts insertable by coach" on public.contracts
+  for insert with check (auth.uid() = coach_id);
+
+drop policy if exists "Contracts updatable by coach" on public.contracts;
+create policy "Contracts updatable by coach" on public.contracts
+  for update using (auth.uid() = coach_id);
+
+create index if not exists idx_contracts_coach_customer on public.contracts(coach_id, customer_id);
+create index if not exists idx_contracts_dates on public.contracts(start_date, end_date);
+
+drop trigger if exists trg_contracts_updated_at on public.contracts;
+create trigger trg_contracts_updated_at
+before update on public.contracts
+for each row execute function public.update_updated_at_column();
+
+-- Notifications (lightweight)
+create table if not exists public.notifications (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  type text not null,
+  title text,
+  body text,
+  data jsonb,
+  read_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+alter table public.notifications enable row level security;
+
+drop policy if exists "Notifications readable by owner" on public.notifications;
+create policy "Notifications readable by owner" on public.notifications
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "Notifications insertable by owner" on public.notifications;
+create policy "Notifications insertable by owner" on public.notifications
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "Notifications updatable by owner" on public.notifications;
+create policy "Notifications updatable by owner" on public.notifications
+  for update using (auth.uid() = user_id);
+
+create index if not exists idx_notifications_user_created on public.notifications(user_id, created_at desc);
+
+-- Helper: compute and record payout when a contract ends
+create or replace function public.create_payout_for_contract()
+returns trigger
+language plpgsql
+security definer
+set search_path = public as $$
+declare
+  v_platform_fee integer;
+  v_net integer;
+  v_payout_id uuid;
+begin
+  -- Only act when contract moves to completed or expired and no payout exists
+  if (TG_OP = 'UPDATE') and (new.status in ('completed','expired')) and new.payout_id is null then
+    v_platform_fee := round(new.price_cents * new.platform_fee_rate);
+    v_net := new.price_cents - v_platform_fee;
+    insert into public.payouts (coach_id, amount_cents, platform_fee_cents, net_amount_cents, status, period_start, period_end)
+    values (new.coach_id, new.price_cents, v_platform_fee, v_net, 'pending', new.start_date, new.end_date)
+    returning id into v_payout_id;
+    new.payout_id := v_payout_id;
+    -- Notify both parties
+    insert into public.notifications (user_id, type, title, body, data)
+    values
+      (new.coach_id, 'contract_ended', 'Contract ended', 'A coaching contract has ended. Payout will be processed.', jsonb_build_object('contract_id', new.id)),
+      (new.customer_id, 'contract_ended', 'Contract ended', 'Your coaching period has ended. You can renew to continue.', jsonb_build_object('contract_id', new.id));
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_contracts_payout on public.contracts;
+create trigger trg_contracts_payout
+after update on public.contracts
+for each row execute function public.create_payout_for_contract();
 
 -- AI flag and profile trial tracking
 alter table if exists public.programs
@@ -189,11 +314,32 @@ for update using (auth.uid() = coach_id or auth.uid() = customer_id);
 drop materialized view if exists public.customer_states;
 create materialized view public.customer_states as
 select p.id as customer_id,
-  case when pr.last_program is null then true else false end as missing_program,
-  case when coalesce(cc.any_open, false) then true else false end as needs_feedback,
-  case when p.plan_expiry is not null and p.plan_expiry::date <= (now() at time zone 'utc')::date + interval '7 days' then true else false end as soon_to_expire,
-  case when dc.date is null or dc.date < (now() at time zone 'utc')::date - interval '3 days' then true else false end as off_track,
-  case when p.plan_expiry is not null and p.plan_expiry::date < (now() at time zone 'utc')::date then true else false end as program_expired
+  -- Program coverage
+  (pr.last_program is null) as missing_program,
+  -- Engagement and feedback
+  coalesce(cc.any_open, false) as needs_feedback,
+  -- Platform subscription expiry (Stripe subscription)
+  (p.plan_expiry is not null and p.plan_expiry::date <= (now() at time zone 'utc')::date + interval '5 days') as soon_to_expire,
+  -- Off-track if no recent checkins in 3 days
+  (dc.date is null or dc.date < (now() at time zone 'utc')::date - interval '3 days') as off_track,
+  -- Platform subscription expired
+  (p.plan_expiry is not null and p.plan_expiry::date < (now() at time zone 'utc')::date) as program_expired,
+  -- Contract signals
+  exists (
+    select 1 from contracts c
+    where c.customer_id = p.id
+      and c.status = 'active'
+      and (c.end_date <= (now() at time zone 'utc')::date + interval '5 days')
+  ) as contract_expiring_soon,
+  exists (
+    select 1 from contracts c
+    where c.customer_id = p.id
+      and c.status = 'expired'
+  ) as contract_expired,
+  exists (
+    select 1 from programs pg
+    where pg.assigned_to = p.id
+  ) as on_track
 from profiles p
 left join (
   select assigned_to as customer_id, max(updated_at) as last_program
@@ -213,6 +359,18 @@ where p.role = 'customer';
 
 create index if not exists idx_customer_states_customer_id on public.customer_states(customer_id);
 
+-- Renewal prompts (5 days before contract end)
+drop view if exists public.renewal_prompts;
+create view public.renewal_prompts as
+select c.id as contract_id,
+       c.coach_id,
+       c.customer_id,
+       c.end_date,
+       greatest((c.end_date - interval '5 days')::date, (now() at time zone 'utc')::date) as prompt_from
+from public.contracts c
+where c.status = 'active'
+  and c.end_date <= (now() at time zone 'utc')::date + interval '5 days';
+
 -- program_entries
 create table if not exists public.program_entries (
   id uuid primary key default gen_random_uuid(),
@@ -231,6 +389,12 @@ alter table public.program_entries enable row level security;
 drop policy if exists "Entries readable by owner" on public.program_entries;
 create policy "Entries readable by owner" on public.program_entries
   for select using (auth.uid() = user_id);
+
+drop policy if exists "Entries readable by coach of customer" on public.program_entries;
+create policy "Entries readable by coach of customer" on public.program_entries
+  for select using (
+    public.is_coach_customer_relationship(auth.uid(), user_id)
+  );
 
 drop policy if exists "Entries writeable by owner" on public.program_entries;
 create policy "Entries writeable by owner" on public.program_entries
@@ -259,8 +423,13 @@ create table if not exists public.blog_posts (
 alter table public.blog_posts enable row level security;
 
 drop policy if exists "Blog readable by anyone" on public.blog_posts;
-create policy "Blog readable by anyone" on public.blog_posts
-  for select using (true);
+drop policy if exists "Blog readable by customers and coaches" on public.blog_posts;
+create policy "Blog readable by customers and coaches" on public.blog_posts
+  for select using (
+    auth.role() = 'authenticated' and (
+      public.has_role(auth.uid(), 'coach') or public.has_role(auth.uid(), 'customer')
+    )
+  );
 
 drop policy if exists "Blog insertable by coach" on public.blog_posts;
 create policy "Blog insertable by coach" on public.blog_posts
@@ -506,3 +675,35 @@ create index if not exists idx_progress_photos_user_id_date on public.progress_p
 -- End of consolidated migration
 
 
+
+-- Customers table: stores basic customer identity and onboarding linkage
+create table if not exists public.customers (
+  id uuid primary key references auth.users(id) on delete cascade,
+  email text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.customers enable row level security;
+
+-- Policies: users can see and manage their own customer record
+drop policy if exists "Customers readable by owner" on public.customers;
+create policy "Customers readable by owner"
+  on public.customers
+  for select using (auth.uid() = id);
+
+drop policy if exists "Customers upsertable by owner" on public.customers;
+create policy "Customers upsertable by owner"
+  on public.customers
+  for insert with check (auth.uid() = id);
+
+drop policy if exists "Customers updatable by owner" on public.customers;
+create policy "Customers updatable by owner"
+  on public.customers
+  for update using (auth.uid() = id);
+
+drop trigger if exists update_customers_updated_at on public.customers;
+create trigger update_customers_updated_at
+before update on public.customers
+for each row
+execute function public.update_updated_at_column();

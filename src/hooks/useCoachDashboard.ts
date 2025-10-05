@@ -93,23 +93,23 @@ export const useCoachTasks = () => {
       try {
         const results: CoachTask[] = [];
 
-        // Clients without a plan -> assign a program
-        const { data: noPlan } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .eq('coach_id', user.id)
-          .eq('role', 'customer')
-          .is('plan', null);
-        (noPlan || []).slice(0, 5).forEach((p: any) => {
+        // Use customer_states for accurate missing program/on_track signals
+        const { data: states } = await supabase
+          .from('customer_states')
+          .select('customer_id, missing_program')
+          .in('customer_id', (
+            (await supabase.from('profiles').select('id').eq('coach_id', user.id).eq('role', 'customer')).data || []
+          ).map((p: any) => p.id));
+        (states || []).filter((s: any) => s.missing_program).slice(0, 5).forEach((s: any) => {
           results.push({
-            id: `noplan-${p.id}`,
-            clientId: p.id,
-            clientName: p.full_name,
+            id: `noplan-${s.customer_id}`,
+            clientId: s.customer_id,
+            clientName: undefined,
             task: 'Assign a new program',
-            details: 'Customer currently has no plan.',
+            details: 'Customer currently has no active program.',
             tag: 'Missing Program',
             color: 'bg-red-500',
-            link: `/coach/clients/${p.id}`,
+            link: `/coach/clients/${s.customer_id}`,
           });
         });
 
@@ -130,6 +130,23 @@ export const useCoachTasks = () => {
             details: 'Reach out to close the deal.',
             tag: 'Pending Offer',
             color: 'bg-orange-500',
+            link: `/coach/messages`,
+          });
+        });
+
+        // Add renewal prompts (contracts ending soon)
+        const { data: renewals } = await supabase
+          .from('renewal_prompts')
+          .select('contract_id, customer_id, end_date')
+          .limit(10);
+        (renewals || []).forEach((r: any) => {
+          results.push({
+            id: `renew-${r.contract_id}`,
+            clientId: r.customer_id,
+            task: 'Contract renewing soon',
+            details: 'Consider sending a renewal offer.',
+            tag: 'Renewal',
+            color: 'bg-blue-500',
             link: `/coach/messages`,
           });
         });

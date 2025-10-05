@@ -58,6 +58,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.error('Error creating profile:', newError.message);
           return null;
         }
+
+        // Ensure customer record exists
+        try {
+          await supabase
+            .from('customers')
+            .upsert({ id: user.id, email: user.email ?? null }, { onConflict: 'id' });
+        } catch (e) {
+          console.warn('Non-fatal: failed to upsert into customers for new profile', e);
+        }
         return newData as Profile;
       }
       
@@ -66,7 +75,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null;
       }
       
-      return data as Profile;
+      const prof = data as Profile;
+      // Keep customers table in sync for customer role
+      if (prof.role === 'customer') {
+        try {
+          await supabase
+            .from('customers')
+            .upsert({ id: user.id, email: user.email ?? null }, { onConflict: 'id' });
+        } catch (e) {
+          console.warn('Non-fatal: failed to upsert into customers', e);
+        }
+      }
+      return prof;
     } catch (error) {
       console.error('Unexpected error in fetchProfile:', error);
       return null;

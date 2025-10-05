@@ -85,6 +85,56 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
                   period_start: new Date().toISOString().slice(0,10),
                   period_end: new Date().toISOString().slice(0,10),
                 });
+
+                // Create or update contract for this offer
+                try {
+                  const startDate = new Date();
+                  const endDate = new Date(startDate.getTime() + (offer.duration_months || 1) * 30 * 24 * 60 * 60 * 1000);
+                  await supabase
+                    .from('contracts')
+                    .insert({
+                      coach_id: offer.coach_id,
+                      customer_id: offer.customer_id,
+                      offer_id: offer.id,
+                      status: 'active',
+                      start_date: startDate.toISOString().slice(0,10),
+                      end_date: endDate.toISOString().slice(0,10),
+                      price_cents: amountCents,
+                    });
+                } catch (contractErr) {
+                  // eslint-disable-next-line no-console
+                  console.warn('[WEBHOOK] Could not create contract for offer', offerId, contractErr);
+                }
+
+                // Ensure a conversation exists and send system message about activation
+                try {
+                  const { data: convo } = await supabase
+                    .from('conversations')
+                    .select('id')
+                    .eq('coach_id', offer.coach_id)
+                    .eq('customer_id', offer.customer_id)
+                    .maybeSingle();
+                  let conversationId = convo?.id as string | undefined;
+                  if (!conversationId) {
+                    const { data: created } = await supabase
+                      .from('conversations')
+                      .insert({ coach_id: offer.coach_id, customer_id: offer.customer_id, title: 'Coaching Contract' })
+                      .select('id')
+                      .single();
+                    conversationId = created?.id;
+                  }
+                  if (conversationId) {
+                    await supabase.from('messages').insert({
+                      conversation_id: conversationId,
+                      sender_id: offer.coach_id,
+                      content: `Your coaching plan is now active for ${offer.duration_months} month(s). Let’s get started!`,
+                      type: 'system',
+                    });
+                  }
+                } catch (chatErr) {
+                  // eslint-disable-next-line no-console
+                  console.warn('[WEBHOOK] Conversation/message setup failed', chatErr);
+                }
               }
             }
           } catch (e) {
@@ -169,6 +219,122 @@ app.use(express.json());
 // Health
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
+// Contract maintenance: expire contracts whose end_date has passed and close chat
+app.post('/api/contracts/expire', async (_req, res) => {
+  try {
+    const today = new Date().toISOString().slice(0,10);
+    // Find active contracts past end_date
+    const { data: contracts } = await supabase
+      .from('contracts')
+      .select('id, coach_id, customer_id, end_date')
+      .eq('status', 'active')
+      .lt('end_date', today);
+    for (const c of contracts || []) {
+      // Mark as expired (payout trigger will enqueue payout)
+      await supabase.from('contracts').update({ status: 'expired' }).eq('id', c.id);
+      // Close conversation by inserting a system message; UI can treat this as closed flag
+      try {
+        const { data: convo } = await supabase
+          .from('conversations')
+          .select('id')
+          .eq('coach_id', c.coach_id)
+          .eq('customer_id', c.customer_id)
+          .maybeSingle();
+        if (convo?.id) {
+          await supabase.from('messages').insert({
+            conversation_id: convo.id,
+            sender_id: c.coach_id,
+            content: 'Contract period ended. This chat is now closed. Renew to continue.',
+            type: 'system',
+          });
+        }
+      } catch {}
+    }
+    return res.json({ ok: true, expired: (contracts || []).length });
+  } catch (e: any) {
+    return res.status(500).json({ error: e?.message || 'Failed to expire contracts' });
+  }
+});
+
+// Contract renewal: create a new period and (re)open chat
+app.post('/api/contracts/renew', async (req, res) => {
+  try {
+    const { contractId, months } = req.body as { contractId?: string; months?: number };
+    if (!contractId) return res.status(400).json({ error: 'contractId required' });
+    const durationMonths = Math.max(1, months || 1);
+    const { data: rows, error } = await supabase
+      .from('contracts')
+      .select('*')
+      .eq('id', contractId)
+      .limit(1);
+    const prev = rows?.[0];
+    if (error || !prev) return res.status(404).json({ error: 'Contract not found' });
+
+    // New period starts at today; price same as previous
+    const start = new Date();
+    const end = new Date(start.getTime() + durationMonths * 30 * 24 * 60 * 60 * 1000);
+    const { data: inserted, error: insertErr } = await supabase
+      .from('contracts')
+      .insert({
+        coach_id: prev.coach_id,
+        customer_id: prev.customer_id,
+        status: 'active',
+        start_date: start.toISOString().slice(0,10),
+        end_date: end.toISOString().slice(0,10),
+        price_cents: prev.price_cents,
+        platform_fee_rate: prev.platform_fee_rate,
+      })
+      .select('id')
+      .single();
+    if (insertErr) return res.status(500).json({ error: insertErr.message });
+
+    // Ensure conversation exists and add system message
+    const { data: convo } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('coach_id', prev.coach_id)
+      .eq('customer_id', prev.customer_id)
+      .maybeSingle();
+    let conversationId = convo?.id as string | undefined;
+    if (!conversationId) {
+      const { data: created } = await supabase
+        .from('conversations')
+        .insert({ coach_id: prev.coach_id, customer_id: prev.customer_id, title: 'Coaching Contract' })
+        .select('id')
+        .single();
+      conversationId = created?.id;
+    }
+    if (conversationId) {
+      await supabase.from('messages').insert({
+        conversation_id: conversationId,
+        sender_id: prev.coach_id,
+        content: `Contract renewed for ${durationMonths} month(s). Welcome back!`,
+        type: 'system',
+      });
+    }
+    return res.json({ ok: true, contract_id: inserted?.id });
+  } catch (e: any) {
+    return res.status(500).json({ error: e?.message || 'Failed to renew contract' });
+  }
+});
+
+// Contract signatures: set document url and signed timestamps
+app.post('/api/contracts/sign', async (req, res) => {
+  try {
+    const { contractId, actor, documentUrl } = req.body as { contractId?: string; actor?: 'coach'|'customer'; documentUrl?: string };
+    if (!contractId || !actor) return res.status(400).json({ error: 'contractId and actor required' });
+    const fields: any = {};
+    if (documentUrl) fields.document_url = documentUrl;
+    if (actor === 'coach') fields.coach_signed_at = new Date().toISOString();
+    if (actor === 'customer') fields.customer_signed_at = new Date().toISOString();
+    const { error } = await supabase.from('contracts').update(fields).eq('id', contractId);
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json({ ok: true });
+  } catch (e: any) {
+    return res.status(500).json({ error: e?.message || 'Failed to sign contract' });
+  }
+});
+
 // Create Checkout Session for platform subscription
 app.post('/api/stripe/create-checkout-session', async (req, res) => {
   try {
@@ -221,6 +387,21 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
     // eslint-disable-next-line no-console
     console.error('[API] create-checkout-session error', e);
     return res.status(500).json({ error: e?.message || 'Failed to create checkout session' });
+  }
+});
+
+// Stripe Customer Portal: return billing portal URL
+app.post('/api/stripe/customer-portal', async (req, res) => {
+  try {
+    const { stripeCustomerId, returnUrl } = req.body as { stripeCustomerId?: string; returnUrl?: string };
+    if (!stripeCustomerId) return res.status(400).json({ error: 'stripeCustomerId required' });
+    const session = await stripe.billingPortal.sessions.create({
+      customer: stripeCustomerId,
+      return_url: returnUrl || `${process.env.PUBLIC_APP_URL}/customer/settings`,
+    });
+    return res.json({ url: session.url });
+  } catch (e: any) {
+    return res.status(500).json({ error: e?.message || 'Failed to create customer portal session' });
   }
 });
 
@@ -352,6 +533,18 @@ app.post('/api/ai/generate-plan', async (req, res) => {
   try {
     const { userId } = req.body as { userId?: string };
     if (!userId) return res.status(400).json({ error: 'userId required' });
+    // Gate: Only active subscribers can use AI Coach
+    const { data: profile, error: profileErr } = await supabase
+      .from('profiles')
+      .select('plan, plan_expiry')
+      .eq('id', userId)
+      .single();
+    if (profileErr) return res.status(400).json({ error: 'Profile not found' });
+    const now = new Date();
+    const active = profile?.plan && profile.plan !== 'trial' && (!profile?.plan_expiry || new Date(profile.plan_expiry) > now);
+    if (!active) {
+      return res.status(403).json({ error: 'AI Coach requires an active subscription' });
+    }
     // Pull onboarding details to inform plan
     const { data: details, error } = await supabase
       .from('onboarding_details')
@@ -385,7 +578,7 @@ app.post('/api/ai/generate-plan', async (req, res) => {
 
     const openaiKey = process.env.OPENAI_KEY;
     if (!openaiKey) {
-      return res.json({ plan: basePlan });
+      return res.json({ plan: basePlan, status: 'ready', source: 'base' });
     }
 
     try {
@@ -408,11 +601,11 @@ Meditation experience: ${JSON.stringify(details?.meditation_experience || 'begin
       });
       const content = completion.choices?.[0]?.message?.content || '';
       const parsed = JSON.parse(content);
-      return res.json({ plan: parsed });
+      return res.json({ plan: parsed, status: 'ready', source: 'openai' });
     } catch (llmErr: any) {
       // eslint-disable-next-line no-console
       console.warn('[AI] OpenAI error, falling back to base plan', llmErr?.message);
-      return res.json({ plan: basePlan });
+      return res.json({ plan: basePlan, status: 'processing' });
     }
   } catch (e: any) {
     // eslint-disable-next-line no-console
@@ -420,6 +613,163 @@ Meditation experience: ${JSON.stringify(details?.meditation_experience || 'begin
     return res.status(500).json({ error: e?.message || 'Failed to generate plan' });
   }
 });
+
+// AI: Generate and save three plans (fitness, nutrition, mental health)
+app.post('/api/ai/generate-plans', async (req, res) => {
+  try {
+    const { userId } = req.body as { userId?: string };
+    if (!userId) return res.status(400).json({ error: 'userId required' });
+    // Gate: Only active subscribers can use AI Coach
+    const { data: profile, error: profileErr } = await supabase
+      .from('profiles')
+      .select('plan, plan_expiry')
+      .eq('id', userId)
+      .single();
+    if (profileErr) return res.status(400).json({ error: 'Profile not found' });
+    const now = new Date();
+    const active = profile?.plan && profile.plan !== 'trial' && (!profile?.plan_expiry || new Date(profile.plan_expiry) > now);
+    if (!active) {
+      return res.status(403).json({ error: 'AI Coach requires an active subscription' });
+    }
+
+    // Fetch onboarding details once
+    const { data: details } = await supabase
+      .from('onboarding_details')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    const makeBasePlan = (summary: string) => ({
+      generatedAt: new Date().toISOString(),
+      summary,
+      goals: details?.goals || [],
+      weeks: 4,
+      schedule: [
+        { day: 'Mon', workout: 'Full-body strength', nutrition: 'High protein, balanced carbs', mindfulness: '10m breathing' },
+        { day: 'Tue', workout: 'Zone 2 cardio 30m', nutrition: 'Mediterranean plate', mindfulness: 'Body scan 10m' },
+        { day: 'Wed', workout: 'Mobility + core', nutrition: 'Balanced bowl', mindfulness: 'Gratitude journaling' },
+        { day: 'Thu', workout: 'Upper strength', nutrition: 'High protein', mindfulness: 'Box breathing 8m' },
+        { day: 'Fri', workout: 'Intervals 20m', nutrition: 'Complex carbs focus', mindfulness: 'Mindful walk' },
+        { day: 'Sat', workout: 'Lower strength', nutrition: 'Protein + greens', mindfulness: 'Meditation 12m' },
+        { day: 'Sun', workout: 'Rest / light yoga', nutrition: 'Free choice within macros', mindfulness: 'Reflection 10m' },
+      ],
+      personalization: {
+        injuries: details?.injuries || [],
+        allergies: details?.allergies || [],
+        meditationExperience: details?.meditation_experience || 'beginner',
+      }
+    });
+
+    const openaiKey = process.env.OPENAI_KEY;
+    const summaries = {
+      fitness: 'AI Fitness Plan - 4 weeks',
+      nutrition: 'AI Nutrition Plan - 4 weeks',
+      mental: 'AI Mental Health Plan - 4 weeks',
+    } as const;
+
+    const buildPrompt = (domain: 'fitness' | 'nutrition' | 'mental') => ({
+      system: `You are a world-class ${domain} coach. Create a 4-week ${domain} plan.`,
+      user: `User goals: ${JSON.stringify(details?.goals || [])}
+Allergies: ${JSON.stringify(details?.allergies || [])}
+Injuries: ${JSON.stringify(details?.injuries || [])}
+Meditation experience: ${JSON.stringify(details?.meditation_experience || 'beginner')}
+Return JSON with fields: generatedAt (ISO), summary (string), goals (array), weeks (number), schedule (array of 7 objects relevant to ${domain}), personalization (object).`,
+    });
+
+    const result: any[] = [];
+    const categories: Array<{ key: 'fitness'|'nutrition'|'mental'; category: 'fitness'|'nutrition'|'mental health' }> = [
+      { key: 'fitness', category: 'fitness' },
+      { key: 'nutrition', category: 'nutrition' },
+      { key: 'mental', category: 'mental health' },
+    ];
+
+    if (!openaiKey) {
+      // Fallback to base plans and save
+      for (const c of categories) {
+        const plan = makeBasePlan(summaries[c.key]);
+        const { data: inserted } = await supabase
+          .from('programs')
+          .insert({
+            name: plan.summary,
+            description: `Personalized ${plan.weeks}-week plan generated by AI`,
+            status: 'active',
+            category: c.category,
+            coach_id: userId,
+            assigned_to: userId,
+            scheduled_date: new Date().toISOString(),
+            plan,
+            is_ai_generated: true,
+          })
+          .select('id, category')
+          .single();
+        result.push({ category: c.category, programId: inserted?.id, status: 'ready', source: 'base' });
+      }
+      return res.json({ items: result });
+    }
+
+    try {
+      const client = new OpenAI({ apiKey: openaiKey });
+      for (const c of categories) {
+        const { system, user } = buildPrompt(c.key);
+        const completion = await client.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: system },
+            { role: 'user', content: user },
+          ],
+          response_format: { type: 'json_object' },
+          temperature: 0.7,
+        });
+        const content = completion.choices?.[0]?.message?.content || '';
+        const plan = JSON.parse(content);
+        const { data: inserted } = await supabase
+          .from('programs')
+          .insert({
+            name: plan.summary || summaries[c.key],
+            description: `Personalized ${plan.weeks || 4}-week plan generated by AI`,
+            status: 'active',
+            category: c.category,
+            coach_id: userId,
+            assigned_to: userId,
+            scheduled_date: new Date().toISOString(),
+            plan,
+            is_ai_generated: true,
+          })
+          .select('id, category')
+          .single();
+        result.push({ category: c.category, programId: inserted?.id, status: 'ready', source: 'openai' });
+      }
+      return res.json({ items: result });
+    } catch (llmErr: any) {
+      // Fallback to base plans and return processing
+      for (const c of categories) {
+        const plan = makeBasePlan(summaries[c.key]);
+        const { data: inserted } = await supabase
+          .from('programs')
+          .insert({
+            name: plan.summary,
+            description: `Personalized ${plan.weeks}-week plan generated by AI`,
+            status: 'active',
+            category: c.category,
+            coach_id: userId,
+            assigned_to: userId,
+            scheduled_date: new Date().toISOString(),
+            plan,
+            is_ai_generated: true,
+          })
+          .select('id, category')
+          .single();
+        result.push({ category: c.category, programId: inserted?.id, status: 'processing', source: 'base' });
+      }
+      return res.json({ items: result });
+    }
+  } catch (e: any) {
+    // eslint-disable-next-line no-console
+    console.error('[AI] generate-plans error', e);
+    return res.status(500).json({ error: e?.message || 'Failed to generate plans' });
+  }
+});
+
 
 // Payouts request (records intent; real transfer handled in Stripe Connect or manual)
 app.post('/api/payouts/request', async (req, res) => {

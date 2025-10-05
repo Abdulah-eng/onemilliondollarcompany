@@ -33,4 +33,8 @@ export async function createOfferCheckoutSession(offerId: string): Promise<Check
   return await postJson(withBase('/api/stripe/create-offer-checkout'), { offerId });
 }
 
+export async function openCustomerPortal(stripeCustomerId: string, returnUrl?: string): Promise<{ url: string }> {
+  return await postJson(withBase('/api/stripe/customer-portal'), { stripeCustomerId, returnUrl });
+}
+
 

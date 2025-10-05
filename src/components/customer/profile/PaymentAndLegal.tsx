@@ -2,7 +2,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { loadStripe } from '@stripe/stripe-js';
 import { useAuth } from '@/contexts/AuthContext';
-import { createCheckoutSession, syncCheckoutSession, cancelSubscriptionAtPeriodEnd, resumeSubscription } from '@/lib/stripe/api';
+import { createCheckoutSession, syncCheckoutSession, cancelSubscriptionAtPeriodEnd, resumeSubscription, openCustomerPortal } from '@/lib/stripe/api';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
@@ -87,6 +87,21 @@ const PaymentAndLegal = () => {
       }
     } catch (e: any) {
       alert(e?.message || 'Failed to resume subscription');
+    }
+  };
+
+  const handleOpenCustomerPortal = async () => {
+    try {
+      if (!profile?.stripe_customer_id) {
+        alert('No Stripe customer found on your profile.');
+        return;
+      }
+      const { url } = await openCustomerPortal(profile.stripe_customer_id, `${window.location.origin}/customer/settings`);
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (e: any) {
+      alert(e?.message || 'Failed to open billing portal');
     }
   };
 
@@ -212,6 +227,14 @@ const PaymentAndLegal = () => {
                     onClick={handleSubscribe}
                   >
                     Subscribe {getCurrencyOption(selectedCurrency).price}/mo (14-day trial)
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="ml-2"
+                    onClick={handleOpenCustomerPortal}
+                  >
+                    Manage Billing
                   </Button>
                 </div>
               </div>

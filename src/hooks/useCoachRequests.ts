@@ -87,6 +87,36 @@ export const useCoachRequests = () => {
 
       if (profileError) throw profileError;
 
+      // Ensure a conversation exists between coach and customer
+      try {
+        const { data: existing } = await supabase
+          .from('conversations')
+          .select('id')
+          .eq('coach_id', request.coach_id)
+          .eq('customer_id', request.customer_id)
+          .maybeSingle();
+
+        let conversationId = existing?.id as string | undefined;
+        if (!conversationId) {
+          const { data: created } = await supabase
+            .from('conversations')
+            .insert({ coach_id: request.coach_id, customer_id: request.customer_id, title: 'New coaching chat' })
+            .select('id')
+            .single();
+          conversationId = created?.id;
+        }
+
+        // Send a welcome system message
+        if (conversationId) {
+          await supabase.from('messages').insert({
+            conversation_id: conversationId,
+            sender_id: request.coach_id,
+            content: 'Welcome aboard! I\'m excited to work with you. Feel free to share your goals here.',
+            type: 'system',
+          });
+        }
+      } catch {}
+
       // Create a coach feedback prompt for this customer
       try {
         await supabase.from('coach_checkins').insert({

@@ -6,4 +6,12 @@ export async function generateAIPersonalPlan(params: { userId: string }): Promis
   return await postJson(`${API_BASE}/api/ai/generate-plan`, params);
 }
 
+export async function generateAIMultiPlans(params: { userId: string }): Promise<{ items: Array<{ category: string; programId: string; status: 'ready' | 'processing' }> }> {
+  return await postJson(`${API_BASE}/api/ai/generate-plans`, params);
+}
+
+export async function generateWeeklyAIFeedback(params: { userId: string; weekOf: string }): Promise<{ status: string }> {
+  return await postJson(`${API_BASE}/api/ai/generate-weekly-feedback`, params);
+}
+
 

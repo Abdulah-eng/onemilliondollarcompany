@@ -460,6 +460,16 @@ const PersonalInfoSection = () => {
                   </MultiSelectButton>
                 ))}
               </div>
+              <div className="flex gap-2 pt-2">
+                <Button onClick={handleSave} disabled={loading}>
+                  <Save className="h-4 w-4 mr-2" />
+                  {loading ? 'Saving...' : 'Save changes'}
+                </Button>
+                <Button variant="outline" onClick={handleCancel}>
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
@@ -666,6 +676,19 @@ const PersonalInfoSection = () => {
               </p>
             )}
           </div>
+
+          {isEditing && (
+            <div className="flex gap-2 pt-2">
+              <Button onClick={handleSave} disabled={loading}>
+                <Save className="h-4 w-4 mr-2" />
+                {loading ? 'Saving...' : 'Save changes'}
+              </Button>
+              <Button variant="outline" onClick={handleCancel}>
+                <X className="h-4 w-4 mr-2" />
+                Cancel
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
