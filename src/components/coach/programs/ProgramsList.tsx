@@ -38,7 +38,7 @@ const ProgramsList = () => {
   const [activeCategory, setActiveCategory] = useState<ProgramCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
-  const { programs, loading, error } = useCoachPrograms();
+  const { programs, loading, error, refetch } = useCoachPrograms();
   const { deleteProgram, loading: mutationLoading } = useProgramMutations();
 
   // Filter programs based on active filters
@@ -76,7 +76,10 @@ const ProgramsList = () => {
         break;
       case 'delete':
         if (window.confirm(`Are you sure you want to delete "${program.name}"?`)) {
-          await deleteProgram(program.id);
+          const ok = await deleteProgram(program.id);
+          if (ok) {
+            await refetch();
+          }
         }
         break;
       default:

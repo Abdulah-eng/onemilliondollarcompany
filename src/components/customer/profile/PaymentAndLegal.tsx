@@ -5,9 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { createCheckoutSession, syncCheckoutSession, cancelSubscriptionAtPeriodEnd, resumeSubscription, openCustomerPortal } from '@/lib/stripe/api';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -19,7 +17,7 @@ const PaymentAndLegal = () => {
   const location = useLocation();
   const { profile } = useAuth();
   const { paymentInfo, loading: paymentLoading } = usePaymentInfo();
-  const { detectedCurrency, currencyOptions, getCurrencyOption } = useCurrencyDetection();
+  const { detectedCurrency, getCurrencyOption } = useCurrencyDetection();
   const [selectedCurrency, setSelectedCurrency] = useState(detectedCurrency);
 
   // Update selected currency when detected currency changes
@@ -159,41 +157,9 @@ const PaymentAndLegal = () => {
               ) : (
                 <div className="text-center py-4 text-muted-foreground">No payment information available</div>
               )}
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button size="sm">Update Payment Method</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Update Payment Method</DialogTitle>
-                      <DialogDescription>Enter your new payment details.</DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <Input placeholder="Card Number" />
-                      <div className="flex gap-4">
-                        <Input placeholder="MM/YY" className="w-1/2" />
-                        <Input placeholder="CVC" className="w-1/2" />
-                      </div>
-                      <Button className="w-full">Save</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                {/* Payment method updates are managed in Stripe Billing Portal */}
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="currency-select">Choose Currency</Label>
-                  <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-                    <SelectTrigger id="currency-select" className="w-full">
-                      <SelectValue placeholder="Select currency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencyOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Currency is auto-detected; selector hidden */}
                 <div className="space-y-2 text-sm">
                   <Button 
                     variant="outline" 

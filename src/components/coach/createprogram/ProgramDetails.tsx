@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { MultiSelect } from '@/components/ui/multi-select';
 import { MUSCLE_GROUPS, EQUIPMENT_OPTIONS } from '@/constants/fitness';
 import { cn } from '@/lib/utils';
 import { ProgramCategory } from '@/mockdata/createprogram/mockExercises';
+import { useCoachLibrary } from '@/hooks/useCoachLibrary';
 
 // Form data structure
 interface ProgramDetailsForm {
@@ -52,6 +53,33 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
   const selectedCategory = watch('category');
   const muscleGroups = watch('muscleGroups') || [];
   const equipment = watch('equipment') || [];
+  const { items: libraryItems, loading: libraryLoading } = useCoachLibrary();
+  const [selectedLibraryIds, setSelectedLibraryIds] = useState<string[]>([]);
+
+  const filteredLibrary = useMemo(() => {
+    if (!selectedCategory) return libraryItems;
+    return libraryItems.filter(i =>
+      (selectedCategory === 'fitness' && i.category === 'fitness') ||
+      (selectedCategory === 'nutrition' && i.category === 'nutrition') ||
+      (selectedCategory === 'mental health' && i.category === 'mental')
+    );
+  }, [libraryItems, selectedCategory]);
+
+  const toggleLibrarySelect = (id: string) => {
+    setSelectedLibraryIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const submitWithLibrary = (data: ProgramDetailsForm) => {
+    const attached = filteredLibrary.filter(i => selectedLibraryIds.includes(i.id));
+    const merged: any = { ...data };
+    if (attached.length > 0) {
+      merged.plan = {
+        ...(initialData as any)?.plan,
+        libraryItems: attached.map(i => ({ id: i.id, name: i.name, category: i.category, details: i.details })),
+      };
+    }
+    onNext(merged);
+  };
 
   const handleCategorySelect = (category: ProgramCategory) => {
     setValue('category', category);
@@ -204,7 +232,7 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
 
       {/* Inline Next Button (kept) */}
       <Button
-        onClick={handleSubmit(onNext)}
+        onClick={handleSubmit(submitWithLibrary)}
         className="w-full md:w-fit"
         disabled={!selectedCategory || !!errors.title}
       >

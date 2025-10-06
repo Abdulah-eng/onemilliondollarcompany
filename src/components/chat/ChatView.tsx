@@ -18,7 +18,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
   userRole
 }) => {
   const { user } = useAuth();
-  const { messages, loading, sendMessage, sendOffer } = useMessages(conversationId);
+  const { messages, loading, sendMessage, sendOffer, refetch } = useMessages(conversationId);
   const [showOfferComposer, setShowOfferComposer] = useState(false);
   const [sending, setSending] = useState(false);
   
@@ -37,14 +37,24 @@ export const ChatView: React.FC<ChatViewProps> = ({
     const params = new URLSearchParams(window.location.search);
     const offerStatus = params.get('offer_status');
     if (offerStatus === 'paid') {
-      toast.success('Payment successful! Offer accepted.');
-      // Clean the URL params
+      toast.success('Payment successful! Finalizing...');
+      // Poll briefly to allow webhook to mark the offer as accepted
+      let attempts = 0;
+      const interval = setInterval(async () => {
+        attempts += 1;
+        await refetch();
+        if (attempts >= 10) {
+          clearInterval(interval);
+        }
+      }, 1500);
+      // Clean URL immediately
       const url = new URL(window.location.href);
       url.searchParams.delete('offer_status');
       url.searchParams.delete('session_id');
       window.history.replaceState({}, '', url.toString());
+      return () => clearInterval(interval);
     }
-  }, []);
+  }, [refetch]);
 
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;

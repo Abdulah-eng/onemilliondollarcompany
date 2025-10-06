@@ -53,7 +53,16 @@ export const useMessages = (conversationId: string | null) => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      // Hide messages that are offer-type with rejected status
+      const filtered = (data || []).filter((m: any) => {
+        const isOffer = m.message_type === 'offer';
+        const hasOfferRow = Boolean(m.coach_offer);
+        const isRejected = isOffer && hasOfferRow && m.coach_offer.status === 'rejected';
+        // Hide offer messages that are rejected OR whose coach_offers row is missing
+        if (isOffer && (!hasOfferRow || isRejected)) return false;
+        return true;
+      });
+      setMessages(filtered);
     } catch (err) {
       console.error('Error fetching messages:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch messages');
@@ -144,19 +153,72 @@ export const useMessages = (conversationId: string | null) => {
 
     if (!conversationId) return;
 
-    // Set up real-time subscription for new messages
-    const channel = supabase
-      .channel(`messages-${conversationId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversationId}`
-        },
-        (payload) => {
-          // Fetch the new message with sender info
+    // Set up real-time subscription for message changes (INSERT/DELETE/UPDATE)
+    const channel = supabase.channel(`messages-${conversationId}`);
+
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `conversation_id=eq.${conversationId}`
+      },
+      (payload) => {
+        supabase
+          .from('messages')
+          .select(`
+            *,
+            sender:profiles!messages_sender_id_fkey(id, full_name, avatar_url),
+            coach_offer:coach_offers!coach_offers_message_id_fkey(
+              id,
+              price,
+              duration_months,
+              status,
+              expires_at
+            )
+          `)
+          .eq('id', payload.new.id)
+          .single()
+          .then(({ data }) => {
+            if (!data) return;
+            const isOffer = data.message_type === 'offer';
+            const hasOfferRow = Boolean(data.coach_offer);
+            const isRejected = isOffer && hasOfferRow && data.coach_offer.status === 'rejected';
+            // do not add rejected offers or orphan offer messages
+            if (isOffer && (!hasOfferRow || isRejected)) return;
+            setMessages(prev => [...prev, data]);
+          });
+      }
+    );
+
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'messages',
+        filter: `conversation_id=eq.${conversationId}`
+      },
+      (payload) => {
+        const deletedId = (payload.old as any)?.id;
+        if (deletedId) {
+          setMessages(prev => prev.filter(m => m.id !== deletedId));
+        }
+      }
+    );
+
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'messages',
+        filter: `conversation_id=eq.${conversationId}`
+      },
+      (payload) => {
+        const updatedId = (payload.new as any)?.id;
+        if (updatedId) {
           supabase
             .from('messages')
             .select(`
@@ -170,16 +232,25 @@ export const useMessages = (conversationId: string | null) => {
                 expires_at
               )
             `)
-            .eq('id', payload.new.id)
+            .eq('id', updatedId)
             .single()
             .then(({ data }) => {
-              if (data && data.sender_id !== user?.id) {
-                setMessages(prev => [...prev, data]);
+              if (!data) return;
+              const isOffer = data.message_type === 'offer';
+              const hasOfferRow = Boolean(data.coach_offer);
+              const isRejected = isOffer && hasOfferRow && data.coach_offer.status === 'rejected';
+              if (isOffer && (!hasOfferRow || isRejected)) {
+                // remove rejected offers from the view
+                setMessages(prev => prev.filter(m => m.id !== updatedId));
+                return;
               }
+              setMessages(prev => prev.map(m => (m.id === updatedId ? data : m)));
             });
         }
-      )
-      .subscribe();
+      }
+    );
+
+    channel.subscribe();
 
     return () => {
       supabase.removeChannel(channel);

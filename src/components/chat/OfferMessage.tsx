@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { DollarSign, Clock, Check, X } from 'lucide-react';
 import { createOfferCheckoutSession } from '@/lib/stripe/api';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface OfferMessageProps {
   message: MessageWithSender;
@@ -22,17 +23,30 @@ export const OfferMessage: React.FC<OfferMessageProps> = ({
   isOwn,
   userRole
 }) => {
-  const { acceptOffer, rejectOffer, loading } = useOfferActions();
+  const { acceptOffer, rejectOffer, rejectOfferByMessage, loading } = useOfferActions();
 
   const offer = message.coach_offer;
-  const isExpired = offer && new Date(offer.expires_at) < new Date();
+  const hasExpiry = Boolean(offer?.expires_at);
+  const isExpired = hasExpiry && offer && new Date(offer.expires_at) < new Date();
 
   const handleAcceptOffer = async () => {
-    if (!offer) return;
-
     try {
+      // Ensure we have an offer id (in case join didn't hydrate yet)
+      let offerId = offer?.id as string | undefined;
+      if (!offerId) {
+        const { data } = await supabase
+          .from('coach_offers')
+          .select('id')
+          .eq('message_id', message.id)
+          .maybeSingle();
+        offerId = data?.id;
+      }
+      if (!offerId) {
+        toast.error('Offer not ready yet. Please try again in a moment.');
+        return;
+      }
       // Redirect to Stripe Checkout for one-time payment
-      const { checkoutUrl } = await createOfferCheckoutSession(offer.id);
+      const { checkoutUrl } = await createOfferCheckoutSession(offerId);
       window.location.href = checkoutUrl;
     } catch (error) {
       toast.error("Failed to accept offer. Please try again.");
@@ -40,10 +54,23 @@ export const OfferMessage: React.FC<OfferMessageProps> = ({
   };
 
   const handleRejectOffer = async () => {
-    if (!offer) return;
-
     try {
-      await rejectOffer(offer.id);
+      // Ensure we have an offer id (in case join didn't hydrate yet)
+      let offerId = offer?.id as string | undefined;
+      if (!offerId) {
+        const { data } = await supabase
+          .from('coach_offers')
+          .select('id')
+          .eq('message_id', message.id)
+          .maybeSingle();
+        offerId = data?.id;
+      }
+      // If offer row missing, delete by message id (removes message + any linked offer)
+      if (!offerId) {
+        await rejectOfferByMessage(message.id);
+      } else {
+        await rejectOffer(offerId);
+      }
       toast.success("The offer has been declined.");
     } catch (error) {
       toast.error("Failed to reject offer. Please try again.");
@@ -60,18 +87,22 @@ export const OfferMessage: React.FC<OfferMessageProps> = ({
       expired: { label: 'Expired', variant: 'outline' as const }
     };
 
-    const status = isExpired ? 'expired' : offer.status;
+    const status = (isExpired ? 'expired' : (offer.status || 'pending')) as keyof typeof statusConfig;
     const config = statusConfig[status];
-
-    return (
-      <Badge variant={config.variant} className="text-xs">
-        {config.label}
-      </Badge>
-    );
+    if (!config) {
+      return <Badge variant="secondary" className="text-xs">Pending</Badge>;
+    }
+    return <Badge variant={config.variant} className="text-xs">{config.label}</Badge>;
   };
 
-  const canRespond = !isOwn && userRole === 'customer' && 
-                     offer?.status === 'pending' && !isExpired;
+  // Determine effective status and whether customer can respond
+  const effectiveStatus: 'pending' | 'accepted' | 'rejected' | 'expired' = (isExpired
+    ? 'expired'
+    : ((offer?.status as any) || 'pending'));
+  const canRespond = !isOwn
+    && (userRole ? userRole === 'customer' : true)
+    && effectiveStatus === 'pending'
+    && !isExpired;
 
   return (
     <div className={cn(
@@ -118,14 +149,14 @@ export const OfferMessage: React.FC<OfferMessageProps> = ({
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Price:</span>
-                  <span className="font-medium">${offer.price}</span>
+                  <span className="font-medium">${(offer.price ?? (message as any)?.metadata?.price) ?? ''}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Duration:</span>
-                  <span className="font-medium">{offer.duration_months} months</span>
+                  <span className="font-medium">{(offer.duration_months ?? (message as any)?.metadata?.duration_months) ?? ''} months</span>
                 </div>
                 
-                {offer.status === 'pending' && !isExpired && (
+                {offer.status === 'pending' && !isExpired && hasExpiry && (
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock className="w-3 h-3" />
                     Expires {formatDistanceToNow(new Date(offer.expires_at), { addSuffix: true })}

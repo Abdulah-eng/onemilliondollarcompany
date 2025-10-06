@@ -107,6 +107,21 @@ before update on public.programs
 for each row
 execute function public.update_updated_at_column();
 
+-- coach_offers RLS policies (ensure both coach and customer can read; coach insert; both can update)
+alter table if exists public.coach_offers enable row level security;
+
+drop policy if exists "Offers readable by coach or customer" on public.coach_offers;
+create policy "Offers readable by coach or customer" on public.coach_offers
+  for select using (auth.uid() = coach_id or auth.uid() = customer_id);
+
+drop policy if exists "Offers insertable by coach" on public.coach_offers;
+create policy "Offers insertable by coach" on public.coach_offers
+  for insert with check (auth.uid() = coach_id);
+
+drop policy if exists "Offers updatable by coach or customer" on public.coach_offers;
+create policy "Offers updatable by coach or customer" on public.coach_offers
+  for update using (auth.uid() = coach_id or auth.uid() = customer_id);
+
 -- Coaching contracts
 do $$
 begin
