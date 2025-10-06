@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -40,7 +40,7 @@ const categoryOptions = [
 ];
 
 const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) => {
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<ProgramDetailsForm>({
+  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<ProgramDetailsForm>({
     defaultValues: {
       ...initialData,
       muscleGroups: initialData?.muscleGroups || [],
@@ -49,6 +49,23 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
       scheduledDate: (initialData as any)?.scheduledDate ?? null,
     },
   });
+
+  // When editing, initialData arrives asynchronously. Ensure the form reflects it.
+  useEffect(() => {
+    if (initialData && Object.keys(initialData).length > 0) {
+      reset({
+        category: initialData.category as any,
+        title: (initialData as any).title,
+        description: (initialData as any).description,
+        muscleGroups: initialData.muscleGroups || [],
+        equipment: initialData.equipment || [],
+        benefits: (initialData as any).benefits,
+        allergies: (initialData as any).allergies,
+        assignedTo: (initialData as any).assignedTo ?? null,
+        scheduledDate: (initialData as any).scheduledDate ?? null,
+      });
+    }
+  }, [initialData, reset]);
 
   const selectedCategory = watch('category');
   const muscleGroups = watch('muscleGroups') || [];
