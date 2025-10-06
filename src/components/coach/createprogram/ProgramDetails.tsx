@@ -59,9 +59,9 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
   const filteredLibrary = useMemo(() => {
     if (!selectedCategory) return libraryItems;
     return libraryItems.filter(i =>
-      (selectedCategory === 'fitness' && i.category === 'fitness') ||
-      (selectedCategory === 'nutrition' && i.category === 'nutrition') ||
-      (selectedCategory === 'mental health' && i.category === 'mental')
+      (selectedCategory === 'fitness' && i.category === 'exercise') ||
+      (selectedCategory === 'nutrition' && i.category === 'recipe') ||
+      (selectedCategory === 'mental health' && i.category === 'mental health')
     );
   }, [libraryItems, selectedCategory]);
 

@@ -6,12 +6,25 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { User, Tag, Award, Plus, Trash2, Link, Upload, Save, Loader2, Brain, AlertCircle, Camera } from 'lucide-react';
+import { User, Tag, Award, Plus, Trash2, Save, Loader2, Brain, AlertCircle, Camera, Instagram, Linkedin, Youtube, Twitter, Video, Facebook, Globe, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCoachProfile, CoachProfile, Certification, SocialLink } from '@/hooks/useCoachProfile';
 import { SkillsSelector } from '@/components/onboarding/SkillsSelector';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import imageCompression from 'browser-image-compression';
+
+const SOCIAL_PLATFORMS = [
+  { value: 'Instagram', icon: Instagram, urlPattern: /^https?:\/\/(www\.)?instagram\.com\/.+/, placeholder: 'https://instagram.com/yourprofile' },
+  { value: 'LinkedIn', icon: Linkedin, urlPattern: /^https?:\/\/(www\.)?linkedin\.com\/(in|company)\/.+/, placeholder: 'https://linkedin.com/in/yourprofile' },
+  { value: 'YouTube', icon: Youtube, urlPattern: /^https?:\/\/(www\.)?youtube\.com\/.+/, placeholder: 'https://youtube.com/@yourchannel' },
+  { value: 'Twitter', icon: Twitter, urlPattern: /^https?:\/\/(www\.)?(twitter\.com|x\.com)\/.+/, placeholder: 'https://twitter.com/yourhandle' },
+  { value: 'TikTok', icon: Video, urlPattern: /^https?:\/\/(www\.)?tiktok\.com\/@.+/, placeholder: 'https://tiktok.com/@yourhandle' },
+  { value: 'Facebook', icon: Facebook, urlPattern: /^https?:\/\/(www\.)?facebook\.com\/.+/, placeholder: 'https://facebook.com/yourpage' },
+  { value: 'Website', icon: Globe, urlPattern: /^https?:\/\/.+/, placeholder: 'https://yourwebsite.com' },
+] as const;
 
 const profileSchema = z.object({
   full_name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100, 'Name too long'),
@@ -48,6 +61,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [socialValidation, setSocialValidation] = useState<Record<string, boolean>>({});
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -74,6 +88,39 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
     setFormData({ ...formData, certifications: formData.certifications.filter(c => c.id !== id) });
   };
 
+  const handleSocialChange = (id: string, field: keyof SocialLink, value: any) => {
+    const newSocials = formData.socials.map(s => 
+      s.id === id ? { ...s, [field]: value } : s
+    );
+    setFormData({ ...formData, socials: newSocials });
+    
+    // Validate URL if it's the url field
+    if (field === 'url') {
+      const social = newSocials.find(s => s.id === id);
+      if (social) {
+        const platformConfig = SOCIAL_PLATFORMS.find(p => p.value === social.platform);
+        const isValid = platformConfig ? platformConfig.urlPattern.test(value) : true;
+        setSocialValidation(prev => ({ ...prev, [id]: isValid }));
+      }
+    }
+  };
+
+  const addSocial = () => {
+    setFormData({ 
+      ...formData, 
+      socials: [...formData.socials, { id: `new-${Date.now()}`, platform: 'Instagram', url: '' }] 
+    });
+  };
+
+  const removeSocial = (id: string) => {
+    setFormData({ ...formData, socials: formData.socials.filter(s => s.id !== id) });
+    setSocialValidation(prev => {
+      const newValidation = { ...prev };
+      delete newValidation[id];
+      return newValidation;
+    });
+  };
+
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -92,12 +139,31 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
 
     setIsUploadingImage(true);
     try {
-      // Create a preview URL for immediate display
-      const previewUrl = URL.createObjectURL(file);
-      setFormData({ ...formData, avatar_url: previewUrl });
+      // Compress image
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 500,
+        useWebWorker: true
+      };
+      const compressedFile = await imageCompression(file, options);
 
-      // In a real app, you would upload to a service like Supabase Storage
-      // For now, we'll just update the form data with the preview
+      // Upload to Supabase Storage
+      const fileExt = compressedFile.name.split('.').pop();
+      const fileName = `${profile?.id}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, compressedFile, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      setFormData({ ...formData, avatar_url: publicUrl });
       toast.success('Image uploaded successfully!');
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -358,17 +424,96 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
       <Card className="shadow-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
-            <Tag className="h-5 w-5" /> Social Presence
+            <Globe className="h-5 w-5" /> Social Media & Online Presence
           </CardTitle>
-          <CardDescription>Share links where clients can find more of your content.</CardDescription>
+          <CardDescription>Add your social media links to help clients connect with you and see your content.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {formData.socials.map(social => (
-            <div key={social.id} className="space-y-2">
-              <Label>{social.platform} URL</Label>
-              <Input value={social.url} onChange={e => setFormData({ ...formData, socials: formData.socials.map(s => s.id === social.id ? { ...s, url: e.target.value } : s) })} placeholder={`https://${social.platform.toLowerCase()}.com/...`} />
-            </div>
-          ))}
+          {formData.socials.map(social => {
+            const platformConfig = SOCIAL_PLATFORMS.find(p => p.value === social.platform);
+            const IconComponent = platformConfig?.icon || Globe;
+            const isValidUrl = socialValidation[social.id] !== false;
+            const hasUrl = social.url.trim().length > 0;
+            
+            return (
+              <div key={social.id} className="p-3 border rounded-lg flex items-start gap-3 bg-muted/20">
+                <div className="flex-1 space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Platform</Label>
+                      <Select 
+                        value={social.platform} 
+                        onValueChange={(value: any) => handleSocialChange(social.id, 'platform', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SOCIAL_PLATFORMS.map(platform => (
+                            <SelectItem key={platform.value} value={platform.value}>
+                              <div className="flex items-center gap-2">
+                                <platform.icon className="h-4 w-4" />
+                                {platform.value}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-end">
+                      <Button 
+                        variant="destructive" 
+                        size="icon" 
+                        onClick={() => removeSocial(social.id)}
+                        className="h-10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Profile URL</Label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <IconComponent className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <Input 
+                        value={social.url} 
+                        onChange={e => handleSocialChange(social.id, 'url', e.target.value)}
+                        placeholder={platformConfig?.placeholder || 'https://...'}
+                        className={cn(
+                          "pl-10 pr-10",
+                          hasUrl && !isValidUrl && "border-destructive"
+                        )}
+                      />
+                      {hasUrl && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          {isValidUrl ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <X className="h-4 w-4 text-destructive" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {hasUrl && !isValidUrl && (
+                      <p className="text-xs text-destructive">
+                        Please enter a valid {social.platform} URL
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          <Button 
+            variant="secondary" 
+            onClick={addSocial} 
+            className="w-full gap-2 mt-4 border-dashed border-2"
+          >
+            <Plus className="h-4 w-4" /> Add Social Link
+          </Button>
         </CardContent>
       </Card>
 
