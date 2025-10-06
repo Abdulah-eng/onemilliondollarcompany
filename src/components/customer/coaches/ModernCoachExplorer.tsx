@@ -168,7 +168,7 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
     const { user } = useAuth();
     const { planStatus } = usePaymentPlan();
     const { coaches, loading, sendRequest, getRequestStatus } = useEnhancedCoaches();
-    const { generateAndSavePlan, loading: aiLoading } = useAIPlanGeneration();
+    const { generateThreePlans, loading: aiLoading } = useAIPlanGeneration();
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [selectedCoach, setSelectedCoach] = useState<EnhancedCoach | null>(null);
@@ -246,9 +246,9 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
                 return;
             }
             
-            await generateAndSavePlan();
-            toast.success('Your AI plan has been generated and saved!');
-            // Navigate to programs page to see the generated plan
+            await generateThreePlans();
+            toast.success('Your AI plans have been generated and saved!');
+            // Navigate to programs page to see the generated plans
             window.location.href = '/customer/programs';
         } catch (error) {
             console.error('AI plan generation error:', error);

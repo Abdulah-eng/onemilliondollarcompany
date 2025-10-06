@@ -11,7 +11,7 @@ export interface Certification {
 
 export interface SocialLink {
   id: string;
-  platform: 'Instagram' | 'LinkedIn' | 'YouTube' | 'Website';
+  platform: 'Instagram' | 'LinkedIn' | 'YouTube' | 'Twitter' | 'TikTok' | 'Facebook' | 'Website';
   url: string;
 }
 
