@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { MultiSelect } from '@/components/ui/multi-select';
+import { Switch } from '@/components/ui/switch';
 import { MUSCLE_GROUPS, EQUIPMENT_OPTIONS } from '@/constants/fitness';
 import { cn } from '@/lib/utils';
 import { ProgramCategory } from '@/mockdata/createprogram/mockExercises';
@@ -25,6 +26,7 @@ interface ProgramDetailsForm {
   allergies?: string;
   assignedTo?: string | null;
   scheduledDate?: string | null;
+  markActive?: boolean;
 }
 
 interface ProgramDetailsProps {
@@ -40,18 +42,21 @@ const categoryOptions = [
 ];
 
 const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) => {
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<ProgramDetailsForm>({
+  const { register, handleSubmit, setValue, watch, reset, control, formState: { errors } } = useForm<ProgramDetailsForm>({
     defaultValues: {
       ...initialData,
       muscleGroups: initialData?.muscleGroups || [],
       equipment: initialData?.equipment || [],
       assignedTo: (initialData as any)?.assignedTo ?? null,
       scheduledDate: (initialData as any)?.scheduledDate ?? null,
+      markActive: (initialData as any)?.markActive ?? false,
     },
   });
 
-  // When editing, initialData arrives asynchronously. Ensure the form reflects it.
+  // When editing, initialData arrives asynchronously. Only reset once when it first becomes available
+  const didInitialResetRef = useRef(false);
   useEffect(() => {
+    if (didInitialResetRef.current) return;
     if (initialData && Object.keys(initialData).length > 0) {
       reset({
         category: initialData.category as any,
@@ -63,7 +68,9 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
         allergies: (initialData as any).allergies,
         assignedTo: (initialData as any).assignedTo ?? null,
         scheduledDate: (initialData as any).scheduledDate ?? null,
+        markActive: (initialData as any)?.markActive ?? false,
       });
+      didInitialResetRef.current = true;
     }
   }, [initialData, reset]);
 
@@ -93,6 +100,13 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
       merged.plan = {
         ...(initialData as any)?.plan,
         libraryItems: attached.map(i => ({ id: i.id, name: i.name, category: i.category, details: i.details })),
+      };
+    }
+    // Ensure allergies and other details persist inside plan for nutrition
+    if (data.allergies) {
+      merged.plan = {
+        ...(merged.plan || (initialData as any)?.plan || {}),
+        allergies: data.allergies,
       };
     }
     onNext(merged);
@@ -245,6 +259,20 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
             {...register('scheduledDate')}
           />
         </div>
+      </div>
+
+      <div className="flex items-center justify-between border rounded-lg p-3">
+        <div>
+          <Label className="mb-0">Mark as Active</Label>
+          <p className="text-xs text-muted-foreground">If enabled, the program will be saved as Active.</p>
+        </div>
+        <Controller
+          name="markActive"
+          control={control}
+          render={({ field: { value, onChange } }) => (
+            <Switch checked={!!value} onCheckedChange={onChange} />
+          )}
+        />
       </div>
 
       {/* Inline Next Button (kept) */}

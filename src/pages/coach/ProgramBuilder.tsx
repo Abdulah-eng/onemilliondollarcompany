@@ -1,7 +1,7 @@
 // src/pages/coach/ProgramBuilder.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import ProgramDetails from '@/components/coach/createprogram/ProgramDetails';
@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check } from 'lucide-react';
 import { useProgramMutations } from '@/hooks/useProgramMutations';
-import { Program, ProgramCategory } from '@/types/program';
+import { Program, ProgramCategory, ProgramStatus } from '@/types/program';
 
 type Step = 'program-details' | 'fitness-builder' | 'nutrition-builder' | 'mental-health-builder';
 
@@ -23,6 +23,7 @@ interface ProgramData {
   plan: any;
   assignedTo?: string | null;
   scheduledDate?: string | null;
+  markActive?: boolean;
 }
 
 const ProgramBuilder = () => {
@@ -34,29 +35,33 @@ const ProgramBuilder = () => {
   const [existingProgram, setExistingProgram] = useState<Program | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Load existing program data if editing
+  // Load existing program data if editing (run once per id)
+  const didLoadRef = useRef<string | null>(null);
   useEffect(() => {
     const loadProgram = async () => {
-      if (id) {
-        setIsEditing(true);
-        const program = await getProgramById(id);
-        if (program) {
-          setExistingProgram(program);
-          setProgramData({
-            category: program.category,
-            title: program.name,
-            description: program.description,
-            plan: program.plan || {}, // Load existing plan data from program.plan
-          });
-        } else {
-          // Program not found, redirect to programs list
-          navigate('/coach/programs');
-        }
+      if (!id) return;
+      if (didLoadRef.current === id) return;
+      setIsEditing(true);
+      const program = await getProgramById(id);
+      if (program) {
+        setExistingProgram(program);
+        setProgramData({
+          category: program.category,
+          title: program.name,
+          description: program.description,
+          plan: program.plan || {}, // Load existing plan data from program.plan
+          // Surface allergies field from stored plan back into details step
+          allergies: (program.plan as any)?.allergies,
+          markActive: program.status === 'active',
+        });
+        didLoadRef.current = id;
+      } else {
+        // Program not found, redirect to programs list
+        navigate('/coach/programs');
       }
     };
-
     loadProgram();
-  }, [id, getProgramById, navigate]);
+  }, [id, navigate]);
 
   const handleProgramDetailsNext = (data: any) => {
     setProgramData(prev => ({ ...prev, ...data }));
@@ -91,6 +96,7 @@ const ProgramBuilder = () => {
         plan: planData,
         assignedTo: finalProgram.assignedTo ?? existingProgram.assignedTo ?? null,
         scheduledDate: finalProgram.scheduledDate ?? existingProgram.scheduledDate ?? null,
+        status: (finalProgram.markActive ? 'active' : (existingProgram.status as ProgramStatus)) || 'draft',
       });
     } else {
       // Create new program
@@ -101,6 +107,7 @@ const ProgramBuilder = () => {
         plan: planData,
         assignedTo: finalProgram.assignedTo ?? null,
         scheduledDate: finalProgram.scheduledDate ?? null,
+        status: (finalProgram.markActive ? 'active' : 'draft') as ProgramStatus,
       });
     }
 

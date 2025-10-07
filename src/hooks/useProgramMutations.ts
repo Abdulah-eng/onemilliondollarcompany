@@ -111,6 +111,7 @@ export const useProgramMutations = () => {
         updatedAt: result.updated_at,
         assignedTo: result.assigned_to,
         scheduledDate: result.scheduled_date || undefined,
+        plan: result.plan || undefined,
       };
     } catch (err) {
       console.error('Error creating program:', err);
@@ -179,6 +180,7 @@ export const useProgramMutations = () => {
         updatedAt: result.updated_at,
         assignedTo: result.assigned_to,
         scheduledDate: result.scheduled_date || undefined,
+        plan: result.plan || undefined,
       };
     } catch (err) {
       console.error('Error updating program:', err);
@@ -239,6 +241,7 @@ export const useProgramMutations = () => {
         updatedAt: data.updated_at,
         assignedTo: data.assigned_to,
         scheduledDate: data.scheduled_date || undefined,
+        plan: data.plan || undefined,
       };
     } catch (err) {
       console.error('Error fetching program:', err);
