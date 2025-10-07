@@ -23,8 +23,8 @@ const SettingsPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-4xl font-extrabold">Settings & Profile ⚙️</h1>
-        <p className="text-muted-foreground text-lg">Manage your public presence and private account details.</p>
+        <h1 className="text-4xl font-extrabold">Coach Settings</h1>
+        <p className="text-muted-foreground text-lg">Shape your professional profile and manage account settings.</p>
         <Separator className="mt-4" />
       </motion.div>
 

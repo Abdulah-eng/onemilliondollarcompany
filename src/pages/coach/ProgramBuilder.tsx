@@ -50,8 +50,6 @@ const ProgramBuilder = () => {
           title: program.name,
           description: program.description,
           plan: program.plan || {}, // Load existing plan data from program.plan
-          // Surface allergies field from stored plan back into details step
-          allergies: (program.plan as any)?.allergies,
           markActive: program.status === 'active',
         });
         didLoadRef.current = id;
