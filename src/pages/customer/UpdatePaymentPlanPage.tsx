@@ -1,30 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, Globe } from 'lucide-react';
 import PlanSelectionCard from '@/components/customer/payment/PlanSelectionCard';
-import PaymentMethodCard from '@/components/customer/payment/PaymentMethodCard';
-import UpdatePaymentMethodForm from '@/components/customer/payment/UpdatePaymentMethodForm';
 import { toast } from 'sonner';
 import { createCheckoutSession } from '@/lib/stripe/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCurrencyDetection } from '@/hooks/useCurrencyDetection';
 
 const UpdatePaymentPlanPage = () => {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState('');
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState('usd');
-
-  const currencyOptions = [
-    { value: 'usd', label: 'USD - $49.99/month', price: '$49.99' },
-    { value: 'nok', label: 'NOK - 499 kr/month', price: '499 kr' },
-    { value: 'sek', label: 'SEK - 499 kr/month', price: '499 kr' },
-    { value: 'dkk', label: 'DKK - 349 kr/month', price: '349 kr' },
-  ];
+  const { detectedCurrency, getCurrencyOption, loading: currencyLoading } = useCurrencyDetection();
 
   const handlePlanSelect = (planKey: string) => {
     setSelectedPlan(planKey);
@@ -36,10 +25,6 @@ const UpdatePaymentPlanPage = () => {
       setSelectedPlan('all-access');
     }
   }, [selectedPlan]);
-
-  const handleUpdatePaymentMethod = () => {
-    setShowPaymentForm(true);
-  };
 
   const handleConfirmUpdate = async () => {
     if (!selectedPlan) {
@@ -59,7 +44,7 @@ const UpdatePaymentPlanPage = () => {
       const mapped = planKeyMap[selectedPlan] || { priceKey: selectedPlan };
       const { checkoutUrl } = await createCheckoutSession({
         ...mapped,
-        currency: selectedCurrency,
+        currency: detectedCurrency,
         stripeCustomerId: profile?.stripe_customer_id ?? null,
         userId: profile?.id,
       });
@@ -70,92 +55,72 @@ const UpdatePaymentPlanPage = () => {
     }
   };
 
-  if (showPaymentForm) {
-    return (
-      <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
-        <Button
-          variant="ghost"
-          onClick={() => setShowPaymentForm(false)}
-          className="mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Plan Selection
-        </Button>
-        <UpdatePaymentMethodForm />
-      </div>
-    );
-  }
+  const currencyOption = getCurrencyOption(detectedCurrency);
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+    <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+      <div className="flex items-center gap-4">
         <Button
           variant="ghost"
           onClick={() => navigate('/customer/settings')}
-          className="w-fit"
+          size="sm"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Update Plan</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Complete access to transform your health and wellness
+          <h1 className="text-xl sm:text-2xl font-bold">Update Your Plan</h1>
+          <p className="text-sm text-muted-foreground">
+            Complete access to transform your health
           </p>
         </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-5">
-        <div className="lg:col-span-3">
-          <PlanSelectionCard
-            onSelectPlan={handlePlanSelect}
-            selectedPlan={selectedPlan}
-          />
-        </div>
+      <PlanSelectionCard
+        onSelectPlan={handlePlanSelect}
+        selectedPlan={selectedPlan}
+        detectedCurrency={detectedCurrency}
+        currencyLoading={currencyLoading}
+      />
 
-        <div className="space-y-6 lg:col-span-2">
-          <PaymentMethodCard onUpdate={handleUpdatePaymentMethod} />
-          
-          <div className="p-4 bg-card border rounded-xl space-y-4">
-            <h3 className="text-lg font-semibold">Currency</h3>
-            <div className="space-y-2">
-              <Label htmlFor="currency-select">Select Your Currency</Label>
-              <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-                <SelectTrigger id="currency-select" className="w-full">
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currencyOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {selectedPlan && (
-            <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl space-y-4">
+      {selectedPlan && (
+        <div className="sticky bottom-4 p-5 bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/20 rounded-xl shadow-lg space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
               <h3 className="text-lg font-semibold">Ready to Transform?</h3>
               <p className="text-sm text-muted-foreground">
-                Your subscription starts immediately with full access to all features.
-              </p>
-              <Button
-                onClick={handleConfirmUpdate}
-                disabled={isProcessing}
-                size="lg"
-                className="w-full h-12 text-base"
-              >
-                {isProcessing ? 'Processing...' : `Subscribe - ${currencyOptions.find(opt => opt.value === selectedCurrency)?.price}/mo`}
-              </Button>
-              <p className="text-xs text-center text-muted-foreground">
-                Cancel anytime • Secure payment
+                Your subscription starts immediately
               </p>
             </div>
-          )}
+            {currencyLoading ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Globe className="h-4 w-4 animate-pulse" />
+                Detecting...
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Globe className="h-4 w-4" />
+                {currencyOption.country}
+              </div>
+            )}
+          </div>
+          
+          <Button
+            onClick={handleConfirmUpdate}
+            disabled={isProcessing || currencyLoading}
+            size="lg"
+            className="w-full h-11 text-base font-semibold"
+          >
+            {isProcessing ? 'Processing...' : `Subscribe Now - ${currencyOption.price}/month`}
+          </Button>
+          
+          <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
+            <span>✓ Cancel Anytime</span>
+            <span>✓ Secure Payment</span>
+            <span>✓ Instant Access</span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
