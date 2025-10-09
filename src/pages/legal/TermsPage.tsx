@@ -7,13 +7,23 @@ import { useNavigate } from 'react-router-dom';
 const TermsPage = () => {
   const navigate = useNavigate();
 
+  const handleBack = () => {
+    // Simple approach: use browser history or go to home
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      // Fallback to home page
+      window.location.href = '/';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-6">
           <Button 
             variant="ghost" 
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             className="mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />

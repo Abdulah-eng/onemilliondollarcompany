@@ -70,6 +70,26 @@ export const ChatView: React.FC<ChatViewProps> = ({
     }
   };
 
+  const handleSendFile = async (file: File) => {
+    setSending(true);
+    try {
+      // Convert file to base64 for storage
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = e.target?.result as string;
+        if (base64) {
+          await sendMessage(`[FILE:${file.name}:${base64}]`);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error sending file:', error);
+      toast.error("Failed to send file. Please try again.");
+    } finally {
+      setSending(false);
+    }
+  };
+
   const handleSendOffer = async (price: number, duration: number, message: string) => {
     setSending(true);
     try {
@@ -135,6 +155,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
           <div className="flex-1">
             <MessageInput
               onSend={handleSendMessage}
+              onSendFile={handleSendFile}
               disabled={sending}
               placeholder={sending ? "Sending..." : "Type a message..."}
             />

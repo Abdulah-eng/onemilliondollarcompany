@@ -31,7 +31,7 @@ const BlogPost = ({ post, onBack }) => {
       {/* Main Image */}
       <div className="rounded-xl overflow-hidden mb-8">
         <img
-          src={post.imageUrl}
+          src={post.imageUrl && !post.imageUrl.startsWith('blob:') ? post.imageUrl : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1200&auto=format&fit=crop'}
           alt={post.title}
           className="w-full h-auto object-cover"
         />
@@ -44,12 +44,16 @@ const BlogPost = ({ post, onBack }) => {
             {post.category.toUpperCase()}
           </Badge>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <img
-              src={post.author.avatarUrl}
-              alt={post.author.name}
-              className="w-8 h-8 rounded-full"
-            />
-            <span>By {post.author.name}</span>
+            {post.author?.avatarUrl ? (
+              <img
+                src={post.author.avatarUrl}
+                alt={post.author.name || 'Author'}
+                className="w-8 h-8 rounded-full"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-muted" />
+            )}
+            <span>By {post.author?.name || 'Unknown Author'}</span>
           </div>
         </div>
 
@@ -66,7 +70,67 @@ const BlogPost = ({ post, onBack }) => {
         </div>
 
         {/* Main Content */}
-        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content || 'No content available.') }} />
+        <div className="space-y-6">
+          {(() => {
+            const tryParse = (val: any) => {
+              try { return JSON.parse(val); } catch { return null; }
+            };
+            // Handle cases where content may be JSON string, possibly double-encoded
+            let content: any = post.content;
+            let parsed = Array.isArray(content) ? content : tryParse(content);
+            if (!parsed && typeof content === 'string') {
+              const once = tryParse(content);
+              const twice = once && typeof once === 'string' ? tryParse(once) : null;
+              parsed = Array.isArray(once) ? once : (Array.isArray(twice) ? twice : null);
+            }
+
+            if (Array.isArray(parsed)) {
+              return parsed.map((item: any, index: number) => (
+                <div key={item.id || index} className="space-y-4">
+                  {item.type === 'text' && (() => {
+                    // item.value might itself be a JSON string (array or object)
+                    let paragraphs: any[] | null = null;
+                    const parsedVal = tryParse(item.value);
+                    if (Array.isArray(parsedVal)) {
+                      paragraphs = parsedVal.map(v => (typeof v === 'object' && v !== null && 'value' in v) ? v.value : String(v));
+                    } else if (parsedVal && typeof parsedVal === 'object' && 'value' in parsedVal) {
+                      paragraphs = [parsedVal.value];
+                    }
+                    const textToRender = paragraphs ?? [item.value];
+                    return (
+                      <div className="prose max-w-none">
+                        {textToRender.map((t, i) => (
+                          <p key={i} className="whitespace-pre-wrap">{t}</p>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                  {item.type === 'file' && (
+                    <div className="space-y-2">
+                      {item.mediaType === 'image' && (
+                        <img
+                          src={item.value}
+                          alt="Blog content"
+                          className="max-w-full h-auto rounded-lg shadow-md"
+                        />
+                      )}
+                      {item.mediaType === 'video' && (
+                        <video
+                          src={item.value}
+                          controls
+                          className="max-w-full h-auto rounded-lg shadow-md"
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              ));
+            }
+
+            // As a safety, do not render raw JSON or unparsed content in the full article view
+            return null;
+          })()}
+        </div>
       </div>
     </motion.div>
   );

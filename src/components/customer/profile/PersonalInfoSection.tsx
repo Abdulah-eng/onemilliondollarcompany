@@ -88,15 +88,19 @@ const meditationOptions = [
   { value: 'experienced', label: 'Very experienced', emoji: '🕉️' },
 ];
 
-const PersonalInfoSection = () => {
+interface PersonalInfoSectionProps {
+  isGlobalEditing?: boolean;
+}
+
+const PersonalInfoSection = ({ isGlobalEditing = false }: PersonalInfoSectionProps) => {
   const { user, profile } = useAuth();
   const { updateOnboarding, updateProfile, loading } = useProfileUpdates();
   const [onboardingData, setOnboardingData] = useState<OnboardingDetails | null>(null);
   const [profileData, setProfileData] = useState<any>(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Partial<OnboardingDetails>>({});
   const [profileFormData, setProfileFormData] = useState({ phone: '', email: '' });
   const [newItem, setNewItem] = useState({ type: '', value: '' });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -160,7 +164,7 @@ const PersonalInfoSection = () => {
       if (onboardingSuccess) {
         setOnboardingData(formData as OnboardingDetails);
         setProfileData({ ...profileData, phone: profileFormData.phone });
-        setIsEditing(false);
+        setHasUnsavedChanges(false);
         toast.success('Profile updated successfully');
       } else {
         toast.error('Failed to update profile');
@@ -177,15 +181,36 @@ const PersonalInfoSection = () => {
       phone: profileData?.phone || '',
       email: profileData?.email || ''
     });
-    setIsEditing(false);
+    setHasUnsavedChanges(false);
   };
 
   const handleMultiSelect = (field: keyof OnboardingDetails, value: string) => {
     const currentArray = (formData[field] as string[]) || [];
-    const newArray = currentArray.includes(value)
-      ? currentArray.filter(item => item !== value)
-      : [...currentArray, value];
-    setFormData({ ...formData, [field]: newArray });
+    
+    // Special handling for goals - limit to 8 maximum
+    if (field === 'goals') {
+      if (currentArray.includes(value)) {
+        // Remove if already selected
+        const newArray = currentArray.filter(item => item !== value);
+        setFormData({ ...formData, [field]: newArray });
+      } else if (currentArray.length < 8) {
+        // Add if under limit
+        const newArray = [...currentArray, value];
+        setFormData({ ...formData, [field]: newArray });
+      } else {
+        // Show warning if trying to exceed limit
+        toast.warning('You can select a maximum of 8 goals');
+        return;
+      }
+    } else {
+      // Default behavior for other fields
+      const newArray = currentArray.includes(value)
+        ? currentArray.filter(item => item !== value)
+        : [...currentArray, value];
+      setFormData({ ...formData, [field]: newArray });
+    }
+    
+    setHasUnsavedChanges(true);
   };
 
   const addArrayItem = (field: keyof OnboardingDetails, value: string) => {
@@ -219,7 +244,7 @@ const PersonalInfoSection = () => {
     return age;
   };
 
-  if (!onboardingData && !profileData && !isEditing) {
+  if (!onboardingData && !profileData && !isGlobalEditing) {
     return (
       <Card className="shadow-md">
         <CardHeader>
@@ -232,7 +257,7 @@ const PersonalInfoSection = () => {
           <p className="text-muted-foreground text-center py-8">
             No personal information available. Complete your onboarding to see your details here.
           </p>
-          <Button onClick={() => setIsEditing(true)} className="w-full">
+          <Button className="w-full">
             Add Personal Information
           </Button>
         </CardContent>
@@ -250,12 +275,6 @@ const PersonalInfoSection = () => {
               <User className="h-5 w-5" />
               Contact & Personal Information
             </CardTitle>
-            {!isEditing && (
-              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -274,11 +293,14 @@ const PersonalInfoSection = () => {
               </div>
               <div>
                 <Label htmlFor="phone">Phone</Label>
-                {isEditing ? (
+                {isGlobalEditing ? (
                   <Input
                     id="phone"
                     value={profileFormData.phone}
-                    onChange={(e) => setProfileFormData({ ...profileFormData, phone: e.target.value })}
+                    onChange={(e) => {
+                      setProfileFormData({ ...profileFormData, phone: e.target.value });
+                      setHasUnsavedChanges(true);
+                    }}
                     placeholder="+1 (555) 123-4567"
                   />
                 ) : (
@@ -299,13 +321,16 @@ const PersonalInfoSection = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="weight">Weight (kg)</Label>
-                {isEditing ? (
+                {isGlobalEditing ? (
                   <Input
                     id="weight"
                     type="number"
                     step="0.1"
                     value={formData.weight || ''}
-                    onChange={(e) => setFormData({ ...formData, weight: parseFloat(e.target.value) || null })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, weight: parseFloat(e.target.value) || null });
+                      setHasUnsavedChanges(true);
+                    }}
                     placeholder="70.0"
                   />
                 ) : (
@@ -317,13 +342,16 @@ const PersonalInfoSection = () => {
 
               <div>
                 <Label htmlFor="height">Height (cm)</Label>
-                {isEditing ? (
+                {isGlobalEditing ? (
                   <Input
                     id="height"
                     type="number"
                     step="0.1"
                     value={formData.height || ''}
-                    onChange={(e) => setFormData({ ...formData, height: parseFloat(e.target.value) || null })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, height: parseFloat(e.target.value) || null });
+                      setHasUnsavedChanges(true);
+                    }}
                     placeholder="175.0"
                   />
                 ) : (
@@ -335,10 +363,13 @@ const PersonalInfoSection = () => {
 
               <div>
                 <Label htmlFor="gender">Gender</Label>
-                {isEditing ? (
+                {isGlobalEditing ? (
                   <Select
                     value={formData.gender || ''}
-                    onValueChange={(value) => setFormData({ ...formData, gender: value })}
+                    onValueChange={(value) => {
+                      setFormData({ ...formData, gender: value });
+                      setHasUnsavedChanges(true);
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select gender" />
@@ -366,12 +397,15 @@ const PersonalInfoSection = () => {
 
               <div>
                 <Label htmlFor="dob">Date of Birth</Label>
-                {isEditing ? (
+                {isGlobalEditing ? (
                   <Input
                     id="dob"
                     type="date"
                     value={formData.dob || ''}
-                    onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, dob: e.target.value });
+                      setHasUnsavedChanges(true);
+                    }}
                   />
                 ) : (
                   <p className="text-sm text-muted-foreground py-2">
@@ -382,11 +416,14 @@ const PersonalInfoSection = () => {
 
               <div>
                 <Label htmlFor="country">Country</Label>
-                {isEditing ? (
+                {isGlobalEditing ? (
                   <Input
                     id="country"
                     value={formData.country || ''}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, country: e.target.value });
+                      setHasUnsavedChanges(true);
+                    }}
                     placeholder="e.g. Norway"
                   />
                 ) : (
@@ -398,11 +435,14 @@ const PersonalInfoSection = () => {
 
               <div className="md:col-span-2">
                 <Label htmlFor="location">Location</Label>
-                {isEditing ? (
+                {isGlobalEditing ? (
                   <Input
                     id="location"
                     value={formData.location || ''}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, location: e.target.value });
+                      setHasUnsavedChanges(true);
+                    }}
                     placeholder="City, State/Province"
                   />
                 ) : (
@@ -414,18 +454,6 @@ const PersonalInfoSection = () => {
             </div>
           </div>
 
-          {isEditing && (
-            <div className="flex gap-2 pt-4">
-              <Button onClick={handleSave} disabled={loading}>
-                <Save className="h-4 w-4 mr-2" />
-                {loading ? 'Saving...' : 'Save'}
-              </Button>
-              <Button variant="outline" onClick={handleCancel}>
-                <X className="h-4 w-4 mr-2" />
-                Cancel
-              </Button>
-            </div>
-          )}
         </CardContent>
       </Card>
 
@@ -437,17 +465,19 @@ const PersonalInfoSection = () => {
               <Heart className="h-5 w-5" />
               Goals
             </CardTitle>
-            {!isEditing && (
-              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-            )}
           </div>
         </CardHeader>
         <CardContent>
-          {isEditing ? (
+          {isGlobalEditing ? (
             <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Select up to 8 goals that matter most to you
+                </p>
+                <div className="text-sm text-muted-foreground">
+                  {(formData.goals || []).length}/8 selected
+                </div>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {goals.map(goal => (
                   <MultiSelectButton
@@ -459,16 +489,6 @@ const PersonalInfoSection = () => {
                     {goal.title}
                   </MultiSelectButton>
                 ))}
-              </div>
-              <div className="flex gap-2 pt-2">
-                <Button onClick={handleSave} disabled={loading}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {loading ? 'Saving...' : 'Save changes'}
-                </Button>
-                <Button variant="outline" onClick={handleCancel}>
-                  <X className="h-4 w-4 mr-2" />
-                  Cancel
-                </Button>
               </div>
             </div>
           ) : (
@@ -499,19 +519,13 @@ const PersonalInfoSection = () => {
               <Activity className="h-5 w-5" />
               Health Information
             </CardTitle>
-            {!isEditing && (
-              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Allergies */}
           <div>
             <Label>Allergies</Label>
-            {isEditing ? (
+            {isGlobalEditing ? (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
                 {allergies.map(allergy => (
                   <MultiSelectButton
@@ -546,7 +560,7 @@ const PersonalInfoSection = () => {
           {/* Injuries */}
           <div>
             <Label>Past Injuries</Label>
-            {isEditing ? (
+            {isGlobalEditing ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
                 {injuries.map(injury => (
                   <MultiSelectButton
@@ -581,7 +595,7 @@ const PersonalInfoSection = () => {
           {/* Training Preferences */}
           <div>
             <Label>Training Likes</Label>
-            {isEditing ? (
+            {isGlobalEditing ? (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
                 {trainingOptions.map(option => (
                   <MultiSelectButton
@@ -616,7 +630,7 @@ const PersonalInfoSection = () => {
           {/* Training Dislikes */}
           <div>
             <Label>Training Dislikes</Label>
-            {isEditing ? (
+            {isGlobalEditing ? (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
                 {trainingOptions.map(option => (
                   <MultiSelectButton
@@ -651,10 +665,13 @@ const PersonalInfoSection = () => {
           {/* Meditation Experience */}
           <div>
             <Label htmlFor="meditation">Meditation Experience</Label>
-            {isEditing ? (
+            {isGlobalEditing ? (
               <RadioGroup
                 value={formData.meditation_experience || ''}
-                onValueChange={(value) => setFormData({ ...formData, meditation_experience: value })}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, meditation_experience: value });
+                  setHasUnsavedChanges(true);
+                }}
                 className="mt-2"
               >
                 {meditationOptions.map(option => (
@@ -677,18 +694,6 @@ const PersonalInfoSection = () => {
             )}
           </div>
 
-          {isEditing && (
-            <div className="flex gap-2 pt-2">
-              <Button onClick={handleSave} disabled={loading}>
-                <Save className="h-4 w-4 mr-2" />
-                {loading ? 'Saving...' : 'Save changes'}
-              </Button>
-              <Button variant="outline" onClick={handleCancel}>
-                <X className="h-4 w-4 mr-2" />
-                Cancel
-              </Button>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

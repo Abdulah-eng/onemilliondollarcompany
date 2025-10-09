@@ -93,65 +93,175 @@ export const useCoachTasks = () => {
       try {
         const results: CoachTask[] = [];
 
-        // Use customer_states for accurate missing program/on_track signals
-        const { data: states } = await supabase
-          .from('customer_states')
-          .select('customer_id, missing_program')
-          .in('customer_id', (
-            (await supabase.from('profiles').select('id').eq('coach_id', user.id).eq('role', 'customer')).data || []
-          ).map((p: any) => p.id));
-        (states || []).filter((s: any) => s.missing_program).slice(0, 5).forEach((s: any) => {
-          results.push({
-            id: `noplan-${s.customer_id}`,
-            clientId: s.customer_id,
-            clientName: undefined,
-            task: 'Assign a new program',
-            details: 'Customer currently has no active program.',
-            tag: 'Missing Program',
-            color: 'bg-red-500',
-            link: `/coach/clients/${s.customer_id}`,
-          });
-        });
-
-        // Pending offers -> follow up
-        const { data: pendingOffers } = await supabase
-          .from('coach_offers')
-          .select('id, customer_id, profiles!coach_offers_customer_id_fkey(full_name)')
+        // Get all clients with their status
+        const { data: clientProfiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, plan_expiry')
           .eq('coach_id', user.id)
-          .eq('status', 'pending')
-          .order('created_at', { ascending: false })
-          .limit(5);
-        (pendingOffers || []).forEach((o: any) => {
-          results.push({
-            id: `offer-${o.id}`,
-            clientId: o.customer_id,
-            clientName: o.profiles?.full_name || 'Customer',
-            task: 'Follow up on pending offer',
-            details: 'Reach out to close the deal.',
-            tag: 'Pending Offer',
-            color: 'bg-orange-500',
-            link: `/coach/messages`,
-          });
+          .eq('role', 'customer');
+
+        for (const client of clientProfiles || []) {
+          // Check for pending requests
+          const { data: pendingRequest } = await supabase
+            .from('coach_requests')
+            .select('id')
+            .eq('customer_id', client.id)
+            .eq('coach_id', user.id)
+            .eq('status', 'pending')
+            .single();
+
+          if (pendingRequest) {
+            results.push({
+              id: `request-${client.id}`,
+              clientId: client.id,
+              clientName: client.full_name,
+              task: 'Review new client request',
+              details: 'A new client has requested your coaching services.',
+              tag: 'New Request',
+              color: 'bg-green-500',
+              link: `/coach/clients/${client.id}`,
+            });
+            continue;
+          }
+
+          // Check for waiting offers
+          const { data: waitingOffer } = await supabase
+            .from('coach_offers')
+            .select('id')
+            .eq('customer_id', client.id)
+            .eq('coach_id', user.id)
+            .eq('status', 'pending')
+            .single();
+
+          if (waitingOffer) {
+            results.push({
+              id: `offer-${client.id}`,
+              clientId: client.id,
+              clientName: client.full_name,
+              task: 'Follow up on pending offer',
+              details: 'Client has a pending offer that needs attention.',
+              tag: 'Pending Offer',
+              color: 'bg-orange-500',
+              link: `/coach/messages`,
+            });
+            continue;
+          }
+
+          // Check for missing programs
+          const { data: programs } = await supabase
+            .from('programs')
+            .select('id, status')
+            .eq('coach_id', user.id)
+            .eq('customer_id', client.id)
+            .in('status', ['active', 'scheduled']);
+
+          if (!programs || programs.length === 0) {
+            results.push({
+              id: `noplan-${client.id}`,
+              clientId: client.id,
+              clientName: client.full_name,
+              task: 'Assign a program',
+              details: 'Client needs a program assigned to get started.',
+              tag: 'Missing Program',
+              color: 'bg-red-500',
+              link: `/coach/clients/${client.id}`,
+            });
+            continue;
+          }
+
+          // Check for off-track clients (missed more than 5 days)
+          const { data: lastEntry } = await supabase
+            .from('program_entries')
+            .select('created_at')
+            .eq('customer_id', client.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (lastEntry) {
+            const daysSinceLastEntry = Math.floor((Date.now() - new Date(lastEntry.created_at).getTime()) / (24 * 60 * 60 * 1000));
+            if (daysSinceLastEntry > 5) {
+              results.push({
+                id: `offtrack-${client.id}`,
+                clientId: client.id,
+                clientName: client.full_name,
+                task: 'Client is off track',
+                details: `Client hasn't logged progress in ${daysSinceLastEntry} days.`,
+                tag: 'Off Track',
+                color: 'bg-red-600',
+                link: `/coach/clients/${client.id}`,
+              });
+              continue;
+            }
+          }
+
+          // Check for soon-to-expire plans
+          if (client.plan_expiry) {
+            const expiryDate = new Date(client.plan_expiry);
+            const daysRemaining = Math.floor((expiryDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+            const totalDays = 30; // Assuming 30-day plans
+            const percentageRemaining = (daysRemaining / totalDays) * 100;
+            
+            if (percentageRemaining <= 20 && percentageRemaining > 0) {
+              results.push({
+                id: `renewal-${client.id}`,
+                clientId: client.id,
+                clientName: client.full_name,
+                task: 'Plan expiring soon',
+                details: `Client's plan expires in ${daysRemaining} days. Consider renewal.`,
+                tag: 'Soon to Expire',
+                color: 'bg-blue-500',
+                link: `/coach/messages`,
+              });
+              continue;
+            }
+          }
+
+          // Check for awaiting check-ins
+          const { data: pendingCheckin } = await supabase
+            .from('checkin_pins')
+            .select('id, created_at')
+            .eq('customer_id', client.id)
+            .eq('coach_id', user.id)
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (pendingCheckin) {
+            const daysSinceCheckin = Math.floor((Date.now() - new Date(pendingCheckin.created_at).getTime()) / (24 * 60 * 60 * 1000));
+            if (daysSinceCheckin > 1) {
+              results.push({
+                id: `checkin-${client.id}`,
+                clientId: client.id,
+                clientName: client.full_name,
+                task: 'Awaiting check-in response',
+                details: 'Client hasn\'t responded to your check-in.',
+                tag: 'Awaiting Check-in',
+                color: 'bg-yellow-500',
+                link: `/coach/messages`,
+              });
+            }
+          }
+        }
+
+        // Sort by priority and limit to 10 tasks
+        const priorityOrder = {
+          'New Request': 1,
+          'Missing Program': 2,
+          'Off Track': 3,
+          'Awaiting Check-in': 4,
+          'Pending Offer': 5,
+          'Soon to Expire': 6
+        };
+
+        results.sort((a, b) => {
+          const aPriority = priorityOrder[a.tag as keyof typeof priorityOrder] || 999;
+          const bPriority = priorityOrder[b.tag as keyof typeof priorityOrder] || 999;
+          return aPriority - bPriority;
         });
 
-        // Add renewal prompts (contracts ending soon)
-        const { data: renewals } = await supabase
-          .from('renewal_prompts')
-          .select('contract_id, customer_id, end_date')
-          .limit(10);
-        (renewals || []).forEach((r: any) => {
-          results.push({
-            id: `renew-${r.contract_id}`,
-            clientId: r.customer_id,
-            task: 'Contract renewing soon',
-            details: 'Consider sending a renewal offer.',
-            tag: 'Renewal',
-            color: 'bg-blue-500',
-            link: `/coach/messages`,
-          });
-        });
-
-        setTasks(results);
+        setTasks(results.slice(0, 10));
       } finally {
         setLoading(false);
       }

@@ -37,7 +37,10 @@ const MyCoach = () => {
     // Check if user has a coach or accepted request
     useEffect(() => {
         const checkCoachStatus = async () => {
-            if (!user) return;
+            if (!user) {
+                setLoading(false);
+                return;
+            }
 
             try {
                 setLoading(true);
@@ -65,8 +68,10 @@ const MyCoach = () => {
             }
         };
 
-        checkCoachStatus();
-    }, [user, profile]); // Removed activeTab from dependencies
+        // Add a small delay to prevent rapid re-renders
+        const timeoutId = setTimeout(checkCoachStatus, 100);
+        return () => clearTimeout(timeoutId);
+    }, [user?.id, profile?.coach_id]); // Only depend on essential values
 
     const showPopup = (message: string, requested = false) => {
         setFeedbackPopup({ isVisible: true, message, requested });

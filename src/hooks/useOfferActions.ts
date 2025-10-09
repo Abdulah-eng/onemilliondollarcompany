@@ -33,8 +33,8 @@ export const useOfferActions = () => {
         .from('profiles')
         .update({ 
           coach_id: offer.coach_id,
-          plan: `${offer.duration_months}-month plan`,
-          plan_expiry: new Date(Date.now() + offer.duration_months * 30 * 24 * 60 * 60 * 1000).toISOString()
+          plan: `${offer.duration_months}-week plan`,
+          plan_expiry: new Date(Date.now() + offer.duration_months * 7 * 24 * 60 * 60 * 1000).toISOString()
         })
         .eq('id', offer.customer_id);
 
@@ -54,7 +54,7 @@ export const useOfferActions = () => {
           .insert({
             conversation_id: conversation.id,
             sender_id: user.id,
-            content: `Offer accepted! ${offer.duration_months}-month coaching plan for $${offer.price} is now active.`,
+            content: `Offer accepted! ${offer.duration_months}-week coaching plan for $${offer.price} is now active.`,
             message_type: 'system'
           });
       }

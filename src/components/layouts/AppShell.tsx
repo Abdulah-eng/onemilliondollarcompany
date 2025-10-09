@@ -14,6 +14,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useLibraryAccess } from '@/hooks/useLibraryAccess';
 import { usePaymentPlan } from '@/hooks/usePaymentPlan';
+import { AccessLevelProvider } from '@/contexts/AccessLevelContext';
 
 const AppShell = () => {
   const { profile, loading } = useAuth();
@@ -33,20 +34,22 @@ const AppShell = () => {
   const bottomNavItems: NavItem[] = navConfig.bottom;
 
   return (
-    <SidebarProvider defaultOpen={false}>
-      {/* ✅ UPDATED: Replaced solid background with a subtle gradient */}
-      <div className="theme-dashboard min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-stone-100 dark:from-black dark:to-gray-900">
-        <SideNav navItems={navItems} bottomNavItems={bottomNavItems} />
-        <div className="flex-1 flex flex-col min-w-0">
-          <TopNav />
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-            <ErrorBoundary>
-              <Outlet />
-            </ErrorBoundary>
-          </main>
+    <AccessLevelProvider>
+      <SidebarProvider defaultOpen={false}>
+        {/* ✅ UPDATED: Replaced solid background with a subtle gradient */}
+        <div className="theme-dashboard min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-stone-100 dark:from-black dark:to-gray-900">
+          <SideNav navItems={navItems} bottomNavItems={bottomNavItems} />
+          <div className="flex-1 flex flex-col min-w-0">
+            <TopNav />
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+              <ErrorBoundary>
+                <Outlet />
+              </ErrorBoundary>
+            </main>
+          </div>
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </AccessLevelProvider>
   );
 };
 

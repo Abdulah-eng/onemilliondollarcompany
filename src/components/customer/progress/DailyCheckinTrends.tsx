@@ -10,7 +10,9 @@ interface DailyCheckinTrendsProps {
 
 export default function DailyCheckinTrends({ checkins, onCardClick }: DailyCheckinTrendsProps) {
     const last7Days = checkins.slice(-7);
-    const avg = (key: keyof DailyCheckin) => last7Days.reduce((acc, curr) => acc + (curr[key] as number), 0) / last7Days.length;
+    const avg = (key: keyof DailyCheckin) => last7Days.length > 0 
+        ? last7Days.reduce((acc, curr) => acc + (curr[key] as number), 0) / last7Days.length 
+        : 0;
     
     const trendData = [
         {
@@ -55,18 +57,47 @@ export default function DailyCheckinTrends({ checkins, onCardClick }: DailyCheck
         },
     ];
 
+    // Check if we have minimum data for meaningful trends (at least 3 days)
+    const hasMinimumData = last7Days.length >= 3;
+    const hasAnyData = last7Days.length > 0;
+
     return (
         <div>
             <h2 className="text-xl font-bold tracking-tight mb-4">Daily Check-in Trends</h2>
-            <div className="flex overflow-x-auto space-x-4 pb-4 -mx-4 px-4 scrollbar-hide-tablet lg:scrollbar-thin lg:scrollbar-thumb-muted-foreground/20 lg:scrollbar-track-transparent">
-                {trendData.map((trend) => (
-                    <CheckinTrendCard 
-                        key={trend.title}
-                        {...trend}
-                        onClick={() => onCardClick(trend.title, <p>{trend.insight}</p>)}
-                    />
-                ))}
-            </div>
+            {hasMinimumData ? (
+                <div className="flex overflow-x-auto space-x-4 pb-4 -mx-4 px-4 scrollbar-hide-tablet lg:scrollbar-thin lg:scrollbar-thumb-muted-foreground/20 lg:scrollbar-track-transparent">
+                    {trendData.map((trend) => (
+                        <CheckinTrendCard 
+                            key={trend.title}
+                            {...trend}
+                            onClick={() => onCardClick(trend.title, <p>{trend.insight}</p>)}
+                        />
+                    ))}
+                </div>
+            ) : hasAnyData ? (
+                <div className="text-center py-8">
+                    <div className="w-12 h-12 mx-auto rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4">
+                        <div className="text-xl">📈</div>
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">Building Your Trends</h3>
+                    <p className="text-muted-foreground max-w-md mx-auto">
+                        Keep tracking for a few more days to see meaningful trends and patterns in your wellness data.
+                    </p>
+                    <div className="mt-4 text-sm text-blue-600 dark:text-blue-400">
+                        {3 - last7Days.length} more days needed for trend analysis
+                    </div>
+                </div>
+            ) : (
+                <div className="text-center py-12">
+                    <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center mb-4">
+                        <div className="text-2xl">📊</div>
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">No Trend Data Yet</h3>
+                    <p className="text-muted-foreground max-w-md mx-auto">
+                        Complete your daily check-ins to start seeing your wellness trends and progress over time.
+                    </p>
+                </div>
+            )}
         </div>
     );
 }

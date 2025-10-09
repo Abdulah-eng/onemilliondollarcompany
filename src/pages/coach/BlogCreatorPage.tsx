@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import BlogContentBuilder, { BlogContentItem } from '@/components/coach/blog/BlogContentBuilder';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'; 
+import { supabase } from '@/integrations/supabase/client';
 
 interface BlogCreatorPageProps {
   onBack: () => void;
@@ -53,11 +54,48 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
   }, []);
   
   const triggerFileInput = () => fileInputRef.current?.click();
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    try {
+      // Build a unique path: blog_covers/{userId}/{timestamp}-{filename}
+      const { data: userRes } = await supabase.auth.getUser();
+      const userId = userRes.user?.id || 'anonymous';
+      const safeName = file.name.replace(/[^a-zA-Z0-9_.-]/g, '_');
+      const path = `blog_covers/${userId}/${Date.now()}-${safeName}`;
+
+      const { error: uploadError } = await supabase
+        .storage
+        .from('blog-covers')
+        .upload(path, file, { contentType: file.type, upsert: false });
+
+      if (uploadError) {
+        console.error('[BlogCreator] upload error', uploadError);
+        // Fallback to local preview so user sees something, but not used on customer side
+        const localUrl = URL.createObjectURL(file);
+        handleFormChange('imageUrl', localUrl);
+        event.target.value = '';
+        return;
+      }
+
+      const { data: publicUrlData } = supabase
+        .storage
+        .from('blog-covers')
+        .getPublicUrl(path);
+
+      const publicUrl = publicUrlData?.publicUrl;
+      if (publicUrl) {
+        handleFormChange('imageUrl', publicUrl);
+      } else {
+        const localUrl = URL.createObjectURL(file);
+        handleFormChange('imageUrl', localUrl);
+      }
+    } catch (e) {
+      console.error('[BlogCreator] unexpected upload error', e);
       const localUrl = URL.createObjectURL(file);
       handleFormChange('imageUrl', localUrl);
+    } finally {
       event.target.value = '';
     }
   };

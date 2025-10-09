@@ -1,10 +1,12 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageWithSender } from '@/hooks/useMessages';
 import { OfferMessage } from './OfferMessage';
 import { cn } from '@/lib/utils';
+import { Download, File, Image, Video, Music } from 'lucide-react';
 
 interface MessageBubbleProps {
   message: MessageWithSender;
@@ -19,6 +21,45 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 }) => {
   const isOffer = message.message_type === 'offer';
   const isSystem = message.message_type === 'system';
+  
+  // Check if message is a file
+  const isFile = message.content.startsWith('[FILE:') && message.content.includes(':');
+  
+  const getFileInfo = () => {
+    if (!isFile) return null;
+    const match = message.content.match(/\[FILE:([^:]+):(.+)\]/);
+    if (!match) return null;
+    return {
+      fileName: match[1],
+      fileData: match[2]
+    };
+  };
+  
+  const getFileIcon = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension || '')) {
+      return <Image className="w-4 h-4" />;
+    }
+    if (['mp4', 'avi', 'mov', 'webm'].includes(extension || '')) {
+      return <Video className="w-4 h-4" />;
+    }
+    if (['mp3', 'wav', 'ogg', 'm4a'].includes(extension || '')) {
+      return <Music className="w-4 h-4" />;
+    }
+    return <File className="w-4 h-4" />;
+  };
+  
+  const handleDownload = () => {
+    const fileInfo = getFileInfo();
+    if (!fileInfo) return;
+    
+    const link = document.createElement('a');
+    link.href = fileInfo.fileData;
+    link.download = fileInfo.fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   if (isSystem) {
     return (
@@ -70,7 +111,22 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
             ? "bg-primary text-primary-foreground" 
             : "bg-muted text-muted-foreground"
         )}>
-          <p className="text-sm">{message.content}</p>
+          {isFile ? (
+            <div className="flex items-center gap-2">
+              {getFileIcon(getFileInfo()?.fileName || '')}
+              <span className="text-sm font-medium">{getFileInfo()?.fileName}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDownload}
+                className="h-6 w-6 p-0"
+              >
+                <Download className="w-3 h-3" />
+              </Button>
+            </div>
+          ) : (
+            <p className="text-sm">{message.content}</p>
+          )}
         </div>
         
         <span className="text-xs text-muted-foreground mt-1">

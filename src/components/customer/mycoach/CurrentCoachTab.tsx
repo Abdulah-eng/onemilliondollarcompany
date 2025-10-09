@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react';
 import ModernCoachDashboard from './ModernCoachDashboard';
 import EnhancedCoachUpdates from './EnhancedCoachUpdates';
 import UnifiedSharedFiles from './UnifiedSharedFiles';
-import RequestFeedbackFab from './RequestFeedbackFab';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { File, Loader2 } from 'lucide-react';
+import { File, Loader2, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +20,7 @@ interface CurrentCoachTabProps {
 
 const CurrentCoachTab: React.FC<CurrentCoachTabProps> = ({ isMobile, onViewBio, onRequestFeedback, onViewSharedFiles }) => {
     const { profile } = useAuth();
+    const navigate = useNavigate();
     const [coach, setCoach] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -127,8 +128,21 @@ const CurrentCoachTab: React.FC<CurrentCoachTabProps> = ({ isMobile, onViewBio, 
                 </div>
             </div>
 
-            {/* Floating Action Button - Only visible on this tab */}
-            <RequestFeedbackFab isMobile={isMobile} onRequestFeedback={onRequestFeedback} />
+            {/* Chat Button - Only visible on this tab */}
+            <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+                className="fixed bottom-6 right-6 z-50"
+            >
+                <Button
+                    onClick={() => navigate('/customer/chat')}
+                    size="lg"
+                    className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-primary hover:bg-primary/90"
+                >
+                    <MessageCircle className="w-6 h-6" />
+                </Button>
+            </motion.div>
         </div>
     );
 };

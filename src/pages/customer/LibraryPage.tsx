@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePaymentPlan } from "@/hooks/usePaymentPlan";
+import { useAccessLevel } from "@/contexts/AccessLevelContext";
 
 import LibraryCard, { LibraryItem } from "@/components/customer/library/LibraryCard";
 import LibraryDetailView from "@/components/customer/library/LibraryDetailView";
@@ -19,6 +20,7 @@ type LibraryTab = 'all' | 'fitness' | 'nutrition' | 'mental';
 export default function LibraryPage() {
   const { profile } = useAuth();
   const { planStatus } = usePaymentPlan();
+  const { accessLevel, hasCoach, hasPaymentPlan } = useAccessLevel();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<LibraryTab>('all');
   const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
@@ -43,7 +45,7 @@ export default function LibraryPage() {
       try {
         setLoading(true);
         
-        if (planStatus.hasActivePlan && profile.coach_id) {
+        if (hasPaymentPlan) {
           // Full access: Get all library items from assigned coach
           const { data } = await supabase
             .from('library_items')
@@ -61,7 +63,7 @@ export default function LibraryPage() {
           })) as LibraryItem[];
           
           setLibraryItems(mapped);
-        } else if (profile.coach_id) {
+        } else if (hasCoach) {
           // Limited access: Get only library items assigned to user's programs
           const { data: programEntries } = await supabase
             .from('program_entries')

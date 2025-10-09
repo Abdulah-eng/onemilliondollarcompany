@@ -124,12 +124,78 @@ const BlogViewer: React.FC<BlogViewerProps> = ({ post, onBack, onEdit, onDelete 
             <CardTitle>Content</CardTitle>
           </CardHeader>
           <CardContent>
-            <div 
-              className="prose max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-primary"
-              dangerouslySetInnerHTML={{ 
-                __html: DOMPurify.sanitize(post.content || 'No content available.') 
-              }}
-            />
+            <div className="space-y-6">
+              {(() => {
+                const tryParse = (val: any) => { try { return JSON.parse(val); } catch { return null; } };
+                let parsed = tryParse(post.content);
+                if (!parsed && typeof post.content === 'string') {
+                  const once = tryParse(post.content);
+                  const twice = once && typeof once === 'string' ? tryParse(once) : null;
+                  parsed = Array.isArray(once) ? once : (Array.isArray(twice) ? twice : null);
+                }
+
+                if (Array.isArray(parsed)) {
+                  return parsed.map((item: any, index: number) => (
+                    <div key={item.id || index} className="space-y-4">
+                      {item.type === 'text' && (() => {
+                        const tryParse = (val: any) => { try { return JSON.parse(val); } catch { return null; } };
+                        let paragraphs: any[] | null = null;
+                        const parsedVal = tryParse(item.value);
+                        if (Array.isArray(parsedVal)) {
+                          paragraphs = parsedVal.map(v => (typeof v === 'object' && v !== null && 'value' in v) ? v.value : String(v));
+                        } else if (parsedVal && typeof parsedVal === 'object' && 'value' in parsedVal) {
+                          paragraphs = [parsedVal.value];
+                        }
+                        const textToRender = paragraphs ?? [item.value];
+                        return (
+                          <div className="prose max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-primary">
+                            {textToRender.map((t, i) => (
+                              <p key={i} className="whitespace-pre-wrap">{t}</p>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                      {item.type === 'file' && (
+                        <div className="space-y-2">
+                          {item.mediaType === 'image' && (
+                            <img 
+                              src={item.value} 
+                              alt="Blog content" 
+                              className="max-w-full h-auto rounded-lg shadow-md"
+                            />
+                          )}
+                          {item.mediaType === 'video' && (
+                            <video 
+                              src={item.value} 
+                              controls 
+                              className="max-w-full h-auto rounded-lg shadow-md"
+                            />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ));
+                }
+
+                // If it looks like JSON but failed to parse, hide it in the viewer
+                if (typeof post.content === 'string') {
+                  const trimmed = post.content.trim();
+                  const looksJsonArray = trimmed.startsWith('[') && trimmed.endsWith(']');
+                  const looksJsonObject = trimmed.startsWith('{') && trimmed.endsWith('}');
+                  if (looksJsonArray || looksJsonObject) {
+                    return null;
+                  }
+                }
+                return (
+                  <div 
+                    className="prose max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-primary"
+                    dangerouslySetInnerHTML={{ 
+                      __html: DOMPurify.sanitize(post.content || 'No content available.') 
+                    }}
+                  />
+                );
+              })()}
+            </div>
           </CardContent>
         </Card>
 

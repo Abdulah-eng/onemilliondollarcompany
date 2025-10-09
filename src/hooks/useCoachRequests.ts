@@ -133,6 +133,9 @@ export const useCoachRequests = () => {
       // Show success message
       console.log('Request accepted successfully for customer:', request.customer_id);
       
+      // Refresh the requests list to ensure UI is updated
+      await fetchRequests();
+      
       return true;
     } catch (error) {
       console.error('Error accepting request:', error);

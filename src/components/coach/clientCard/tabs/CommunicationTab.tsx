@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-import { Send, Clock, MessageSquare, ArrowLeft } from 'lucide-react';
+import { Send, Clock, MessageSquare, ArrowLeft, Star } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRealTimeClientData } from '@/hooks/useRealTimeClientData';
 
 interface Message {
   id: number;
@@ -147,94 +148,55 @@ const CommunicationTab: React.FC<CommunicationTabProps> = ({ client }) => {
   const isMobile = useIsMobile();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useAuth();
+  const { clientData, loading } = useRealTimeClientData(client?.id);
   const [threads, setThreads] = useState<Thread[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const [activeThreadId, setActiveThreadId] = useState<number | null>(null);
   const [replyText, setReplyText] = useState('');
   const [showThreadList, setShowThreadList] = useState(true);
 
-  // Fetch conversations and messages from database
+  // Transform check-in history into threads
   useEffect(() => {
-    const fetchConversations = async () => {
-      if (!client?.id || !user?.id) return;
-      
-      try {
-        setLoading(true);
-        
-        // Get conversation between coach and client
-        const { data: conversation } = await supabase
-          .from('conversations')
-          .select('*')
-          .eq('coach_id', user.id)
-          .eq('customer_id', client.id)
-          .single();
+    if (!clientData) return;
 
-        if (conversation) {
-          // Get messages for this conversation
-          const { data: messages } = await supabase
-            .from('messages')
-            .select('*, sender:profiles!messages_sender_id_fkey(id, full_name, avatar_url)')
-            .eq('conversation_id', conversation.id)
-            .order('created_at', { ascending: true });
+    const checkinThreads: Thread[] = clientData.checkinHistory.map((checkin, index) => ({
+      id: 1000 + index,
+      title: checkin.message,
+      type: 'check-in' as const,
+      createdAt: checkin.date,
+      respondable: checkin.status === 'pending',
+      messages: [
+        { 
+          id: 2000 + index, 
+          author: 'coach' as const, 
+          content: checkin.message, 
+          date: checkin.date 
+        },
+        ...(checkin.response ? [{
+          id: 2001 + index,
+          author: 'client' as const,
+          content: checkin.response,
+          date: checkin.date
+        }] : []),
+        ...(checkin.rating ? [{
+          id: 2002 + index,
+          author: 'client' as const,
+          content: `Rating: ${checkin.rating}/10 ${getRatingEmoji(checkin.rating)}`,
+          date: checkin.date
+        }] : [])
+      ]
+    }));
 
-          // Get coach check-ins for this client
-          const { data: checkins } = await supabase
-            .from('coach_checkins')
-            .select('*')
-            .eq('coach_id', user.id)
-            .eq('customer_id', client.id)
-            .order('created_at', { ascending: false });
+    setThreads(checkinThreads);
+  }, [clientData]);
 
-          // Transform data into threads format
-          const threadsData: Thread[] = [];
-
-          // Add check-ins as threads
-          checkins?.forEach((checkin, index) => {
-            threadsData.push({
-              id: 1000 + index, // Use high IDs to avoid conflicts
-              title: checkin.message || 'Check-in request',
-              type: 'check-in',
-              createdAt: checkin.created_at,
-              respondable: checkin.status === 'open',
-              messages: checkin.status === 'completed' ? [
-                { id: 2000 + index, author: 'coach', content: checkin.message || 'Check-in request', date: checkin.created_at },
-                { id: 2001 + index, author: 'client', content: 'Check-in completed', date: checkin.created_at },
-              ] : [
-                { id: 2000 + index, author: 'coach', content: checkin.message || 'Check-in request', date: checkin.created_at },
-              ],
-            });
-          });
-
-          // Add conversation messages as a thread
-          if (messages && messages.length > 0) {
-            threadsData.push({
-              id: 1,
-              title: 'General conversation',
-              type: 'message',
-              createdAt: conversation.created_at,
-              respondable: true,
-              messages: messages.map((msg, index) => ({
-                id: 3000 + index,
-                author: msg.sender_id === user.id ? 'coach' : 'client',
-                content: msg.content,
-                date: msg.created_at,
-                sender: msg.sender,
-              })),
-            });
-          }
-
-          setThreads(threadsData);
-        }
-      } catch (error) {
-        console.error('Error fetching conversations:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchConversations();
-  }, [client?.id, user?.id]);
+  const getRatingEmoji = (rating: number) => {
+    if (rating >= 9) return '😍';
+    if (rating >= 7) return '😊';
+    if (rating >= 5) return '😐';
+    if (rating >= 3) return '😕';
+    return '😢';
+  };
 
   const handleThreadSelect = (id: number) => {
     setActiveThreadId(id);
@@ -285,7 +247,7 @@ const CommunicationTab: React.FC<CommunicationTabProps> = ({ client }) => {
       >
         <CardHeader className={isMobile ? 'pb-3' : ''}>
           <CardTitle className={`flex items-center gap-2 ${isMobile ? 'text-lg' : ''}`}>
-            <MessageSquare className="h-5 w-5" /> Conversation Feed
+            <MessageSquare className="h-5 w-5" /> Check-in History
           </CardTitle>
         </CardHeader>
         <CardContent className={`overflow-y-auto flex-1 ${isMobile ? 'px-3 pb-3 space-y-2' : 'space-y-3 p-4'}`}>
@@ -299,7 +261,7 @@ const CommunicationTab: React.FC<CommunicationTabProps> = ({ client }) => {
             ))
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              No conversations yet. Start a conversation with your client.
+              No check-ins yet. Send a check-in to your client to start tracking their progress.
             </div>
           )}
         </CardContent>
@@ -321,13 +283,13 @@ const CommunicationTab: React.FC<CommunicationTabProps> = ({ client }) => {
             {isMobile && <span className="ml-2">Back</span>}
           </Button>
           <CardTitle className={`flex-1 ${isMobile ? 'text-base px-3' : 'text-center lg:text-left'}`}>
-            {activeThread ? activeThread.title : 'Select a conversation'}
+            {activeThread ? activeThread.title : 'Select a check-in'}
           </CardTitle>
         </CardHeader>
         <CardContent className={`flex flex-col flex-1 ${isMobile ? 'px-3 pb-3' : 'p-4'}`}>
           {!activeThread ? (
             <div className={`text-muted-foreground text-center py-10 ${isMobile ? 'text-base' : 'text-sm'}`}>
-              Select a conversation from the feed to view its details and respond.
+              Select a check-in from the history to view client responses and ratings.
             </div>
           ) : (
             <>

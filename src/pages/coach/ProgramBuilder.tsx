@@ -50,7 +50,13 @@ const ProgramBuilder = () => {
           title: program.name,
           description: program.description,
           plan: program.plan || {}, // Load existing plan data from program.plan
-          markActive: program.status === 'active',
+          // Load existing program details from plan data
+          muscleGroups: program.plan?.muscleGroups || [],
+          equipment: program.plan?.equipment || [],
+          benefits: program.plan?.benefits || '',
+          allergies: program.plan?.allergies || '',
+          assignedTo: program.assigned_to,
+          scheduledDate: program.scheduled_date,
         });
         didLoadRef.current = id;
       } else {
@@ -85,7 +91,7 @@ const ProgramBuilder = () => {
 
     let result;
     if (isEditing && existingProgram) {
-      // Update existing program
+      // Update existing program - save as active when completed
       result = await updateProgram({
         id: existingProgram.id,
         name: finalProgram.title || existingProgram.name,
@@ -94,10 +100,10 @@ const ProgramBuilder = () => {
         plan: planData,
         assignedTo: finalProgram.assignedTo ?? existingProgram.assignedTo ?? null,
         scheduledDate: finalProgram.scheduledDate ?? existingProgram.scheduledDate ?? null,
-        status: (finalProgram.markActive ? 'active' : (existingProgram.status as ProgramStatus)) || 'draft',
+        status: 'active' as ProgramStatus, // Save as active when program is completed
       });
     } else {
-      // Create new program
+      // Create new program - save as active when completed
       result = await createProgram({
         name: finalProgram.title || 'Untitled Program',
         description: finalProgram.description || '',
@@ -105,7 +111,7 @@ const ProgramBuilder = () => {
         plan: planData,
         assignedTo: finalProgram.assignedTo ?? null,
         scheduledDate: finalProgram.scheduledDate ?? null,
-        status: (finalProgram.markActive ? 'active' : 'draft') as ProgramStatus,
+        status: 'active' as ProgramStatus, // Save as active when program is completed
       });
     }
 
@@ -123,7 +129,11 @@ const ProgramBuilder = () => {
     switch (step) {
       case 'program-details':
         return (
-          <ProgramDetails onNext={handleProgramDetailsNext} initialData={programData} />
+          <ProgramDetails 
+            onNext={handleProgramDetailsNext} 
+            initialData={programData} 
+            isEditing={isEditing}
+          />
         );
       case 'fitness-builder':
         return (

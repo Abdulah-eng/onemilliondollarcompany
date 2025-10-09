@@ -76,12 +76,45 @@ export default function ProgressPage() {
     );
   }
 
-  if (!data || !data.dailyCheckins || !data.nutrition?.macros) {
+  // Check if user has minimum data requirements (1 week minimum)
+  const hasMinimumData = data && (
+    (data.dailyCheckins && data.dailyCheckins.length >= 7) ||
+    (data.nutrition && data.nutrition.macros && data.nutrition.macros.length >= 7) ||
+    (data.fitnessProgression && Object.values(data.fitnessProgression).some(progression => progression.length >= 7)) ||
+    (data.mentalHealth && data.mentalHealth.length >= 7)
+  );
+
+  // Check if user has any data at all (for basic display)
+  const hasAnyData = data && (
+    (data.dailyCheckins && data.dailyCheckins.length > 0) ||
+    (data.nutrition && data.nutrition.macros && data.nutrition.macros.length > 0) ||
+    (data.fitnessProgression && Object.values(data.fitnessProgression).some(progression => progression.length > 0)) ||
+    (data.mentalHealth && data.mentalHealth.length > 0)
+  );
+
+  if (!hasAnyData) {
     return (
       <div className="w-full max-w-4xl mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight">No Progress Data</h1>
-          <p className="text-muted-foreground">Start your wellness journey to see your progress here.</p>
+        <div className="text-center space-y-6">
+          <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
+            <div className="text-2xl">📊</div>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">Your Progress</h1>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Stay consistent with your daily check-ins to track your progress and see your trends grow over time.
+          </p>
+          
+          <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5 max-w-md mx-auto">
+            <CardContent className="p-6 text-center space-y-4">
+              <div className="flex items-center justify-center gap-2">
+                <div className="text-2xl">💪</div>
+                <h3 className="text-xl font-semibold">Start Your Journey</h3>
+              </div>
+              <p className="text-muted-foreground">
+                Complete your daily check-ins to begin tracking your wellness progress and see meaningful trends.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -114,39 +147,70 @@ export default function ProgressPage() {
           <p className="text-muted-foreground">A detailed overview of your wellness journey.</p>
         </div>
 
-        {/* 1. Hero Progress Snapshot --- UPDATED PROPS --- */}
-        <HeroProgressSnapshot
-          streak={data.workoutStreak}
-          avgSleep={avgSleep}
-          avgEnergy={avgEnergy}
-          kcalBurned={data.kcalBurnedLast7Days}
-          goals={data.userGoals}
-          dailyCheckins={data.dailyCheckins}
-          nutrition={data.nutrition}
-          avgProtein={avgProtein}
-          avgCarbs={avgCarbs}
-        />
+        {/* 1. Hero Progress Snapshot - Only show if we have minimum data */}
+        {hasMinimumData && (
+          <HeroProgressSnapshot
+            streak={data.workoutStreak}
+            avgSleep={avgSleep}
+            avgEnergy={avgEnergy}
+            kcalBurned={data.kcalBurnedLast7Days}
+            goals={data.userGoals}
+            dailyCheckins={data.dailyCheckins}
+            nutrition={data.nutrition}
+            avgProtein={avgProtein}
+            avgCarbs={avgCarbs}
+          />
+        )}
 
-        {/* 2. Smart Insights */}
-        <SmartInsights insights={data.smartInsights} />
+        {/* 2. Smart Insights - Only show if we have minimum data for AI analysis */}
+        {hasMinimumData && data.smartInsights && data.smartInsights.length > 0 && (
+          <SmartInsights insights={data.smartInsights} />
+        )}
 
-        {/* 3. Daily Check-in Trends (Wellness Overview) */}
-        <DailyCheckinTrends checkins={data.dailyCheckins} onCardClick={handleCardClick} />
+        {/* 3. Daily Check-in Trends - Show if we have any check-in data */}
+        {data.dailyCheckins && data.dailyCheckins.length > 0 && (
+          <DailyCheckinTrends checkins={data.dailyCheckins} onCardClick={handleCardClick} />
+        )}
         
-        {/* 4. Fitness Progression */}
-        <FitnessProgression data={data.fitnessProgression} />
+        {/* 4. Fitness Progression - Only show if we have minimum fitness data */}
+        {data.fitnessProgression && Object.values(data.fitnessProgression).some(progression => progression.length >= 7) && (
+          <FitnessProgression data={data.fitnessProgression} />
+        )}
 
-        {/* 5. Nutrition Progression */}
-        <NutritionProgression data={data.nutrition} />
+        {/* 5. Nutrition Progression - Only show if we have minimum nutrition data */}
+        {data.nutrition && data.nutrition.macros && data.nutrition.macros.length >= 7 && (
+          <NutritionProgression data={data.nutrition} />
+        )}
 
-        {/* 6. Mental Health Progression */}
-        <MentalHealthProgression mentalHealth={data.mentalHealth} dailyCheckins={data.dailyCheckins}/>
+        {/* 6. Mental Health Progression - Only show if we have minimum mental health data */}
+        {data.mentalHealth && data.mentalHealth.length >= 7 && (
+          <MentalHealthProgression mentalHealth={data.mentalHealth} dailyCheckins={data.dailyCheckins}/>
+        )}
 
-        {/* 7. Weight and Photo Progress Cards */}
+        {/* 7. Weight and Photo Progress Cards - Always show, but with proper no-data messaging */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <WeightTrendCard />
           <PhotoProgressCard photos={data.photoEntries} />
         </div>
+
+        {/* Show message if user has some data but not enough for full analysis */}
+        {hasAnyData && !hasMinimumData && (
+          <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 dark:border-blue-800">
+            <CardContent className="p-6 text-center space-y-4">
+              <div className="flex items-center justify-center gap-2">
+                <div className="text-2xl">📈</div>
+                <h3 className="text-xl font-semibold">Building Your Progress Profile</h3>
+              </div>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                You're making great progress! Keep tracking your daily check-ins for at least a week to unlock detailed analytics, AI insights, and comprehensive progress tracking.
+              </p>
+              <div className="flex items-center justify-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Continue for {7 - Math.min(data.dailyCheckins?.length || 0, 7)} more days to unlock full insights</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
       
       {/* --- FLOATING ACTION BUTTON --- */}

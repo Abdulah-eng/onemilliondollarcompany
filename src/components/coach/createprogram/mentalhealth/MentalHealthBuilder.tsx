@@ -10,7 +10,8 @@ import DateCircles from '../builders/DateCircles'; // Reused
 import MentalHealthLibrary from './MentalHealthLibrary'; // New
 import MentalHealthDay, { MentalHealthDayItem, MentalHealthSection } from './MentalHealthDay'; // New
 import MentalHealthSummary from './MentalHealthSummary'; // New/Adapted
-import { mockMentalHealthActivities, MentalHealthActivity, ActivityType, FocusArea } from '@/mockdata/createprogram/mockMentalHealthActivities';
+import { MentalHealthActivity, ActivityType, FocusArea } from '@/mockdata/createprogram/mockMentalHealthActivities';
+import { useCoachLibrary } from '@/hooks/useCoachLibrary';
 
 // Helper function to create a unique key for data storage
 const getDataKey = (week: number, day: string) => `W${week}_${day}`;
@@ -38,9 +39,13 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
   const [mhData, setMhData] = useState<{ [key: string]: { [key in MentalHealthSection]: MentalHealthDayItem[] } }>(initialData || {});
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<MentalHealthActivity[]>(mockMentalHealthActivities);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedSection, setSelectedSection] = useState<MentalHealthSection>('morning');
+  const { items: libraryItems, loading: libraryLoading } = useCoachLibrary();
+  
+  // Filter library items for mental health activities only
+  const mentalHealthItems = libraryItems.filter(item => item.category === 'mental health');
+  const [searchResults, setSearchResults] = useState<MentalHealthActivity[]>(mentalHealthItems);
 
   // ⭐ CALCULATE UNIQUE KEY
   const currentDataKey = getDataKey(activeWeek, activeDay); 
@@ -71,7 +76,7 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
   
   // Handlers for search (unchanged)
   const handleSearch = useCallback((query: string, activityTypeFilter?: ActivityType | 'all', focusArea?: FocusArea | 'all') => {
-    let filtered = mockMentalHealthActivities;
+    let filtered = mentalHealthItems;
     if (activityTypeFilter && activityTypeFilter !== 'all') {
       filtered = filtered.filter(activity => activity.type === activityTypeFilter);
     }
@@ -87,7 +92,7 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
       );
     }
     setSearchResults(filtered);
-  }, []);
+  }, [mentalHealthItems]);
 
   useEffect(() => {
     handleSearch(searchQuery);
@@ -155,6 +160,7 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
             // ⭐ PASS NEW WEEK PROPS
             activeWeek={activeWeek}
             onWeekChange={handleWeekChange}
+            dataIndicators={dataIndicators}
           />
         </div>
 
@@ -166,7 +172,7 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
             searchResults={searchResults}
             onSelect={handleSelectActivity}
             onSearch={handleSearch}
-            allActivities={mockMentalHealthActivities}
+            allActivities={mentalHealthItems}
           />
         </div>
 
@@ -205,7 +211,7 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
               searchResults={searchResults}
               onSelect={handleSelectActivity}
               onSearch={handleSearch}
-              allActivities={mockMentalHealthActivities}
+              allActivities={mentalHealthItems}
             />
           </div>
         </SheetContent>

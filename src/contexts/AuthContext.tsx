@@ -109,10 +109,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Synchronous state updates to prevent deadlocks
       if (currentUser) {
-        // Defer async profile fetch using setTimeout to avoid blocking
-        setTimeout(() => {
+        // Use requestAnimationFrame for better timing
+        requestAnimationFrame(() => {
           fetchProfile(currentUser).then(setProfile);
-        }, 0);
+        });
       } else {
         setProfile(null);
       }
@@ -126,9 +126,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(currentUser ?? null);
       
       if (currentUser) {
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           fetchProfile(currentUser).then(setProfile);
-        }, 0);
+        });
       } else {
         setProfile(null);
       }

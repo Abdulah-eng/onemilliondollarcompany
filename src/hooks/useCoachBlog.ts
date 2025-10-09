@@ -21,11 +21,14 @@ export const useCoachBlog = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchPosts = async () => {
+    if (!user) return;
+    
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('blog_posts')
         .select('*')
+        .eq('coach_id', user.id)
         .order('updated_at', { ascending: false });
       if (error) throw error;
       setPosts((data || []) as BlogPostRow[]);
@@ -38,7 +41,7 @@ export const useCoachBlog = () => {
 
   useEffect(() => { fetchPosts(); }, [user?.id]);
 
-  const createOrUpdate = async (payload: Partial<BlogPostRow> & { id?: string }) => {
+  const createOrUpdate = async (payload: Partial<BlogPostRow> & { id?: string; isPublished?: boolean }) => {
     if (!user) throw new Error('Not authenticated');
     if (payload.id) {
       const { data, error } = await supabase
@@ -49,6 +52,7 @@ export const useCoachBlog = () => {
           content: payload.content ?? null,
           category: payload.category ?? null,
           cover_url: payload.cover_url ?? null,
+          is_published: payload.isPublished ?? false,
         })
         .eq('id', payload.id)
         .eq('coach_id', user.id)
@@ -67,6 +71,7 @@ export const useCoachBlog = () => {
         content: payload.content ?? null,
         category: payload.category ?? null,
         cover_url: payload.cover_url ?? null,
+        is_published: payload.isPublished ?? false,
       })
       .select('*')
       .single();

@@ -1,13 +1,15 @@
 // src/components/customer/mycoach/EnhancedCoachUpdates.tsx
 import { useState } from 'react';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { feedbackHistory } from '@/mockdata/mycoach/coachData';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { CheckCircle2, History, X, MessageCircle, MapPin, BarChart3, Send } from 'lucide-react';
+import { CheckCircle2, History, X, MessageCircle, MapPin, BarChart3, Send, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import useMediaQuery from '@/hooks/use-media-query';
+import { useRealTimeCheckIns } from '@/hooks/useRealTimeCheckIns';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePaymentPlan } from '@/hooks/usePaymentPlan';
 
 const emojiRatings = ['😞', '😕', '😐', '🙂', '😃', '😁', '🤩'];
 
@@ -30,24 +32,36 @@ const getUpdateColor = (type: string) => {
 };
 
 const EnhancedCoachUpdates = () => {
-    const isPremiumUser = true;
-    const [responses, setResponses] = useState<Record<number, string>>({});
-    const [ratings, setRatings] = useState<Record<number, number>>({});
-    const [submittedIds, setSubmittedIds] = useState<number[]>([]);
-    const [dismissedInfoId, setDismissedInfoId] = useState<number | null>(null);
+    const { profile } = useAuth();
+    const { planStatus } = usePaymentPlan();
+    const { activePins, history, loading, respondToCheckIn } = useRealTimeCheckIns();
+    const [responses, setResponses] = useState<Record<string, string>>({});
+    const [ratings, setRatings] = useState<Record<string, number>>({});
+    const [submittedIds, setSubmittedIds] = useState<string[]>([]);
+    const [dismissedInfoId, setDismissedInfoId] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState<string | null>(null);
     const isMobile = useMediaQuery('(max-width: 768px)');
 
-    const handleSubmit = (id: number) => {
-        setSubmittedIds((prev) => [...prev, id]);
-        setResponses(prev => { delete prev[id]; return { ...prev }; });
-        setRatings(prev => { delete prev[id]; return { ...prev }; });
+    const handleSubmit = async (id: string) => {
+        setIsSubmitting(id);
+        try {
+            const response = responses[id] || '';
+            await respondToCheckIn(id, response);
+            setSubmittedIds((prev) => [...prev, id]);
+            setResponses(prev => { delete prev[id]; return { ...prev }; });
+            setRatings(prev => { delete prev[id]; return { ...prev }; });
+        } catch (error) {
+            console.error('Error submitting response:', error);
+        } finally {
+            setIsSubmitting(null);
+        }
     };
 
-    const handleDismissInfo = (id: number) => {
+    const handleDismissInfo = (id: string) => {
         setDismissedInfoId(id);
     };
 
-    if (!isPremiumUser) {
+    if (!planStatus.hasActivePlan && !profile?.coach_id) {
         return (
             <Card className="shadow-xl border-0 rounded-2xl bg-gradient-to-br from-primary/5 to-secondary/5">
                 <CardContent className="p-8 text-center">
@@ -63,34 +77,46 @@ const EnhancedCoachUpdates = () => {
         );
     }
 
-    const recentUpdates = feedbackHistory
-        .filter((update) => update.id !== dismissedInfoId)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        );
+    }
+
+    const recentUpdates = activePins
+        .filter((pin) => pin.id !== dismissedInfoId)
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 3);
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold text-foreground">Coach Inbox</h3>
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary transition-colors">
+                <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                    onClick={() => {/* TODO: Implement history view */}}
+                >
                     <History className="w-4 h-4 mr-2" />
-                    View History
+                    View History ({history.length})
                 </Button>
             </div>
 
             <AnimatePresence mode="popLayout">
                 {recentUpdates
-                    .filter((update) => !submittedIds.includes(update.id))
-                    .map((update, index) => {
-                        const isFeedback = update.type === 'Program Feedback';
-                        const isCheckIn = update.type === 'Check-in';
-                        const isInfo = update.type === 'Pinpoint';
-                        const Icon = getUpdateIcon(update.type);
-                        const colorGradient = getUpdateColor(update.type);
+                    .filter((pin) => !submittedIds.includes(pin.id))
+                    .map((pin, index) => {
+                        const isCheckIn = pin.type === 'checkin';
+                        const isInfo = pin.type === 'program';
+                        const Icon = getUpdateIcon('Check-in');
+                        const colorGradient = getUpdateColor('Check-in');
 
                         return (
                             <motion.div
-                                key={update.id}
+                                key={pin.id}
                                 layout
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -100,7 +126,7 @@ const EnhancedCoachUpdates = () => {
                                 dragConstraints={{ left: 0, right: 0 }}
                                 onDragEnd={(event, info) => {
                                     if (isInfo && isMobile && Math.abs(info.point.x) > 50) {
-                                        handleDismissInfo(update.id);
+                                        handleDismissInfo(pin.id);
                                     }
                                 }}
                                 className={cn(
@@ -118,10 +144,10 @@ const EnhancedCoachUpdates = () => {
                                                 </div>
                                                 <div className="min-w-0 flex-1">
                                                     <CardTitle className="text-lg font-semibold truncate">
-                                                        {update.title}
+                                                        {pin.title}
                                                     </CardTitle>
                                                     <p className="text-xs text-muted-foreground mt-0.5">
-                                                        {update.date} • <span className="font-medium text-primary">{update.type}</span>
+                                                        {new Date(pin.created_at).toLocaleDateString()} • <span className="font-medium text-primary">Check-in</span>
                                                     </p>
                                                 </div>
                                             </div>
@@ -130,7 +156,7 @@ const EnhancedCoachUpdates = () => {
                                                     variant="ghost"
                                                     size="sm"
                                                     className="opacity-60 hover:opacity-100 transition-opacity ml-4 p-2 h-auto flex-shrink-0"
-                                                    onClick={() => handleDismissInfo(update.id)}
+                                                    onClick={() => handleDismissInfo(pin.id)}
                                                     aria-label="Dismiss information"
                                                 >
                                                     <X className="w-4 h-4" />
@@ -140,11 +166,11 @@ const EnhancedCoachUpdates = () => {
 
                                         <div className="space-y-4">
                                             <p className="text-sm text-foreground leading-relaxed border-l-2 border-primary/50 pl-4 py-1">
-                                                {update.message}
+                                                {pin.content}
                                             </p>
 
                                             {/* Interactive Feedback Section */}
-                                            {(isFeedback || isCheckIn) && (
+                                            {isCheckIn && (
                                                 <div className="pt-2 space-y-4 border-t border-border/50">
                                                     {isCheckIn && (
                                                         <div className="space-y-3">
@@ -152,13 +178,13 @@ const EnhancedCoachUpdates = () => {
                                                             <div className="flex items-center gap-2 justify-center sm:justify-start">
                                                                 {emojiRatings.map((emoji, index) => {
                                                                     const ratingValue = index + 1;
-                                                                    const isSelected = ratings[update.id] === ratingValue;
+                                                                    const isSelected = ratings[pin.id] === ratingValue;
                                                                     return (
                                                                         <motion.button
                                                                             key={ratingValue}
                                                                             type="button"
                                                                             onClick={() =>
-                                                                                setRatings((prev) => ({ ...prev, [update.id]: ratingValue }))
+                                                                                setRatings((prev) => ({ ...prev, [pin.id]: ratingValue }))
                                                                             }
                                                                             initial={false}
                                                                             animate={{ scale: isSelected ? 1.2 : 1, opacity: isSelected ? 1 : 0.6 }}
@@ -179,29 +205,33 @@ const EnhancedCoachUpdates = () => {
                                                     )}
 
                                                     <Textarea
-                                                        value={responses[update.id] || ''}
+                                                        value={responses[pin.id] || ''}
                                                         onChange={(e) =>
-                                                            setResponses((prev) => ({ ...prev, [update.id]: e.target.value }))
+                                                            setResponses((prev) => ({ ...prev, [pin.id]: e.target.value }))
                                                         }
-                                                        placeholder={isCheckIn ? "Add details about your feeling (optional)..." : "Share your detailed thoughts..."}
+                                                        placeholder="Add details about your feeling (optional)..."
                                                         className="min-h-[80px] bg-background/50 backdrop-blur-sm"
                                                     />
                                                     <Button
                                                         size="sm"
-                                                        onClick={() => handleSubmit(update.id)}
+                                                        onClick={() => handleSubmit(pin.id)}
                                                         disabled={
-                                                            (isCheckIn && ratings[update.id] === undefined && !responses[update.id]?.trim()) ||
-                                                            (isFeedback && !responses[update.id]?.trim())
+                                                            (isCheckIn && ratings[pin.id] === undefined && !responses[pin.id]?.trim()) ||
+                                                            isSubmitting === pin.id
                                                         }
                                                         className="w-full sm:w-auto"
                                                     >
-                                                        <Send className="w-4 h-4 mr-2" />
-                                                        {isFeedback ? 'Send Response' : 'Submit Check-in'}
+                                                        {isSubmitting === pin.id ? (
+                                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                        ) : (
+                                                            <Send className="w-4 h-4 mr-2" />
+                                                        )}
+                                                        {isSubmitting === pin.id ? 'Submitting...' : 'Submit Check-in'}
                                                     </Button>
                                                 </div>
                                             )}
 
-                                            {submittedIds.includes(update.id) && (
+                                            {submittedIds.includes(pin.id) && (
                                                 <motion.div
                                                     initial={{ opacity: 0, scale: 0.8 }}
                                                     animate={{ opacity: 1, scale: 1 }}
@@ -209,7 +239,7 @@ const EnhancedCoachUpdates = () => {
                                                 >
                                                     <CheckCircle2 className="w-4 h-4" />
                                                     <span className="text-sm font-medium">
-                                                        {isFeedback ? 'Response submitted!' : 'Check-in submitted!'}
+                                                        Check-in submitted!
                                                     </span>
                                                 </motion.div>
                                             )}

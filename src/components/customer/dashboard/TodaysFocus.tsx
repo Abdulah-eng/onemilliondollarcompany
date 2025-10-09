@@ -2,10 +2,11 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, Star, Flame, Salad, BrainCircuit, PlayCircle, Loader2 } from "lucide-react";
+import { Clock, Star, Flame, Salad, BrainCircuit, PlayCircle, Loader2, Users } from "lucide-react";
 import { ComponentType } from "react";
 import { useAuth } from '@/contexts/AuthContext';
 import { useCustomerPrograms } from '@/hooks/useCustomerPrograms';
+import { useAccessLevel } from '@/contexts/AccessLevelContext';
 import { supabase } from '@/integrations/supabase/client';
 
 // --- Data Layer (Now fetched from backend) ---
@@ -51,6 +52,7 @@ const programConfig: {
 const TodaysProgram = () => {
   const { user } = useAuth();
   const { activeProgram, loading } = useCustomerPrograms();
+  const { hasCoach, hasPaymentPlan } = useAccessLevel();
   const [agendaItems, setAgendaItems] = useState<ProgramItem[]>([]);
   const [loadingPrograms, setLoadingPrograms] = useState(true);
 
@@ -146,6 +148,9 @@ const TodaysProgram = () => {
     );
   }
 
+  // Since this component is only shown to users with access, we don't need upgrade prompts
+  const hasPartialAccess = hasCoach && !hasPaymentPlan;
+
   if (agendaItems.length === 0) {
     return (
       <div className="w-full max-w-5xl mx-auto space-y-8">
@@ -164,8 +169,8 @@ const TodaysProgram = () => {
   const secondaryPrograms = agendaItems.slice(1);
   const primaryConfig = programConfig[primaryProgram.type];
 
-  return (
-    <div className="w-full max-w-5xl mx-auto space-y-8">
+  return (
+    <div className="w-full max-w-5xl mx-auto space-y-8">
       <div className="px-2">
         <p className="text-sm text-muted-foreground">
           {new Date().toLocaleDateString('en-US', { 
@@ -178,8 +183,8 @@ const TodaysProgram = () => {
         <h2 className="text-2xl font-bold text-foreground">Today's Focus 💪</h2>
       </div>
 
-      {/* Primary Program Card (Full Width) */}
-      <Card className="relative w-full overflow-hidden border-0 shadow-xl rounded-3xl group">
+      {/* Primary Program Card (Full Width) */}
+      <Card className="relative w-full overflow-hidden border-0 shadow-xl rounded-3xl group">
         <img
           src={primaryProgram.details.image}
           alt={primaryProgram.details.title}
@@ -229,14 +234,14 @@ const TodaysProgram = () => {
                 {primaryProgram.details.duration}
              </span>
           </div>
-        </CardContent>
-      </Card>
+        </CardContent>
+      </Card>
 
-      {/* Secondary Programs Section (Unchanged) */}
-      {secondaryPrograms.length > 0 && (
-        <div className="pt-6">
-          <h3 className="mb-4 text-xl font-bold text-foreground px-2">Later Today</h3>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+      {/* Secondary Programs Section */}
+      {secondaryPrograms.length > 0 && (
+        <div className="pt-6">
+          <h3 className="mb-4 text-xl font-bold text-foreground px-2">Later Today</h3>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {secondaryPrograms.map((item) => {
               const config = programConfig[item.type];
               return (
@@ -266,11 +271,24 @@ const TodaysProgram = () => {
                 </Card>
               );
             })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+          </div>
+        </div>
+      )}
+
+      {/* Coach Access Notice */}
+      {hasPartialAccess && (
+        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+            <Users className="w-4 h-4" />
+            <span className="text-sm font-medium">Coach Access</span>
+          </div>
+          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+            You have access to programs through your coach. Upgrade for full program access and insights.
+          </p>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default TodaysProgram;

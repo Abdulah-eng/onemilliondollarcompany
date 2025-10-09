@@ -66,11 +66,11 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
               if (!offerErr && offer) {
                 // Mark offer accepted
                 await supabase.from('coach_offers').update({ status: 'accepted' }).eq('id', offerId);
-                // Assign coach to customer and set plan expiry based on duration_months
-                const expiry = new Date(Date.now() + (offer.duration_months || 1) * 30 * 24 * 60 * 60 * 1000).toISOString();
+                // Assign coach to customer and set plan expiry based on duration_months (now weeks)
+                const expiry = new Date(Date.now() + (offer.duration_months || 1) * 7 * 24 * 60 * 60 * 1000).toISOString();
                 await supabase
                   .from('profiles')
-                  .update({ coach_id: offer.coach_id, plan: `${offer.duration_months}-month plan`, plan_expiry: expiry })
+                  .update({ coach_id: offer.coach_id, plan: `${offer.duration_months}-week plan`, plan_expiry: expiry })
                   .eq('id', offer.customer_id);
                 // Record payout intent with platform commission (15%)
                 const amountCents = Math.round(Number(offer.price) * 100);
@@ -218,6 +218,43 @@ app.use(express.json());
 
 // Health
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
+
+// Geolocation proxy endpoint to avoid CORS issues
+app.get('/api/geolocation', async (_req, res) => {
+  try {
+    console.log('Fetching geolocation from ip-api.com...');
+    const response = await fetch('http://ip-api.com/json/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+    
+    console.log('Response status:', response.status);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('Geolocation data received:', data);
+    
+    // Transform ip-api.com response to match ipapi.co format
+    const transformedData = {
+      country_code: data.countryCode,
+      country_name: data.country,
+      region: data.regionName,
+      city: data.city,
+      latitude: data.lat,
+      longitude: data.lon,
+      timezone: data.timezone
+    };
+    
+    res.json(transformedData);
+  } catch (error) {
+    console.error('Error fetching geolocation:', error);
+    res.status(500).json({ error: 'Failed to fetch geolocation data', details: error.message });
+  }
+});
 
 // Contract maintenance: expire contracts whose end_date has passed and close chat
 app.post('/api/contracts/expire', async (_req, res) => {

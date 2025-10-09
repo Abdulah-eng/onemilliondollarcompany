@@ -114,22 +114,35 @@ const FileItem: React.FC<FileItemProps> = ({ file, index }) => {
                     </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-4">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="opacity-70 hover:opacity-100 transition-all hover:bg-primary/10 p-2 h-auto"
-                        aria-label="View File"
-                    >
-                        <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="opacity-70 hover:opacity-100 transition-all hover:bg-primary/10 p-2 h-auto"
-                        aria-label="Download File"
-                    >
-                        <Download className="w-4 h-4" />
-                    </Button>
+                    {file.file_url && (
+                        <>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="opacity-70 hover:opacity-100 transition-all hover:bg-primary/10 p-2 h-auto"
+                                aria-label="View File"
+                                onClick={() => window.open(file.file_url, '_blank')}
+                            >
+                                <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="opacity-70 hover:opacity-100 transition-all hover:bg-primary/10 p-2 h-auto"
+                                aria-label="Download File"
+                                onClick={() => {
+                                    const link = document.createElement('a');
+                                    link.href = file.file_url!;
+                                    link.download = file.name;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                }}
+                            >
+                                <Download className="w-4 h-4" />
+                            </Button>
+                        </>
+                    )}
                 </div>
             </div>
         </motion.div>
@@ -187,17 +200,31 @@ const UnifiedSharedFiles: React.FC<UnifiedSharedFilesProps> = ({ className, onVi
             try {
                 setLoading(true);
                 
-                // For now, we'll use a placeholder since we don't have a shared_files table yet
-                // In a real implementation, you would fetch from a shared_files table
-                // const { data } = await supabase
-                //     .from('shared_files')
-                //     .select('*')
-                //     .eq('coach_id', profile.coach_id)
-                //     .eq('customer_id', profile.id)
-                //     .order('created_at', { ascending: false });
+                // Fetch real-time shared files from the database
+                const { data, error } = await supabase
+                    .from('shared_files')
+                    .select('*')
+                    .eq('coach_id', profile.coach_id)
+                    .eq('customer_id', profile.id)
+                    .order('created_at', { ascending: false });
 
-                // For now, return empty array to show "no files" state
-                setSharedFiles([]);
+                if (error) {
+                    console.error('Error fetching shared files:', error);
+                    setSharedFiles([]);
+                    return;
+                }
+
+                // Transform the data to match our interface
+                const transformedFiles: SharedFile[] = (data || []).map(file => ({
+                    id: file.id,
+                    name: file.file_name,
+                    description: file.file_description || 'No description provided',
+                    date: new Date(file.created_at).toLocaleDateString(),
+                    file_url: file.file_url,
+                    file_type: file.file_type
+                }));
+
+                setSharedFiles(transformedFiles);
             } catch (error) {
                 console.error('Error fetching shared files:', error);
                 setSharedFiles([]);
@@ -207,7 +234,7 @@ const UnifiedSharedFiles: React.FC<UnifiedSharedFilesProps> = ({ className, onVi
         };
 
         fetchSharedFiles();
-    }, [profile?.coach_id]);
+    }, [profile?.coach_id, profile?.id]);
 
     // Limit files shown in the desktop widget view (3)
     const filesToShow = isMobile ? sharedFiles.length : 3;

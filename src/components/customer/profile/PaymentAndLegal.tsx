@@ -207,34 +207,8 @@ const PaymentAndLegal = () => {
             </AccordionContent>
           </AccordionItem>
           
-          <AccordionItem value="item-2">
-            <AccordionTrigger className="text-base font-medium">Preferences</AccordionTrigger>
-            <AccordionContent className="p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="theme-select">Theme</Label>
-                <Select defaultValue="system">
-                  <SelectTrigger id="theme-select" className="w-[120px]">
-                    <SelectValue placeholder="System" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="new-messages">New Messages</Label>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="coach-feedback">Coach Feedback</Label>
-                <Switch defaultChecked />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
           
-          <AccordionItem value="item-3">
+          <AccordionItem value="item-2">
             <AccordionTrigger className="text-base font-medium">Privacy Policy & Terms</AccordionTrigger>
             <AccordionContent className="p-4 space-y-4">
               <div className="space-y-4">

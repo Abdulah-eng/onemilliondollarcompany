@@ -10,7 +10,8 @@ import DateCircles from '../builders/DateCircles'; // Reused
 import RecipeLibrary from './RecipeLibrary'; // New
 import NutritionDay, { NutritionDayItem, MealSection } from './NutritionDay'; // New
 import NutritionSummary from './NutritionSummary'; // New/Adapted
-import { mockRecipes, RecipeItem, MealType, IngredientType } from '@/mockdata/createprogram/mockRecipes';
+import { RecipeItem, MealType, IngredientType } from '@/mockdata/createprogram/mockRecipes';
+import { useCoachLibrary } from '@/hooks/useCoachLibrary';
 
 // Helper function to create a unique key for data storage
 const getDataKey = (week: number, day: string) => `W${week}_${day}`;
@@ -40,9 +41,13 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave, ini
   const [nutritionData, setNutritionData] = useState<{ [key: string]: { [key in MealSection]: NutritionDayItem[] } }>(initialData || {});
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<RecipeItem[]>(mockRecipes);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedSection, setSelectedSection] = useState<MealSection>('breakfast');
+  const { items: libraryItems, loading: libraryLoading } = useCoachLibrary();
+  
+  // Filter library items for recipes only
+  const recipeItems = libraryItems.filter(item => item.category === 'recipe');
+  const [searchResults, setSearchResults] = useState<RecipeItem[]>(recipeItems);
   
   // ⭐ CALCULATE UNIQUE KEY
   const currentDataKey = getDataKey(activeWeek, activeDay); 
@@ -73,7 +78,7 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave, ini
 
   // Handle recipe search with enhanced filtering (unchanged)
   const handleSearch = useCallback((query: string, mealTypeFilter?: MealType | 'all', ingredientType?: IngredientType | 'all') => {
-    let filtered = mockRecipes;
+    let filtered = recipeItems;
 
     if (mealTypeFilter && mealTypeFilter !== 'all') {
       filtered = filtered.filter(recipe => recipe.mealTypes.includes(mealTypeFilter as MealType));
@@ -93,7 +98,7 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave, ini
     }
 
     setSearchResults(filtered);
-  }, []);
+  }, [recipeItems]);
 
   useEffect(() => {
     handleSearch(searchQuery);
@@ -166,6 +171,7 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave, ini
             // ⭐ PASS NEW WEEK PROPS
             activeWeek={activeWeek}
             onWeekChange={handleWeekChange}
+            dataIndicators={dataIndicators}
           />
         </div>
 
@@ -177,7 +183,7 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave, ini
             searchResults={searchResults}
             onSelect={handleSelectRecipe}
             onSearch={handleSearch}
-            allRecipes={mockRecipes}
+            allRecipes={recipeItems}
           />
         </div>
 
@@ -224,7 +230,7 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave, ini
               searchResults={searchResults}
               onSelect={handleSelectRecipe}
               onSearch={handleSearch}
-              allRecipes={mockRecipes}
+              allRecipes={recipeItems}
             />
           </div>
         </SheetContent>

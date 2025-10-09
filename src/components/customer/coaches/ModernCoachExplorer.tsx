@@ -13,6 +13,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { useEnhancedCoaches, EnhancedCoach } from '@/hooks/useEnhancedCoaches';
+import { useRealTimeCoachData, RealTimeCoachData } from '@/hooks/useRealTimeCoachData';
 import { CoachDetailModal } from './CoachDetailModal';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,9 +24,9 @@ type FilterOption = 'All' | 'Fitness' | 'Nutrition' | 'Mental Health';
 const FILTER_OPTIONS: FilterOption[] = ['All', 'Fitness', 'Nutrition', 'Mental Health'];
 
 interface CoachCardProps {
-    coach: EnhancedCoach;
-    onRequest: (coach: EnhancedCoach) => void;
-    onViewDetails: (coach: EnhancedCoach) => void;
+    coach: RealTimeCoachData;
+    onRequest: (coach: RealTimeCoachData) => void;
+    onViewDetails: (coach: RealTimeCoachData) => void;
     index: number;
     requestStatus?: 'pending' | 'accepted' | 'rejected' | null;
     isRequestLoading?: boolean;
@@ -167,16 +168,17 @@ interface ModernCoachExplorerProps {
 const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachRequestSent }) => {
     const { user } = useAuth();
     const { planStatus } = usePaymentPlan();
-    const { coaches, loading, sendRequest, getRequestStatus } = useEnhancedCoaches();
+    const { coaches: realTimeCoaches, loading: realTimeLoading } = useRealTimeCoachData();
+    const { sendRequest, getRequestStatus } = useEnhancedCoaches();
     const { generateThreePlans, loading: aiLoading } = useAIPlanGeneration();
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const [selectedCoach, setSelectedCoach] = useState<EnhancedCoach | null>(null);
+    const [selectedCoach, setSelectedCoach] = useState<RealTimeCoachData | null>(null);
     const [isRequestLoading, setIsRequestLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [activeFilter, setActiveFilter] = useState<FilterOption>('All');
 
-    const handleRequest = async (coach: EnhancedCoach) => {
+    const handleRequest = async (coach: RealTimeCoachData) => {
         const requestStatus = getRequestStatus(coach.id);
         if (requestStatus === 'pending' || requestStatus === 'accepted') {
             return;
@@ -196,7 +198,7 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
         }
     };
 
-    const handleViewDetails = (coach: EnhancedCoach) => {
+    const handleViewDetails = (coach: RealTimeCoachData) => {
         setSelectedCoach(coach);
         setIsDetailModalOpen(true);
     };
@@ -216,7 +218,7 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
 
     const filteredCoaches = useMemo(() => {
         const term = searchTerm.toLowerCase();
-        return coaches.filter(coach => {
+        return realTimeCoaches.filter(coach => {
             const matchesSearch = coach.name.toLowerCase().includes(term) ||
                                  coach.bio.toLowerCase().includes(term) ||
                                  coach.skills.some(skill => skill.toLowerCase().includes(term));
@@ -224,9 +226,9 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
                                  coach.skills.some(skill => mapSkillToCategory(skill) === activeFilter);
             return matchesSearch && matchesFilter;
         });
-    }, [coaches, searchTerm, activeFilter]);
+    }, [realTimeCoaches, searchTerm, activeFilter]);
 
-    if (loading) {
+    if (realTimeLoading) {
         return (
             <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin" />

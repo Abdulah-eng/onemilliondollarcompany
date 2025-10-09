@@ -3,20 +3,11 @@ import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Check, Droplets, Battery, Smile, Moon, TrendingUp } from 'lucide-react';
-
-/*
-TODO: Backend Integration Notes for DailyCheckIn
-- isAlreadyCheckedIn: Query `daily_logs` for a record with the current user's ID and today's date.
-- handleLogCheckIn: On button click, INSERT a new row into `daily_logs` with the selected values.
-- trends: The trend data needs to be calculated by comparing historical data from the `daily_logs` table.
-*/
-const mockData = {
-  isAlreadyCheckedIn: false,
-  trends: {
-    energyTrend: 'up', // 'up', 'down', 'stable'
-  }
-};
+import { Check, Droplets, Battery, Smile, Moon, TrendingUp, Lock } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePaymentPlan } from '@/hooks/usePaymentPlan';
+import { useDailyCheckins } from '@/hooks/useDailyCheckins';
+import { toast } from 'sonner';
 
 const sleepOptions = [
   { value: 1, emoji: '😴', label: '< 5 hrs', feedback: 'Tip: Try to avoid screens 30 minutes before bed.' },
@@ -40,16 +31,30 @@ const moodOptions = [
 ];
 
 const DailyCheckIn = () => {
-  const [checkedIn, setCheckedIn] = useState(mockData.isAlreadyCheckedIn);
-  const [water, setWater] = useState(0);
-  const [sleep, setSleep] = useState(0);
-  const [energy, setEnergy] = useState(0);
-  const [mood, setMood] = useState(0);
+  const { profile } = useAuth();
+  const { planStatus } = usePaymentPlan();
+  const { checkins, upsertToday, loading: checkinsLoading } = useDailyCheckins();
+  
+  const [water, setWater] = useState(0);
+  const [sleep, setSleep] = useState(0);
+  const [energy, setEnergy] = useState(0);
+  const [mood, setMood] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [activeStep, setActiveStep] = useState(0);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [activeStep, setActiveStep] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Check if user has access to daily check-ins
+  const hasCoach = Boolean(profile?.coach_id);
+  const hasActivePlan = planStatus.hasActivePlan;
+  const canAccessCheckIn = hasCoach || hasActivePlan;
+
+  // Check if user already checked in today
+  const today = new Date().toISOString().slice(0, 10);
+  const todayCheckin = checkins.find(checkin => checkin.date === today);
+  const checkedIn = Boolean(todayCheckin);
 
   useEffect(() => {
     if (itemRefs.current[activeStep]) {
@@ -67,8 +72,59 @@ const DailyCheckIn = () => {
     }, 150);
   };
 
-  const handleLogCheckIn = () => setCheckedIn(true);
-  const isComplete = water > 0 && sleep > 0 && energy > 0 && mood > 0;
+  const handleLogCheckIn = async () => {
+    if (!canAccessCheckIn) {
+      toast.error('Daily check-ins require a coach or active subscription');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await upsertToday({
+        water_liters: water * 0.3, // Convert to liters (8 glasses = 2.4L)
+        sleep_hours: sleep,
+        energy: energy,
+        mood: mood,
+      });
+      
+      toast.success('Check-in saved successfully!');
+    } catch (error) {
+      console.error('Error saving check-in:', error);
+      toast.error('Failed to save check-in. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const isComplete = water > 0 && sleep > 0 && energy > 0 && mood > 0;
+
+  // Show access denied message if user doesn't have coach or plan
+  if (!canAccessCheckIn) {
+    return (
+      <div>
+        <h2 className="text-xl font-bold text-foreground mb-4">Daily Check-in</h2>
+        <Card className="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600">
+          <CardContent className="p-8 text-center">
+            <Lock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Daily Check-ins Available
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Get a coach or subscribe to access daily wellness tracking and personalized insights.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <Button variant="outline" size="sm">
+                Find a Coach
+              </Button>
+              <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                Subscribe Now
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (checkedIn) {
     return (
@@ -99,9 +155,9 @@ const DailyCheckIn = () => {
           <div ref={el => itemRefs.current[1] = el} className="min-w-full flex-shrink-0 snap-center lg:min-w-0 p-1">
             <SleepModule value={sleep} onChange={(val) => { setSleep(val); setTimeout(() => setActiveStep(2), 1000); }} />
           </div>
-          <div ref={el => itemRefs.current[2] = el} className="min-w-full flex-shrink-0 snap-center lg:min-w-0 p-1">
-            <EnergyModule value={energy} onChange={(val) => { setEnergy(val); setTimeout(() => setActiveStep(3), 1000); }} trend={mockData.trends.energyTrend} />
-          </div>
+          <div ref={el => itemRefs.current[2] = el} className="min-w-full flex-shrink-0 snap-center lg:min-w-0 p-1">
+            <EnergyModule value={energy} onChange={(val) => { setEnergy(val); setTimeout(() => setActiveStep(3), 1000); }} />
+          </div>
           <div ref={el => itemRefs.current[3] = el} className="min-w-full flex-shrink-0 snap-center lg:min-w-0 p-1">
             <MoodModule value={mood} onChange={setMood} />
           </div>
@@ -113,11 +169,16 @@ const DailyCheckIn = () => {
           ))}
         </div>
         
-        <div className="pt-2 flex justify-center">
-            <Button onClick={handleLogCheckIn} disabled={!isComplete} size="lg" className="w-full max-w-sm bg-orange-500 hover:bg-orange-600 font-bold disabled:bg-muted">
-              {isComplete ? "Log Today's Check-in" : "Complete All Items"}
-            </Button>
-        </div>
+        <div className="pt-2 flex justify-center">
+            <Button 
+              onClick={handleLogCheckIn} 
+              disabled={!isComplete || isSubmitting} 
+              size="lg" 
+              className="w-full max-w-sm bg-orange-500 hover:bg-orange-600 font-bold disabled:bg-muted"
+            >
+              {isSubmitting ? "Saving..." : isComplete ? "Log Today's Check-in" : "Complete All Items"}
+            </Button>
+        </div>
       </div>
     </div>
   );

@@ -26,8 +26,8 @@ export const useCurrencyDetection = () => {
       try {
         setLoading(true);
         
-        // Try to get user's location
-        const response = await fetch('https://ipapi.co/json/');
+        // Try to get user's location via backend proxy
+        const response = await fetch('http://localhost:3000/api/geolocation');
         const data = await response.json();
         
         const countryCode = data.country_code?.toLowerCase();
@@ -43,7 +43,13 @@ export const useCurrencyDetection = () => {
           'it': 'eur',
           'es': 'eur',
           'nl': 'eur',
+          'at': 'eur',
+          'be': 'eur',
+          'fi': 'eur',
+          'ie': 'eur',
+          'pt': 'eur',
           'gb': 'gbp',
+          // Default to USD for other countries
         };
 
         const detected = countryToCurrency[countryCode] || 'usd';

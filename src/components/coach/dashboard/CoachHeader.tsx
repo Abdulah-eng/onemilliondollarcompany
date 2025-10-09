@@ -1,11 +1,15 @@
 // src/components/coach/dashboard/CoachHeader.tsx
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, BookOpenCheck, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { Users, BookOpenCheck, TrendingUp, TrendingDown, DollarSign, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCoachDashboardStats } from '@/hooks/useCoachDashboard';
+import { useRealTimeMotivation } from '@/hooks/useRealTimeMotivation';
+import { useAuth } from '@/contexts/AuthContext';
 
 const CoachHeader = () => {
   const { stats } = useCoachDashboardStats();
+  const { motivationMessage, loading: motivationLoading } = useRealTimeMotivation();
+  const { profile } = useAuth();
   const metrics = [
     { title: 'Total Clients', value: String(stats.totalClients), icon: Users, trend: 'up', trendValue: '', description: 'Since last month' },
     { title: 'Total Earning', value: `$${stats.totalEarning.toLocaleString()}`, icon: DollarSign, trend: 'up', trendValue: '', description: 'All time net' },
@@ -13,6 +17,7 @@ const CoachHeader = () => {
     { title: 'Retention Rate', value: `${stats.retentionRate}%`, icon: TrendingUp, trend: 'up', trendValue: '', description: 'Subscribed customers' },
   ];
   const timeOfDay = new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening';
+  const coachName = profile?.full_name || 'Coach';
 
   const StatCard = ({ title, value, icon: Icon, trend, trendValue, description }) => {
     return (
@@ -43,8 +48,20 @@ const CoachHeader = () => {
       <Card className="relative border-none bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-lg animate-fade-in-down overflow-hidden rounded-xl">
         <CardContent className="p-6">
           <div className="pr-28">
-            <h1 className="text-2xl font-bold">Good {timeOfDay}, Coach 👋</h1>
-            <p className="opacity-80 mt-1 text-sm italic">"Ready to make an impact today?"</p>
+            <h1 className="text-2xl font-bold">Good {timeOfDay}, {coachName} 👋</h1>
+            {motivationLoading ? (
+              <div className="flex items-center gap-2 mt-1">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <p className="opacity-80 text-sm italic">Loading your daily motivation...</p>
+              </div>
+            ) : motivationMessage ? (
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-lg">{motivationMessage.emoji}</span>
+                <p className="opacity-80 text-sm italic">"{motivationMessage.content}"</p>
+              </div>
+            ) : (
+              <p className="opacity-80 mt-1 text-sm italic">"Ready to make an impact today?"</p>
+            )}
           </div>
         </CardContent>
       </Card>

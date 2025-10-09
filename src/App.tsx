@@ -13,6 +13,8 @@ import AuthLinkHandler from "@/components/system/AuthLinkHandler";
 import AppShell from "@/components/layouts/AppShell";
 import RoleGate from "@/components/routing/RoleGate";
 import SubscriptionGate from "@/components/routing/SubscriptionGate";
+import AccessControl from "@/components/routing/AccessControl";
+import LibraryAccessControl from "@/components/routing/LibraryAccessControl";
 import AdminGate from "@/components/routing/AdminGate";
 
 // --- PAGES (Lazy Loaded) ---
@@ -68,12 +70,22 @@ const queryClient = new QueryClient();
 
 const PublicRoutesLayout = () => {
   const { profile, loading } = useAuth();
+  const location = useLocation();
+  
   if (loading) return <LoadingScreen />;
+  
+  // Only redirect to dashboard if user is on a public route (not already on a protected route)
   if (profile) {
-    if (profile.role === "coach") return <Navigate to="/coach/dashboard" replace />;
-    if (profile.onboarding_complete) return <Navigate to="/customer/dashboard" replace />;
-    return <Navigate to="/onboarding/step-1" replace />;
+    const publicRoutes = ['/', '/login', '/get-started', '/forgot-password', '/update-password', '/terms', '/privacy'];
+    const isOnPublicRoute = publicRoutes.includes(location.pathname);
+    
+    if (isOnPublicRoute) {
+      if (profile.role === "coach") return <Navigate to="/coach/dashboard" replace />;
+      if (profile.onboarding_complete) return <Navigate to="/customer/dashboard" replace />;
+      return <Navigate to="/onboarding/step-1" replace />;
+    }
   }
+  
   return <Outlet />;
 };
 
@@ -162,7 +174,7 @@ const ThemedApp = () => {
 
               {/* Protected Routes */}
               <Route element={<ProtectedRoutesLayout />}>
-                {/* Coach Routes */}
+                {/* Coach Routes - Only accessible to coaches */}
                 <Route
                   element={
                     <RoleGate allowedRole="coach">
@@ -170,9 +182,24 @@ const ThemedApp = () => {
                     </RoleGate>
                   }
                 >
+                  {/* Coach Dashboard - Coach only */}
                   <Route path="/coach/dashboard" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <CoachDashboardPage />
+                    </Suspense>
+                  } />
+                  
+                  {/* Coach Settings - Coach only */}
+                  <Route path="/coach/settings" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <CoachSettingsPage />
+                    </Suspense>
+                  } />
+                  
+                  {/* Coach Clients - Coach only (their own clients) */}
+                  <Route path="/coach/clients" element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <ClientOverviewPage />
                     </Suspense>
                   } />
                   <Route path="/coach/clients/:clientId" element={
@@ -180,36 +207,37 @@ const ThemedApp = () => {
                       <ClientCard />
                     </Suspense>
                   } />
-                  <Route path="/coach/clients" element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <ClientOverviewPage />
-                    </Suspense>
-                  } />
+                  
+                  {/* Coach Programs - Coach only (their own programs) */}
                   <Route path="/coach/programs" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <CoachProgramsPage />
                     </Suspense>
                   } />
-                  <Route path="/coach/programs/create" element={ // ✅ New route for creating a program
+                  <Route path="/coach/programs/create" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <ProgramBuilder />
                     </Suspense>
                   } />
-                  <Route path="/coach/programs/edit/:id" element={ // ✅ New route for editing a program
+                  <Route path="/coach/programs/edit/:id" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <ProgramBuilder />
                     </Suspense>
                   } />
-                  <Route path="/coach/programs/view/:id" element={ // ✅ New route for viewing a program
+                  <Route path="/coach/programs/view/:id" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <ProgramViewPage />
                     </Suspense>
                   } />
+                  
+                  {/* Coach Library - Coach only */}
                   <Route path="/coach/library" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <CoachLibraryPage />
                     </Suspense>
                   } />
+                  
+                  {/* Coach Messages - Coach only (with their clients) */}
                   <Route path="/coach/messages" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <CoachMessagesPage />
@@ -220,19 +248,18 @@ const ThemedApp = () => {
                       <CoachMessagesPage />
                     </Suspense>
                   } />
+                  
+                  {/* Coach Blog - Coach only */}
                   <Route path="/coach/blog" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <CoachBlogPage />
                     </Suspense>
                   } />
+                  
+                  {/* Coach Income - Coach only */}
                   <Route path="/coach/income" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <IncomePage />
-                    </Suspense>
-                  } />
-                  <Route path="/coach/settings" element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <CoachSettingsPage />
                     </Suspense>
                   } />
                 </Route>
@@ -245,63 +272,86 @@ const ThemedApp = () => {
                     </RoleGate>
                   }
                 >
+                  {/* Home - Free access */}
                   <Route path="/customer/dashboard" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <CustomerDashboardPage />
                     </Suspense>
                   } />
-                  <Route path="/customer/programs" element={
-                    <SubscriptionGate>
-                      <Suspense fallback={<LoadingScreen />}>
-                        <MyProgramsPage />
-                      </Suspense>
-                    </SubscriptionGate>
-                  } />
-                  <Route path="/customer/library" element={
-                    <SubscriptionGate>
-                      <Suspense fallback={<LoadingScreen />}>
-                        <LibraryPage />
-                      </Suspense>
-                    </SubscriptionGate>
-                  } />
-                  <Route path="/customer/progress" element={
-                    <SubscriptionGate>
-                      <Suspense fallback={<LoadingScreen />}>
-                        <ProgressPage />
-                      </Suspense>
-                    </SubscriptionGate>
-                  } />
-                  <Route path="/customer/history" element={
-                    <SubscriptionGate>
-                      <Suspense fallback={<LoadingScreen />}>
-                        <ProgramHistoryPage />
-                      </Suspense>
-                    </SubscriptionGate>
-                  } />
-                  <Route path="/customer/messages" element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <CustomerMessagesPage />
-                    </Suspense>
-                  } />
-                  <Route path="/customer/messages/:conversationId" element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <CustomerMessagesPage />
-                    </Suspense>
-                  } />
+                  
+                  {/* My Coach - Free access */}
                   <Route path="/customer/my-coach" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <MyCoachPage />
                     </Suspense>
                   } />
-                  <Route path="/customer/blog" element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <BlogPage />
-                    </Suspense>
-                  } />
+                  
+                  {/* Settings - Free access for all users */}
                   <Route path="/customer/settings" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <ProfilePage />
                     </Suspense>
+                  } />
+                  
+                  {/* Messages - Coach OR Payment plan access */}
+                  <Route path="/customer/messages" element={
+                    <AccessControl requiredAccess="coach">
+                      <Suspense fallback={<LoadingScreen />}>
+                        <CustomerMessagesPage />
+                      </Suspense>
+                    </AccessControl>
+                  } />
+                  <Route path="/customer/messages/:conversationId" element={
+                    <AccessControl requiredAccess="coach">
+                      <Suspense fallback={<LoadingScreen />}>
+                        <CustomerMessagesPage />
+                      </Suspense>
+                    </AccessControl>
+                  } />
+                  
+                  {/* Blog - Coach OR Payment plan access */}
+                  <Route path="/customer/blog" element={
+                    <AccessControl requiredAccess="coach">
+                      <Suspense fallback={<LoadingScreen />}>
+                        <BlogPage />
+                      </Suspense>
+                    </AccessControl>
+                  } />
+                  
+                  {/* My Programs - Coach OR Payment plan access */}
+                  <Route path="/customer/programs" element={
+                    <AccessControl requiredAccess="coach">
+                      <Suspense fallback={<LoadingScreen />}>
+                        <MyProgramsPage />
+                      </Suspense>
+                    </AccessControl>
+                  } />
+                  
+                  {/* Library - Coach OR Payment plan access (with partial access for coach clients) */}
+                  <Route path="/customer/library" element={
+                    <LibraryAccessControl>
+                      <Suspense fallback={<LoadingScreen />}>
+                        <LibraryPage />
+                      </Suspense>
+                    </LibraryAccessControl>
+                  } />
+                  
+                  {/* Progress - Payment plan access only */}
+                  <Route path="/customer/progress" element={
+                    <AccessControl requiredAccess="payment">
+                      <Suspense fallback={<LoadingScreen />}>
+                        <ProgressPage />
+                      </Suspense>
+                    </AccessControl>
+                  } />
+                  
+                  {/* History - Payment plan access only */}
+                  <Route path="/customer/history" element={
+                    <AccessControl requiredAccess="payment">
+                      <Suspense fallback={<LoadingScreen />}>
+                        <ProgramHistoryPage />
+                      </Suspense>
+                    </AccessControl>
                   } />
                   <Route path="/customer/payment/update-plan" element={
                     <Suspense fallback={<LoadingScreen />}>

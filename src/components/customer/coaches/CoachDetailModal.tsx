@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { EnhancedCoach } from '@/hooks/useEnhancedCoaches';
+import { RealTimeCoachData } from '@/hooks/useRealTimeCoachData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,10 +9,10 @@ import { Star, Award, Globe, Instagram, Linkedin, Youtube, ExternalLink, Message
 import { Separator } from '@/components/ui/separator';
 
 interface CoachDetailModalProps {
-  coach: EnhancedCoach | null;
+  coach: RealTimeCoachData | null;
   isOpen: boolean;
   onClose: () => void;
-  onRequest: (coach: EnhancedCoach) => void;
+  onRequest: (coach: RealTimeCoachData) => void;
   requestStatus?: 'pending' | 'accepted' | 'rejected' | null;
 }
 

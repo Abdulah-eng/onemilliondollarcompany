@@ -130,12 +130,12 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
-  IF NEW.price < 50 OR NEW.price > 10000 THEN
-    RAISE EXCEPTION 'Offer price must be between $50 and $10,000';
+  IF NEW.price < 10 OR NEW.price > 10000 THEN
+    RAISE EXCEPTION 'Offer price must be between $10 and $10,000';
   END IF;
   
-  IF NEW.duration_months < 1 OR NEW.duration_months > 12 THEN
-    RAISE EXCEPTION 'Offer duration must be between 1 and 12 months';
+  IF NEW.duration_months < 1 OR NEW.duration_months > 52 THEN
+    RAISE EXCEPTION 'Offer duration must be between 1 and 52 weeks';
   END IF;
   
   IF NEW.expires_at <= now() THEN

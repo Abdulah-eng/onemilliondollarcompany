@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { ProgressData } from '@/mockdata/progress/mockProgressData';
 import { TrendingUp, TrendingDown, Activity, Utensils, Zap, Scale } from 'lucide-react';
 import { ComposedChart, Line, Area, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
+import { useRealTimeNutrition } from '@/hooks/useRealTimeNutrition';
 
 // Define colors to match the user's provided images
 const MACRO_COLORS = {
@@ -112,22 +113,81 @@ const EnhancedNutritionTooltip = ({ active, payload, label }: TooltipProps<numbe
 
 export default function NutritionProgression({ data }: { data: ProgressData['nutrition'] }) {
     const [activeTrend, setActiveTrend] = useState('7D');
-    const safeMacros = Array.isArray(data?.macros) ? data.macros : [];
-    const todayData = safeMacros[safeMacros.length - 1] || { protein: 0, carbs: 0, fat: 0 } as any;
-    const totalCaloriesToday = Math.round((todayData.protein || 0) * 4 + (todayData.carbs || 0) * 4 + (todayData.fat || 0) * 9);
-
-    const trendData = DUMMY_TREND_DATA[activeTrend as keyof typeof DUMMY_TREND_DATA];
+    const { data: realTimeData, loading } = useRealTimeNutrition();
     
-    // Calculate trend insights
-    const currentWeight = trendData[trendData.length - 1]?.weight || 0;
-    const previousWeight = trendData[0]?.weight || currentWeight;
-    const weightChange = currentWeight - previousWeight;
-    const avgCaloriesConsumed = Math.round(trendData.reduce((sum, d) => sum + d.consumed, 0) / trendData.length);
-    const avgCaloriesBurned = Math.round(trendData.reduce((sum, d) => sum + d.burned, 0) / trendData.length);
+    // Use real-time data if available, fallback to passed data
+    const nutritionData = realTimeData || {
+        totalCaloriesToday: 0,
+        totalProteinToday: 0,
+        totalCarbsToday: 0,
+        totalFatToday: 0,
+        avgCaloriesLast7Days: 0,
+        avgProteinLast7Days: 0,
+        avgCarbsLast7Days: 0,
+        avgFatLast7Days: 0,
+        currentWeight: null,
+        weightChange: 0,
+        entries: []
+    };
+
+    // Check if we have sufficient data for meaningful analysis
+    const hasMinimumData = nutritionData.entries.length >= 7;
+    const hasAnyData = nutritionData.entries.length > 0;
+
+    if (loading) {
+        return (
+            <div className="w-full text-center py-12">
+                <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center mb-4">
+                    <div className="text-2xl">⏳</div>
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Loading Nutrition Data</h3>
+                <p className="text-muted-foreground">Calculating your real-time nutrition data...</p>
+            </div>
+        );
+    }
+
+    // If no data, show the consistent message
+    if (!hasAnyData) {
+        return (
+            <div className="w-full text-center py-12">
+                <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center mb-4">
+                    <div className="text-2xl">🍽️</div>
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">No Nutrition Data Yet</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                    Stay consistent with your programs to track your progress and see your trends grow over time.
+                </p>
+            </div>
+        );
+    }
+
+    // If insufficient data, show building message
+    if (!hasMinimumData) {
+        return (
+            <div className="w-full text-center py-8">
+                <div className="w-12 h-12 mx-auto rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-4">
+                    <div className="text-xl">📊</div>
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Building Your Nutrition Profile</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                    Keep tracking your nutrition for a few more days to see meaningful trends and patterns in your dietary data.
+                </p>
+                <div className="mt-4 text-sm text-orange-600 dark:text-orange-400">
+                    {7 - safeMacros.length} more days needed for comprehensive analysis
+                </div>
+            </div>
+        );
+    }
+
+    // Use real-time data for calculations
+    const currentWeight = nutritionData.currentWeight || 0;
+    const weightChange = nutritionData.weightChange;
+    const avgCaloriesConsumed = Math.round(nutritionData.avgCaloriesLast7Days);
+    const avgCaloriesBurned = Math.round(Math.abs(nutritionData.avgCaloriesLast7Days * 0.2)); // Estimate 20% as burned
 
     const recommended = (data as any)?.recommended || { kcal: 2000, protein: 120, fat: 70, carbs: 250 };
-    const caloriePercentage = Math.min(100, (totalCaloriesToday / recommended.kcal) * 100);
-    const fatPercentage = Math.min(100, ((todayData.fat || 0) / recommended.fat) * 100);
+    const caloriePercentage = Math.min(100, (nutritionData.totalCaloriesToday / recommended.kcal) * 100);
+    const fatPercentage = Math.min(100, ((nutritionData.totalFatToday || 0) / recommended.fat) * 100);
 
     return (
         <motion.div
@@ -200,7 +260,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     
                     <div className="absolute flex flex-col items-center top-6">
                         <span role="img" aria-label="calories" className="text-2xl mb-1">🔥</span>
-                        <span className="text-2xl font-bold text-gray-800">{totalCaloriesToday}</span>
+                        <span className="text-2xl font-bold text-gray-800">{nutritionData.totalCaloriesToday}</span>
                         <span className="text-sm text-gray-500">of {recommended.kcal} kcal</span>
                     </div>
                 </div>
@@ -215,12 +275,12 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                 className="h-full rounded-full"
                                 style={{ backgroundColor: MACRO_COLORS.protein }}
                                 initial={{ width: 0 }}
-                                animate={{ width: `${Math.min(100, ((todayData.protein || 0) / recommended.protein) * 100)}%` }}
+                                animate={{ width: `${Math.min(100, ((nutritionData.totalProteinToday || 0) / recommended.protein) * 100)}%` }}
                                 transition={{ duration: 0.8, delay: 0.2 }}
                             />
                         </div>
                         <div className="text-xs text-gray-500">
-                            {todayData.protein || 0} / {recommended.protein} g
+                            {nutritionData.totalProteinToday || 0} / {recommended.protein} g
                         </div>
                     </div>
 
@@ -233,12 +293,12 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                 className="h-full rounded-full"
                                 style={{ backgroundColor: MACRO_COLORS.fat }}
                                 initial={{ width: 0 }}
-                                animate={{ width: `${Math.min(100, ((todayData.fat || 0) / recommended.fat) * 100)}%` }}
+                                animate={{ width: `${Math.min(100, ((nutritionData.totalFatToday || 0) / recommended.fat) * 100)}%` }}
                                 transition={{ duration: 0.8, delay: 0.4 }}
                             />
                         </div>
                         <div className="text-xs text-gray-500">
-                            {todayData.fat || 0} / {recommended.fat} g
+                            {nutritionData.totalFatToday || 0} / {recommended.fat} g
                         </div>
                     </div>
 
@@ -251,12 +311,12 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                                 className="h-full rounded-full"
                                 style={{ backgroundColor: MACRO_COLORS.carbs }}
                                 initial={{ width: 0 }}
-                                animate={{ width: `${Math.min(100, ((todayData.carbs || 0) / recommended.carbs) * 100)}%` }}
+                                animate={{ width: `${Math.min(100, ((nutritionData.totalCarbsToday || 0) / recommended.carbs) * 100)}%` }}
                                 transition={{ duration: 0.8, delay: 0.6 }}
                             />
                         </div>
                         <div className="text-xs text-gray-500">
-                            {todayData.carbs || 0} / {recommended.carbs} g
+                            {nutritionData.totalCarbsToday || 0} / {recommended.carbs} g
                         </div>
                     </div>
                 </div>
@@ -277,7 +337,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     </div>
                     <div className="flex-1">
                         <div className="flex items-baseline gap-1">
-                            <span className="text-2xl font-bold text-gray-800">{totalCaloriesToday}</span>
+                            <span className="text-2xl font-bold text-gray-800">{nutritionData.totalCaloriesToday}</span>
                             <span className="text-sm font-medium text-gray-500">kcal</span>
                         </div>
                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Consumed</p>
@@ -295,7 +355,7 @@ export default function NutritionProgression({ data }: { data: ProgressData['nut
                     </div>
                     <div className="flex-1">
                         <div className="flex items-baseline gap-1">
-                            <span className="text-2xl font-bold text-gray-800">{DUMMY_BURNED_KCAL}</span>
+                            <span className="text-2xl font-bold text-gray-800">{avgCaloriesBurned}</span>
                             <span className="text-sm font-medium text-gray-500">kcal</span>
                         </div>
                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Burned</p>

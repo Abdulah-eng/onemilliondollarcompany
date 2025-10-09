@@ -6,8 +6,9 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Check, ArrowLeft } from 'lucide-react';
 import WorkoutDay, { WorkoutDayItem } from './WorkoutDay';
-import { mockExercises, ExerciseItem } from '@/mockdata/createprogram/mockExercises';
+import { ExerciseItem } from '@/mockdata/createprogram/mockExercises';
 import ExerciseLibrary from './ExerciseLibrary';
+import { useCoachLibrary } from '@/hooks/useCoachLibrary';
 import DaySummary from './DaySummary';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import DateCircles from './DateCircles';
@@ -31,8 +32,12 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave, initial
   const [workoutData, setWorkoutData] = useState<{ [key: string]: WorkoutDayItem[] }>(initialData || {}); 
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<ExerciseItem[]>(mockExercises);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { items: libraryItems, loading: libraryLoading } = useCoachLibrary();
+  
+  // Filter library items for exercises only
+  const exerciseItems = libraryItems.filter(item => item.category === 'exercise');
+  const [searchResults, setSearchResults] = useState<ExerciseItem[]>(exerciseItems);
 
   // ⭐ CALCULATE UNIQUE KEY
   const currentDataKey = getDataKey(activeWeek, activeDay); 
@@ -54,7 +59,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave, initial
 
   // Handle exercise search with enhanced filtering (no change needed to search logic itself)
   const handleSearch = useCallback((query: string, filterType?: any, muscleGroup?: string, equipment?: string) => {
-    let filtered = mockExercises;
+    let filtered = exerciseItems;
 
     if (filterType && filterType !== 'all') {
       filtered = filtered.filter(exercise => exercise.type === filterType);
@@ -91,7 +96,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave, initial
     }
 
     setSearchResults(filtered);
-  }, []);
+  }, [exerciseItems]);
 
   useEffect(() => {
     handleSearch(searchQuery);
@@ -153,6 +158,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave, initial
             // ⭐ PASS NEW WEEK PROPS
             activeWeek={activeWeek}
             onWeekChange={handleWeekChange}
+            dataIndicators={dataIndicators}
           />
         </div>
 
@@ -164,7 +170,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave, initial
             searchResults={searchResults}
             onSelect={handleSelectExercise}
             onSearch={handleSearch}
-            allExercises={mockExercises}
+            allExercises={exerciseItems}
           />
         </div>
 
@@ -201,7 +207,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave, initial
               searchResults={searchResults}
               onSelect={handleSelectExercise}
               onSearch={handleSearch}
-              allExercises={mockExercises}
+              allExercises={exerciseItems}
             />
           </div>
         </SheetContent>

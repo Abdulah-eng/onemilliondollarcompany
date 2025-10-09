@@ -16,8 +16,10 @@ import {
   Activity,
   Crown,
   Play,
-  Clock
+  Clock,
+  AlertCircle
 } from 'lucide-react';
+import { useRealTimeClientData } from '@/hooks/useRealTimeClientData';
 
 interface ClientProfileTabProps {
   client: any | null;
@@ -32,18 +34,37 @@ interface Program {
 }
 
 const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
+  const { clientData, loading } = useRealTimeClientData(client?.id);
+
   const handleCopyInfo = () => {
-    const info = `Client: ${client?.full_name || client?.name || 'Customer'}\nAge: 28\nHeight: 180cm\nWeight: 72kg\nGoals: Build muscle, Lose fat`;
+    if (!clientData) return;
+    const info = `Client: ${clientData.full_name}\nAge: ${clientData.personalInfo.age || 'Not provided'}\nHeight: ${clientData.personalInfo.height}\nWeight: ${clientData.personalInfo.weight}\nGoals: ${clientData.goals.join(', ')}`;
     navigator.clipboard.writeText(info);
   };
 
-  // Fetch programs assigned to this client from DB when available
-  const programs: Program[] = Array.isArray((client as any)?.programs)
-    ? (client as any).programs
-    : [];
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-32 bg-gray-200 rounded-2xl mb-4"></div>
+          <div className="h-48 bg-gray-200 rounded-2xl mb-4"></div>
+          <div className="h-32 bg-gray-200 rounded-2xl"></div>
+        </div>
+      </div>
+    );
+  }
 
-  const activePrograms = programs.filter(p => p.status === 'active');
-  const scheduledPrograms = programs.filter(p => p.status === 'scheduled');
+  if (!clientData) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">No client data available</p>
+      </div>
+    );
+  }
+
+  const activePrograms = clientData.programs.filter(p => p.status === 'active');
+  const scheduledPrograms = clientData.programs.filter(p => p.status === 'scheduled');
+  const hasAnyProgram = activePrograms.length > 0 || scheduledPrograms.length > 0;
 
   return (
     <motion.div 
@@ -61,44 +82,56 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <h4 className="text-sm font-medium text-muted-foreground mb-2">Current Active Program(s)</h4>
-            {activePrograms.length > 0 ? (
-              <div className="flex flex-col gap-2">
-                {activePrograms.map(p => (
-                  <div key={p.id} className="flex items-center gap-2 p-3 rounded-xl border bg-muted/30">
-                    <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
-                      <Play className="h-3 w-3 mr-1" /> Active
-                    </Badge>
-                    <span className="font-medium text-sm">{p.name}</span>
-                  </div>
-                ))}
+          {!hasAnyProgram ? (
+            <div className="flex items-center gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50">
+              <AlertCircle className="h-5 w-5 text-amber-600" />
+              <div>
+                <p className="font-medium text-amber-800">Missing a program</p>
+                <p className="text-sm text-amber-700">This client doesn't have any assigned or scheduled programs yet.</p>
               </div>
-            ) : (
-              <div className="text-sm text-muted-foreground">No active programs.</div>
-            )}
-          </div>
-          
-          <div>
-            <h4 className="text-sm font-medium text-muted-foreground mb-2">Scheduled Program(s)</h4>
-            {scheduledPrograms.length > 0 ? (
-              <div className="flex flex-col gap-2">
-                {scheduledPrograms.map(p => (
-                  <div key={p.id} className="flex items-center justify-between p-3 rounded-xl border bg-muted/30">
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-blue-100 text-blue-700 border-blue-200">
-                        <Clock className="h-3 w-3 mr-1" /> Scheduled
-                      </Badge>
-                      <span className="font-medium text-sm">{p.name}</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">{new Date(p.startDate!).toLocaleDateString()}</span>
+            </div>
+          ) : (
+            <>
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">Current Active Program(s)</h4>
+                {activePrograms.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    {activePrograms.map(p => (
+                      <div key={p.id} className="flex items-center gap-2 p-3 rounded-xl border bg-muted/30">
+                        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
+                          <Play className="h-3 w-3 mr-1" /> Active
+                        </Badge>
+                        <span className="font-medium text-sm">{p.name}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <div className="text-sm text-muted-foreground">No active programs.</div>
+                )}
               </div>
-            ) : (
-              <div className="text-sm text-muted-foreground">No scheduled programs.</div>
-            )}
-          </div>
+              
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">Scheduled Program(s)</h4>
+                {scheduledPrograms.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    {scheduledPrograms.map(p => (
+                      <div key={p.id} className="flex items-center justify-between p-3 rounded-xl border bg-muted/30">
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-blue-100 text-blue-700 border-blue-200">
+                            <Clock className="h-3 w-3 mr-1" /> Scheduled
+                          </Badge>
+                          <span className="font-medium text-sm">{p.name}</span>
+                        </div>
+                        <span className="text-sm text-muted-foreground">{p.startDate ? new Date(p.startDate).toLocaleDateString() : 'TBD'}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">No scheduled programs.</div>
+                )}
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -118,22 +151,28 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <InfoItem icon={User} label="Name" value={client?.full_name || client?.name || '—'} />
-            <InfoItem icon={Calendar} label="Age" value={client?.personalInfo?.age ? `${client.personalInfo.age} years old` : 'Not provided'} />
-            <InfoItem icon={Heart} label="Gender" value={client?.personalInfo?.gender || 'Not provided'} />
-            <InfoItem icon={Ruler} label="Height" value={client?.personalInfo?.height || 'Not provided'} />
-            <InfoItem icon={Weight} label="Weight" value={client?.personalInfo?.weight || 'Not provided'} />
-            <InfoItem icon={Phone} label="Phone" value={client?.phone || 'Not provided'} />
-            <InfoItem icon={Mail} label="Email" value={client?.email || 'Not provided'} />
-            {/* Premium Plan Info */}
+            <InfoItem icon={User} label="Name" value={clientData.full_name} />
+            <InfoItem icon={Calendar} label="Age" value={clientData.personalInfo.age ? `${clientData.personalInfo.age} years old` : 'Not provided'} />
+            <InfoItem icon={Heart} label="Gender" value={clientData.personalInfo.gender} />
+            <InfoItem icon={Ruler} label="Height" value={clientData.personalInfo.height} />
+            <InfoItem icon={Weight} label="Weight" value={clientData.personalInfo.weight} />
+            <InfoItem icon={Phone} label="Phone" value={clientData.phone || 'Not provided'} />
+            <InfoItem icon={Mail} label="Email" value={clientData.email} />
+            {/* Real Membership Info */}
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Crown className="h-4 w-4 text-yellow-500" />
                 Membership
               </div>
-              <Badge className="rounded-full px-3 py-1 text-xs bg-yellow-100 text-yellow-700 border-yellow-200">
-                {(client?.plan || 'Premium')} • {28} days left
-              </Badge>
+              {clientData.membership.hasPaymentPlan ? (
+                <Badge className="rounded-full px-3 py-1 text-xs bg-yellow-100 text-yellow-700 border-yellow-200">
+                  {clientData.plan} • {clientData.membership.daysLeft} days left
+                </Badge>
+              ) : (
+                <Badge className="rounded-full px-3 py-1 text-xs bg-gray-100 text-gray-700 border-gray-200">
+                  Free Plan
+                </Badge>
+              )}
             </div>
           </div>
         </CardContent>
@@ -151,8 +190,8 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
           <div>
             <h4 className="text-sm font-medium text-muted-foreground mb-2">Primary Goals</h4>
             <div className="flex flex-wrap gap-2">
-              {client?.goals && client.goals.length > 0 ? (
-                client.goals.map((goal: string, index: number) => (
+              {clientData.goals && clientData.goals.length > 0 ? (
+                clientData.goals.map((goal: string, index: number) => (
                   <Badge key={index} className="rounded-full px-3 py-1 text-xs bg-blue-100 text-blue-700 border-blue-200">
                     {goal}
                   </Badge>
@@ -166,8 +205,8 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
           <div>
             <h4 className="text-sm font-medium text-muted-foreground mb-2">Training Preferences</h4>
             <p className="text-sm">
-              {client?.preferences?.likes && client.preferences.likes.length > 0 
-                ? client.preferences.likes.join(', ')
+              {clientData.preferences.likes && clientData.preferences.likes.length > 0 
+                ? clientData.preferences.likes.join(', ')
                 : 'No preferences specified'
               }
             </p>
@@ -176,8 +215,8 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
           <div>
             <h4 className="text-sm font-medium text-muted-foreground mb-2">Training Dislikes</h4>
             <p className="text-sm">
-              {client?.preferences?.dislikes && client.preferences.dislikes.length > 0 
-                ? client.preferences.dislikes.join(', ')
+              {clientData.preferences.dislikes && clientData.preferences.dislikes.length > 0 
+                ? clientData.preferences.dislikes.join(', ')
                 : 'No dislikes specified'
               }
             </p>
@@ -185,7 +224,7 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
 
           <div>
             <h4 className="text-sm font-medium text-muted-foreground mb-2">Meditation Experience</h4>
-            <p className="text-sm">{client?.preferences?.meditationExperience || 'Not specified'}</p>
+            <p className="text-sm">{clientData.preferences.meditationExperience}</p>
           </div>
         </CardContent>
       </Card>
@@ -202,8 +241,8 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
           <div>
             <h4 className="text-sm font-medium text-muted-foreground mb-2">Allergies</h4>
             <div className="flex flex-wrap gap-2">
-              {client?.preferences?.allergies && client.preferences.allergies.length > 0 ? (
-                client.preferences.allergies.map((allergy: string, index: number) => (
+              {clientData.preferences.allergies && clientData.preferences.allergies.length > 0 ? (
+                clientData.preferences.allergies.map((allergy: string, index: number) => (
                   <Badge key={index} className="rounded-full px-3 py-1 text-xs bg-amber-100 text-amber-700 border-amber-200">
                     {allergy}
                   </Badge>
@@ -217,8 +256,8 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
           <div>
             <h4 className="text-sm font-medium text-muted-foreground mb-2">Past Injuries</h4>
             <div className="flex flex-wrap gap-2">
-              {client?.preferences?.injuries && client.preferences.injuries.length > 0 ? (
-                client.preferences.injuries.map((injury: string, index: number) => (
+              {clientData.preferences.injuries && clientData.preferences.injuries.length > 0 ? (
+                clientData.preferences.injuries.map((injury: string, index: number) => (
                   <Badge key={index} className="rounded-full px-3 py-1 text-xs bg-rose-100 text-rose-700 border-rose-200">
                     {injury}
                   </Badge>

@@ -1,8 +1,9 @@
 // src/components/coach/clientCard/ClientActionButton.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ClipboardCheck, Plus } from 'lucide-react';
+import { ClipboardCheck, Plus, MessageCircle } from 'lucide-react';
 import { CheckInModal } from './CheckInModal';
+import { useNavigate } from 'react-router-dom';
 
 const SIZE = 64; // FAB size
 const MARGIN = 16; // padding from viewport edges
@@ -10,13 +11,20 @@ const ACTION_MARGIN = 12; // gap between FAB and action bubble
 
 export default function ClientActionButton() {
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleSendCheckIn = (data: { title: string; message: string }) => {
     console.log('Sending check-in:', data);
   };
 
+  const handleMessage = () => {
+    // Navigate to chat with this client
+    navigate('/coach/messages');
+  };
+
   const actionItems = [
     { label: 'Check In', icon: <ClipboardCheck className="h-5 w-5" />, action: () => setIsCheckInModalOpen(true) },
+    { label: 'Message', icon: <MessageCircle className="h-5 w-5" />, action: handleMessage },
   ];
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);

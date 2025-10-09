@@ -153,7 +153,7 @@ export const OfferMessage: React.FC<OfferMessageProps> = ({
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Duration:</span>
-                  <span className="font-medium">{(offer.duration_months ?? (message as any)?.metadata?.duration_months) ?? ''} months</span>
+                  <span className="font-medium">{(offer.duration_months ?? (message as any)?.metadata?.duration_months) ?? ''} weeks</span>
                 </div>
                 
                 {offer.status === 'pending' && !isExpired && hasExpiry && (

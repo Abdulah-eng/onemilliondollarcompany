@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   LineChart,
   Line,
@@ -13,10 +14,10 @@ import {
   RadialBarChart,
   RadialBar,
 } from "recharts";
-import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, AlertCircle, MessageCircle } from "lucide-react";
 import FitnessTrendChart from "./charts/FitnessTrendChart";
 import MentalHealthTrendChart from "./charts/MentalHealthTrendChart";
-import { supabase } from '@/integrations/supabase/client';
+import { useRealTimeClientData } from '@/hooks/useRealTimeClientData';
 
 // --- Types ---
 interface DashboardProps {
@@ -207,52 +208,25 @@ DailyTrendCard.displayName = "DailyTrendCard";
 const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
   const [selectedRange, setSelectedRange] = useState("4w");
   const [weightRange, setWeightRange] = useState("1m");
-  const [dailyCheckIns, setDailyCheckIns] = useState([]);
-  const [programEntries, setProgramEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { clientData, loading } = useRealTimeClientData(client?.id);
 
-  // Fetch real data from database
-  useEffect(() => {
-    const fetchClientData = async () => {
-      if (!client?.id) return;
-      
-      try {
-        setLoading(true);
-        
-        // Fetch daily check-ins
-        const { data: checkins } = await supabase
-          .from('daily_checkins')
-          .select('*')
-          .eq('user_id', client.id)
-          .order('date', { ascending: false })
-          .limit(180);
+  if (loading) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Loading progress data...
+      </div>
+    );
+  }
 
-        // Fetch program entries
-        const { data: entries } = await supabase
-          .from('program_entries')
-          .select('*')
-          .eq('user_id', client.id)
-          .order('date', { ascending: false })
-          .limit(180);
+  if (!clientData) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        No client data available
+      </div>
+    );
+  }
 
-        setDailyCheckIns(checkins || []);
-        setProgramEntries(entries || []);
-      } catch (error) {
-        console.error('Error fetching client data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchClientData();
-  }, [client?.id]);
-
-  const fitness = { adherence: 0, progression: [] };
-  const weight = [];
-  const nutrition = [];
-  const mentalHealth = [];
-
-  // Dummy Data Memoized
+  // Dummy Data Memoized (fallback)
   const dummyDailyCheckIns = useMemo(() => {
     const data = [];
     const today = new Date();
@@ -302,8 +276,40 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
     []
   );
 
+  // Use real data from clientData
+  const dailyData = useMemo(() => {
+    // Use real daily check-in data if available, otherwise fallback to dummy data
+    if (clientData.dailyCheckin.today.mood > 0 || clientData.dailyCheckin.today.energy > 0) {
+      // Transform real data to match chart format - use today's data as the big number
+      return [{
+        date: new Date().toISOString().split("T")[0],
+        water: 0, // Not tracked in daily check-ins
+        sleep: clientData.dailyCheckin.today.sleep,
+        mood: clientData.dailyCheckin.today.mood,
+        energy: clientData.dailyCheckin.today.energy,
+        stress: clientData.dailyCheckin.today.stress,
+        anxiety: 0, // Not tracked separately
+      }];
+    }
+    return dummyDailyCheckIns;
+  }, [clientData.dailyCheckin, dummyDailyCheckIns]);
+
+  const nutritionData = useMemo(() => {
+    // Use real nutrition data if available
+    if (clientData.programTrends.nutrition.hasData) {
+      return clientData.programTrends.nutrition.data.map(entry => ({
+        date: new Date(entry.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        protein: entry.protein || 0,
+        carbs: entry.carbs || 0,
+        fat: entry.fat || 0,
+        calories: entry.calories || 0,
+      }));
+    }
+    return dummyNutrition;
+  }, [clientData.programTrends.nutrition, dummyNutrition]);
+
   const aggregateWeightData = useMemo(() => {
-    const rawData = weight.length > 0 ? weight : dummyWeightTrend;
+    const rawData = clientData.weightJourney.hasData ? clientData.weightJourney.entries : dummyWeightTrend;
     const now = new Date();
     const rangeInDays =
       weightRange === "1m"
@@ -376,7 +382,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
       default:
         return aggregateData(filteredData, 4, "week");
     }
-  }, [weight, dummyWeightTrend, weightRange]);
+  }, [clientData.weightJourney, dummyWeightTrend, weightRange]);
 
   const colors = useMemo(
     () => ({
@@ -402,43 +408,23 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
     []
   );
 
-  // Transform daily check-ins data for charts
-  const dailyData = useMemo(() => {
-    if (dailyCheckIns.length > 0) {
-      return dailyCheckIns.map(checkin => ({
-        date: checkin.date,
-        water: checkin.water_liters || 0,
-        sleep: checkin.sleep_hours || 0,
-        mood: checkin.mood || 0,
-        energy: checkin.energy || 0,
-        stress: 0, // Not in daily_checkins table
-        anxiety: 0, // Not in daily_checkins table
-      }));
-    }
-    return dummyDailyCheckIns;
-  }, [dailyCheckIns]);
-
-  // Transform program entries for nutrition data
-  const nutritionData = useMemo(() => {
-    if (programEntries.length > 0) {
-      return programEntries.map(entry => ({
-        date: new Date(entry.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-        protein: entry.protein || 0,
-        carbs: entry.carbs || 0,
-        fat: entry.fat || 0,
-        calories: entry.calories || 0,
-      }));
-    }
-    return dummyNutrition;
-  }, [programEntries]);
-
-  if (loading) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        Loading progress data...
-      </div>
-    );
-  }
+  // No data message component
+  const NoDataMessage = ({ programType, hasProgram }: { programType: string; hasProgram: boolean }) => (
+    <div className="flex flex-col items-center justify-center p-8 text-center">
+      <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+      <h3 className="text-lg font-semibold text-foreground mb-2">No data yet</h3>
+      <p className="text-sm text-muted-foreground mb-4">
+        {hasProgram 
+          ? `The user hasn't filled in their ${programType} program. It might be a good idea to check in with them.`
+          : `The user doesn't have a ${programType} program assigned.`
+        }
+      </p>
+      <Button variant="outline" size="sm" className="gap-2">
+        <MessageCircle className="h-4 w-4" />
+        Check in with client
+      </Button>
+    </div>
+  );
 
   return (
     <>
@@ -551,92 +537,119 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
         </Card>
       </div>
 
-      {/* Weight Journey Card */}
-      <div className="mt-6">
-        <Card className="rounded-2xl shadow-lg bg-card border border-border p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-foreground">Weight Journey</h3>
-            <div className="bg-card/80 backdrop-blur-md rounded-full border border-border p-1 flex shadow-sm">
-              {["1m", "3m", "6m", "12m"].map((range) => (
-                <button
-                  key={range}
-                  onClick={() => setWeightRange(range)}
-                  className={`text-xs font-medium px-3 py-1 rounded-full transition-all duration-300 ${
-                    weightRange === range
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "text-muted-foreground hover:bg-muted"
-                  }`}
-                >
-                  {range === "1m"
-                    ? "1M"
-                    : range === "3m"
-                    ? "3M"
-                    : range === "6m"
-                    ? "6M"
-                    : "1Y"}
-                </button>
-              ))}
+      {/* Weight Journey Card - Only show if user has payment plan */}
+      {clientData.membership.hasPaymentPlan && (
+        <div className="mt-6">
+          <Card className="rounded-2xl shadow-lg bg-card border border-border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-foreground">Weight Journey</h3>
+              <div className="bg-card/80 backdrop-blur-md rounded-full border border-border p-1 flex shadow-sm">
+                {["1m", "3m", "6m", "12m"].map((range) => (
+                  <button
+                    key={range}
+                    onClick={() => setWeightRange(range)}
+                    className={`text-xs font-medium px-3 py-1 rounded-full transition-all duration-300 ${
+                      weightRange === range
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {range === "1m"
+                      ? "1M"
+                      : range === "3m"
+                      ? "3M"
+                      : range === "6m"
+                      ? "6M"
+                      : "1Y"}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="flex items-center mb-4">
-            <span className="text-2xl font-bold text-foreground">
-              {aggregateWeightData.length > 0
-                ? aggregateWeightData[aggregateWeightData.length - 1].weight
-                : "N/A"}
-            </span>
-            <span className="text-sm text-muted-foreground ml-2">lbs</span>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={aggregateWeightData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis 
-                  dataKey="label" 
-                  tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} 
-                />
-                <YAxis 
-                  tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} 
-                  domain={['dataMin - 5', 'dataMax + 5']}
-                />
-                <Tooltip
-                  content={({ active, payload, label }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="bg-card text-card-foreground p-3 rounded-lg shadow-lg border border-border">
-                          <p className="font-semibold text-sm mb-1">{label}</p>
-                          <p className="text-sm" style={{ color: payload[0].color }}>
-                            Weight: {payload[0].value} lbs
-                          </p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="weight"
-                  stroke={colors.weight}
-                  strokeWidth={3}
-                  dot={{ fill: colors.weight, strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: colors.weight, strokeWidth: 2 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-      </div>
+            {clientData.weightJourney.hasData ? (
+              <>
+                <div className="flex items-center mb-4">
+                  <span className="text-2xl font-bold text-foreground">
+                    {aggregateWeightData.length > 0
+                      ? aggregateWeightData[aggregateWeightData.length - 1].weight
+                      : "N/A"}
+                  </span>
+                  <span className="text-sm text-muted-foreground ml-2">lbs</span>
+                </div>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={aggregateWeightData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis 
+                        dataKey="label" 
+                        tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} 
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} 
+                        domain={['dataMin - 5', 'dataMax + 5']}
+                      />
+                      <Tooltip
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="bg-card text-card-foreground p-3 rounded-lg shadow-lg border border-border">
+                                <p className="font-semibold text-sm mb-1">{label}</p>
+                                <p className="text-sm" style={{ color: payload[0].color }}>
+                                  Weight: {payload[0].value} lbs
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="weight"
+                        stroke={colors.weight}
+                        strokeWidth={3}
+                        dot={{ fill: colors.weight, strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: colors.weight, strokeWidth: 2 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </>
+            ) : (
+              <NoDataMessage programType="weight tracking" hasProgram={true} />
+            )}
+          </Card>
+        </div>
+      )}
 
-      {/* Fitness and Mental Health Trend Charts */}
+      {/* Fitness and Mental Health Trend Charts - Only show if user has corresponding programs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <FitnessTrendChart 
-          data={fitness.progression || []} 
-          selectedRange={selectedRange}
-        />
-        <MentalHealthTrendChart 
-          data={mentalHealth} 
-          selectedRange={selectedRange}
-        />
+        {/* Fitness Trend Chart */}
+        {clientData.programTrends.fitness.hasProgram ? (
+          clientData.programTrends.fitness.hasData ? (
+            <FitnessTrendChart 
+              data={clientData.programTrends.fitness.data} 
+              selectedRange={selectedRange}
+            />
+          ) : (
+            <Card className="rounded-2xl shadow-lg bg-card border border-border p-6">
+              <NoDataMessage programType="fitness" hasProgram={true} />
+            </Card>
+          )
+        ) : null}
+
+        {/* Mental Health Trend Chart */}
+        {clientData.programTrends.mentalHealth.hasProgram ? (
+          clientData.programTrends.mentalHealth.hasData ? (
+            <MentalHealthTrendChart 
+              data={clientData.programTrends.mentalHealth.data} 
+              selectedRange={selectedRange}
+            />
+          ) : (
+            <Card className="rounded-2xl shadow-lg bg-card border border-border p-6">
+              <NoDataMessage programType="mental health" hasProgram={true} />
+            </Card>
+          )
+        ) : null}
       </div>
     </>
   );

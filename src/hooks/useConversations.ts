@@ -73,10 +73,7 @@ export const useConversations = () => {
       const customerIds = Array.from(new Set(conversationsWithMessages.map(c => c.customer_id)));
       const allIds = Array.from(new Set([...coachIds, ...customerIds]));
 
-      console.log('[useConversations] Participant IDs to fetch:', allIds);
-
       // Try direct profiles table query first
-      console.log('[useConversations] Querying profiles table with IDs:', allIds);
       let profilesMapArr: any[] = [];
       let profilesError: any = null;
       
@@ -85,7 +82,6 @@ export const useConversations = () => {
         .select('id, full_name, avatar_url, email')
         .in('id', allIds);
       
-      console.log('[useConversations] Direct profiles query result:', { data: directProfiles, error: directError });
       
       if (directError) {
         console.warn('[useConversations] Direct profiles query failed, trying RPC fallback:', directError);
@@ -93,7 +89,6 @@ export const useConversations = () => {
         const { data: rpcProfiles, error: rpcError } = await supabase
           .rpc('get_public_profiles', { ids: allIds });
         
-        console.log('[useConversations] RPC profiles query result:', { data: rpcProfiles, error: rpcError });
         
         if (rpcError) {
           console.error('[useConversations] Both direct and RPC queries failed:', { directError, rpcError });
@@ -115,17 +110,8 @@ export const useConversations = () => {
       const profilesById: Record<string, { id: string; full_name?: string; avatar_url?: string; email?: string }> = {};
       (profilesMapArr || []).forEach((p: any) => { 
         profilesById[p.id] = p;
-        console.log('[useConversations] Fetched profile:', { 
-          id: p.id, 
-          full_name: p.full_name, 
-          email: p.email,
-          avatar_url: p.avatar_url,
-          raw: p
-        });
       });
       
-      console.log('[useConversations] Final profilesById mapping:', profilesById);
-      console.log('[useConversations] Available profile IDs:', Object.keys(profilesById));
 
       const data = conversationsWithMessages.map(c => ({
         ...c,
@@ -133,19 +119,6 @@ export const useConversations = () => {
         customer: profilesById[c.customer_id] || null,
       }));
 
-      // DEBUG: Log final processed conversations
-      console.log('[useConversations] Final conversations with profiles:', data.map(c => ({
-        id: c.id,
-        coach_id: c.coach_id,
-        coach_name: c.coach?.full_name || 'MISSING',
-        coach_email: c.coach?.email || 'MISSING',
-        customer_id: c.customer_id,
-        customer_name: c.customer?.full_name || 'MISSING',
-        customer_email: c.customer?.email || 'MISSING',
-      })));
-
-      // DEBUG: Log raw conversations with joined profiles
-      console.log('[useConversations] Raw conversations from DB:', data);
 
       // Process conversations to add unread count and deduplicate
       const processedConversations = data.map(conv => ({
@@ -191,22 +164,6 @@ export const useConversations = () => {
         return acc;
       }, [] as typeof processedConversations);
 
-      console.log('[useConversations] Merged conversations by participant:', {
-        before: processedConversations.length,
-        after: mergedConversations.length
-      });
-
-      // DEBUG: Log simplified view for UI
-      console.table(processedConversations.map(c => ({
-        id: c.id,
-        coach_id: c.coach_id,
-        coach_name: c.coach?.full_name,
-        coach_email: c.coach?.email,
-        customer_id: c.customer_id,
-        customer_name: c.customer?.full_name,
-        customer_email: c.customer?.email,
-        last_message: c.last_message?.content,
-      })));
 
       setConversations(mergedConversations);
     } catch (err) {

@@ -1,61 +1,169 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Filter, SortAsc } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Clock, 
+  DollarSign, 
+  AlertCircle, 
+  CheckCircle, 
+  MessageCircle,
+  X,
+  Filter
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const TOP_NAV_HEIGHT = 65; // TopNav height (64px) + border (1px)
+interface ClientFiltersProps {
+  onFilterChange: (filters: {
+    status: string[];
+    badges: string[];
+  }) => void;
+}
 
-const ClientFilters = () => {
+const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
+
+  const statusOptions = [
+    { value: 'no_status', label: 'No Status', icon: Clock, color: 'bg-gray-100 text-gray-800' },
+    { value: 'waiting_offer', label: 'Waiting Offer', icon: DollarSign, color: 'bg-yellow-100 text-yellow-800' },
+    { value: 'missing_program', label: 'Missing Program', icon: AlertCircle, color: 'bg-red-100 text-red-800' },
+    { value: 'program_active', label: 'Program Active', icon: CheckCircle, color: 'bg-blue-100 text-blue-800' },
+    { value: 'on_track', label: 'On Track', icon: CheckCircle, color: 'bg-green-100 text-green-800' },
+    { value: 'off_track', label: 'Off Track', icon: AlertCircle, color: 'bg-red-100 text-red-800' },
+    { value: 'soon_to_expire', label: 'Soon to Expire', icon: Clock, color: 'bg-orange-100 text-orange-800' }
+  ];
+
+  const badgeOptions = [
+    { value: 'new_message', label: 'New Message', icon: MessageCircle, color: 'bg-blue-100 text-blue-800' },
+    { value: 'awaiting_checkin', label: 'Awaiting Check-in', icon: Clock, color: 'bg-yellow-100 text-yellow-800' },
+    { value: 'new_feedback', label: 'New Feedback', icon: CheckCircle, color: 'bg-green-100 text-green-800' }
+  ];
+
+  const handleStatusToggle = (status: string) => {
+    const newStatus = selectedStatus.includes(status)
+      ? selectedStatus.filter(s => s !== status)
+      : [...selectedStatus, status];
+    setSelectedStatus(newStatus);
+    onFilterChange({ status: newStatus, badges: selectedBadges });
+  };
+
+  const handleBadgeToggle = (badge: string) => {
+    const newBadges = selectedBadges.includes(badge)
+      ? selectedBadges.filter(b => b !== badge)
+      : [...selectedBadges, badge];
+    setSelectedBadges(newBadges);
+    onFilterChange({ status: selectedStatus, badges: newBadges });
+  };
+
+  const clearFilters = () => {
+    setSelectedStatus([]);
+    setSelectedBadges([]);
+    onFilterChange({ status: [], badges: [] });
+  };
+
+  const hasActiveFilters = selectedStatus.length > 0 || selectedBadges.length > 0;
+
   return (
-    <motion.div
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.4 }}
-      className="w-full z-30"
-      style={{ position: 'sticky', top: TOP_NAV_HEIGHT }}
-    >
-      <Card className="rounded-xl shadow-md bg-card border border-border">
-        <CardContent className="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Filter by Status */}
-          <div className="flex flex-col w-full md:w-auto">
-            <p className="font-semibold text-sm text-muted-foreground mb-1">Filter Clients</p>
-            <div className="flex items-center gap-2">
-              <Filter size={18} className="text-primary" />
-              <Select>
-                <SelectTrigger className="w-full md:w-[180px] bg-background border border-border shadow-sm">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="on-track">On Track</SelectItem>
-                  <SelectItem value="needs-feedback">Needs Feedback</SelectItem>
-                  <SelectItem value="off-track">Off Track</SelectItem>
-                  <SelectItem value="missing-program">Missing Program</SelectItem>
-                  <SelectItem value="soon-to-expire">Soon to Expire</SelectItem>
-                </SelectContent>
-              </Select>
+    <Card className="shadow-lg rounded-xl">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold">Filter Clients</h3>
+          </div>
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-4 h-4 mr-1" />
+              Clear All
+            </Button>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          {/* Status Filters */}
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground mb-2">Status</h4>
+            <div className="flex flex-wrap gap-2">
+              {statusOptions.map((option) => {
+                const Icon = option.icon;
+                const isSelected = selectedStatus.includes(option.value);
+                return (
+                  <Button
+                    key={option.value}
+                    variant={isSelected ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleStatusToggle(option.value)}
+                    className={cn(
+                      "flex items-center gap-2",
+                      isSelected ? option.color : "hover:bg-muted"
+                    )}
+                  >
+                    <Icon className="w-3 h-3" />
+                    {option.label}
+                  </Button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Sort By */}
-          <div className="flex flex-col w-full md:w-auto">
-            <p className="font-semibold text-sm text-muted-foreground mb-1">Sort By</p>
-            <div className="flex items-center gap-2">
-              <SortAsc size={18} className="text-primary" />
-              <Select>
-                <SelectTrigger className="w-full md:w-[180px] bg-background border border-border shadow-sm">
-                  <SelectValue placeholder="Last Active" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="last-active">Last Active</SelectItem>
-                  <SelectItem value="signup-date">Sign-up Date</SelectItem>
-                  <SelectItem value="name">Name</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* Badge Filters */}
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground mb-2">Badges</h4>
+            <div className="flex flex-wrap gap-2">
+              {badgeOptions.map((option) => {
+                const Icon = option.icon;
+                const isSelected = selectedBadges.includes(option.value);
+                return (
+                  <Button
+                    key={option.value}
+                    variant={isSelected ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleBadgeToggle(option.value)}
+                    className={cn(
+                      "flex items-center gap-2",
+                      isSelected ? option.color : "hover:bg-muted"
+                    )}
+                  >
+                    <Icon className="w-3 h-3" />
+                    {option.label}
+                  </Button>
+                );
+              })}
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+
+          {/* Active Filters Summary */}
+          {hasActiveFilters && (
+            <div className="pt-2 border-t">
+              <div className="flex flex-wrap gap-1">
+                {selectedStatus.map((status) => {
+                  const option = statusOptions.find(o => o.value === status);
+                  return (
+                    <Badge key={status} variant="secondary" className="text-xs">
+                      {option?.label}
+                    </Badge>
+                  );
+                })}
+                {selectedBadges.map((badge) => {
+                  const option = badgeOptions.find(o => o.value === badge);
+                  return (
+                    <Badge key={badge} variant="secondary" className="text-xs">
+                      {option?.label}
+                    </Badge>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

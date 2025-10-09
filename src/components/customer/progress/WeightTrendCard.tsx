@@ -80,9 +80,9 @@ export default function WeightTrendCard() {
         ) : (
           <div className="text-center py-8">
             <Weight className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground mb-4">No weight data recorded yet</p>
-            <p className="text-sm text-muted-foreground">
-              Use the floating action button to record your first weight entry
+            <h4 className="text-lg font-semibold text-foreground mb-2">No Weight Data Yet</h4>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Do a weigh-in or progression photo to track your progress and see how your body changes over time.
             </p>
           </div>
         )}

@@ -2,6 +2,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ExerciseItem } from '@/mockdata/library/mockLibrary';
 import { Lightbulb, AlertTriangle } from 'lucide-react';
 import ContentUploadSection from './ContentUploadSection';
@@ -12,6 +13,27 @@ interface ExerciseFormProps {
 }
 
 const ExerciseForm: React.FC<ExerciseFormProps> = ({ formData, onFormChange }) => {
+  const muscleGroups = [
+    'Chest',
+    'Back',
+    'Shoulders',
+    'Biceps',
+    'Triceps',
+    'Forearms',
+    'Abs',
+    'Obliques',
+    'Lower Back',
+    'Glutes',
+    'Quadriceps',
+    'Hamstrings',
+    'Calves',
+    'Full Body',
+    'Cardio',
+    'Core',
+    'Upper Body',
+    'Lower Body'
+  ];
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Exercise Details</h2>
@@ -24,7 +46,18 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ formData, onFormChange }) =
         </div>
         <div className="space-y-2">
           <Label htmlFor="muscleGroup">Muscle Group Target</Label>
-          <Input id="muscleGroup" value={formData.muscleGroup || ''} onChange={(e) => onFormChange('muscleGroup', e.target.value)} placeholder="e.g., Chest, Triceps, Shoulders" />
+          <Select value={formData.muscleGroup || ''} onValueChange={(value) => onFormChange('muscleGroup', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select muscle group" />
+            </SelectTrigger>
+            <SelectContent>
+              {muscleGroups.map((group) => (
+                <SelectItem key={group} value={group}>
+                  {group}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       

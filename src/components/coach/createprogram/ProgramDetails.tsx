@@ -14,6 +14,8 @@ import { MUSCLE_GROUPS, EQUIPMENT_OPTIONS } from '@/constants/fitness';
 import { cn } from '@/lib/utils';
 import { ProgramCategory } from '@/mockdata/createprogram/mockExercises';
 import { useCoachLibrary } from '@/hooks/useCoachLibrary';
+import { useRealTimeClientStatus } from '@/hooks/useRealTimeClientStatus';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // Form data structure
 interface ProgramDetailsForm {
@@ -32,6 +34,7 @@ interface ProgramDetailsForm {
 interface ProgramDetailsProps {
   onNext: (data: ProgramDetailsForm) => void;
   initialData?: Partial<ProgramDetailsForm>;
+  isEditing?: boolean;
 }
 
 // Categories with emojis
@@ -41,7 +44,7 @@ const categoryOptions = [
   { value: 'mental health', label: 'Mental Health', emoji: '🧘‍♂️', description: 'Mindfulness and stress management.' },
 ];
 
-const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) => {
+const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData, isEditing = false }) => {
   const { register, handleSubmit, setValue, watch, reset, control, formState: { errors } } = useForm<ProgramDetailsForm>({
     defaultValues: {
       ...initialData,
@@ -78,7 +81,11 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
   const muscleGroups = watch('muscleGroups') || [];
   const equipment = watch('equipment') || [];
   const { items: libraryItems, loading: libraryLoading } = useCoachLibrary();
+  const { clients, loading: clientsLoading } = useRealTimeClientStatus();
   const [selectedLibraryIds, setSelectedLibraryIds] = useState<string[]>([]);
+
+  // Filter clients with "Missing Program" status
+  const missingProgramClients = clients.filter(client => client.status === 'missing_program');
 
   const filteredLibrary = useMemo(() => {
     if (!selectedCategory) return libraryItems;
@@ -127,21 +134,25 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
       {/* Category Selection */}
       <div className="space-y-2">
         <Label className="text-lg">Select Program Category</Label>
-        <p className="text-muted-foreground text-sm">Choose the primary focus of your new program.</p>
+        <p className="text-muted-foreground text-sm">
+          {isEditing ? 'Program category cannot be changed when editing.' : 'Choose the primary focus of your new program.'}
+        </p>
         <div className="flex gap-3 flex-wrap justify-start">
           {categoryOptions.map(option => (
             <motion.div
               key={option.value}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="cursor-pointer"
-              onClick={() => handleCategorySelect(option.value as ProgramCategory)}
+              whileHover={isEditing ? {} : { scale: 1.05 }}
+              whileTap={isEditing ? {} : { scale: 0.95 }}
+              className={isEditing ? "cursor-not-allowed" : "cursor-pointer"}
+              onClick={isEditing ? undefined : () => handleCategorySelect(option.value as ProgramCategory)}
             >
               <Card
                 className={cn(
                   "flex flex-col items-center justify-center gap-1 p-3 w-20 h-20 text-center transition-all duration-200",
                   selectedCategory === option.value
                     ? "border-primary ring-2 ring-primary/50"
+                    : isEditing 
+                    ? "border-border opacity-50"
                     : "border-border hover:border-primary/50"
                 )}
               >
@@ -244,36 +255,62 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData }) 
       <div className="grid md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="assignedTo">Assign to Client (optional)</Label>
-          <Input
-            id="assignedTo"
-            placeholder="Enter customer ID"
-            {...register('assignedTo')}
+          <Controller
+            name="assignedTo"
+            control={control}
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} value={field.value || ""}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a client with missing program" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clientsLoading ? (
+                    <SelectItem value="" disabled>Loading clients...</SelectItem>
+                  ) : missingProgramClients.length > 0 ? (
+                    missingProgramClients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        <div className="flex items-center gap-2">
+                          <img 
+                            src={client.avatar_url} 
+                            alt={client.full_name}
+                            className="w-6 h-6 rounded-full object-cover"
+                          />
+                          <span>{client.full_name}</span>
+                          <span className="text-xs text-muted-foreground">({client.email})</span>
+                        </div>
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>No clients with missing programs</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            )}
           />
-          <p className="text-xs text-muted-foreground">Paste customer id to pre-assign this program.</p>
+          <p className="text-xs text-muted-foreground">Select a client who needs a program assigned.</p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="scheduledDate">Schedule Date (optional)</Label>
           <Input
             id="scheduledDate"
             type="date"
-            {...register('scheduledDate')}
+            min={new Date().toISOString().split('T')[0]}
+            {...register('scheduledDate', {
+              validate: (value) => {
+                if (!value) return true; // Optional field
+                const selectedDate = new Date(value);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return selectedDate >= today || 'Cannot schedule a program in the past';
+              }
+            })}
           />
+          {errors.scheduledDate && (
+            <p className="text-sm text-destructive">{errors.scheduledDate.message}</p>
+          )}
         </div>
       </div>
 
-      <div className="flex items-center justify-between border rounded-lg p-3">
-        <div>
-          <Label className="mb-0">Mark as Active</Label>
-          <p className="text-xs text-muted-foreground">If enabled, the program will be saved as Active.</p>
-        </div>
-        <Controller
-          name="markActive"
-          control={control}
-          render={({ field: { value, onChange } }) => (
-            <Switch checked={!!value} onCheckedChange={onChange} />
-          )}
-        />
-      </div>
 
       {/* Inline Next Button (kept) */}
       <Button

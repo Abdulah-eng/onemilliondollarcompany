@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ComposedChart, Line, Area, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import { BrainCircuit, Sun, Moon, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useRealTimeMentalHealth } from '@/hooks/useRealTimeMentalHealth';
 
 // Define colors for mental health metrics
 const MENTAL_HEALTH_COLORS = {
@@ -14,9 +15,9 @@ const MENTAL_HEALTH_COLORS = {
     foreground: '#262626', // Charcoal/dark text
 };
 
-// Helper function to generate trend data from daily check-ins
-const generateTrendData = (dailyCheckins: any[], timeframe: string) => {
-    if (!dailyCheckins || dailyCheckins.length === 0) return [];
+// Helper function to generate trend data from mental health entries
+const generateTrendData = (entries: any[], timeframe: string) => {
+    if (!entries || entries.length === 0) return [];
     
     const now = new Date();
     let daysToShow = 7;
@@ -36,10 +37,10 @@ const generateTrendData = (dailyCheckins: any[], timeframe: string) => {
     }
     
     // Get the last N days of data
-    const recentData = dailyCheckins.slice(-daysToShow);
+    const recentData = entries.slice(-daysToShow);
     
-    return recentData.map((checkin, index) => {
-        const date = new Date(checkin.date);
+    return recentData.map((entry, index) => {
+        const date = new Date(entry.date);
         let dateLabel = '';
         
         if (timeframe === '7D') {
@@ -54,12 +55,12 @@ const generateTrendData = (dailyCheckins: any[], timeframe: string) => {
         
         return {
             date: dateLabel,
-            sleepHours: checkin.sleep_hours || 0,
-            stressLevel: checkin.stress || 0,
-            energyLevel: checkin.energy || 0,
-            meditationMinutes: 0, // Not in daily_checkins table
-            journalingCompleted: false, // Not in daily_checkins table
-            mood: checkin.mood || 'neutral',
+            sleepHours: entry.sleepHours || 0,
+            stressLevel: entry.stressLevel || 0,
+            energyLevel: entry.energyLevel || 0,
+            meditationMinutes: entry.meditationMinutes || 0,
+            journalingCompleted: entry.journalingCompleted || false,
+            mood: entry.mood || 'neutral',
         };
     });
 };
@@ -129,34 +130,92 @@ const MentalHealthTooltip = ({ active, payload, label }: TooltipProps<any, any>)
 
 export default function MentalHealthProgression({ mentalHealth, dailyCheckins }) {
     const [activeTrend, setActiveTrend] = useState('7D');
+    const { data: realTimeData, loading } = useRealTimeMentalHealth();
     
-    // Generate trend data from real daily check-ins
-    const trendData = useMemo(() => {
-        return generateTrendData(dailyCheckins || [], activeTrend);
-    }, [dailyCheckins, activeTrend]);
+    // Use real-time data if available, fallback to passed data
+    const mentalHealthData = realTimeData || {
+        todaySleep: 0,
+        todayStress: 0,
+        todayEnergy: 0,
+        todayMood: 'neutral',
+        avgSleepLast7Days: 0,
+        avgStressLast7Days: 0,
+        avgEnergyLast7Days: 0,
+        meditationStreak: 0,
+        journalingStreak: 0,
+        yogaStreak: 0,
+        hasMinimumData: false,
+        hasAnyData: false,
+        entries: []
+    };
 
-    // Handle empty data case
-    if (!dailyCheckins || dailyCheckins.length === 0) {
+    // Generate trend data from real-time data
+    const trendData = useMemo(() => {
+        if (realTimeData?.entries) {
+            return generateTrendData(realTimeData.entries, activeTrend);
+        }
+        return generateTrendData(dailyCheckins || [], activeTrend);
+    }, [realTimeData, dailyCheckins, activeTrend]);
+
+    if (loading) {
         return (
-            <div className="w-full bg-white text-gray-900 rounded-2xl p-4 sm:p-8 space-y-8 shadow-xl">
-                <div className="text-center">
-                    <h3 className="text-2xl font-bold tracking-tight">Mental Wellness</h3>
-                    <p className="text-sm text-gray-500 mt-2">
-                        No mental health data available yet. Start logging your daily check-ins to see your progress here.
-                    </p>
+            <div className="w-full text-center py-12">
+                <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center mb-4">
+                    <div className="text-2xl">⏳</div>
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Loading Mental Health Data</h3>
+                <p className="text-muted-foreground">Calculating your real-time mental wellness data...</p>
+            </div>
+        );
+    }
+
+    // If no data, show the consistent message
+    if (!mentalHealthData.hasAnyData) {
+        return (
+            <div className="w-full text-center py-12">
+                <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center mb-4">
+                    <div className="text-2xl">🧠</div>
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">No Mental Health Data Yet</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                    Stay consistent with your programs to track your progress and see your trends grow over time.
+                </p>
+            </div>
+        );
+    }
+
+    // If insufficient data, show building message
+    if (!mentalHealthData.hasMinimumData) {
+        return (
+            <div className="w-full text-center py-8">
+                <div className="w-12 h-12 mx-auto rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-4">
+                    <div className="text-xl">🧠</div>
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Building Your Mental Wellness Profile</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                    Keep tracking your mental health for a few more days to see meaningful trends and patterns in your wellness data.
+                </p>
+                <div className="mt-4 text-sm text-purple-600 dark:text-purple-400">
+                    {7 - mentalHealthData.entries.length} more days needed for comprehensive analysis
                 </div>
             </div>
         );
     }
 
-    const latestData = trendData[trendData.length - 1] || { sleepHours: 0, stressLevel: 0, energyLevel: 0 };
-    const avgSleepHours = trendData.length > 0 ? (trendData.reduce((sum, d) => sum + d.sleepHours, 0) / trendData.length).toFixed(1) : '0.0';
-    const avgStressLevel = trendData.length > 0 ? (trendData.reduce((sum, d) => sum + d.stressLevel, 0) / trendData.length).toFixed(1) : '0.0';
-    const avgEnergyLevel = trendData.length > 0 ? (trendData.reduce((sum, d) => sum + d.energyLevel, 0) / trendData.length).toFixed(1) : '0.0';
+    // Use real-time data for display
+    const latestData = {
+        sleepHours: mentalHealthData.todaySleep,
+        stressLevel: mentalHealthData.todayStress,
+        energyLevel: mentalHealthData.todayEnergy
+    };
+    
+    const avgSleepHours = mentalHealthData.avgSleepLast7Days.toFixed(1);
+    const avgStressLevel = mentalHealthData.avgStressLast7Days.toFixed(1);
+    const avgEnergyLevel = mentalHealthData.avgEnergyLast7Days.toFixed(1);
 
-    const meditationStreak = getMeditationStreak(trendData);
-    const journalingStreak = getJournalingStreak(trendData);
-    const yogaStreak = getYogaStreak();
+    const meditationStreak = mentalHealthData.meditationStreak;
+    const journalingStreak = mentalHealthData.journalingStreak;
+    const yogaStreak = mentalHealthData.yogaStreak;
 
     return (
         <motion.div

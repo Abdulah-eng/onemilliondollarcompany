@@ -109,7 +109,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ formData, onFormChange }) => {
       {/* Recipe Steps (Now using the old Recipe model structure but with the new, prominent Step-by-Step look) */}
       <div className="space-y-5 border-t pt-5">
               <h4 className="text-xl font-bold flex justify-between items-center text-primary">
-                  STEP BY FUCKING STEP Instructions 👣
+                  Step by step instructions 👣
                   <Button variant="default" onClick={addStep}>+ Add Step</Button>
               </h4>
               {steps.map((step, index) => (

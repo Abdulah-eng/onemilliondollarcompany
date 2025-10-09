@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { User, Star, Calendar, X } from 'lucide-react';
-import { dailyMessage } from '@/mockdata/mycoach/coachData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import useMediaQuery from '@/hooks/use-media-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePaymentPlan } from '@/hooks/usePaymentPlan';
+import { useRealTimeMotivation } from '@/hooks/useRealTimeMotivation';
+import { useNavigate } from 'react-router-dom';
 
 interface CoachInfo {
     name: string;
@@ -38,6 +39,8 @@ const ModernCoachDashboard: React.FC<ModernCoachDashboardProps> = ({
     const [isDailyMessageVisible, setIsDailyMessageVisible] = useState(true);
     const { profile } = useAuth();
     const { planStatus } = usePaymentPlan();
+    const { motivationMessage, loading: motivationLoading } = useRealTimeMotivation();
+    const navigate = useNavigate();
 
     const handleDismissMessage = () => {
         setIsDailyMessageVisible(false);
@@ -99,9 +102,10 @@ const ModernCoachDashboard: React.FC<ModernCoachDashboardProps> = ({
                                         variant="outline"
                                         size="sm"
                                         className="text-primary hover:bg-primary/5 border-primary/20"
+                                        onClick={() => navigate('/customer/chat')}
                                     >
                                         <Calendar className="w-4 h-4 mr-2" />
-                                        Schedule Session
+                                        Message Coach
                                     </Button>
                                 </div>
                             </div>
@@ -112,7 +116,7 @@ const ModernCoachDashboard: React.FC<ModernCoachDashboardProps> = ({
 
             {/* Today's Message (Swipe Dismissible on Mobile) - gated to paying plan or active coach contract */}
             <AnimatePresence>
-                {isDailyMessageVisible && (planStatus.hasActivePlan || Boolean(profile?.coach_id)) && (
+                {isDailyMessageVisible && (planStatus.hasActivePlan || Boolean(profile?.coach_id)) && motivationMessage && (
                     <motion.div
                         key="todays-message"
                         initial={{ opacity: 0, y: -20 }}
@@ -133,15 +137,15 @@ const ModernCoachDashboard: React.FC<ModernCoachDashboardProps> = ({
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3 mb-3">
                                             <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                                                <span className="text-xl">💬</span>
+                                                <span className="text-xl">{motivationMessage.emoji}</span>
                                             </div>
                                             <div>
-                                                <h3 className="font-semibold text-foreground">{dailyMessage.title}</h3>
+                                                <h3 className="font-semibold text-foreground">{motivationMessage.title}</h3>
                                                 <p className="text-xs text-muted-foreground">Today's motivation</p>
                                             </div>
                                         </div>
                                         <p className="text-sm text-muted-foreground leading-relaxed">
-                                            {dailyMessage.content}
+                                            {motivationMessage.content}
                                         </p>
                                     </div>
                                     <Button
