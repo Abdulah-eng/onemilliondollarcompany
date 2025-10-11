@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 
 export interface ProgramEntry {
   id: string;
@@ -14,6 +15,7 @@ export interface ProgramEntry {
 
 export const useProgramEntries = (programId?: string) => {
   const { user } = useAuth();
+  const { refreshAll } = useRefresh();
   const [entries, setEntries] = useState<ProgramEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +54,10 @@ export const useProgramEntries = (programId?: string) => {
       .select('*');
     if (error) throw error;
     await fetchEntries();
+    
+    // Use smart refresh to update all related data
+    await refreshAll();
+    
     return data as ProgramEntry[];
   };
 

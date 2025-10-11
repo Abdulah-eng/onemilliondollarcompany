@@ -9,6 +9,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRealTimeClientData } from '@/hooks/useRealTimeClientData';
+import { useClientStatus } from '@/hooks/useClientStatus';
+import AwaitingOfferMessage from './AwaitingOfferMessage';
 
 interface Message {
   id: number;
@@ -149,11 +151,25 @@ const CommunicationTab: React.FC<CommunicationTabProps> = ({ client }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useAuth();
   const { clientData, loading } = useRealTimeClientData(client?.id);
+  const { clientStatus } = useClientStatus(client?.id);
   const [threads, setThreads] = useState<Thread[]>([]);
 
   const [activeThreadId, setActiveThreadId] = useState<number | null>(null);
   const [replyText, setReplyText] = useState('');
   const [showThreadList, setShowThreadList] = useState(true);
+
+  // Check if client is waiting for an offer
+  if (clientStatus?.status === 'waiting_offer') {
+    return (
+      <AwaitingOfferMessage 
+        clientName={client?.full_name || client?.name || 'this client'} 
+        onSendOffer={() => {
+          // TODO: Implement send offer functionality
+          console.log('Send offer clicked');
+        }}
+      />
+    );
+  }
 
   // Transform check-in history into threads
   useEffect(() => {

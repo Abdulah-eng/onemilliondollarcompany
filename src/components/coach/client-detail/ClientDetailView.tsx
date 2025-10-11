@@ -10,6 +10,7 @@ import {
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { useClientStatus } from '@/hooks/useClientStatus';
+import ClientProgramsDisplay from './ClientProgramsDisplay';
 
 const ClientDetailView = ({ client, onClose, loading = false }) => {
   const { clientStatus, loading: statusLoading } = useClientStatus(client?.id);
@@ -243,14 +244,10 @@ const ClientDetailView = ({ client, onClose, loading = false }) => {
           </TabsContent>
           
           <TabsContent value="programs">
-            <Card className="shadow-lg rounded-xl">
-              <CardHeader>
-                <CardTitle>Programs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Program information will be shown here.</p>
-              </CardContent>
-            </Card>
+            <ClientProgramsDisplay 
+              programs={client.programs || []} 
+              clientId={client.id} 
+            />
           </TabsContent>
         </Tabs>
       ) : (

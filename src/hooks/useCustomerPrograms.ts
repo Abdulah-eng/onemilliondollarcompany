@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 
 export interface CustomerProgram {
   id: string;
@@ -24,6 +25,7 @@ export interface CustomerProgram {
 
 export const useCustomerPrograms = () => {
   const { user } = useAuth();
+  const { refreshAll } = useRefresh();
   const [programs, setPrograms] = useState<CustomerProgram[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

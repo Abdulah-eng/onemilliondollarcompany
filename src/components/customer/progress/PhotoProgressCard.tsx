@@ -43,14 +43,14 @@ export default function PhotoProgressCard({ photos }: { photos: PhotoEntry[] }) 
       
       {/* Latest Photo Section */}
       {latestPhoto && (
-        <div className="mb-6 rounded-xl overflow-hidden relative group max-w-sm mx-auto md:max-w-md lg:max-w-xl">
+        <div className="mb-6 rounded-xl overflow-hidden relative group max-w-xs mx-auto">
           <img 
             src={latestPhoto.imageUrl} 
             alt={`Latest progress photo taken on ${latestPhoto.date}`} 
-            className="w-full aspect-[3/4] object-cover" 
+            className="w-full aspect-[3/4] object-cover max-h-80" 
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              target.src = 'https://placehold.co/400x300/6b7280/fff?text=Photo+Not+Found';
+              target.src = 'https://placehold.co/320x427/6b7280/fff?text=Photo+Not+Found';
             }}
           />
           <div className="absolute top-0 left-0 p-3 bg-background/50 backdrop-blur-sm rounded-br-lg text-sm font-semibold text-foreground/80">
@@ -72,18 +72,18 @@ export default function PhotoProgressCard({ photos }: { photos: PhotoEntry[] }) 
       {olderPhotos.length > 0 && (
         <>
           <h4 className="text-lg font-semibold mb-3">Snapshots</h4>
-          <div className="flex overflow-x-auto space-x-4 pb-2 scrollbar-hide-tablet">
-            {olderPhotos.map((photo) => (
-              <div key={photo.id} className="flex-shrink-0 w-32 group relative">
-                <img 
-                  src={photo.imageUrl} 
-                  alt={`Progress photo on ${photo.date}`} 
-                  className="aspect-[3/4] w-full object-cover rounded-lg" 
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = 'https://placehold.co/128x171/6b7280/fff?text=Photo+Not+Found';
-                  }}
-                />
+            <div className="flex overflow-x-auto space-x-3 pb-2 scrollbar-hide-tablet">
+              {olderPhotos.map((photo) => (
+                <div key={photo.id} className="flex-shrink-0 w-24 group relative">
+                  <img 
+                    src={photo.imageUrl} 
+                    alt={`Progress photo on ${photo.date}`} 
+                    className="aspect-[3/4] w-full object-cover rounded-lg max-h-32" 
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = 'https://placehold.co/96x128/6b7280/fff?text=Photo+Not+Found';
+                    }}
+                  />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 rounded-lg">
                   <Button variant="ghost" className="h-10 w-10 p-0 text-white hover:bg-white/20 mb-2">
                     <Maximize className="h-6 w-6" />

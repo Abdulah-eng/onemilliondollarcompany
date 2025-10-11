@@ -31,11 +31,10 @@ export const useRealTimeMotivation = () => {
           .from('motivation_messages')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+          .limit(10);
 
-        if (error) {
-          console.error('Error fetching motivation message:', error);
+        if (error || !data || data.length === 0) {
+          console.error('Error fetching motivation message or no messages found:', error);
           // Fallback to default message
           setMotivationMessage({
             id: 'default',
@@ -46,7 +45,9 @@ export const useRealTimeMotivation = () => {
             created_at: new Date().toISOString()
           });
         } else {
-          setMotivationMessage(data);
+          // Select a random message from the results
+          const randomIndex = Math.floor(Math.random() * data.length);
+          setMotivationMessage(data[randomIndex]);
         }
       } catch (error) {
         console.error('Error fetching motivation message:', error);

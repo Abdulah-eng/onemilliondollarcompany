@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChatLayout } from '@/components/chat/ChatLayout';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useConversations } from '@/hooks/useConversations';
 
 const MessagesPage = () => {
   const navigate = useNavigate();
@@ -8,6 +9,19 @@ const MessagesPage = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(
     conversationId || null
   );
+  const { conversations, loading } = useConversations();
+
+  // Auto-open most recent conversation if no specific conversation is selected
+  useEffect(() => {
+    if (!conversationId && !loading && conversations.length > 0 && !selectedConversationId) {
+      // Find the most recent conversation (conversations are already sorted by updated_at desc)
+      const mostRecentConversation = conversations[0];
+      if (mostRecentConversation) {
+        setSelectedConversationId(mostRecentConversation.id);
+        navigate(`/customer/messages/${mostRecentConversation.id}`);
+      }
+    }
+  }, [conversationId, loading, conversations, selectedConversationId, navigate]);
 
   const handleSelectConversation = (id: string | null) => {
     setSelectedConversationId(id);

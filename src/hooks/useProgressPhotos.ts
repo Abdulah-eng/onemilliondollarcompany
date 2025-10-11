@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 
 export interface ProgressPhoto {
   id: string;
@@ -12,6 +13,7 @@ export interface ProgressPhoto {
 
 export const useProgressPhotos = () => {
   const { user } = useAuth();
+  const { refreshAll } = useRefresh();
   const [photos, setPhotos] = useState<ProgressPhoto[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +57,10 @@ export const useProgressPhotos = () => {
 
       // Update local state
       setPhotos(prev => [data, ...prev]);
+      
+      // Use smart refresh to update all related data
+      await refreshAll();
+      
       return data;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add progress photo');

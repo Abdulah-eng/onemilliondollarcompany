@@ -161,47 +161,35 @@ const PaymentAndLegal = () => {
               <div className="space-y-4">
                 {/* Currency is auto-detected; selector hidden */}
                 <div className="space-y-2 text-sm">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => navigate('/customer/payment/update-plan')}
-                  >
-                    Update Plan
-                  </Button>
-                  <Button 
-                  variant="destructive" 
-                    size="sm" 
-                    className="ml-2"
-                  onClick={handleCancelAtPeriodEnd}
-                  >
-                    Cancel Subscription
-                  </Button>
-                {profile?.stripe_subscription_id && (
-                  <Button 
-                    variant="secondary" 
-                    size="sm" 
-                    className="ml-2"
-                    onClick={handleResume}
-                  >
-                    Resume Subscription
-                  </Button>
-                )}
-                  <Button 
-                    variant="secondary" 
-                    size="sm" 
-                    className="ml-2"
-                    onClick={handleSubscribe}
-                  >
-                    Subscribe {getCurrencyOption(selectedCurrency).price}/mo (14-day trial)
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="ml-2"
-                    onClick={handleOpenCustomerPortal}
-                  >
-                    Manage Billing
-                  </Button>
+                  {paymentInfo?.currentPlan?.status === 'active' ? (
+                    // User has an active plan - show manage billing and cancel options
+                    <>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleOpenCustomerPortal}
+                      >
+                        Manage Billing
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        className="ml-2"
+                        onClick={handleCancelAtPeriodEnd}
+                      >
+                        Cancel Subscription
+                      </Button>
+                    </>
+                  ) : (
+                    // User doesn't have an active plan - show subscribe option
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      onClick={handleSubscribe}
+                    >
+                      Subscribe {getCurrencyOption(selectedCurrency).price}/mo (14-day trial)
+                    </Button>
+                  )}
                 </div>
               </div>
             </AccordionContent>

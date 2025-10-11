@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth, AuthProvider } from "./contexts/AuthContext";
 import { OnboardingProvider } from "./contexts/OnboardingContext";
+import { RefreshProvider } from "./contexts/RefreshContext";
 import { ThemeProvider } from "next-themes";
 import { Loader2 } from "lucide-react";
 import StripeSyncHandler from "@/components/system/StripeSyncHandler";
@@ -145,9 +146,10 @@ const ThemedApp = () => {
         } />
 
         {/* 2. All other routes inside AuthProvider */}
-        <Route path="*" element={
-          <AuthProvider>
-            <Routes>
+         <Route path="*" element={
+           <AuthProvider>
+             <RefreshProvider>
+               <Routes>
               {/* Authentication Routes */}
               <Route element={<PublicRoutesLayout />}>
                 <Route path="/get-started" element={
@@ -364,14 +366,18 @@ const ThemedApp = () => {
                     </Suspense>
                   } />
                   <Route path="/program/:type/:id" element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <ViewProgramPage />
-                    </Suspense>
+                    <AccessControl requiredAccess="coach">
+                      <Suspense fallback={<LoadingScreen />}>
+                        <ViewProgramPage />
+                      </Suspense>
+                    </AccessControl>
                   } />
                   <Route path="/program/:id" element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <ViewProgramPage />
-                    </Suspense>
+                    <AccessControl requiredAccess="coach">
+                      <Suspense fallback={<LoadingScreen />}>
+                        <ViewProgramPage />
+                      </Suspense>
+                    </AccessControl>
                   } />
                 </Route>
 
@@ -412,6 +418,7 @@ const ThemedApp = () => {
                 </Suspense>
               } />
             </Routes>
+            </RefreshProvider>
           </AuthProvider>
         } />
       </Routes>

@@ -28,16 +28,22 @@ const GoalSelectionStep = () => {
 
   const handleGoalToggle = (goalId) => {
     const currentGoals = state.goals;
-    const newGoals = currentGoals.includes(goalId)
-      ? currentGoals.filter(id => id !== goalId)
-      : [...currentGoals, goalId];
-    updateState('goals', newGoals);
+    if (currentGoals.includes(goalId)) {
+      // Remove goal if already selected
+      const newGoals = currentGoals.filter(id => id !== goalId);
+      updateState('goals', newGoals);
+    } else if (currentGoals.length < 8) {
+      // Add goal if under limit
+      const newGoals = [...currentGoals, goalId];
+      updateState('goals', newGoals);
+    }
+    // If already at 8 goals and trying to add another, do nothing
   };
 
   return (
     <OnboardingContainer
       title="What brings you to TrainWise?"
-      subtitle="Select your top goals. This helps us personalize your journey from day one."
+      subtitle="Select up to 8 goals that matter most to you. This helps us personalize your journey from day one."
       currentStep={1}
       totalSteps={5}
       showBack={false}
@@ -46,6 +52,14 @@ const GoalSelectionStep = () => {
       isLoading={loading}
     >
       <div className="space-y-8 max-w-3xl mx-auto">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-muted-foreground">
+            Choose goals that align with your fitness journey
+          </p>
+          <div className="text-sm text-muted-foreground">
+            {state.goals.length}/8 selected
+          </div>
+        </div>
         <GoalSection title="Fitness" emoji="🏋️" goals={goals.filter(g => g.category === 'fitness')} onToggle={handleGoalToggle} selectedGoals={state.goals} />
         <GoalSection title="Nutrition" emoji="🥗" goals={goals.filter(g => g.category === 'nutrition')} onToggle={handleGoalToggle} selectedGoals={state.goals} />
         <GoalSection title="Mental Wellness" emoji="🧠" goals={goals.filter(g => g.category === 'mental')} onToggle={handleGoalToggle} selectedGoals={state.goals} />

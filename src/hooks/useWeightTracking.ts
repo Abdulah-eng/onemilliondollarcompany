@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 
 export interface WeightEntry {
   id: string;
@@ -12,6 +13,7 @@ export interface WeightEntry {
 
 export const useWeightTracking = () => {
   const { user } = useAuth();
+  const { refreshAll } = useRefresh();
   const [entries, setEntries] = useState<WeightEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +62,10 @@ export const useWeightTracking = () => {
 
       // Update local state
       setEntries(prev => [data, ...prev.filter(e => e.date !== data.date)]);
+      
+      // Use smart refresh to update all related data
+      await refreshAll();
+      
       return data;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add weight entry');

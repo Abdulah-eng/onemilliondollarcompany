@@ -65,19 +65,19 @@ const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
   const hasActiveFilters = selectedStatus.length > 0 || selectedBadges.length > 0;
 
   return (
-    <Card className="shadow-lg rounded-xl">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-4">
+    <Card className="shadow-lg rounded-xl border-0 bg-gradient-to-br from-background to-muted/20">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-primary" />
-            <h3 className="font-semibold">Filter Clients</h3>
+            <Filter className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold text-lg">Filter Clients</h3>
           </div>
           {hasActiveFilters && (
             <Button
               variant="ghost"
               size="sm"
               onClick={clearFilters}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
             >
               <X className="w-4 h-4 mr-1" />
               Clear All
@@ -85,10 +85,13 @@ const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
           )}
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Status Filters */}
           <div>
-            <h4 className="text-sm font-medium text-muted-foreground mb-2">Status</h4>
+            <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-primary"></div>
+              Status
+            </h4>
             <div className="flex flex-wrap gap-2">
               {statusOptions.map((option) => {
                 const Icon = option.icon;
@@ -100,8 +103,8 @@ const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
                     size="sm"
                     onClick={() => handleStatusToggle(option.value)}
                     className={cn(
-                      "flex items-center gap-2",
-                      isSelected ? option.color : "hover:bg-muted"
+                      "flex items-center gap-2 transition-all duration-200",
+                      isSelected ? option.color : "hover:bg-muted hover:border-primary/50"
                     )}
                   >
                     <Icon className="w-3 h-3" />
@@ -114,7 +117,10 @@ const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
 
           {/* Badge Filters */}
           <div>
-            <h4 className="text-sm font-medium text-muted-foreground mb-2">Badges</h4>
+            <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-secondary"></div>
+              Badges
+            </h4>
             <div className="flex flex-wrap gap-2">
               {badgeOptions.map((option) => {
                 const Icon = option.icon;
@@ -126,8 +132,8 @@ const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
                     size="sm"
                     onClick={() => handleBadgeToggle(option.value)}
                     className={cn(
-                      "flex items-center gap-2",
-                      isSelected ? option.color : "hover:bg-muted"
+                      "flex items-center gap-2 transition-all duration-200",
+                      isSelected ? option.color : "hover:bg-muted hover:border-primary/50"
                     )}
                   >
                     <Icon className="w-3 h-3" />
@@ -140,12 +146,16 @@ const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
 
           {/* Active Filters Summary */}
           {hasActiveFilters && (
-            <div className="pt-2 border-t">
-              <div className="flex flex-wrap gap-1">
+            <div className="pt-4 border-t border-border/50">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 rounded-full bg-accent"></div>
+                <span className="text-xs font-medium text-muted-foreground">Active Filters</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
                 {selectedStatus.map((status) => {
                   const option = statusOptions.find(o => o.value === status);
                   return (
-                    <Badge key={status} variant="secondary" className="text-xs">
+                    <Badge key={status} variant="secondary" className="text-xs px-2 py-1">
                       {option?.label}
                     </Badge>
                   );
@@ -153,7 +163,7 @@ const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
                 {selectedBadges.map((badge) => {
                   const option = badgeOptions.find(o => o.value === badge);
                   return (
-                    <Badge key={badge} variant="secondary" className="text-xs">
+                    <Badge key={badge} variant="secondary" className="text-xs px-2 py-1">
                       {option?.label}
                     </Badge>
                   );

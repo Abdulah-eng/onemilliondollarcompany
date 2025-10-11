@@ -25,6 +25,7 @@ const QuickStats = () => {
     avgMood: 'N/A',
     weightTrend: '0.0 kg',
     goalAdherence: 0,
+    hasWeightData: false,
   });
   const [loading, setLoading] = useState(true);
 
@@ -87,13 +88,17 @@ const QuickStats = () => {
       const completedDays = last7Days.filter(c => c.water_liters && c.energy && c.sleep_hours && c.mood).length;
       const goalAdherence = last7Days.length > 0 ? Math.round((completedDays / last7Days.length) * 100) : 0;
 
+      // Check if user has weight data
+      const hasWeightData = weightEntries.length > 0;
+
       setStats({
         avgWater: `${avgWater.toFixed(1)} L`,
         avgEnergy: avgEnergy > 3.5 ? 'Good' : avgEnergy > 2.5 ? 'Fair' : 'Low',
         avgSleep: `${avgSleep.toFixed(1)} hrs`,
         avgMood: avgMood > 3.5 ? 'Positive' : avgMood > 2.5 ? 'Neutral' : 'Low',
-        weightTrend: weightEntries.length === 0 ? 'No data' : weightEntries.length === 1 ? 'Need more data' : `${weightTrend > 0 ? '+' : ''}${weightTrend.toFixed(1)} kg`,
+        weightTrend: hasWeightData ? (weightEntries.length === 1 ? 'Need more data' : `${weightTrend > 0 ? '+' : ''}${weightTrend.toFixed(1)} kg`) : 'No data',
         goalAdherence,
+        hasWeightData, // Add flag to track if weight data exists
       });
       setLoading(false);
     };
@@ -106,7 +111,7 @@ const QuickStats = () => {
     { label: "Avg. Energy", value: stats.avgEnergy, emoji: '⚡️', requiredPlan: 1, color: 'green' },
     { label: "Avg. Sleep", value: stats.avgSleep, emoji: '😴', requiredPlan: 1, color: 'indigo' },
     { label: "Avg. Mood", value: stats.avgMood, emoji: '😊', requiredPlan: 1, color: 'rose' },
-    { label: "Weight Trend", value: stats.weightTrend, emoji: '⚖️', requiredPlan: 3, trend: 'down', color: 'sky' },
+    ...(stats.hasWeightData ? [{ label: "Weight Trend", value: stats.weightTrend, emoji: '⚖️', requiredPlan: 3, trend: 'down', color: 'sky' }] : []),
     { label: "Goal Adherence", value: `${stats.goalAdherence}%`, emoji: '🎯', requiredPlan: 3, trend: 'up', color: 'purple' },
   ];
 

@@ -154,7 +154,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                   )}
                 </div>
                 
-                {conversation.unread_count && conversation.unread_count > 0 && (
+                {conversation.unread_count > 0 && (
                   <div className="flex items-center gap-1">
                     <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                     <Badge variant="destructive" className="w-5 h-5 text-xs rounded-full p-0 flex items-center justify-center">

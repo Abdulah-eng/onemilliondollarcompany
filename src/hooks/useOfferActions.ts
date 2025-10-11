@@ -54,7 +54,7 @@ export const useOfferActions = () => {
           .insert({
             conversation_id: conversation.id,
             sender_id: user.id,
-            content: `Offer accepted! ${offer.duration_months}-week coaching plan for $${offer.price} is now active.`,
+            content: `✅ Offer accepted! ${offer.duration_months}-week coaching plan for $${offer.price} is now active. Welcome to your personalized coaching journey!`,
             message_type: 'system'
           });
       }
@@ -73,14 +73,33 @@ export const useOfferActions = () => {
 
     setLoading(true);
     try {
-      // Load the offer to find the related message to remove from chat
+      // Load the offer to get conversation details and send system message
       const { data: offerRow, error: fetchError } = await supabase
         .from('coach_offers')
-        .select('id, message_id')
+        .select('id, message_id, coach_id, customer_id, price, duration_months')
         .eq('id', offerId)
         .single();
 
       if (fetchError) throw fetchError;
+
+      // Send system message about rejection before deleting
+      const { data: conversation } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('coach_id', offerRow.coach_id)
+        .eq('customer_id', offerRow.customer_id)
+        .single();
+
+      if (conversation) {
+        await supabase
+          .from('messages')
+          .insert({
+            conversation_id: conversation.id,
+            sender_id: user.id,
+            content: `❌ Offer declined. The ${offerRow.duration_months}-week coaching plan for $${offerRow.price} has been declined.`,
+            message_type: 'system'
+          });
+      }
 
       // Remove the original offer message from chat first (so UI updates via realtime DELETE)
       if (offerRow?.message_id) {

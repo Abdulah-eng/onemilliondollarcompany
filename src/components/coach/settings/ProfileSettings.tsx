@@ -25,7 +25,7 @@ const profileSchema = z.object({
   full_name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100, 'Name too long'),
   tagline: z.string().trim().max(150, 'Tagline cannot exceed 150 characters').optional(),
   bio: z.string().trim().max(2000, 'Bio cannot exceed 2000 characters').optional(),
-  skills: z.array(z.string()).min(1, 'Select at least one skill').max(10, 'Maximum 10 skills allowed'),
+  skills: z.array(z.string()).min(1, 'Select at least one skill').max(8, 'Maximum 8 skills allowed'),
   certifications: z.array(z.object({
     id: z.string(),
     name: z.string().trim().min(1, 'Certification name required').max(200, 'Name too long'),

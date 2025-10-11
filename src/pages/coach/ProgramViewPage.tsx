@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Edit, Calendar, User, Clock, Play, Pencil } from 'lucide-react';
 import { useProgramMutations } from '@/hooks/useProgramMutations';
 import { Program } from '@/types/program';
+import ProgramPlanViewer from '@/components/coach/programs/ProgramPlanViewer';
 
 const ProgramViewPage = () => {
   const { id } = useParams();
@@ -156,11 +157,7 @@ const ProgramViewPage = () => {
               <CardTitle>Program Plan</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="prose max-w-none">
-                <pre className="whitespace-pre-wrap bg-muted p-4 rounded-lg text-sm">
-                  {JSON.stringify(program.plan, null, 2)}
-                </pre>
-              </div>
+              <ProgramPlanViewer plan={program.plan} category={program.category} />
             </CardContent>
           </Card>
         )}

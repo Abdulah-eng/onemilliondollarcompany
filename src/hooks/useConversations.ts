@@ -121,9 +121,21 @@ export const useConversations = () => {
 
 
       // Process conversations to add unread count and deduplicate
-      const processedConversations = data.map(conv => ({
-        ...conv,
-        unread_count: 0 // TODO: Implement unread count logic
+      const processedConversations = await Promise.all(data.map(async (conv) => {
+        // Calculate unread count for this conversation
+        const { data: unreadMessages } = await supabase
+          .from('messages')
+          .select('id')
+          .eq('conversation_id', conv.id)
+          .neq('sender_id', user.id) // Messages not from current user
+          .gt('created_at', conv.updated_at); // Messages after last conversation update
+
+        const unreadCount = unreadMessages?.length || 0;
+
+        return {
+          ...conv,
+          unread_count: unreadCount
+        };
       }));
 
       // DEBUG: Check for duplicates before deduplication

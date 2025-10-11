@@ -20,6 +20,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useRealTimeClientData } from '@/hooks/useRealTimeClientData';
+import { useClientStatus } from '@/hooks/useClientStatus';
+import AwaitingOfferMessage from './AwaitingOfferMessage';
 
 interface ClientProfileTabProps {
   client: any | null;
@@ -35,6 +37,7 @@ interface Program {
 
 const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
   const { clientData, loading } = useRealTimeClientData(client?.id);
+  const { clientStatus } = useClientStatus(client?.id);
 
   const handleCopyInfo = () => {
     if (!clientData) return;
@@ -51,6 +54,19 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
           <div className="h-32 bg-gray-200 rounded-2xl"></div>
         </div>
       </div>
+    );
+  }
+
+  // Check if client is waiting for an offer
+  if (clientStatus?.status === 'waiting_offer') {
+    return (
+      <AwaitingOfferMessage 
+        clientName={client?.full_name || client?.name || 'this client'} 
+        onSendOffer={() => {
+          // TODO: Implement send offer functionality
+          console.log('Send offer clicked');
+        }}
+      />
     );
   }
 

@@ -87,8 +87,8 @@ export const useStreaksAndMotivation = () => {
           });
           
           if (hasRecentWorkout) {
-            // Calculate consecutive days
-            let currentStreak = 0;
+            // Calculate consecutive days - always start from 1 if there's at least one workout
+            let currentStreak = 1;
             let checkDate = new Date(today);
             
             for (const workoutDate of sortedDates) {
@@ -96,8 +96,13 @@ export const useStreaksAndMotivation = () => {
               const checkDateStr = checkDate.toDateString();
               
               if (workoutDateStr === checkDateStr) {
-                currentStreak++;
-                checkDate.setDate(checkDate.getDate() - 1);
+                if (currentStreak === 1) {
+                  // First day counts as 1, subsequent days increment
+                  checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                  currentStreak++;
+                  checkDate.setDate(checkDate.getDate() - 1);
+                }
               } else {
                 break;
               }

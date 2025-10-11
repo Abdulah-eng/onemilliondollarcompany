@@ -169,7 +169,7 @@ const ProfileHeader = ({ isGlobalEditing = false }: ProfileHeaderProps) => {
                 setEditName(e.target.value);
                 setHasUnsavedChanges(true);
               }}
-              className="text-2xl font-bold text-center bg-white/90 border-2 border-primary/50"
+              className="text-2xl font-bold text-center bg-background/90 border-2 border-primary/50 text-foreground"
               placeholder="Enter your name"
             />
           </div>

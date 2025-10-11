@@ -18,6 +18,8 @@ import { ArrowUpRight, ArrowDownRight, AlertCircle, MessageCircle } from "lucide
 import FitnessTrendChart from "./charts/FitnessTrendChart";
 import MentalHealthTrendChart from "./charts/MentalHealthTrendChart";
 import { useRealTimeClientData } from '@/hooks/useRealTimeClientData';
+import { useClientStatus } from '@/hooks/useClientStatus';
+import AwaitingOfferMessage from './AwaitingOfferMessage';
 
 // --- Types ---
 interface DashboardProps {
@@ -209,12 +211,26 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
   const [selectedRange, setSelectedRange] = useState("4w");
   const [weightRange, setWeightRange] = useState("1m");
   const { clientData, loading } = useRealTimeClientData(client?.id);
+  const { clientStatus } = useClientStatus(client?.id);
 
   if (loading) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         Loading progress data...
       </div>
+    );
+  }
+
+  // Check if client is waiting for an offer
+  if (clientStatus?.status === 'waiting_offer') {
+    return (
+      <AwaitingOfferMessage 
+        clientName={client?.full_name || client?.name || 'this client'} 
+        onSendOffer={() => {
+          // TODO: Implement send offer functionality
+          console.log('Send offer clicked');
+        }}
+      />
     );
   }
 

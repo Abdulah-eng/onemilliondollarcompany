@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 import { Program, ProgramStatus, ProgramCategory } from '@/types/program';
 import { toast } from 'sonner';
 import { supabase as sb } from '@/integrations/supabase/client';
@@ -22,6 +23,7 @@ interface UpdateProgramData extends CreateProgramData {
 export const useProgramMutations = () => {
   const [loading, setLoading] = useState(false);
   const { profile } = useAuth();
+  const { refreshAll } = useRefresh();
 
   const createProgram = async (data: CreateProgramData): Promise<Program | null> => {
     if (!profile?.id) {
@@ -100,6 +102,9 @@ export const useProgramMutations = () => {
 
       toast.success('Program created successfully!');
       
+      // Use smart refresh to update all related data
+      await refreshAll();
+      
       // Transform the result to match our Program interface
       return {
         id: result.id,
@@ -169,6 +174,9 @@ export const useProgramMutations = () => {
       if (error) throw error;
 
       toast.success('Program updated successfully!');
+      
+      // Use smart refresh to update all related data
+      await refreshAll();
       
       return {
         id: result.id,

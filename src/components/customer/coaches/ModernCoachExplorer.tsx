@@ -270,7 +270,7 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
                                 AI Coach
                             </span>
                         </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className={`text-sm ${planStatus.hasActivePlan ? 'text-emerald-600' : 'text-amber-600'}`}>
                             {planStatus.hasActivePlan 
                                 ? 'Get a personalized plan powered by AI.' 
                                 : 'Get a personalized plan powered by AI. Requires active subscription.'

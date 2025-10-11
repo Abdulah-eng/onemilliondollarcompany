@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 import { Program, ProgramStatus, ProgramCategory } from '@/types/program';
 
 export const useCoachPrograms = () => {
@@ -8,6 +9,7 @@ export const useCoachPrograms = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { profile } = useAuth();
+  const { refreshAll } = useRefresh();
 
   const fetchPrograms = async () => {
     if (!profile?.id) return;

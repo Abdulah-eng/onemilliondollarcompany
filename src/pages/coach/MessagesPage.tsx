@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChatLayout } from '@/components/chat/ChatLayout';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useConversations } from '@/hooks/useConversations';
 
 const MessagesPage = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const MessagesPage = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(
     conversationId || null
   );
+  const { conversations, loading } = useConversations();
 
   // Handle client parameter from URL
   useEffect(() => {
@@ -21,6 +23,18 @@ const MessagesPage = () => {
       findOrCreateConversation(clientId, clientName);
     }
   }, [searchParams]);
+
+  // Auto-open most recent conversation if no specific conversation is selected
+  useEffect(() => {
+    if (!conversationId && !loading && conversations.length > 0 && !selectedConversationId) {
+      // Find the most recent conversation (conversations are already sorted by updated_at desc)
+      const mostRecentConversation = conversations[0];
+      if (mostRecentConversation) {
+        setSelectedConversationId(mostRecentConversation.id);
+        navigate(`/coach/messages/${mostRecentConversation.id}`);
+      }
+    }
+  }, [conversationId, loading, conversations, selectedConversationId, navigate]);
 
   const findOrCreateConversation = async (clientId: string, clientName?: string | null) => {
     try {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 
 export interface DailyCheckinRecord {
   id: string;
@@ -14,6 +15,7 @@ export interface DailyCheckinRecord {
 
 export const useDailyCheckins = () => {
   const { user } = useAuth();
+  const { refreshAll } = useRefresh();
   const [checkins, setCheckins] = useState<DailyCheckinRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +60,10 @@ export const useDailyCheckins = () => {
       .select('*');
     if (error) throw error;
     await fetchCheckins();
+    
+    // Use smart refresh to update all related data
+    await refreshAll();
+    
     return data as DailyCheckinRecord[];
   };
 
