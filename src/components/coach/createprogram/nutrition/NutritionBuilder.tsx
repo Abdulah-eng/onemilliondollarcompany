@@ -1,4 +1,5 @@
 // src/components/coach/createprogram/nutrition/NutritionBuilder.tsx
+// Updated: 2024-01-15 15:30:00
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
@@ -38,7 +39,10 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave, ini
   const [activeDay, setActiveDay] = useState(INITIAL_WEEK_DAY);
   
   // ⭐ UPDATE DATA STRUCTURE to use the compound key: { "W#_DayName": { breakfast: [] } }
-  const [nutritionData, setNutritionData] = useState<{ [key: string]: { [key in MealSection]: NutritionDayItem[] } }>(initialData || {});
+  const [nutritionData, setNutritionData] = useState<{ [key: string]: { [key in MealSection]: NutritionDayItem[] } }>(() => {
+    // Ensure we always have a valid object, even if initialData is undefined
+    return initialData && typeof initialData === 'object' ? initialData : {};
+  });
   
   const [searchQuery, setSearchQuery] = useState('');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -51,6 +55,13 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave, ini
   
   // ⭐ CALCULATE UNIQUE KEY
   const currentDataKey = getDataKey(activeWeek, activeDay); 
+
+  // ⭐ DATA INDICATORS for DateCircles (shows which days have data) - FIXED v2
+  const dataIndicators = Object.keys(nutritionData || {}).reduce((acc, key) => {
+    const hasData = Object.values(nutritionData[key] || {}).some(mealItems => mealItems.length > 0);
+    acc[key] = hasData;
+    return acc;
+  }, {} as { [key: string]: boolean });
 
   // Ensure initial data exists for the current W#_DayName
   useEffect(() => {

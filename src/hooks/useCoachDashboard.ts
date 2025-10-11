@@ -108,7 +108,7 @@ export const useCoachTasks = () => {
             .eq('customer_id', client.id)
             .eq('coach_id', user.id)
             .eq('status', 'pending')
-            .single();
+            .maybeSingle();
 
           if (pendingRequest) {
             results.push({
@@ -131,7 +131,7 @@ export const useCoachTasks = () => {
             .eq('customer_id', client.id)
             .eq('coach_id', user.id)
             .eq('status', 'pending')
-            .single();
+            .maybeSingle();
 
           if (waitingOffer) {
             results.push({
@@ -152,7 +152,7 @@ export const useCoachTasks = () => {
             .from('programs')
             .select('id, status')
             .eq('coach_id', user.id)
-            .eq('customer_id', client.id)
+            .eq('assigned_to', client.id)
             .in('status', ['active', 'scheduled']);
 
           if (!programs || programs.length === 0) {
@@ -173,10 +173,10 @@ export const useCoachTasks = () => {
           const { data: lastEntry } = await supabase
             .from('program_entries')
             .select('created_at')
-            .eq('customer_id', client.id)
+            .eq('user_id', client.id)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
 
           if (lastEntry) {
             const daysSinceLastEntry = Math.floor((Date.now() - new Date(lastEntry.created_at).getTime()) / (24 * 60 * 60 * 1000));
@@ -219,14 +219,14 @@ export const useCoachTasks = () => {
 
           // Check for awaiting check-ins
           const { data: pendingCheckin } = await supabase
-            .from('checkin_pins')
+            .from('coach_checkins')
             .select('id, created_at')
             .eq('customer_id', client.id)
             .eq('coach_id', user.id)
-            .eq('status', 'pending')
+            .eq('status', 'open')
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
 
           if (pendingCheckin) {
             const daysSinceCheckin = Math.floor((Date.now() - new Date(pendingCheckin.created_at).getTime()) / (24 * 60 * 60 * 1000));

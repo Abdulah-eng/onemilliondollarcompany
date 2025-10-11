@@ -235,9 +235,10 @@ export const useProgramMutations = () => {
         .select('*')
         .eq('id', id)
         .eq('coach_id', profile.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) return null;
 
       return {
         id: data.id,

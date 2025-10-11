@@ -96,7 +96,7 @@ export const useOfferActions = () => {
           .insert({
             conversation_id: conversation.id,
             sender_id: user.id,
-            content: `❌ Offer declined. The ${offerRow.duration_months}-week coaching plan for $${offerRow.price} has been declined.`,
+            content: `❌ The offer has been declined.`,
             message_type: 'system'
           });
       }

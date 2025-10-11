@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { findProgramByIdAndType, ProgramData } from "@/mockdata/viewprograms/programFinder";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ✅ Import all necessary data types
 import { DetailedFitnessTask } from "@/mockdata/viewprograms/mockexerciseprograms";
 import { DetailedNutritionTask } from "@/mockdata/viewprograms/mocknutritionprograms";
 import { DetailedMentalHealthTask } from "@/mockdata/viewprograms/mockmentalhealthprograms";
+
+type ProgramData = DetailedFitnessTask | DetailedNutritionTask | DetailedMentalHealthTask;
 
 // ✅ Import all specialized headers
 import WorkoutHeader from "@/components/customer/viewprogram/exercise/WorkoutHeader";
@@ -49,13 +52,53 @@ export default function ViewProgramPage() {
   const { completeToday } = useProgramEntries(id);
 
   useEffect(() => {
-    setLoading(true);
-    if (id && type) {
-      const program = findProgramByIdAndType(type, id);
-      setProgramData(program || null);
-    }
-    setLoading(false);
-  }, [id, type]);
+    const loadProgram = async () => {
+      if (!id || !type || !profile) return;
+      
+      setLoading(true);
+      try {
+        // Load program from database
+        const { data: program, error } = await supabase
+          .from('programs')
+          .select('*')
+          .eq('id', id)
+          .eq('assigned_to', profile.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error loading program:', error);
+          setProgramData(null);
+          return;
+        }
+
+        if (!program) {
+          setProgramData(null);
+          return;
+        }
+
+        // Convert database program to the expected format
+        const programData: ProgramData = {
+          id: program.id,
+          type: program.category === 'fitness' ? 'fitness' : program.category === 'nutrition' ? 'nutrition' : 'mental',
+          title: program.name,
+          description: program.description,
+          duration: program.plan?.duration || '4 weeks',
+          difficulty: program.plan?.difficulty || 'beginner',
+          // Add plan data if available
+          ...(program.plan || {}),
+        } as ProgramData;
+
+        setProgramData(programData);
+      } catch (error) {
+        console.error('Error loading program:', error);
+        setProgramData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProgram();
+  }, [id, type, profile]);
 
   // ✅ Renders the correct specialized header based on program type
   const renderProgramHeader = () => {

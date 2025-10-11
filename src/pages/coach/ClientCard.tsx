@@ -21,14 +21,19 @@ const ClientCard = () => {
         .from('profiles')
         .select('id, full_name, email, avatar_url, plan, plan_expiry, coach_id, phone')
         .eq('id', clientId)
-        .single();
+        .maybeSingle();
+
+      if (!profile) {
+        console.error('Client not found');
+        return;
+      }
 
       // Load client onboarding details (personal info, goals, preferences)
       const { data: onboardingDetails } = await supabase
         .from('onboarding_details')
         .select('*')
         .eq('user_id', clientId)
-        .single();
+        .maybeSingle();
 
       // Load programs assigned to client
       const { data: programs } = await supabase

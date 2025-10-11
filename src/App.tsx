@@ -430,7 +430,7 @@ const ThemedApp = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_relativeSplatPath: true }}>
         <ThemedApp />
       </BrowserRouter>
     </TooltipProvider>

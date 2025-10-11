@@ -36,7 +36,10 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
   const [activeDay, setActiveDay] = useState(INITIAL_WEEK_DAY);
   
   // ⭐ UPDATE DATA STRUCTURE to use the compound key: { "W1_Monday": { morning: [] } }
-  const [mhData, setMhData] = useState<{ [key: string]: { [key in MentalHealthSection]: MentalHealthDayItem[] } }>(initialData || {});
+  const [mhData, setMhData] = useState<{ [key: string]: { [key in MentalHealthSection]: MentalHealthDayItem[] } }>(() => {
+    // Ensure we always have a valid object, even if initialData is undefined
+    return initialData && typeof initialData === 'object' ? initialData : {};
+  });
   
   const [searchQuery, setSearchQuery] = useState('');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -49,6 +52,13 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
 
   // ⭐ CALCULATE UNIQUE KEY
   const currentDataKey = getDataKey(activeWeek, activeDay); 
+
+  // ⭐ DATA INDICATORS for DateCircles (shows which days have data)
+  const dataIndicators = Object.keys(mhData || {}).reduce((acc, key) => {
+    const hasData = Object.values(mhData[key] || {}).some(activities => activities.length > 0);
+    acc[key] = hasData;
+    return acc;
+  }, {} as { [key: string]: boolean });
 
   // Ensure initial data exists for the current W#_DayName when navigating
   useEffect(() => {

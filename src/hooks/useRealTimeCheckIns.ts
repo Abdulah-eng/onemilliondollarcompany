@@ -44,10 +44,10 @@ export const useRealTimeCheckIns = () => {
         
         // Fetch active check-in pins (not responded to)
         const { data: pinsData, error: pinsError } = await supabase
-          .from('checkin_pins')
+          .from('coach_checkins')
           .select('*')
-          .eq('user_id', user.id)
-          .eq('is_responded', false)
+          .eq('customer_id', user.id)
+          .eq('status', 'open')
           .order('created_at', { ascending: false });
 
         if (pinsError) {
@@ -58,11 +58,11 @@ export const useRealTimeCheckIns = () => {
 
         // Fetch check-in history (responded to)
         const { data: historyData, error: historyError } = await supabase
-          .from('checkin_pins')
+          .from('coach_checkins')
           .select('*')
-          .eq('user_id', user.id)
-          .eq('is_responded', true)
-          .order('responded_at', { ascending: false })
+          .eq('customer_id', user.id)
+          .eq('status', 'completed')
+          .order('created_at', { ascending: false })
           .limit(20);
 
         if (historyError) {
@@ -83,11 +83,9 @@ export const useRealTimeCheckIns = () => {
   const respondToCheckIn = async (pinId: string, response: string) => {
     try {
       const { error } = await supabase
-        .from('checkin_pins')
+        .from('coach_checkins')
         .update({
-          is_responded: true,
-          response: response,
-          responded_at: new Date().toISOString()
+          status: 'completed'
         })
         .eq('id', pinId);
 

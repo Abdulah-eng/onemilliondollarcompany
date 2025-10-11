@@ -109,7 +109,7 @@ export const useRealTimeClientData = (clientId?: string) => {
         .select('id, full_name, email, avatar_url, plan, plan_expiry, phone, coach_id')
         .eq('id', id)
         .eq('coach_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) throw profileError;
 
@@ -118,7 +118,7 @@ export const useRealTimeClientData = (clientId?: string) => {
         .from('onboarding_details')
         .select('*')
         .eq('user_id', id)
-        .single();
+        .maybeSingle();
 
       // Get programs
       const { data: programs } = await supabase
@@ -132,7 +132,7 @@ export const useRealTimeClientData = (clientId?: string) => {
       const { data: programEntries } = await supabase
         .from('program_entries')
         .select('created_at')
-        .eq('customer_id', id)
+        .eq('user_id', id)
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
       // Calculate adherence based on actual program completion
@@ -201,28 +201,28 @@ export const useRealTimeClientData = (clientId?: string) => {
       const { data: fitnessData } = await supabase
         .from('program_entries')
         .select('*')
-        .eq('customer_id', id)
+        .eq('user_id', id)
         .eq('program_id', fitnessProgram?.id)
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
       const { data: nutritionData } = await supabase
         .from('program_entries')
         .select('*')
-        .eq('customer_id', id)
+        .eq('user_id', id)
         .eq('program_id', nutritionProgram?.id)
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
       const { data: mentalHealthData } = await supabase
         .from('program_entries')
         .select('*')
-        .eq('customer_id', id)
+        .eq('user_id', id)
         .eq('program_id', mentalHealthProgram?.id)
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
       // Get check-in history (coach check-ins)
       const { data: coachCheckins } = await supabase
-        .from('checkin_pins')
-        .select('id, message, response, rating, status, created_at')
+        .from('coach_checkins')
+        .select('id, message, status, created_at')
         .eq('customer_id', id)
         .eq('coach_id', user.id)
         .order('created_at', { ascending: false });

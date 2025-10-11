@@ -29,7 +29,10 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave, initial
   const [activeDay, setActiveDay] = useState(INITIAL_WEEK_DAY);
   
   // ⭐ UPDATE DATA STRUCTURE to use the compound key
-  const [workoutData, setWorkoutData] = useState<{ [key: string]: WorkoutDayItem[] }>(initialData || {}); 
+  const [workoutData, setWorkoutData] = useState<{ [key: string]: WorkoutDayItem[] }>(() => {
+    // Ensure we always have a valid object, even if initialData is undefined
+    return initialData && typeof initialData === 'object' ? initialData : {};
+  }); 
   
   const [searchQuery, setSearchQuery] = useState('');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -41,6 +44,13 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave, initial
 
   // ⭐ CALCULATE UNIQUE KEY
   const currentDataKey = getDataKey(activeWeek, activeDay); 
+
+  // ⭐ DATA INDICATORS for DateCircles (shows which days have data)
+  const dataIndicators = Object.keys(workoutData || {}).reduce((acc, key) => {
+    const hasData = (workoutData[key] || []).length > 0;
+    acc[key] = hasData;
+    return acc;
+  }, {} as { [key: string]: boolean });
 
   // ⭐ UPDATE HANDLERS to use the compound key
   const handleUpdateItems = useCallback((key: string, items: WorkoutDayItem[]) => {

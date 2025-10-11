@@ -58,7 +58,7 @@ export const useRealTimeClientStatus = () => {
           .eq('customer_id', client.id)
           .eq('coach_id', user.id)
           .eq('status', 'pending')
-          .single();
+          .maybeSingle();
 
         if (request) {
           // Client has sent request but not accepted yet - no status
@@ -86,7 +86,7 @@ export const useRealTimeClientStatus = () => {
           .eq('customer_id', client.id)
           .eq('coach_id', user.id)
           .eq('status', 'pending')
-          .single();
+          .maybeSingle();
 
         if (pendingOffer) {
           // Client has accepted request but no offer sent yet
@@ -114,7 +114,7 @@ export const useRealTimeClientStatus = () => {
           .eq('customer_id', client.id)
           .eq('coach_id', user.id)
           .eq('status', 'accepted')
-          .single();
+          .maybeSingle();
 
         if (acceptedOffer) {
           // Check if client has any assigned programs
@@ -122,7 +122,7 @@ export const useRealTimeClientStatus = () => {
             .from('programs')
             .select('id, status')
             .eq('coach_id', user.id)
-            .eq('customer_id', client.id)
+            .eq('assigned_to', client.id)
             .in('status', ['active', 'scheduled']);
 
           if (!assignedPrograms || assignedPrograms.length === 0) {
@@ -150,12 +150,12 @@ export const useRealTimeClientStatus = () => {
           .from('programs')
           .select('id, status, created_at')
           .eq('coach_id', user.id)
-          .eq('customer_id', client.id);
+          .eq('assigned_to', client.id);
 
         const { data: programEntries } = await supabase
           .from('program_entries')
           .select('created_at')
-          .eq('customer_id', client.id)
+          .eq('user_id', client.id)
           .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
           .order('created_at', { ascending: false });
 
@@ -212,23 +212,23 @@ export const useRealTimeClientStatus = () => {
           .single();
 
         const { data: checkinPins } = await supabase
-          .from('checkin_pins')
+          .from('coach_checkins')
           .select('id, status, created_at')
           .eq('customer_id', client.id)
           .eq('coach_id', user.id)
           .order('created_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
 
         const { data: checkinResponses } = await supabase
-          .from('checkin_pins')
-          .select('id, status, response, created_at')
+          .from('coach_checkins')
+          .select('id, status, created_at')
           .eq('customer_id', client.id)
           .eq('coach_id', user.id)
-          .eq('status', 'responded')
+          .eq('status', 'completed')
           .order('created_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
 
         const newMessage = lastMessage && 
           lastMessage.sender_id !== user.id && 

@@ -121,12 +121,12 @@ export const ProfileEditMode: React.FC<ProfileEditModeProps> = ({
       </Alert>
 
       {/* Action Buttons */}
-      <div className="flex gap-3 justify-end sticky top-4 z-10 bg-background/95 backdrop-blur-sm p-4 rounded-lg border shadow-md">
-        <Button onClick={handleCancelClick} variant="outline" size="lg" disabled={isSubmitting}>
+      <div className="flex flex-col sm:flex-row gap-3 justify-end sticky top-4 z-10 bg-background/95 backdrop-blur-sm p-4 rounded-lg border shadow-md">
+        <Button onClick={handleCancelClick} variant="outline" size="lg" disabled={isSubmitting} className="order-2 sm:order-1">
           <X className="h-4 w-4 mr-2" />
           Cancel
         </Button>
-        <Button onClick={onSave} size="lg" disabled={isSubmitting} className="gap-2">
+        <Button onClick={onSave} size="lg" disabled={isSubmitting} className="gap-2 order-1 sm:order-2">
           {isSubmitting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
