@@ -72,10 +72,10 @@ export const OfferComposer: React.FC<OfferComposerProps> = ({
 
   return (
     <Card>
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2 sm:pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <DollarSign className="w-5 h-5" />
+          <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+            <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
             Send Coaching Offer
           </CardTitle>
           <Button
@@ -90,8 +90,8 @@ export const OfferComposer: React.FC<OfferComposerProps> = ({
       </CardHeader>
       
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <Label htmlFor="price">Price ($)</Label>
               <Input
@@ -142,7 +142,7 @@ export const OfferComposer: React.FC<OfferComposerProps> = ({
           </div>
           
           <div>
-            <Label htmlFor="message">Message</Label>
+            <Label htmlFor="message" className="text-sm">Message</Label>
             <Textarea
               id="message"
               value={message}
@@ -154,11 +154,11 @@ export const OfferComposer: React.FC<OfferComposerProps> = ({
               rows={3}
               disabled={sending}
               maxLength={1000}
-              className={errors.message ? 'border-destructive' : ''}
+              className={`text-sm ${errors.message ? 'border-destructive' : ''}`}
             />
-            <div className="flex justify-between items-center mt-1">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 mt-1">
               {errors.message && (
-                <p className="text-sm text-destructive flex items-center gap-1">
+                <p className="text-xs sm:text-sm text-destructive flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
                   {errors.message}
                 </p>
@@ -166,7 +166,7 @@ export const OfferComposer: React.FC<OfferComposerProps> = ({
               <div className="ml-auto flex items-center gap-2">
                 {message.trim().length > 0 && message.trim().length < 5 && (
                   <p className="text-xs text-amber-600">
-                    {5 - message.trim().length} more characters needed
+                    {5 - message.trim().length} more
                   </p>
                 )}
                 <p className={`text-xs ${message.length > 900 ? 'text-amber-600' : 'text-muted-foreground'}`}>

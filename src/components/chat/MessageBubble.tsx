@@ -83,7 +83,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
   return (
     <div className={cn(
-      "flex gap-3 max-w-[80%]",
+      "flex gap-2 sm:gap-3 max-w-[90%] sm:max-w-[85%] md:max-w-[80%]",
       isOwn ? "ml-auto flex-row-reverse" : "mr-auto"
     )}>
       {!isOwn && (
@@ -106,7 +106,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         )}
         
         <div className={cn(
-          "rounded-lg px-3 py-2 max-w-full break-words",
+          "rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 max-w-full break-words",
           isOwn 
             ? "bg-primary text-primary-foreground" 
             : "bg-muted text-muted-foreground"
@@ -114,7 +114,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           {isFile ? (
             <div className="flex items-center gap-2">
               {getFileIcon(getFileInfo()?.fileName || '')}
-              <span className="text-sm font-medium">{getFileInfo()?.fileName}</span>
+              <span className="text-xs sm:text-sm font-medium truncate">{getFileInfo()?.fileName}</span>
               <Button
                 variant="ghost"
                 size="sm"
@@ -125,7 +125,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
               </Button>
             </div>
           ) : (
-            <p className="text-sm">{message.content}</p>
+            <p className="text-xs sm:text-sm">{message.content}</p>
           )}
         </div>
         

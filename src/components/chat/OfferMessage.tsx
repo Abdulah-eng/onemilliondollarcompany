@@ -106,7 +106,7 @@ export const OfferMessage: React.FC<OfferMessageProps> = ({
 
   return (
     <div className={cn(
-      "flex gap-3 max-w-[80%]",
+      "flex gap-2 sm:gap-3 max-w-[95%] sm:max-w-[85%] md:max-w-[80%]",
       isOwn ? "ml-auto flex-row-reverse" : "mr-auto"
     )}>
       {!isOwn && (
@@ -129,47 +129,47 @@ export const OfferMessage: React.FC<OfferMessageProps> = ({
         )}
         
         <Card className={cn(
-          "w-full max-w-sm",
+          "w-full max-w-full sm:max-w-sm",
           isOwn ? "bg-primary/5" : "bg-muted/50"
         )}>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-primary" />
-                <span className="font-medium text-sm">Coaching Offer</span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+                <span className="font-medium text-xs sm:text-sm">Coaching Offer</span>
               </div>
               {getStatusBadge()}
             </div>
           </CardHeader>
           
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">{message.content}</p>
+          <CardContent className="space-y-2 sm:space-y-3 p-3 sm:p-6 pt-0">
+            <p className="text-xs sm:text-sm text-muted-foreground">{message.content}</p>
             
             {offer && (
               <div className="space-y-2">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-xs sm:text-sm">
                   <span className="text-muted-foreground">Price:</span>
                   <span className="font-medium">${(offer.price ?? (message as any)?.metadata?.price) ?? ''}</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-xs sm:text-sm">
                   <span className="text-muted-foreground">Duration:</span>
                   <span className="font-medium">{(offer.duration_months ?? (message as any)?.metadata?.duration_months) ?? ''} weeks</span>
                 </div>
                 
                 {offer.status === 'pending' && !isExpired && hasExpiry && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
                     <Clock className="w-3 h-3" />
                     Expires {formatDistanceToNow(new Date(offer.expires_at), { addSuffix: true })}
                   </div>
                 )}
                 
                 {canRespond && (
-                  <div className="flex gap-2 pt-2">
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
                     <Button
                       size="sm"
                       onClick={handleAcceptOffer}
                       disabled={loading}
-                      className="flex-1"
+                      className="flex-1 text-xs sm:text-sm"
                     >
                       <Check className="w-3 h-3 mr-1" />
                       Accept
@@ -179,7 +179,7 @@ export const OfferMessage: React.FC<OfferMessageProps> = ({
                       variant="outline"
                       onClick={handleRejectOffer}
                       disabled={loading}
-                      className="flex-1"
+                      className="flex-1 text-xs sm:text-sm"
                     >
                       <X className="w-3 h-3 mr-1" />
                       Decline

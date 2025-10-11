@@ -5,17 +5,19 @@ import { OfferComposer } from './OfferComposer';
 import { useMessages } from '@/hooks/useMessages';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { DollarSign, Loader2 } from 'lucide-react';
+import { DollarSign, Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ChatViewProps {
   conversationId: string;
   userRole?: string;
+  onBack?: () => void;
 }
 
 export const ChatView: React.FC<ChatViewProps> = ({
   conversationId,
-  userRole
+  userRole,
+  onBack
 }) => {
   const { user } = useAuth();
   const { messages, loading, sendMessage, sendOffer, refetch } = useMessages(conversationId);
@@ -114,8 +116,18 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
   return (
     <div className="flex flex-col h-full">
+      {/* Mobile Header with Back Button */}
+      {onBack && (
+        <div className="md:hidden border-b border-border p-3 flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={onBack}>
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <h2 className="text-sm font-medium">Conversation</h2>
+        </div>
+      )}
+
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-2 sm:p-3 md:p-4 space-y-2 sm:space-y-3 md:space-y-4">
         {messages.map((message) => (
           <MessageBubble
             key={message.id}
@@ -129,7 +141,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
       {/* Offer Composer */}
       {showOfferComposer && (
-        <div className="border-t border-border p-4">
+        <div className="border-t border-border p-2 sm:p-3 md:p-4">
           <OfferComposer
             onSend={handleSendOffer}
             onCancel={() => setShowOfferComposer(false)}
@@ -139,8 +151,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
       )}
 
       {/* Message Input */}
-      <div className="border-t border-border p-4">
-        <div className="flex gap-2">
+      <div className="border-t border-border p-2 sm:p-3 md:p-4">
+        <div className="flex gap-1 sm:gap-2">
           {userRole === 'coach' && !showOfferComposer && (
             <Button
               variant="outline"
@@ -148,8 +160,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
               onClick={() => setShowOfferComposer(true)}
               className="flex-shrink-0"
             >
-              <DollarSign className="w-4 h-4 mr-1" />
-              Send Offer
+              <DollarSign className="w-4 h-4 md:mr-1" />
+              <span className="hidden md:inline">Send Offer</span>
             </Button>
           )}
           <div className="flex-1">

@@ -103,8 +103,8 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-border">
-        <h2 className="text-lg font-semibold">Messages</h2>
+      <div className="p-3 md:p-4 border-b border-border">
+        <h2 className="text-base md:text-lg font-semibold">Messages</h2>
       </div>
       
       <div className="flex-1 overflow-y-auto">
@@ -117,12 +117,12 @@ export const ConversationList: React.FC<ConversationListProps> = ({
               key={conversation.id}
               onClick={() => onSelect(conversation.id)}
               className={cn(
-                "p-4 cursor-pointer border-b border-border hover:bg-accent/50 transition-colors",
+                "p-3 md:p-4 cursor-pointer border-b border-border hover:bg-accent/50 transition-colors",
                 isSelected && "bg-accent"
               )}
             >
-              <div className="flex items-start gap-3">
-                <Avatar className="w-10 h-10">
+              <div className="flex items-start gap-2 sm:gap-3">
+                <Avatar className="w-8 h-8 md:w-10 md:h-10">
                   <AvatarImage src={otherUser?.avatar_url || undefined} />
                   <AvatarFallback>
                     {otherUser?.full_name?.split(' ').map(n => n[0]).join('') || (otherUser?.email ? otherUser.email[0].toUpperCase() : '?')}
@@ -131,14 +131,14 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-medium text-sm truncate">
+                    <h3 className="font-medium text-xs sm:text-sm truncate">
                       {getDisplayName(otherUser?.full_name, otherUser?.email)}
                     </h3>
                     {getStatusBadge(conversation)}
                   </div>
                   
                   {conversation.last_message && (
-                    <p className="text-xs text-muted-foreground truncate mb-1">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate mb-1">
                       {conversation.last_message.message_type === 'offer' 
                         ? '💰 Sent an offer' 
                         : conversation.last_message.content}
@@ -146,7 +146,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                   )}
                   
                   {conversation.last_message && (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(conversation.last_message.created_at), { 
                         addSuffix: true 
                       })}
@@ -156,8 +156,8 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                 
                 {conversation.unread_count > 0 && (
                   <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                    <Badge variant="destructive" className="w-5 h-5 text-xs rounded-full p-0 flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full animate-pulse"></div>
+                    <Badge variant="destructive" className="w-4 h-4 sm:w-5 sm:h-5 text-[10px] sm:text-xs rounded-full p-0 flex items-center justify-center">
                       {conversation.unread_count}
                     </Badge>
                   </div>
