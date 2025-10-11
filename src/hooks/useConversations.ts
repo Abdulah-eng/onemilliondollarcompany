@@ -59,7 +59,7 @@ export const useConversations = () => {
             .eq('conversation_id', conv.id)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
           
           return {
             ...conv,

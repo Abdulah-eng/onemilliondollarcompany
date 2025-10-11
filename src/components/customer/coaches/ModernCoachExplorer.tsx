@@ -219,9 +219,8 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
     const filteredCoaches = useMemo(() => {
         const term = searchTerm.toLowerCase();
         return realTimeCoaches.filter(coach => {
-            const matchesSearch = coach.name.toLowerCase().includes(term) ||
-                                 coach.bio.toLowerCase().includes(term) ||
-                                 coach.skills.some(skill => skill.toLowerCase().includes(term));
+            // Only filter by name, not bio or skills
+            const matchesSearch = coach.name.toLowerCase().includes(term);
             const matchesFilter = activeFilter === 'All' ||
                                  coach.skills.some(skill => mapSkillToCategory(skill) === activeFilter);
             return matchesSearch && matchesFilter;
@@ -303,7 +302,7 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                     <Input
-                        placeholder="Search coaches by name, expertise, or skills..."
+                        placeholder="Search coaches by name..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10 bg-background/50 border-primary/20 focus:border-primary/40 h-12"

@@ -3,18 +3,24 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, Edit, Camera, CreditCard, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePaymentPlan } from '@/hooks/usePaymentPlan';
-import { useState, useRef } from 'react';
+import React, { useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { useProfileUpdates } from '@/hooks/useProfileUpdates';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import imageCompression from 'browser-image-compression';
 
 interface ProfileHeaderProps {
   isGlobalEditing?: boolean;
 }
 
-const ProfileHeader = ({ isGlobalEditing = false }: ProfileHeaderProps) => {
+export interface ProfileHeaderRef {
+  save: () => Promise<void>;
+  cancel: () => void;
+}
+
+const ProfileHeader = forwardRef<ProfileHeaderRef, ProfileHeaderProps>(({ isGlobalEditing = false }, ref) => {
   const { profile } = useAuth();
   const { planStatus, startTrial } = usePaymentPlan();
   const { updateProfile, loading } = useProfileUpdates();
@@ -24,6 +30,13 @@ const ProfileHeader = ({ isGlobalEditing = false }: ProfileHeaderProps) => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isStartingTrial, setIsStartingTrial] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync edit name when switching to edit mode or when profile changes
+  React.useEffect(() => {
+    if (isGlobalEditing && profile?.full_name) {
+      setEditName(profile.full_name);
+    }
+  }, [isGlobalEditing, profile?.full_name]);
   
   const avatar = profile?.avatar_url || 'https://placehold.co/256x256/6b7280/fff?text=Avatar';
   const fullName = profile?.full_name || profile?.email || 'Your Profile';
@@ -54,6 +67,12 @@ const ProfileHeader = ({ isGlobalEditing = false }: ProfileHeaderProps) => {
     setHasUnsavedChanges(false);
   };
 
+  // Expose save and cancel functions to parent component
+  useImperativeHandle(ref, () => ({
+    save: handleSaveName,
+    cancel: handleCancel
+  }));
+
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -72,30 +91,46 @@ const ProfileHeader = ({ isGlobalEditing = false }: ProfileHeaderProps) => {
 
     setIsUploadingImage(true);
     try {
-      // For now, use data URL approach (base64) since storage bucket doesn't exist
-      // This works immediately without any setup
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const dataUrl = e.target?.result as string;
-        if (dataUrl) {
-          const success = await updateProfile({ avatar_url: dataUrl });
-          if (success) {
-            toast.success('Profile image updated successfully');
-            setHasUnsavedChanges(true);
-          } else {
-            toast.error('Failed to update profile image');
-          }
-        }
-        setIsUploadingImage(false);
+      // Compress the image
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 500,
+        useWebWorker: true
       };
-      reader.onerror = () => {
-        toast.error('Failed to read image file');
-        setIsUploadingImage(false);
-      };
-      reader.readAsDataURL(file);
+      const compressedFile = await imageCompression(file, options);
+
+      // Create file path with user ID as first folder (required by RLS policy)
+      const fileExt = compressedFile.name.split('.').pop();
+      const fileName = `${profile?.id}-${Date.now()}.${fileExt}`;
+      const filePath = `${profile?.id}/${fileName}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, compressedFile, { upsert: true });
+
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update profile with new avatar URL
+      const success = await updateProfile({ avatar_url: publicUrl });
+      if (success) {
+        toast.success('Profile image updated successfully');
+        setHasUnsavedChanges(true);
+      } else {
+        toast.error('Failed to update profile image');
+      }
     } catch (error) {
       console.error('Image upload error:', error);
-      toast.error('Failed to upload image');
+      toast.error('Failed to upload image. Please try again.');
+    } finally {
       setIsUploadingImage(false);
     }
   };
@@ -233,6 +268,6 @@ const ProfileHeader = ({ isGlobalEditing = false }: ProfileHeaderProps) => {
       </div>
     </div>
   );
-};
+});
 
 export default ProfileHeader;

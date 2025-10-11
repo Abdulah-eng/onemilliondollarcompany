@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { MultiSelectButton } from '@/components/onboarding/MultiSelectButton';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfileUpdates } from '@/hooks/useProfileUpdates';
 import { supabase } from '@/integrations/supabase/client';
@@ -92,7 +92,12 @@ interface PersonalInfoSectionProps {
   isGlobalEditing?: boolean;
 }
 
-const PersonalInfoSection = ({ isGlobalEditing = false }: PersonalInfoSectionProps) => {
+export interface PersonalInfoSectionRef {
+  save: () => Promise<void>;
+  cancel: () => void;
+}
+
+const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSectionProps>(({ isGlobalEditing = false }, ref) => {
   const { user, profile } = useAuth();
   const { updateOnboarding, updateProfile, loading } = useProfileUpdates();
   const [onboardingData, setOnboardingData] = useState<OnboardingDetails | null>(null);
@@ -150,28 +155,36 @@ const PersonalInfoSection = ({ isGlobalEditing = false }: PersonalInfoSectionPro
     fetchData();
   }, [user]);
 
+  // Sync form data when switching to edit mode
+  useEffect(() => {
+    if (isGlobalEditing && onboardingData) {
+      setFormData(onboardingData);
+    }
+    if (isGlobalEditing && profileData) {
+      setProfileFormData({
+        phone: profileData.phone || '',
+        email: profileData.email || ''
+      });
+    }
+  }, [isGlobalEditing, onboardingData, profileData]);
+
   const handleSave = async () => {
     try {
       // Update profile data (phone)
-      const profileSuccess = await updateProfile({ phone: profileFormData.phone });
-      if (!profileSuccess) {
-        toast.error('Failed to update profile');
-        return;
-      }
+      await updateProfile({ phone: profileFormData.phone });
 
       // Update onboarding data
-      const onboardingSuccess = await updateOnboarding(formData);
-      if (onboardingSuccess) {
-        setOnboardingData(formData as OnboardingDetails);
-        setProfileData({ ...profileData, phone: profileFormData.phone });
-        setHasUnsavedChanges(false);
-        toast.success('Profile updated successfully');
-      } else {
-        toast.error('Failed to update profile');
-      }
+      const onboardingData = await updateOnboarding(formData);
+      
+      // Update local state with the returned data
+      setOnboardingData(onboardingData as OnboardingDetails);
+      setProfileData({ ...profileData, phone: profileFormData.phone });
+      setHasUnsavedChanges(false);
+      toast.success('Profile updated successfully');
     } catch (error) {
       console.error('Profile update error:', error);
-      toast.error('Failed to update profile');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update profile';
+      toast.error(`Failed to update profile: ${errorMessage}`);
     }
   };
 
@@ -183,6 +196,12 @@ const PersonalInfoSection = ({ isGlobalEditing = false }: PersonalInfoSectionPro
     });
     setHasUnsavedChanges(false);
   };
+
+  // Expose save and cancel functions to parent component
+  useImperativeHandle(ref, () => ({
+    save: handleSave,
+    cancel: handleCancel
+  }));
 
   const handleMultiSelect = (field: keyof OnboardingDetails, value: string) => {
     const currentArray = (formData[field] as string[]) || [];
@@ -698,6 +717,6 @@ const PersonalInfoSection = ({ isGlobalEditing = false }: PersonalInfoSectionPro
       </Card>
     </div>
   );
-};
+});
 
 export default PersonalInfoSection;

@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
-import ProfileHeader from '@/components/customer/profile/ProfileHeader';
-import PersonalInfoSection from '@/components/customer/profile/PersonalInfoSection';
+import ProfileHeader, { ProfileHeaderRef } from '@/components/customer/profile/ProfileHeader';
+import PersonalInfoSection, { PersonalInfoSectionRef } from '@/components/customer/profile/PersonalInfoSection';
 import PaymentAndLegal from '@/components/customer/profile/PaymentAndLegal';
 import PaymentHistoryTable from '@/components/customer/profile/PaymentHistoryTable';
 import ProfileFAB from '@/components/customer/profile/ProfileFAB';
@@ -17,14 +17,36 @@ const ProfilePage = () => {
   const { updateProfile, updateOnboarding, loading } = useProfileUpdates();
   const { refreshProfile } = useAuth();
   const { refreshProfile: smartRefreshProfile } = useRefresh();
+  
+  // Refs to child components
+  const profileHeaderRef = useRef<ProfileHeaderRef>(null);
+  const personalInfoRef = useRef<PersonalInfoSectionRef>(null);
 
   const handleSaveAll = async () => {
     setIsSaving(true);
     try {
-      // The actual saving is handled by the individual components
-      // This is just a placeholder for any global save logic
+      console.log('Starting global save...');
+      
+      // Call save functions from child components
+      const savePromises = [];
+      
+      if (profileHeaderRef.current) {
+        console.log('Saving profile header...');
+        savePromises.push(profileHeaderRef.current.save());
+      }
+      
+      if (personalInfoRef.current) {
+        console.log('Saving personal info...');
+        savePromises.push(personalInfoRef.current.save());
+      }
+      
+      // Wait for all saves to complete
+      await Promise.all(savePromises);
+      
+      console.log('All saves completed successfully');
       toast.success('Profile updated successfully');
       setIsEditing(false);
+      
       // Use smart refresh to update profile data
       await smartRefreshProfile();
     } catch (error) {
@@ -36,6 +58,15 @@ const ProfilePage = () => {
   };
 
   const handleCancelAll = () => {
+    // Call cancel functions from child components
+    if (profileHeaderRef.current) {
+      profileHeaderRef.current.cancel();
+    }
+    
+    if (personalInfoRef.current) {
+      personalInfoRef.current.cancel();
+    }
+    
     // Reset any unsaved changes
     setIsEditing(false);
     toast.info('Changes cancelled');
@@ -54,8 +85,8 @@ const ProfilePage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <ProfileHeader isGlobalEditing={isEditing} />
-          <PersonalInfoSection isGlobalEditing={isEditing} />
+          <ProfileHeader ref={profileHeaderRef} isGlobalEditing={isEditing} />
+          <PersonalInfoSection ref={personalInfoRef} isGlobalEditing={isEditing} />
         </div>
         <div className="lg:col-span-1 space-y-6">
           <PaymentAndLegal />

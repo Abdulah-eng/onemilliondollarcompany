@@ -259,13 +259,13 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData, is
             name="assignedTo"
             control={control}
             render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value || ""}>
+              <Select onValueChange={field.onChange} value={field.value || undefined}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a client with missing program" />
                 </SelectTrigger>
                 <SelectContent>
                   {clientsLoading ? (
-                    <SelectItem value="" disabled>Loading clients...</SelectItem>
+                    <SelectItem value="loading" disabled>Loading clients...</SelectItem>
                   ) : missingProgramClients.length > 0 ? (
                     missingProgramClients.map((client) => (
                       <SelectItem key={client.id} value={client.id}>
@@ -281,7 +281,7 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({ onNext, initialData, is
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="" disabled>No clients with missing programs</SelectItem>
+                    <SelectItem value="no-clients" disabled>No clients with missing programs</SelectItem>
                   )}
                 </SelectContent>
               </Select>

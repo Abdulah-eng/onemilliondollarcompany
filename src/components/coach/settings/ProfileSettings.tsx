@@ -97,7 +97,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate }) => {
 
       const fileExt = compressedFile.name.split('.').pop();
       const fileName = `${profile?.id}-${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const filePath = `${profile?.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
