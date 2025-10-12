@@ -2,18 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { ChatLayout } from '@/components/chat/ChatLayout';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useConversations } from '@/hooks/useConversations';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const MessagesPage = () => {
   const navigate = useNavigate();
   const { conversationId } = useParams();
+  const isMobile = useIsMobile();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(
     conversationId || null
   );
   const { conversations, loading } = useConversations();
 
-  // Auto-open most recent conversation if no specific conversation is selected
+  // Auto-open most recent conversation if no specific conversation is selected (desktop only)
   useEffect(() => {
-    if (!conversationId && !loading && conversations.length > 0 && !selectedConversationId) {
+    if (!conversationId && !loading && conversations.length > 0 && !selectedConversationId && !isMobile) {
       // Find the most recent conversation (conversations are already sorted by updated_at desc)
       const mostRecentConversation = conversations[0];
       if (mostRecentConversation) {
@@ -21,7 +23,7 @@ const MessagesPage = () => {
         navigate(`/customer/messages/${mostRecentConversation.id}`);
       }
     }
-  }, [conversationId, loading, conversations, selectedConversationId, navigate]);
+  }, [conversationId, loading, conversations, selectedConversationId, navigate, isMobile]);
 
   const handleSelectConversation = (id: string | null) => {
     setSelectedConversationId(id);

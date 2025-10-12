@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { ChatLayout } from '@/components/chat/ChatLayout';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useConversations } from '@/hooks/useConversations';
 
 const MessagesPage = () => {
   const navigate = useNavigate();
   const { conversationId } = useParams();
   const [searchParams] = useSearchParams();
+  const isMobile = useIsMobile();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(
     conversationId || null
   );
@@ -24,9 +26,9 @@ const MessagesPage = () => {
     }
   }, [searchParams]);
 
-  // Auto-open most recent conversation if no specific conversation is selected
+  // Auto-open most recent conversation if no specific conversation is selected (desktop only)
   useEffect(() => {
-    if (!conversationId && !loading && conversations.length > 0 && !selectedConversationId) {
+    if (!conversationId && !loading && conversations.length > 0 && !selectedConversationId && !isMobile) {
       // Find the most recent conversation (conversations are already sorted by updated_at desc)
       const mostRecentConversation = conversations[0];
       if (mostRecentConversation) {
@@ -34,7 +36,7 @@ const MessagesPage = () => {
         navigate(`/coach/messages/${mostRecentConversation.id}`);
       }
     }
-  }, [conversationId, loading, conversations, selectedConversationId, navigate]);
+  }, [conversationId, loading, conversations, selectedConversationId, navigate, isMobile]);
 
   const findOrCreateConversation = async (clientId: string, clientName?: string | null) => {
     try {
