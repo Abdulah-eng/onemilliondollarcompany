@@ -2,7 +2,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { loadStripe } from '@stripe/stripe-js';
 import { useAuth } from '@/contexts/AuthContext';
-import { createCheckoutSession, syncCheckoutSession, cancelSubscriptionAtPeriodEnd, resumeSubscription, openCustomerPortal } from '@/lib/stripe/api';
+import { createCheckoutSession, syncCheckoutSession, cancelSubscriptionAtPeriodEnd, resumeSubscription, openCustomerPortal, cancelSubscriptionNow, gracefulCancelPlan } from '@/lib/stripe/api';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
@@ -11,6 +11,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { usePaymentInfo } from '@/hooks/usePaymentInfo';
 import { useCurrencyDetection } from '@/hooks/useCurrencyDetection';
+import { supabase } from '@/integrations/supabase/client';
 
 const PaymentAndLegal = () => {
   const navigate = useNavigate();
@@ -27,12 +28,6 @@ const PaymentAndLegal = () => {
 
   const handleSubscribe = async () => {
     try {
-      const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-      if (!stripe) {
-        alert('Failed to load Stripe. Please try again.');
-        return;
-      }
-      
       const { checkoutUrl } = await createCheckoutSession({
         priceKey: 'platform_monthly',
         trialDays: 14,
@@ -40,33 +35,36 @@ const PaymentAndLegal = () => {
         currency: selectedCurrency,
         userId: profile?.id,
       });
-      
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
-      } else {
-        alert('Failed to create checkout session. Please try again.');
+        return;
       }
-    } catch (error) {
+      alert('Failed to create checkout session. Please try again.');
+    } catch (error: any) {
       console.error('Subscription error:', error);
-      alert('Failed to start subscription process. Please try again.');
+      alert(error?.message || 'Failed to start subscription process. Please try again.');
     }
   };
 
   const handleCancelAtPeriodEnd = async () => {
     try {
-      if (!profile?.stripe_subscription_id) {
-        alert('No active subscription found.');
-        return;
-      }
-      const res = await cancelSubscriptionAtPeriodEnd(profile.stripe_subscription_id);
-      if (res?.success) {
-        alert('Your subscription will be canceled at the end of the current period.');
-        window.location.reload();
-      } else {
-        alert(res?.error || 'Failed to schedule cancellation');
-      }
+      if (!profile?.id) return;
+      await gracefulCancelPlan(profile.id);
+      alert('Subscription marked as canceled.');
+      window.location.reload();
     } catch (e: any) {
-      alert(e?.message || 'Failed to schedule cancellation');
+      alert(e?.message || 'Failed to cancel');
+    }
+  };
+
+  const handleCancelNow = async () => {
+    try {
+      if (!profile?.id) return;
+      await gracefulCancelPlan(profile.id);
+      alert('Subscription canceled.');
+      window.location.reload();
+    } catch (e: any) {
+      alert(e?.message || 'Failed to cancel');
     }
   };
 
@@ -178,6 +176,14 @@ const PaymentAndLegal = () => {
                         onClick={handleCancelAtPeriodEnd}
                       >
                         Cancel Subscription
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        className="ml-2"
+                        onClick={handleCancelNow}
+                      >
+                        Cancel Now
                       </Button>
                     </>
                   ) : (

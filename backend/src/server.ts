@@ -445,9 +445,15 @@ app.post('/api/stripe/customer-portal', async (req, res) => {
 // Cancel at period end
 app.post('/api/stripe/cancel-at-period-end', async (req, res) => {
   try {
-    const { subscriptionId } = req.body as { subscriptionId?: string };
-    if (!subscriptionId) return res.status(400).json({ error: 'subscriptionId required' });
-    const sub = await stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: true });
+    const { subscriptionId, stripeCustomerId } = req.body as { subscriptionId?: string; stripeCustomerId?: string };
+    let subId = subscriptionId;
+    if (!subId) {
+      if (!stripeCustomerId) return res.status(400).json({ error: 'subscriptionId or stripeCustomerId required' });
+      const subs = await stripe.subscriptions.list({ customer: stripeCustomerId, status: 'active', limit: 1 });
+      subId = subs.data?.[0]?.id;
+      if (!subId) return res.status(404).json({ error: 'Active subscription not found for customer' });
+    }
+    const sub = await stripe.subscriptions.update(subId, { cancel_at_period_end: true });
     return res.json({ success: true, current_period_end: sub.current_period_end });
   } catch (e: any) {
     return res.status(500).json({ error: e?.message || 'Failed to cancel subscription' });
@@ -463,6 +469,73 @@ app.post('/api/stripe/resume', async (req, res) => {
     return res.json({ success: true });
   } catch (e: any) {
     return res.status(500).json({ error: e?.message || 'Failed to resume subscription' });
+  }
+});
+
+// Cancel immediately and clear profile mapping
+app.post('/api/stripe/cancel-now', async (req, res) => {
+  try {
+    const { subscriptionId, userId, stripeCustomerId } = req.body as { subscriptionId?: string; userId?: string; stripeCustomerId?: string };
+    let subId = subscriptionId;
+    if (!subId) {
+      if (!stripeCustomerId) return res.status(400).json({ error: 'subscriptionId or stripeCustomerId required' });
+      const subs = await stripe.subscriptions.list({ customer: stripeCustomerId, status: 'active', limit: 1 });
+      subId = subs.data?.[0]?.id;
+      if (!subId) return res.status(404).json({ error: 'Active subscription not found for customer' });
+    }
+    const sub = await stripe.subscriptions.cancel(subId);
+    // Best-effort DB cleanup
+    if (userId) {
+      await supabase
+        .from('profiles')
+        .update({ plan: null, plan_expiry: null, stripe_subscription_id: null })
+        .eq('id', userId);
+    }
+    return res.json({ success: true, canceled_at: sub.canceled_at });
+  } catch (e: any) {
+    return res.status(500).json({ error: e?.message || 'Failed to cancel subscription immediately' });
+  }
+});
+
+// Graceful cancel: attempt to cancel subscription, then clear plan-related fields in DB
+app.post('/api/stripe/cancel-graceful', async (req, res) => {
+  try {
+    const { userId } = req.body as { userId?: string };
+    if (!userId) return res.status(400).json({ error: 'userId required' });
+
+    // Load profile
+    const { data: profileRows, error: profileErr } = await supabase
+      .from('profiles')
+      .select('id, stripe_customer_id')
+      .eq('id', userId)
+      .limit(1);
+    if (profileErr) return res.status(500).json({ error: profileErr.message });
+    const profile = profileRows?.[0] as { id: string; stripe_customer_id: string | null } | undefined;
+    if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+    // Best-effort subscription cancel (ignore if not found)
+    try {
+      let subId: string | undefined;
+      if (profile.stripe_customer_id) {
+        const subs = await stripe.subscriptions.list({ customer: profile.stripe_customer_id, status: 'active', limit: 1 });
+        subId = subs.data?.[0]?.id;
+      }
+      if (subId) {
+        await stripe.subscriptions.cancel(subId);
+      }
+    } catch (e) {
+      // ignore subscription cancel errors; proceed to clear DB
+    }
+
+    // Clear plan-related fields
+    const { error: updErr } = await supabase
+      .from('profiles')
+      .update({ plan: null, plan_expiry: null, stripe_customer_id: null })
+      .eq('id', userId);
+    if (updErr) return res.status(500).json({ error: updErr.message });
+    return res.json({ success: true });
+  } catch (e: any) {
+    return res.status(500).json({ error: e?.message || 'Failed to gracefully cancel plan' });
   }
 });
 

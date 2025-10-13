@@ -41,18 +41,20 @@ export const usePaymentInfo = () => {
         const planExpiry = profile.plan_expiry;
 
         // Determine plan status
-        let status: 'active' | 'canceled' | 'past_due' | 'trialing' = 'active';
-        if (!subscriptionId || !plan) {
-          status = 'canceled';
-        } else if (planExpiry && new Date(planExpiry) < new Date()) {
+        let status: 'active' | 'canceled' | 'past_due' | 'trialing' = 'canceled';
+        const expiryDate = planExpiry ? new Date(planExpiry) : null;
+        const isExpired = expiryDate ? expiryDate < new Date() : false;
+        if (plan && !isExpired) {
+          status = 'active';
+        } else if (plan && isExpired) {
           status = 'past_due';
         }
 
         // Format plan info
         const currentPlan = {
           name: plan || 'No Plan',
-          price: plan === 'premium' ? '$49.99' : 'Free',
-          billingCycle: plan === 'premium' ? 'month' : 'N/A',
+          price: plan === 'platform_monthly' ? '$49.99' : (plan ? 'Free' : 'Free'),
+          billingCycle: plan === 'platform_monthly' ? 'month' : (plan ? 'N/A' : 'N/A'),
           nextBillingDate: planExpiry ? new Date(planExpiry).toLocaleDateString() : 'N/A',
           status
         };
