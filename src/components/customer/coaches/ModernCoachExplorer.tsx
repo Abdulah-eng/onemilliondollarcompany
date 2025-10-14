@@ -264,12 +264,12 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
                 <CardContent className="p-6 flex items-center justify-between gap-4">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <Bot className={`w-5 h-5 ${planStatus.hasActivePlan ? 'text-emerald-600' : 'text-amber-600'}`} />
-                            <span className={`text-sm font-semibold ${planStatus.hasActivePlan ? 'text-emerald-700' : 'text-amber-700'}`}>
+                            <Bot className={`w-6 h-6 ${planStatus.hasActivePlan ? 'text-emerald-600' : 'text-amber-600'}`} />
+                            <span className={`text-2xl font-extrabold tracking-tight ${planStatus.hasActivePlan ? 'text-emerald-700' : 'text-amber-700'}`}>
                                 AI Coach
                             </span>
                         </div>
-                        <p className={`text-sm ${planStatus.hasActivePlan ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        <p className={`mt-1 ${planStatus.hasActivePlan ? 'text-emerald-700' : 'text-amber-700'} text-lg font-semibold`}>
                             {planStatus.hasActivePlan 
                                 ? 'Get a personalized plan powered by AI.' 
                                 : 'Get a personalized plan powered by AI. Requires active subscription.'

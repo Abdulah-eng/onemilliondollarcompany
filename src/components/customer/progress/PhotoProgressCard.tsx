@@ -43,17 +43,17 @@ export default function PhotoProgressCard({ photos }: { photos: PhotoEntry[] }) 
       
       {/* Latest Photo Section */}
       {latestPhoto && (
-        <div className="mb-6 rounded-xl overflow-hidden relative group max-w-xs mx-auto">
+        <div className="mb-6 rounded-xl overflow-hidden relative group max-w-sm mx-auto">
           <img 
             src={latestPhoto.imageUrl} 
             alt={`Latest progress photo taken on ${latestPhoto.date}`} 
-            className="w-full aspect-[3/4] object-cover max-h-80" 
+            className="w-full aspect-[3/4] object-cover max-h-64" 
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              target.src = 'https://placehold.co/320x427/6b7280/fff?text=Photo+Not+Found';
+              target.src = 'https://placehold.co/256x341/6b7280/fff?text=Photo+Not+Found';
             }}
           />
-          <div className="absolute top-0 left-0 p-3 bg-background/50 backdrop-blur-sm rounded-br-lg text-sm font-semibold text-foreground/80">
+          <div className="absolute top-0 left-0 p-2 bg-background/50 backdrop-blur-sm rounded-br-lg text-xs font-semibold text-foreground/80">
             Latest: {new Date(latestPhoto.date).toLocaleDateString('en-US', { 
               year: 'numeric', 
               month: 'short', 
@@ -61,8 +61,8 @@ export default function PhotoProgressCard({ photos }: { photos: PhotoEntry[] }) 
             })}
           </div>
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-            <Button variant="ghost" className="h-10 w-10 p-0 text-white hover:bg-white/20">
-              <Maximize className="h-6 w-6" />
+            <Button variant="ghost" className="h-8 w-8 p-0 text-white hover:bg-white/20">
+              <Maximize className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -74,33 +74,33 @@ export default function PhotoProgressCard({ photos }: { photos: PhotoEntry[] }) 
           <h4 className="text-lg font-semibold mb-3">Snapshots</h4>
             <div className="flex overflow-x-auto space-x-3 pb-2 scrollbar-hide-tablet">
               {olderPhotos.map((photo) => (
-                <div key={photo.id} className="flex-shrink-0 w-24 group relative">
+                <div key={photo.id} className="flex-shrink-0 w-20 group relative">
                   <img 
                     src={photo.imageUrl} 
                     alt={`Progress photo on ${photo.date}`} 
-                    className="aspect-[3/4] w-full object-cover rounded-lg max-h-32" 
+                    className="aspect-[3/4] w-full object-cover rounded-lg max-h-24" 
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = 'https://placehold.co/96x128/6b7280/fff?text=Photo+Not+Found';
+                      target.src = 'https://placehold.co/80x107/6b7280/fff?text=Photo+Not+Found';
                     }}
                   />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 rounded-lg">
-                  <Button variant="ghost" className="h-10 w-10 p-0 text-white hover:bg-white/20 mb-2">
-                    <Maximize className="h-6 w-6" />
-                  </Button>
-                  <Button variant="ghost" className="h-10 w-10 p-0 text-white hover:bg-white/20">
-                    <GitCompare className="h-6 w-6" />
-                  </Button>
-                </div>
-                <p className="text-xs text-center mt-1 text-muted-foreground">
-                  {new Date(photo.date).toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric' 
-                  })}
-                </p>
-              </div>
-            ))}
-          </div>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-1 rounded-lg">
+                    <Button variant="ghost" className="h-6 w-6 p-0 text-white hover:bg-white/20 mb-1">
+                      <Maximize className="h-3 w-3" />
+                    </Button>
+                    <Button variant="ghost" className="h-6 w-6 p-0 text-white hover:bg-white/20">
+                      <GitCompare className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-center mt-1 text-muted-foreground">
+                    {new Date(photo.date).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}
+                  </p>
+                </div>
+              ))}
+            </div>
         </>
       )}
     </motion.div>

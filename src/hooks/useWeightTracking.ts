@@ -44,24 +44,51 @@ export const useWeightTracking = () => {
     try {
       const today = new Date().toISOString().split('T')[0];
       
-      const { data, error } = await supabase
+      // First, check if there's already an entry for today
+      const { data: existingEntry } = await supabase
         .from('weight_entries')
-        .upsert({
-          user_id: user.id,
-          weight_kg: weight,
-          date: today,
-          notes
-        }, { 
-          onConflict: 'user_id,date',
-          ignoreDuplicates: false 
-        })
-        .select()
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('date', today)
         .single();
 
-      if (error) throw error;
+      let data;
+      if (existingEntry) {
+        // Update existing entry
+        const { data: updatedData, error } = await supabase
+          .from('weight_entries')
+          .update({
+            weight_kg: weight,
+            notes
+          })
+          .eq('id', existingEntry.id)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        data = updatedData;
+      } else {
+        // Create new entry
+        const { data: newData, error } = await supabase
+          .from('weight_entries')
+          .insert({
+            user_id: user.id,
+            weight_kg: weight,
+            date: today,
+            notes
+          })
+          .select()
+          .single();
+        
+        if (error) throw error;
+        data = newData;
+      }
 
-      // Update local state
-      setEntries(prev => [data, ...prev.filter(e => e.date !== data.date)]);
+      // Update local state - replace existing entry for today or add new one
+      setEntries(prev => {
+        const filtered = prev.filter(e => e.date !== today);
+        return [data, ...filtered];
+      });
       
       // Use smart refresh to update all related data
       await refreshAll();

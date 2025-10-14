@@ -75,11 +75,16 @@ const QuickStats = () => {
       // Get last 7 days of data
       const last7Days = checkins.slice(-7);
       
-      // Calculate averages from real data
-      const avgWater = last7Days.reduce((sum, c) => sum + (c.water_liters || 0), 0) / last7Days.length;
-      const avgEnergy = last7Days.reduce((sum, c) => sum + (c.energy || 0), 0) / last7Days.length;
-      const avgSleep = last7Days.reduce((sum, c) => sum + (c.sleep_hours || 0), 0) / last7Days.length;
-      const avgMood = last7Days.reduce((sum, c) => sum + (c.mood || 0), 0) / last7Days.length;
+      // Calculate averages from real data - only include days with actual data
+      const waterDays = last7Days.filter(c => c.water_liters && c.water_liters > 0);
+      const energyDays = last7Days.filter(c => c.energy && c.energy > 0);
+      const sleepDays = last7Days.filter(c => c.sleep_hours && c.sleep_hours > 0);
+      const moodDays = last7Days.filter(c => c.mood && c.mood > 0);
+      
+      const avgWater = waterDays.length > 0 ? waterDays.reduce((sum, c) => sum + c.water_liters, 0) / waterDays.length : 0;
+      const avgEnergy = energyDays.length > 0 ? energyDays.reduce((sum, c) => sum + c.energy, 0) / energyDays.length : 0;
+      const avgSleep = sleepDays.length > 0 ? sleepDays.reduce((sum, c) => sum + c.sleep_hours, 0) / sleepDays.length : 0;
+      const avgMood = moodDays.length > 0 ? moodDays.reduce((sum, c) => sum + c.mood, 0) / moodDays.length : 0;
 
       // Calculate weight trend from real data
       const weightTrend = getWeightTrend();
@@ -112,7 +117,7 @@ const QuickStats = () => {
     { label: "Avg. Sleep", value: stats.avgSleep, emoji: '😴', requiredPlan: 1, color: 'indigo' },
     { label: "Avg. Mood", value: stats.avgMood, emoji: '😊', requiredPlan: 1, color: 'rose' },
     ...(stats.hasWeightData ? [{ label: "Weight Trend", value: stats.weightTrend, emoji: '⚖️', requiredPlan: 3, trend: 'down', color: 'sky' }] : []),
-    { label: "Goal Adherence", value: `${stats.goalAdherence}%`, emoji: '🎯', requiredPlan: 3, trend: 'up', color: 'purple' },
+    ...(stats.goalAdherence > 0 ? [{ label: "Goal Adherence", value: `${stats.goalAdherence}%`, emoji: '🎯', requiredPlan: 3, trend: 'up', color: 'purple' }] : []),
   ];
 
   if (loading) {
