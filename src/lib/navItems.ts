@@ -34,11 +34,9 @@ export const getCustomerNavItems = (showLibrary: boolean = true, showProgress: b
     baseItems.splice(2, 0, { name: 'Library', href: '/customer/library', icon: Library, conditional: true });
   }
 
-  // Add Progress if user has payment plan
-  if (showProgress) {
-    const insertIndex = showLibrary ? 3 : 2; // Insert after Library or after My Programs
-    baseItems.splice(insertIndex, 0, { name: 'Progress', href: '/customer/progress', icon: TrendingUp, conditional: true });
-  }
+  // Always show Progress page - let AccessControl handle access restrictions
+  const insertIndex = showLibrary ? 3 : 2; // Insert after Library or after My Programs
+  baseItems.splice(insertIndex, 0, { name: 'Progress', href: '/customer/progress', icon: TrendingUp, conditional: true });
 
   return baseItems;
 };

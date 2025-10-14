@@ -26,7 +26,7 @@ const AppShell = () => {
 
   const navByRole = {
     coach: { main: coachNavItems, bottom: coachBottomNavItems },
-    customer: { main: getCustomerNavItems(shouldShowLink, planStatus.hasActivePlan), bottom: customerBottomNavItems },
+    customer: { main: getCustomerNavItems(shouldShowLink, true), bottom: customerBottomNavItems },
   };
 
   const navConfig = navByRole[profile.role as keyof typeof navByRole];
