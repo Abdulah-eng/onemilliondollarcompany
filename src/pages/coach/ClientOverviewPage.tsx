@@ -5,12 +5,14 @@ import ClientFilters from '@/components/coach/client-overview/ClientFilters';
 import ClientList from '@/components/coach/client-overview/ClientList';
 import ClientDetailModal from '@/components/coach/client-detail/ClientDetailModal';
 import { useCustomerDetail } from '@/hooks/useCustomerDetail';
+import { useTranslation } from 'react-i18next';
 
 const ClientOverviewPage = () => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const isMobile = useIsMobile();
   const { customer: selectedClient, loading: customerLoading } = useCustomerDetail(selectedClientId);
+  const { t } = useTranslation();
   
   console.log('ClientOverviewPage: selectedClientId:', selectedClientId);
   console.log('ClientOverviewPage: selectedClient:', selectedClient);
@@ -34,9 +36,9 @@ const ClientOverviewPage = () => {
     <>
       <div className="w-full max-w-7xl mx-auto px-4 py-8 space-y-10">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">Client Management 🚀</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t('clients.management')} 🚀</h1>
           <p className="text-md text-muted-foreground">
-            A detailed overview of all your clients, their status, and new requests.
+            {t('clients.description')}
           </p>
         </div>
 

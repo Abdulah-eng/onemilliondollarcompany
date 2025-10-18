@@ -9,6 +9,8 @@ import { ThemeProvider } from "next-themes";
 import { Loader2 } from "lucide-react";
 import StripeSyncHandler from "@/components/system/StripeSyncHandler";
 import AuthLinkHandler from "@/components/system/AuthLinkHandler";
+import { DiagnosticPanel } from "@/components/system/DiagnosticPanel";
+import "@/lib/i18n";
 
 // --- LAYOUTS ---
 import AppShell from "@/components/layouts/AppShell";
@@ -132,6 +134,9 @@ const ThemedApp = () => {
       <Routes>
         {/* 1. Landing Page (Outside AuthProvider for performance) */}
         <Route path="/" element={<LandingPage />} />
+
+        {/* Diagnostic page - accessible without authentication */}
+        <Route path="/diagnostic" element={<DiagnosticPanel />} />
 
         {/* Legal pages - accessible without authentication */}
         <Route path="/terms" element={

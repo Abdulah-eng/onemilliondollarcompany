@@ -17,12 +17,14 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 import { User, Search, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const MyCoach = () => {
     const { user, profile } = useAuth();
     const [hasCurrentCoach, setHasCurrentCoach] = useState(false);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('myCoach');
+    const { t } = useTranslation();
 
     const [isBioDrawerOpen, setIsBioDrawerOpen] = useState(false);
     const [isFilesDrawerOpen, setIsFilesDrawerOpen] = useState(false);
@@ -100,7 +102,7 @@ const MyCoach = () => {
             <div className="w-full max-w-5xl mx-auto px-4 py-8 flex items-center justify-center">
                 <div className="text-center">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                    <p className="text-muted-foreground">Loading your coaching information...</p>
+                    <p className="text-muted-foreground">{t('common.loading')}</p>
                 </div>
             </div>
         );
@@ -109,8 +111,8 @@ const MyCoach = () => {
     return (
         <div className="w-full max-w-5xl mx-auto px-4 py-8 space-y-8">
             <div className="px-2">
-                <h1 className="text-3xl font-bold text-foreground">Coaching Hub 🚀</h1>
-                <p className="mt-1 text-lg text-muted-foreground">Your complete coach management center.</p>
+                <h1 className="text-3xl font-bold text-foreground">{t('mycoach.coachingHub')} 🚀</h1>
+                <p className="mt-1 text-lg text-muted-foreground">{t('mycoach.description')}</p>
             </div>
 
             <Tabs
@@ -125,13 +127,13 @@ const MyCoach = () => {
                         value="myCoach"
                         className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-border/50 rounded-lg h-10 transition-all"
                     >
-                        <User className="w-4 h-4 mr-2"/> My Coach
+                        <User className="w-4 h-4 mr-2"/> {t('mycoach.myCoach')}
                     </TabsTrigger>
                     <TabsTrigger
                         value="explore"
                         className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-border/50 rounded-lg h-10 transition-all"
                     >
-                        <Search className="w-4 h-4 mr-2"/> Explore & History
+                        <Search className="w-4 h-4 mr-2"/> {t('mycoach.exploreHistory')}
                     </TabsTrigger>
                 </TabsList>
 
@@ -148,13 +150,13 @@ const MyCoach = () => {
                         />
                     ) : (
                         <div className="text-center py-12">
-                            <h3 className="text-xl font-semibold mb-2">You don't have any coach</h3>
-                            <p className="text-muted-foreground mb-4">Find a coach from the <span className="font-semibold text-primary">Explore & History</span> tab.</p>
+                            <h3 className="text-xl font-semibold mb-2">{t('mycoach.noCoach')}</h3>
+                            <p className="text-muted-foreground mb-4">{t('mycoach.findCoachFromTab')}</p>
                             <button 
                                 onClick={() => setActiveTab('explore')}
                                 className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                             >
-                                Go to Explore & History
+                                {t('mycoach.goToExplore')}
                             </button>
                         </div>
                     )}

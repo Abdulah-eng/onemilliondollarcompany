@@ -1,17 +1,20 @@
 // src/pages/onboarding/OnboardingSuccess.tsx
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Sparkles } from 'lucide-react';
+import { CheckCircle, Sparkles, Download, Loader2 } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
-import { useAuth } from '@/contexts/AuthContext'; // <-- IMPORT useAuth
+import { useAuth } from '@/contexts/AuthContext';
+import { useWelcomePDF } from '@/hooks/useWelcomePDF';
 
 const OnboardingSuccess = () => {
   const { clearState } = useOnboarding();
-  const { refreshProfile } = useAuth(); // <-- GET THE REFRESH FUNCTION
+  const { refreshProfile } = useAuth();
+  const { downloadPDF, saveToProfile, loading: pdfLoading, error: pdfError } = useWelcomePDF();
   const navigate = useNavigate();
+  const [pdfGenerated, setPdfGenerated] = useState(false);
 
   useEffect(() => {
     // Clean up the form state when the user leaves this page.
@@ -20,7 +23,16 @@ const OnboardingSuccess = () => {
     };
   }, [clearState]);
 
-  // THIS IS THE CORRECT LOGIC
+  const handleDownloadPDF = async () => {
+    try {
+      await downloadPDF();
+      await saveToProfile();
+      setPdfGenerated(true);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  };
+
   const handleGoToDashboard = async () => {
     // 1. First, tell the app to get the new profile data (onboarding_complete: true)
     await refreshProfile();
@@ -52,12 +64,42 @@ const OnboardingSuccess = () => {
               <FeatureHighlight emoji="🧘" title="Mindfulness Tools" subtitle="Build mental resilience." />
             </div>
 
-            <Button
-              onClick={handleGoToDashboard}
-              className="w-full !mt-8 text-lg py-6 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all"
-            >
-              Go to My Dashboard
-            </Button>
+            <div className="space-y-3">
+              <Button
+                onClick={handleDownloadPDF}
+                disabled={pdfLoading || pdfGenerated}
+                variant="outline"
+                className="w-full text-lg py-4 border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 font-semibold"
+              >
+                {pdfLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Generating Welcome PDF...
+                  </>
+                ) : pdfGenerated ? (
+                  <>
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    PDF Downloaded & Saved!
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-5 h-5 mr-2" />
+                    Download Welcome PDF
+                  </>
+                )}
+              </Button>
+              
+              {pdfError && (
+                <p className="text-sm text-red-600">{pdfError}</p>
+              )}
+
+              <Button
+                onClick={handleGoToDashboard}
+                className="w-full text-lg py-6 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+              >
+                Go to My Dashboard
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

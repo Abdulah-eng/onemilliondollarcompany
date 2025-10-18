@@ -22,6 +22,7 @@ import {
 import { useRealTimeClientData } from '@/hooks/useRealTimeClientData';
 import { useClientStatus } from '@/hooks/useClientStatus';
 import AwaitingOfferMessage from './AwaitingOfferMessage';
+import { useTranslation } from 'react-i18next';
 
 interface ClientProfileTabProps {
   client: any | null;
@@ -38,6 +39,7 @@ interface Program {
 const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
   const { clientData, loading } = useRealTimeClientData(client?.id);
   const { clientStatus } = useClientStatus(client?.id);
+  const { t } = useTranslation();
 
   const handleCopyInfo = () => {
     if (!clientData) return;
@@ -73,7 +75,7 @@ const ClientProfileTab: React.FC<ClientProfileTabProps> = ({ client }) => {
   if (!clientData) {
     return (
       <div className="text-center py-8">
-        <p className="text-muted-foreground">No client data available</p>
+        <p className="text-muted-foreground">{t('common.noDataAvailable')}</p>
       </div>
     );
   }

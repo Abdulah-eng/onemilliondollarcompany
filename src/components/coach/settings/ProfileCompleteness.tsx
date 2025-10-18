@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { CheckCircle2, Circle, Lightbulb } from 'lucide-react';
 import { CoachProfile } from '@/hooks/useCoachProfile';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileCompletenessProps {
   profile: CoachProfile;
@@ -36,47 +37,48 @@ export const calculateCompleteness = (profile: CoachProfile): number => {
   return Math.round((score / total) * 100);
 };
 
-const getProfileStrength = (percentage: number): { label: string; color: string } => {
-  if (percentage >= 90) return { label: 'Excellent', color: 'text-green-500' };
-  if (percentage >= 70) return { label: 'Good', color: 'text-blue-500' };
-  if (percentage >= 50) return { label: 'Fair', color: 'text-yellow-500' };
-  return { label: 'Weak', color: 'text-red-500' };
+const getProfileStrength = (percentage: number, t: any): { label: string; color: string } => {
+  if (percentage >= 90) return { label: t('settings.excellent'), color: 'text-green-500' };
+  if (percentage >= 70) return { label: t('settings.good'), color: 'text-blue-500' };
+  if (percentage >= 50) return { label: t('settings.fair'), color: 'text-yellow-500' };
+  return { label: t('settings.weak'), color: 'text-red-500' };
 };
 
 export const ProfileCompleteness: React.FC<ProfileCompletenessProps> = ({ profile }) => {
+  const { t } = useTranslation();
   const percentage = calculateCompleteness(profile);
-  const strength = getProfileStrength(percentage);
+  const strength = getProfileStrength(percentage, t);
 
   const items: CompletionItem[] = [
     {
-      label: 'Profile Photo',
+      label: t('settings.profilePhoto'),
       completed: !!profile.avatar_url,
-      tip: 'A professional photo builds trust'
+      tip: t('settings.profilePhotoTip')
     },
     {
-      label: 'Complete Bio (100+ chars)',
+      label: t('settings.completeBio'),
       completed: profile.bio.length > 100,
-      tip: 'Tell clients why you\'re the right coach'
+      tip: t('settings.completeBioTip')
     },
     {
-      label: 'Skills (3+ selected)',
+      label: t('settings.skills'),
       completed: profile.skills.length >= 3,
-      tip: 'Help clients find you based on expertise'
+      tip: t('settings.skillsTip')
     },
     {
-      label: 'Certifications',
+      label: t('settings.certifications'),
       completed: profile.certifications.length >= 1,
-      tip: 'Showcase your credentials to build credibility'
+      tip: t('settings.certificationsTip')
     },
     {
-      label: 'Social Links',
+      label: t('settings.socialLinks'),
       completed: profile.socials.length >= 1,
-      tip: 'Let clients see your content and community'
+      tip: t('settings.socialLinksTip')
     },
     {
-      label: 'Price Range',
+      label: t('settings.priceRange'),
       completed: !!(profile.price_min_cents && profile.price_max_cents),
-      tip: 'Set clear expectations for potential clients'
+      tip: t('settings.priceRangeTip')
     },
   ];
 
@@ -87,11 +89,11 @@ export const ProfileCompleteness: React.FC<ProfileCompletenessProps> = ({ profil
       <CardContent className="pt-6 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold">Profile Strength</h3>
+            <h3 className="text-lg font-semibold">{t('settings.profileStrength')}</h3>
             <p className="text-sm text-muted-foreground">
               <span className={cn('font-bold', strength.color)}>{strength.label}</span>
               {' • '}
-              {percentage}% Complete
+              {percentage}% {t('settings.complete')}
             </p>
           </div>
           <div className="text-3xl font-bold text-primary">{percentage}%</div>
@@ -103,7 +105,7 @@ export const ProfileCompleteness: React.FC<ProfileCompletenessProps> = ({ profil
           <div className="space-y-2 pt-2">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Lightbulb className="h-4 w-4 text-yellow-500" />
-              <span>Complete your profile to stand out:</span>
+              <span>{t('settings.completeProfileToStandOut')}</span>
             </div>
             <div className="space-y-1.5">
               {incompleteItems.map((item, idx) => (
@@ -122,7 +124,7 @@ export const ProfileCompleteness: React.FC<ProfileCompletenessProps> = ({ profil
         {percentage === 100 && (
           <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 dark:bg-green-950/30 p-3 rounded-md">
             <CheckCircle2 className="h-5 w-5" />
-            <span className="font-medium">Perfect! Your profile is complete and ready to attract clients.</span>
+            <span className="font-medium">{t('settings.profileCompleteMessage')}</span>
           </div>
         )}
       </CardContent>

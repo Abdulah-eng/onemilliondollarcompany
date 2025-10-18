@@ -20,6 +20,7 @@ import MentalHealthTrendChart from "./charts/MentalHealthTrendChart";
 import { useRealTimeClientData } from '@/hooks/useRealTimeClientData';
 import { useClientStatus } from '@/hooks/useClientStatus';
 import AwaitingOfferMessage from './AwaitingOfferMessage';
+import { useTranslation } from 'react-i18next';
 
 // --- Types ---
 interface DashboardProps {
@@ -212,11 +213,12 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
   const [weightRange, setWeightRange] = useState("1m");
   const { clientData, loading } = useRealTimeClientData(client?.id);
   const { clientStatus } = useClientStatus(client?.id);
+  const { t } = useTranslation();
 
   if (loading) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Loading progress data...
+        {t('common.loading')} {t('progress.title').toLowerCase()}...
       </div>
     );
   }
@@ -237,7 +239,7 @@ const ProgressProgramsTab: React.FC<DashboardProps> = ({ client }) => {
   if (!clientData) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        No client data available
+        {t('common.noDataAvailable')}
       </div>
     );
   }

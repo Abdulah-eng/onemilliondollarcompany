@@ -4,6 +4,7 @@ import { ChatView } from './ChatView';
 import { useConversations } from '@/hooks/useConversations';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface ChatLayoutProps {
   selectedConversationId: string | null;
@@ -16,11 +17,12 @@ export const ChatLayout: React.FC<ChatLayoutProps> = ({
 }) => {
   const { conversations, loading } = useConversations();
   const { profile } = useAuth();
+  const { t } = useTranslation();
 
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="text-muted-foreground">Loading conversations...</div>
+        <div className="text-muted-foreground">{t('messages.loadingConversations')}</div>
       </div>
     );
   }
@@ -54,8 +56,8 @@ export const ChatLayout: React.FC<ChatLayoutProps> = ({
         ) : (
           <div className="hidden md:flex flex-1 items-center justify-center">
             <div className="text-center text-muted-foreground">
-              <h3 className="text-lg font-medium mb-2">Select a conversation</h3>
-              <p>Choose a conversation from the list to start messaging</p>
+              <h3 className="text-lg font-medium mb-2">{t('messages.selectConversation')}</h3>
+              <p>{t('messages.chooseConversation')}</p>
             </div>
           </div>
         )}

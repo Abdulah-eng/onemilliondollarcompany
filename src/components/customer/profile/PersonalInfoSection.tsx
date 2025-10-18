@@ -13,6 +13,7 @@ import { useProfileUpdates } from '@/hooks/useProfileUpdates';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Edit, Save, X, Plus, Trash2, Calendar, MapPin, Ruler, Weight, User, Flag, Heart, Activity, Brain, Mail, Phone } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface OnboardingDetails {
   id: string;
@@ -100,6 +101,7 @@ export interface PersonalInfoSectionRef {
 const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSectionProps>(({ isGlobalEditing = false }, ref) => {
   const { user, profile } = useAuth();
   const { updateOnboarding, updateProfile, loading } = useProfileUpdates();
+  const { t } = useTranslation();
   const [onboardingData, setOnboardingData] = useState<OnboardingDetails | null>(null);
   const [profileData, setProfileData] = useState<any>(null);
   const [formData, setFormData] = useState<Partial<OnboardingDetails>>({});
@@ -292,7 +294,7 @@ const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSecti
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Contact & Personal Information
+              {t('profile.contactPersonalInfo')}
             </CardTitle>
           </div>
         </CardHeader>

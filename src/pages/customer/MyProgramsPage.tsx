@@ -6,6 +6,7 @@ import SlideInDetail from "@/components/customer/programsoverview/SlideInDetail"
 import { ScheduledProgramCard } from "@/components/customer/programsoverview/ScheduledProgramCard";
 import { useCustomerPrograms } from "@/hooks/useCustomerPrograms";
 import { isSameDay, parseISO, addDays } from "date-fns";
+import { useTranslation } from 'react-i18next';
 
 type TabType = "active" | "scheduled";
 
@@ -16,6 +17,7 @@ export default function MyProgramsPage() {
   const [isMobile, setIsMobile] = useState<boolean>(
     typeof window !== "undefined" ? window.innerWidth < 1024 : false
   );
+  const { t } = useTranslation();
 
   const { activeProgram, scheduledPrograms, loading } = useCustomerPrograms();
 
@@ -118,13 +120,13 @@ export default function MyProgramsPage() {
             />
           ) : (
             <div className="p-4 text-center border border-dashed rounded-2xl text-muted-foreground">
-              No active program schedule found.
+              {t('programs.noActiveProgram')}
             </div>
           )}
           <div className="space-y-6">
             {todayTasks.length === 0 ? (
               <div className="p-8 text-center border border-dashed rounded-2xl text-muted-foreground">
-                No tasks today!
+                {t('programs.noTasksToday')}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

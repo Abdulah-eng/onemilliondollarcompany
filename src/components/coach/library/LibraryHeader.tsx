@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface LibraryHeaderProps {
   activeCategory: LibraryCategory | null;
@@ -31,6 +32,7 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
   itemCount,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const { t } = useTranslation();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -53,7 +55,7 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
     <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-30 pt-6 pb-4 -mx-4 px-4 md:-mx-6 md:px-6">
       
       {/* Reduced Title Size: text-4xl -> text-3xl */}
-      <h1 className="text-3xl font-extrabold mb-3 text-center md:text-left">Your Library {activeCategory ? CATEGORY_MAP[activeCategory].emoji : '📚'}</h1>
+      <h1 className="text-3xl font-extrabold mb-3 text-center md:text-left">{t('library.title')} {activeCategory ? CATEGORY_MAP[activeCategory].emoji : '📚'}</h1>
 
       <div className="flex items-center space-x-2 md:space-x-4">
         {/* Main Search Input (Reduced Height: h-14 -> h-11, icon size, text size) */}
@@ -61,7 +63,7 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
           {/* Reduced icon size: h-5 w-5 -> h-4 w-4 */}
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder={`Search ${activeCategory ? CATEGORY_MAP[activeCategory].label : 'all content'}...`}
+            placeholder={t('library.searchPlaceholder', { category: activeCategory ? CATEGORY_MAP[activeCategory].label : t('library.allContent') })}
             // Reduced height: h-14 -> h-11. Reduced font: text-base -> text-sm. Reduced padding: pl-12 -> pl-10
             className="w-full pl-10 pr-10 h-11 rounded-xl border-2 shadow-inner bg-card/80 transition-all text-sm"
             value={searchTerm}
@@ -94,12 +96,12 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
             >
               {/* Reduced icon size: h-5 w-5 -> h-4 w-4 */}
               <Filter className="h-4 w-4" />
-              <span className='hidden sm:inline'>{activeCategory ? CATEGORY_MAP[activeCategory].emoji : 'Filter'}</span>
+              <span className='hidden sm:inline'>{activeCategory ? CATEGORY_MAP[activeCategory].emoji : t('library.filter')}</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-64 p-4 space-y-3 rounded-xl shadow-2xl" align="end">
             {/* Reduced font size: text-lg -> text-base */}
-            <h4 className="font-bold text-base">Filter by Type 💡</h4>
+            <h4 className="font-bold text-base">{t('library.filterByType')} 💡</h4>
             <div className="flex flex-col gap-2">
                 {/* Reduced font size: text-base -> text-sm, icon size: h-5 w-5 -> h-4 w-4 */}
                 <Button
@@ -107,7 +109,7 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
                     className='w-full justify-start text-sm'
                     onClick={clearCategory}
                 >
-                    <Zap className="h-4 w-4 mr-3" /> All Content
+                    <Zap className="h-4 w-4 mr-3" /> {t('library.allContent')}
                 </Button>
               {allCategories.map((cat) => {
                 const { label, icon: Icon } = CATEGORY_MAP[cat];
@@ -130,7 +132,7 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
       {/* Active Filter Display (Reduced Font Sizes) */}
       <div className="mt-3 flex items-center space-x-2 text-sm text-muted-foreground">
         {/* Reduced font size: text-base -> text-sm */}
-        <span className="font-medium text-sm text-foreground">{itemCount} items</span>
+        <span className="font-medium text-sm text-foreground">{itemCount} {t('library.items')}</span>
         <span className='text-lg font-light text-muted-foreground'>|</span>
         <Badge
             // Reduced padding and font size

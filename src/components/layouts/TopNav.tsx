@@ -12,6 +12,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useConversations } from '@/hooks/useConversations';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 
 interface TopNavProps {
   title?: string;
@@ -68,6 +69,7 @@ const TopNav = ({ title }: TopNavProps) => {
           <h1 className="text-lg font-semibold text-foreground truncate">{getPageTitle()}</h1>
         </div>
         <div className="flex items-center gap-3">
+          <LanguageSwitcher />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">

@@ -12,6 +12,7 @@ import {
   Filter
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface ClientFiltersProps {
   onFilterChange: (filters: {
@@ -23,6 +24,7 @@ interface ClientFiltersProps {
 const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
   const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
+  const { t } = useTranslation();
 
   const statusOptions = [
     { value: 'no_status', label: 'No Status', icon: Clock, color: 'bg-gray-100 text-gray-800' },
@@ -70,7 +72,7 @@ const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Filter className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold text-lg">Filter Clients</h3>
+            <h3 className="font-semibold text-lg">{t('clients.filterClients')}</h3>
           </div>
           {hasActiveFilters && (
             <Button
@@ -80,7 +82,7 @@ const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
               className="text-muted-foreground hover:text-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
             >
               <X className="w-4 h-4 mr-1" />
-              Clear All
+{t('clients.clearAll')}
             </Button>
           )}
         </div>
@@ -90,7 +92,7 @@ const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
           <div>
             <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-primary"></div>
-              Status
+{t('clients.status')}
             </h4>
             <div className="flex flex-wrap gap-2">
               {statusOptions.map((option) => {
@@ -119,7 +121,7 @@ const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
           <div>
             <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-secondary"></div>
-              Badges
+{t('clients.badges')}
             </h4>
             <div className="flex flex-wrap gap-2">
               {badgeOptions.map((option) => {
@@ -149,7 +151,7 @@ const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
             <div className="pt-4 border-t border-border/50">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full bg-accent"></div>
-                <span className="text-xs font-medium text-muted-foreground">Active Filters</span>
+                <span className="text-xs font-medium text-muted-foreground">{t('clients.activeFilters')}</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {selectedStatus.map((status) => {

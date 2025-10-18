@@ -4,20 +4,24 @@ import { Users, BookOpenCheck, TrendingUp, TrendingDown, DollarSign, Loader2 } f
 import { cn } from '@/lib/utils';
 import { useCoachDashboardStats } from '@/hooks/useCoachDashboard';
 import { useRealTimeMotivation } from '@/hooks/useRealTimeMotivation';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 
 const CoachHeader = () => {
   const { stats } = useCoachDashboardStats();
   const { motivationMessage, loading: motivationLoading } = useRealTimeMotivation();
   const { profile } = useAuth();
+  const { t } = useTranslation();
+  
   const metrics = [
-    { title: 'Total Clients', value: String(stats.totalClients), icon: Users, trend: 'up', trendValue: '', description: 'Since last month' },
-    { title: 'Total Earning', value: `$${stats.totalEarning.toLocaleString()}`, icon: DollarSign, trend: 'up', trendValue: '', description: 'All time net' },
-    { title: 'Active Programs', value: String(stats.activePrograms), icon: BookOpenCheck, trend: 'up', trendValue: '', description: 'Active clients' },
-    { title: 'Retention Rate', value: `${stats.retentionRate}%`, icon: TrendingUp, trend: 'up', trendValue: '', description: 'Subscribed customers' },
+    { title: t('dashboard.totalClients'), value: String(stats.totalClients), icon: Users, trend: 'up', trendValue: '', description: t('dashboard.sinceLastMonth') },
+    { title: t('dashboard.totalEarning'), value: `$${stats.totalEarning.toLocaleString()}`, icon: DollarSign, trend: 'up', trendValue: '', description: t('dashboard.allTimeNet') },
+    { title: t('dashboard.activePrograms'), value: String(stats.activePrograms), icon: BookOpenCheck, trend: 'up', trendValue: '', description: t('dashboard.activeClients') },
+    { title: t('dashboard.retentionRate'), value: `${stats.retentionRate}%`, icon: TrendingUp, trend: 'up', trendValue: '', description: t('dashboard.subscribedCustomers') },
   ];
-  const timeOfDay = new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening';
-  const coachName = profile?.full_name || 'Coach';
+  
+  const timeOfDay = new Date().getHours() < 12 ? t('common.morning') : new Date().getHours() < 18 ? t('common.afternoon') : t('common.evening');
+  const coachName = profile?.full_name || t('common.coach');
 
   const StatCard = ({ title, value, icon: Icon, trend, trendValue, description }) => {
     return (
@@ -48,11 +52,11 @@ const CoachHeader = () => {
       <Card className="relative border-none bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-lg animate-fade-in-down overflow-hidden rounded-xl">
         <CardContent className="p-6">
           <div className="pr-28">
-            <h1 className="text-2xl font-bold">Good {timeOfDay}, {coachName} 👋</h1>
+            <h1 className="text-2xl font-bold">{t('dashboard.goodMorning', { timeOfDay, coachName })} 👋</h1>
             {motivationLoading ? (
               <div className="flex items-center gap-2 mt-1">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <p className="opacity-80 text-sm italic">Loading your daily motivation...</p>
+                <p className="opacity-80 text-sm italic">{t('dashboard.loadingMotivation')}</p>
               </div>
             ) : motivationMessage ? (
               <div className="flex items-center gap-2 mt-1">
@@ -60,7 +64,7 @@ const CoachHeader = () => {
                 <p className="opacity-80 text-sm italic">"{motivationMessage.content}"</p>
               </div>
             ) : (
-              <p className="opacity-80 mt-1 text-sm italic">"Ready to make an impact today?"</p>
+              <p className="opacity-80 mt-1 text-sm italic">"{t('dashboard.readyToMakeImpact')}"</p>
             )}
           </div>
         </CardContent>

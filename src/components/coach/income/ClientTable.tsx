@@ -11,15 +11,18 @@ export interface ClientEarningUI {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { User, DollarSign, Calendar } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ClientTableProps { earnings: ClientEarningUI[]; }
 
 const ClientTable: React.FC<ClientTableProps> = ({ earnings }) => {
+  const { t } = useTranslation();
+  
   return (
     <Card className="shadow-lg">
       <CardHeader>
         <CardTitle className="text-xl font-bold flex items-center gap-2">
-          Client Income Breakdown 🤝
+          {t('income.clientIncomeBreakdown')} 🤝
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
@@ -27,10 +30,10 @@ const ClientTable: React.FC<ClientTableProps> = ({ earnings }) => {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
-                <TableHead className="w-[150px]"><User className="h-4 w-4 inline mr-1" /> Client</TableHead>
-                <TableHead><DollarSign className="h-4 w-4 inline mr-1" /> Total Earned</TableHead>
-                <TableHead>Contracts</TableHead>
-                <TableHead><Calendar className="h-4 w-4 inline mr-1" /> Last Payout</TableHead>
+                <TableHead className="w-[150px]"><User className="h-4 w-4 inline mr-1" /> {t('income.client')}</TableHead>
+                <TableHead><DollarSign className="h-4 w-4 inline mr-1" /> {t('income.totalEarned')}</TableHead>
+                <TableHead>{t('income.contracts')}</TableHead>
+                <TableHead><Calendar className="h-4 w-4 inline mr-1" /> {t('income.lastPayout')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

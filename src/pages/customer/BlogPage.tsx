@@ -9,12 +9,14 @@ import { Button } from '@/components/ui/button';
 import { History, Lock, Crown, Users, Loader2 } from 'lucide-react';
 import { useRealTimeBlog } from '@/hooks/useRealTimeBlog';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const BlogPage = () => {
     const [selectedPost, setSelectedPost] = useState<any>(null);
     const [isTimelineOpen, setIsTimelineOpen] = useState(false);
     const isDesktop = useMediaQuery('(min-width: 1024px)'); // Corresponds to lg breakpoint
     const { posts, loading, error, hasAccess } = useRealTimeBlog();
+    const { t } = useTranslation();
     // Map backend shape to UI-friendly post shape expected by components
     const uiPosts = (posts || []).map((p: any) => {
         const buildHtmlFromBlocks = (raw: any): string | null => {
@@ -108,7 +110,7 @@ const BlogPage = () => {
             <div className="w-full max-w-6xl mx-auto px-4 py-8 flex items-center justify-center">
                 <div className="text-center">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                    <p className="text-muted-foreground">Loading blog posts...</p>
+                    <p className="text-muted-foreground">{t('common.loading')}</p>
                 </div>
             </div>
         );
@@ -122,9 +124,9 @@ const BlogPage = () => {
                     <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
                         <Lock className="w-8 h-8 text-muted-foreground" />
                     </div>
-                    <h1 className="text-3xl font-bold tracking-tight">Blog Access Required</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">{t('blog.accessRequired')}</h1>
                     <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                        Access our exclusive blog content with expert insights, tips, and guidance from our professional coaches.
+                        {t('blog.accessDescription')}
                     </p>
                     
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -133,7 +135,7 @@ const BlogPage = () => {
                             className="bg-orange-500 hover:bg-orange-600 text-white"
                         >
                             <Crown className="w-4 h-4 mr-2" />
-                            Subscribe Now
+                            {t('blog.subscribeNow')}
                         </Button>
                         <Button 
                             onClick={handleFindCoach}
@@ -141,7 +143,7 @@ const BlogPage = () => {
                             className="border-orange-200 text-orange-600 hover:bg-orange-50"
                         >
                             <Users className="w-4 h-4 mr-2" />
-                            Find a Coach
+                            {t('blog.findCoach')}
                         </Button>
                     </div>
                 </div>
@@ -192,7 +194,7 @@ const BlogPage = () => {
                                     )}
                                 </div>
                                 <div className="lg:col-span-1 border-l pl-6 border-gray-200 dark:border-gray-700">
-                                    <h2 className="text-2xl font-bold mb-4">This Just In</h2>
+                                    <h2 className="text-2xl font-bold mb-4">{t('blog.thisJustIn')}</h2>
                                     <BlogTimeline posts={previousPosts.map(p => ({
                                       title: p.title,
                                       excerpt: p.introduction,
@@ -231,7 +233,7 @@ const BlogPage = () => {
                                   }} onReadMore={handleReadMore} />
                                 )}
                                 <div className="mt-8">
-                                    <h2 className="text-2xl font-bold mb-4">This Just In</h2>
+                                    <h2 className="text-2xl font-bold mb-4">{t('blog.thisJustIn')}</h2>
                                     <BlogTimeline posts={previousPosts.map(p => ({
                                       title: p.title,
                                       excerpt: p.introduction,

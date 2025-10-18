@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface BlogHeaderProps {
   activeCategory: BlogCategory | null;
@@ -20,6 +21,7 @@ const allCategories: BlogCategory[] = ['fitness', 'nutrition', 'mental health'];
 
 const BlogHeader: React.FC<BlogHeaderProps> = ({ activeCategory, onCategoryChange, onSearch, itemCount }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const { t } = useTranslation();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -39,13 +41,13 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({ activeCategory, onCategoryChang
 
   return (
     <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-30 pt-6 pb-4 -mx-4 px-4 md:-mx-6 md:px-6">
-      <h1 className="text-3xl font-extrabold mb-3 text-center md:text-left">Blog Posts ✍️</h1>
+      <h1 className="text-3xl font-extrabold mb-3 text-center md:text-left">{t('blog.title')} ✍️</h1>
 
       <div className="flex items-center space-x-2 md:space-x-4">
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder={`Search ${activeCategory ? CATEGORY_DETAILS[activeCategory].label : 'all posts'}...`}
+            placeholder={t('blog.searchPlaceholder', { category: activeCategory ? CATEGORY_DETAILS[activeCategory].label : t('blog.allPosts') })}
             className="w-full pl-10 pr-10 h-11 rounded-xl border-2 shadow-inner bg-card/80 transition-all text-sm"
             value={searchTerm}
             onChange={handleSearchChange}
@@ -73,18 +75,18 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({ activeCategory, onCategoryChang
               aria-label="Filter content"
             >
               <Filter className="h-4 w-4" />
-              <span className='hidden sm:inline'>{activeCategory ? CATEGORY_DETAILS[activeCategory].emoji : 'Filter'}</span>
+              <span className='hidden sm:inline'>{activeCategory ? CATEGORY_DETAILS[activeCategory].emoji : t('blog.filter')}</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-64 p-4 space-y-3 rounded-xl shadow-2xl" align="end">
-            <h4 className="font-bold text-base">Filter by Topic 💡</h4>
+            <h4 className="font-bold text-base">{t('blog.filterByTopic')} 💡</h4>
             <div className="flex flex-col gap-2">
                 <Button
                     variant={!activeCategory ? 'default' : 'ghost'}
                     className='w-full justify-start text-sm'
                     onClick={clearCategory}
                 >
-                    All Topics 📚
+{t('blog.allTopics')} 📚
                 </Button>
               {allCategories.map((cat) => {
                 const { label, icon: Icon } = CATEGORY_DETAILS[cat];
@@ -105,7 +107,7 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({ activeCategory, onCategoryChang
       </div>
 
       <div className="mt-3 flex items-center space-x-2 text-sm text-muted-foreground">
-        <span className="font-medium text-sm text-foreground">{itemCount} posts</span>
+        <span className="font-medium text-sm text-foreground">{itemCount} {t('blog.posts')}</span>
         <span className='text-lg font-light text-muted-foreground'>|</span>
         <Badge
             className={cn(

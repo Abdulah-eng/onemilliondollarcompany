@@ -5,17 +5,20 @@ import { Transaction } from '@/mockdata/income/mockIncome';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ListOrdered, TrendingUp, TrendingDown, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
 }
 
 const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transactions }) => {
+  const { t } = useTranslation();
+  
   return (
     <Card className="shadow-lg">
       <CardHeader>
         <CardTitle className="text-xl font-bold flex items-center gap-2">
-          Recent Activity 🕒
+          {t('income.recentActivity')} 🕒
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

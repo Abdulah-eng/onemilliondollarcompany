@@ -10,6 +10,7 @@ import { Mail, Phone, Lock, Globe, DollarSign, Save, CreditCard, Building2, Load
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface AccountSettingsProps {
   account: CoachAccount;
@@ -19,6 +20,7 @@ interface AccountSettingsProps {
 const AccountSettings: React.FC<AccountSettingsProps> = ({ account, onUpdate }) => {
   const [formData, setFormData] = useState(account);
   const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' });
+  const { t } = useTranslation();
   const [payoutForm, setPayoutForm] = useState({
     method: 'bank' as 'bank' | 'paypal' | 'stripe',
     bankName: '',
@@ -240,15 +242,15 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ account, onUpdate }) 
       <Card className="shadow-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
-            <Lock className="h-5 w-5" /> Change Password
+            <Lock className="h-5 w-5" /> {t('settings.changePassword')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Input type="password" placeholder="Current Password" value={passwordForm.current} onChange={e => setPasswordForm({ ...passwordForm, current: e.target.value })} />
-          <Input type="password" placeholder="New Password (min 8 chars)" value={passwordForm.new} onChange={e => setPasswordForm({ ...passwordForm, new: e.target.value })} />
-          <Input type="password" placeholder="Confirm New Password" value={passwordForm.confirm} onChange={e => setPasswordForm({ ...passwordForm, confirm: e.target.value })} />
+          <Input type="password" placeholder={t('auth.currentPassword')} value={passwordForm.current} onChange={e => setPasswordForm({ ...passwordForm, current: e.target.value })} />
+          <Input type="password" placeholder={t('auth.newPassword')} value={passwordForm.new} onChange={e => setPasswordForm({ ...passwordForm, new: e.target.value })} />
+          <Input type="password" placeholder={t('auth.confirmPassword')} value={passwordForm.confirm} onChange={e => setPasswordForm({ ...passwordForm, confirm: e.target.value })} />
           <Button onClick={handlePasswordChange} className="w-full bg-red-600 hover:bg-red-700">
-            Update Password
+            {t('settings.updatePassword')}
           </Button>
         </CardContent>
       </Card>
@@ -257,22 +259,22 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ account, onUpdate }) 
       <Card className="shadow-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
-            <Globe className="h-5 w-5" /> Preferences
+            <Globe className="h-5 w-5" /> {t('settings.preferences')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Label>Preferred Language</Label>
+          <Label>{t('settings.preferredLanguage')}</Label>
           <Select 
             value={formData.preferredLanguage} 
             onValueChange={(value) => setFormData({ ...formData, preferredLanguage: value as 'English' | 'Spanish' | 'German' })}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select Language" />
+              <SelectValue placeholder={t('language.select')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="English">English</SelectItem>
-              <SelectItem value="Spanish">Spanish</SelectItem>
-              <SelectItem value="German">German</SelectItem>
+              <SelectItem value="English">{t('language.english')}</SelectItem>
+              <SelectItem value="Spanish">{t('language.spanish')}</SelectItem>
+              <SelectItem value="German">{t('language.german')}</SelectItem>
             </SelectContent>
           </Select>
         </CardContent>

@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import imageCompression from 'browser-image-compression';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileHeaderProps {
   isGlobalEditing?: boolean;
@@ -25,6 +26,7 @@ const ProfileHeader = forwardRef<ProfileHeaderRef, ProfileHeaderProps>(({ isGlob
   const { planStatus, startTrial } = usePaymentPlan();
   const { updateProfile, loading } = useProfileUpdates();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [editName, setEditName] = useState(profile?.full_name || '');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -40,7 +42,7 @@ const ProfileHeader = forwardRef<ProfileHeaderRef, ProfileHeaderProps>(({ isGlob
   
   const avatar = profile?.avatar_url || 'https://placehold.co/256x256/6b7280/fff?text=Avatar';
   const fullName = profile?.full_name || profile?.email || 'Your Profile';
-  const role = profile?.role === 'coach' ? 'Coach' : 'Customer';
+  const role = profile?.role === 'coach' ? t('common.coach') : t('common.customer');
 
   const handleSaveName = async () => {
     if (!editName.trim()) {
@@ -215,7 +217,7 @@ const ProfileHeader = forwardRef<ProfileHeaderRef, ProfileHeaderProps>(({ isGlob
           </h2>
         )}
         <p className="text-sm text-muted-foreground mb-4">
-          {role} • {planStatus.hasActivePlan ? 'Premium Member' : 'Free Member'}
+          {role} • {planStatus.hasActivePlan ? t('profile.premiumMember') : t('profile.freeMember')}
         </p>
         <div className="flex gap-2 flex-wrap justify-center">
           {!planStatus.hasActivePlan ? (
@@ -228,7 +230,7 @@ const ProfileHeader = forwardRef<ProfileHeaderRef, ProfileHeaderProps>(({ isGlob
                   onClick={handleStartTrial}
                   disabled={isStartingTrial}
                 >
-                  {isStartingTrial ? 'Starting...' : 'Start 14-Day Trial'}
+                  {isStartingTrial ? t('profile.starting') : t('profile.startTrial')}
                 </Button>
               )}
               <Button 
@@ -251,7 +253,7 @@ const ProfileHeader = forwardRef<ProfileHeaderRef, ProfileHeaderProps>(({ isGlob
                 className="flex items-center gap-2"
               >
                 <CreditCard className="w-4 h-4" />
-                Manage Billing
+                {t('profile.manageBilling')}
               </Button>
               <Button 
                 size="sm" 
@@ -260,7 +262,7 @@ const ProfileHeader = forwardRef<ProfileHeaderRef, ProfileHeaderProps>(({ isGlob
                 className="flex items-center gap-2"
               >
                 <X className="w-4 h-4" />
-                Cancel
+                {t('common.cancel')}
               </Button>
             </>
           )}

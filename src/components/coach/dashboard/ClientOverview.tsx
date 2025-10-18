@@ -5,44 +5,46 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, MessageCircle, Clock, CheckCircle, AlertCircle, DollarSign, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRealTimeClientStatus } from '@/hooks/useRealTimeClientStatus';
+import { useTranslation } from 'react-i18next';
 
 const ClientOverview = () => {
   const { clients, loading } = useRealTimeClientStatus();
+  const { t } = useTranslation();
 
   const getStatusConfig = (status: string) => {
     const statusConfigs = {
       'no_status': { 
-        label: 'No Status', 
+        label: t('clientStatus.noStatus'), 
         icon: Clock, 
         className: 'bg-gray-100 text-gray-800 border-gray-200' 
       },
       'waiting_offer': { 
-        label: 'Waiting Offer', 
+        label: t('clientStatus.waitingOffer'), 
         icon: DollarSign, 
         className: 'bg-yellow-100 text-yellow-800 border-yellow-200' 
       },
       'missing_program': { 
-        label: 'Missing Program', 
+        label: t('clientStatus.missingProgram'), 
         icon: AlertCircle, 
         className: 'bg-red-100 text-red-800 border-red-200' 
       },
       'program_active': { 
-        label: 'Program Active', 
+        label: t('clientStatus.programActive'), 
         icon: CheckCircle, 
         className: 'bg-blue-100 text-blue-800 border-blue-200' 
       },
       'on_track': { 
-        label: 'On Track', 
+        label: t('clientStatus.onTrack'), 
         icon: CheckCircle, 
         className: 'bg-green-100 text-green-800 border-green-200' 
       },
       'off_track': { 
-        label: 'Off Track', 
+        label: t('clientStatus.offTrack'), 
         icon: AlertCircle, 
         className: 'bg-red-100 text-red-800 border-red-200' 
       },
       'soon_to_expire': { 
-        label: 'Soon to Expire', 
+        label: t('clientStatus.soonToExpire'), 
         icon: Clock, 
         className: 'bg-orange-100 text-orange-800 border-orange-200' 
       }
@@ -66,7 +68,7 @@ const ClientOverview = () => {
         <div className="flex items-center justify-center py-8">
           <div className="text-center">
             <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Loading client statuses...</p>
+            <p className="text-sm text-muted-foreground">{t('common.loading')} {t('dashboard.clientStatuses').toLowerCase()}...</p>
           </div>
         </div>
       </div>
@@ -75,8 +77,8 @@ const ClientOverview = () => {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-foreground">Client Statuses</h2>
-      <p className="text-sm text-muted-foreground -mt-2">An overview of all your clients and their current status.</p>
+      <h2 className="text-2xl font-bold text-foreground">{t('dashboard.clientStatuses')}</h2>
+      <p className="text-sm text-muted-foreground -mt-2">{t('dashboard.clientStatusesDescription')}</p>
       <div className="space-y-4">
         {clients.slice(0, 5).map((client) => {
           const statusConfig = getStatusConfig(client.status);
@@ -92,7 +94,7 @@ const ClientOverview = () => {
                   </span>
                   <div className="flex-1">
                     <p className="text-base font-semibold">{client.full_name || 'Client'}</p>
-                    <p className="text-xs text-muted-foreground">{client.plan || 'Free'} Plan</p>
+                    <p className="text-xs text-muted-foreground">{client.plan || t('common.free')} {t('common.plan')}</p>
                   </div>
                 </Link>
                 
@@ -118,7 +120,7 @@ const ClientOverview = () => {
           );
         })}
         {clients.length === 0 && (
-          <div className="text-sm text-muted-foreground">No clients yet.</div>
+          <div className="text-sm text-muted-foreground">{t('dashboard.noClientsYet')}</div>
         )}
       </div>
     </div>

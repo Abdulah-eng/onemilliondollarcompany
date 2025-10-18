@@ -10,11 +10,13 @@ import ProfileFAB from '@/components/customer/profile/ProfileFAB';
 import { useProfileUpdates } from '@/hooks/useProfileUpdates';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRefresh } from '@/contexts/RefreshContext';
+import { useTranslation } from 'react-i18next';
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { updateProfile, updateOnboarding, loading } = useProfileUpdates();
+  const { t } = useTranslation();
   const { refreshProfile } = useAuth();
   const { refreshProfile: smartRefreshProfile } = useRefresh();
   
@@ -77,8 +79,8 @@ const ProfilePage = () => {
       <div className="px-2">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Profile</h1>
-            <p className="mt-1 text-lg text-muted-foreground">View all your profile details here.</p>
+            <h1 className="text-3xl font-bold text-foreground">{t('profile.title')}</h1>
+            <p className="mt-1 text-lg text-muted-foreground">{t('profile.description')}</p>
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { usePaymentPlan } from '@/hooks/usePaymentPlan';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Crown, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // --- NEW & UPDATED COMPONENT IMPORTS ---
 import HeroProgressSnapshot from '@/components/customer/progress/HeroProgressSnapshot';
@@ -23,6 +24,7 @@ import WeightTrendCard from '@/components/customer/progress/WeightTrendCard';
 export default function ProgressPage() {
   const { progressData: data, loading } = useCustomerProgress();
   const { planStatus } = usePaymentPlan();
+  const { t } = useTranslation();
 
   // State for the detail modal
   const [modalData, setModalData] = useState<{ title: string; content: React.ReactNode } | null>(null);
@@ -40,9 +42,9 @@ export default function ProgressPage() {
           <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
             <Lock className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h1 className="text-4xl font-bold tracking-tight">Progress Tracking</h1>
+          <h1 className="text-4xl font-bold tracking-tight">{t('progress.tracking')}</h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Unlock detailed progress tracking and analytics with a paid plan. Track your fitness journey, monitor trends, and get personalized insights.
+            {t('progress.unlockDescription')}
           </p>
           
           <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5 max-w-md mx-auto">
@@ -99,7 +101,7 @@ export default function ProgressPage() {
           <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
             <div className="text-2xl">📊</div>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">Your Progress</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('progress.yourProgress')}</h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Stay consistent with your daily check-ins to track your progress and see your trends grow over time.
           </p>
@@ -143,7 +145,7 @@ export default function ProgressPage() {
       <div className="w-full max-w-4xl mx-auto px-4 py-8 pb-28 space-y-10">
         {/* --- HEADER --- */}
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Your Progress</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('progress.yourProgress')}</h1>
           <p className="text-muted-foreground">A detailed overview of your wellness journey.</p>
         </div>
 

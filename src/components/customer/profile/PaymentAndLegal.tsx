@@ -12,6 +12,7 @@ import { useState, useEffect } from 'react';
 import { usePaymentInfo } from '@/hooks/usePaymentInfo';
 import { useCurrencyDetection } from '@/hooks/useCurrencyDetection';
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from 'react-i18next';
 
 const PaymentAndLegal = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const PaymentAndLegal = () => {
   const { paymentInfo, loading: paymentLoading } = usePaymentInfo();
   const { detectedCurrency, getCurrencyOption } = useCurrencyDetection();
   const [selectedCurrency, setSelectedCurrency] = useState(detectedCurrency);
+  const { t } = useTranslation();
 
   // Update selected currency when detected currency changes
   useEffect(() => {
@@ -126,7 +128,7 @@ const PaymentAndLegal = () => {
   return (
     <div className="space-y-6">
       <Card className="shadow-md rounded-2xl p-6">
-        <h3 className="text-xl font-semibold mb-4">Settings & Legal</h3>
+        <h3 className="text-xl font-semibold mb-4">{t('profile.settingsLegal')}</h3>
         <Accordion type="multiple" className="w-full">
           <AccordionItem value="item-1">
             <AccordionTrigger className="text-base font-medium">Payment & Subscription</AccordionTrigger>
