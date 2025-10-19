@@ -38,8 +38,25 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave, initial
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { items: libraryItems, loading: libraryLoading } = useCoachLibrary();
   
-  // Filter library items for exercises only
-  const exerciseItems = libraryItems.filter(item => item.category === 'exercise');
+  // Filter library items for exercises only and convert to ExerciseItem type
+  const exerciseItems: ExerciseItem[] = libraryItems
+    .filter(item => item.category === 'exercise')
+    .map(item => {
+      const details = (item.details as any) || {};
+      return {
+        id: item.id,
+        name: item.name,
+        type: details.type || 'exercise',
+        description: item.introduction || '',
+        muscleGroups: details.muscle_groups || [],
+        equipment: details.equipment || [],
+        difficulty: details.difficulty,
+        sets: details.sets,
+        reps: details.reps,
+        duration: details.duration,
+        content: (item as any).content
+      } as ExerciseItem;
+    });
   const [searchResults, setSearchResults] = useState<ExerciseItem[]>(exerciseItems);
 
   // ⭐ CALCULATE UNIQUE KEY
@@ -67,7 +84,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave, initial
   }, []);
 
 
-  // Handle exercise search with enhanced filtering (no change needed to search logic itself)
+  // Handle exercise search with enhanced filtering
   const handleSearch = useCallback((query: string, filterType?: any, muscleGroup?: string, equipment?: string) => {
     let filtered = exerciseItems;
 
@@ -77,7 +94,7 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave, initial
 
     if (muscleGroup && muscleGroup !== 'all') {
       filtered = filtered.filter(exercise => 
-        exercise.muscleGroups.some(group => 
+        exercise.muscleGroups?.some(group => 
           group.toLowerCase() === muscleGroup.toLowerCase()
         )
       );
@@ -95,8 +112,8 @@ const FitnessBuilder: React.FC<FitnessBuilderProps> = ({ onBack, onSave, initial
       const searchTerm = query.toLowerCase();
       filtered = filtered.filter(exercise =>
         exercise.name.toLowerCase().includes(searchTerm) ||
-        exercise.description.toLowerCase().includes(searchTerm) ||
-        exercise.muscleGroups.some(group => 
+        exercise.description?.toLowerCase().includes(searchTerm) ||
+        exercise.muscleGroups?.some(group => 
           group.toLowerCase().includes(searchTerm)
         ) ||
         exercise.equipment?.some(eq => 

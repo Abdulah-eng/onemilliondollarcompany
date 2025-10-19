@@ -9,10 +9,11 @@ export const useWelcomePDF = () => {
   const [error, setError] = useState<string | null>(null);
 
   const generateWelcomeData = (): WelcomePDFData => {
+    const onboardingDetails = ((profile as any)?.onboarding_details as any) || {};
     return {
       userName: profile?.full_name || user?.email?.split('@')[0] || 'User',
       userEmail: user?.email || '',
-      goals: profile?.goals || [],
+      goals: onboardingDetails.goals || [],
       startDate: new Date().toLocaleDateString(),
       platformName: 'Harmony Stride'
     };
@@ -120,6 +121,6 @@ export const useWelcomePDF = () => {
     saveToProfile,
     loading,
     error,
-    hasWelcomePDF: Boolean(profile?.welcome_pdf_url)
+    hasWelcomePDF: Boolean((profile as any)?.welcome_pdf_url)
   };
 };

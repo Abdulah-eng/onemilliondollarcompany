@@ -83,8 +83,44 @@ export const usePaymentPlan = () => {
     return { error };
   };
 
+  const refreshPaymentPlan = async () => {
+    if (!profile) return;
+    // Trigger re-check by simulating a profile update
+    setPlanStatus(prev => ({ ...prev, loading: true }));
+    setTimeout(() => {
+      if (profile) {
+        const now = new Date();
+        const planExpiry = profile.plan_expiry ? new Date(profile.plan_expiry) : null;
+        
+        const hasActivePlan = Boolean(
+          profile.plan && 
+          profile.plan !== 'trial' && 
+          (planExpiry ? planExpiry > now : true)
+        );
+        
+        const planExpired = Boolean(
+          profile.plan && 
+          planExpiry && 
+          planExpiry <= now
+        );
+
+        const hasUsedTrial = Boolean((profile as any).has_used_trial) || profile.plan === 'trial' || (planExpired && profile.plan === 'trial');
+        const needsUpgrade = !hasActivePlan && profile.onboarding_complete;
+
+        setPlanStatus({
+          hasActivePlan,
+          planExpired,
+          hasUsedTrial,
+          needsUpgrade,
+          loading: false
+        });
+      }
+    }, 100);
+  };
+
   return {
     planStatus,
-    startTrial
+    startTrial,
+    refreshPaymentPlan
   };
 };

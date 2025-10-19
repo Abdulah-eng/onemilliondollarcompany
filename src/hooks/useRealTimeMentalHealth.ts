@@ -101,8 +101,8 @@ export const useRealTimeMentalHealth = () => {
             meditationMinutes: programData.meditation_minutes || 0,
             journalingCompleted: programData.journaling_completed || false,
             source: 'mental_health_program' as const,
-            sourceId: entry.program?.id || '',
-            sourceName: entry.program?.name || 'Mental Health Program'
+            sourceId: (entry.program as any)?.id || '',
+            sourceName: (entry.program as any)?.name || 'Mental Health Program'
           };
         }) || [];
 

@@ -49,8 +49,28 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave, ini
   const [selectedSection, setSelectedSection] = useState<MealSection>('breakfast');
   const { items: libraryItems, loading: libraryLoading } = useCoachLibrary();
   
-  // Filter library items for recipes only
-  const recipeItems = libraryItems.filter(item => item.category === 'recipe');
+  // Filter library items for recipes only and convert type
+  const recipeItems: RecipeItem[] = libraryItems
+    .filter(item => item.category === 'recipe')
+    .map(item => {
+      const details = (item.details as any) || {};
+      return {
+        id: item.id,
+        name: item.name,
+        description: item.introduction || '',
+        mealTypes: details.meal_types || [],
+        ingredientTypes: details.ingredient_types || [],
+        calories: details.calories || 0,
+        protein: details.protein || 0,
+        carbs: details.carbs || 0,
+        fat: details.fat || 0,
+        prepTime: details.prep_time,
+        cookTime: details.cook_time,
+        servings: details.servings,
+        difficulty: details.difficulty,
+        content: (item as any).content
+      } as RecipeItem;
+    });
   const [searchResults, setSearchResults] = useState<RecipeItem[]>(recipeItems);
   
   // ⭐ CALCULATE UNIQUE KEY
@@ -87,24 +107,24 @@ const NutritionBuilder: React.FC<NutritionBuilderProps> = ({ onBack, onSave, ini
     setActiveDay(INITIAL_WEEK_DAY); // Reset to Monday when week changes
   }, []);
 
-  // Handle recipe search with enhanced filtering (unchanged)
+  // Handle recipe search with enhanced filtering
   const handleSearch = useCallback((query: string, mealTypeFilter?: MealType | 'all', ingredientType?: IngredientType | 'all') => {
     let filtered = recipeItems;
 
     if (mealTypeFilter && mealTypeFilter !== 'all') {
-      filtered = filtered.filter(recipe => recipe.mealTypes.includes(mealTypeFilter as MealType));
+      filtered = filtered.filter(recipe => recipe.mealTypes?.includes(mealTypeFilter as MealType));
     }
 
     if (ingredientType && ingredientType !== 'all') {
-      filtered = filtered.filter(recipe => recipe.ingredientTypes.includes(ingredientType as IngredientType));
+      filtered = filtered.filter(recipe => recipe.ingredientTypes?.includes(ingredientType as IngredientType));
     }
 
     if (query.trim()) {
       const searchTerm = query.toLowerCase();
       filtered = filtered.filter(recipe =>
         recipe.name.toLowerCase().includes(searchTerm) ||
-        recipe.description.toLowerCase().includes(searchTerm) ||
-        recipe.ingredientTypes.some(type => type.toLowerCase().includes(searchTerm))
+        recipe.description?.toLowerCase().includes(searchTerm) ||
+        recipe.ingredientTypes?.some(type => type.toLowerCase().includes(searchTerm))
       );
     }
 

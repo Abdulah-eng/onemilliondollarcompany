@@ -50,13 +50,8 @@ const ProgramBuilder = () => {
           title: program.name,
           description: program.description,
           plan: program.plan || {}, // Load existing plan data from program.plan
-          // Load existing program details from plan data
-          muscleGroups: program.plan?.muscleGroups || [],
-          equipment: program.plan?.equipment || [],
-          benefits: program.plan?.benefits || '',
-          allergies: program.plan?.allergies || '',
-          assignedTo: program.assigned_to,
-          scheduledDate: program.scheduled_date,
+          assignedTo: (program as any).assignedTo,
+          scheduledDate: (program as any).scheduledDate,
         });
         didLoadRef.current = id;
       } else {

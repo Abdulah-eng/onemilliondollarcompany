@@ -27,12 +27,13 @@ export const useTrendAnalysis = () => {
         setTrends(trendAnalysis);
 
         // Get user goals from profile or onboarding details
-        const userGoals = profile?.goals || [];
+        const onboardingDetails = ((profile as any)?.onboarding_details as any) || {};
+        const userGoals = onboardingDetails.goals || [];
         const userProfile = {
-          age: profile?.age,
-          fitnessLevel: profile?.fitness_level,
-          injuries: profile?.injuries || [],
-          allergies: profile?.allergies || []
+          age: onboardingDetails.age,
+          fitnessLevel: onboardingDetails.fitness_level,
+          injuries: onboardingDetails.injuries || [],
+          allergies: onboardingDetails.allergies || []
         };
 
         // Generate AI recommendations

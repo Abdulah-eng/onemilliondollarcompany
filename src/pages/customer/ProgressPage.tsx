@@ -83,7 +83,7 @@ export default function ProgressPage() {
     (data.dailyCheckins && data.dailyCheckins.length >= 7) ||
     (data.nutrition && data.nutrition.macros && data.nutrition.macros.length >= 7) ||
     (data.fitnessProgression && Object.values(data.fitnessProgression).some(progression => progression.length >= 7)) ||
-    (data.mentalHealth && data.mentalHealth.length >= 7)
+    (data.mentalHealth && (data.mentalHealth as any).length >= 7)
   );
 
   // Check if user has any data at all (for basic display)
@@ -91,7 +91,7 @@ export default function ProgressPage() {
     (data.dailyCheckins && data.dailyCheckins.length > 0) ||
     (data.nutrition && data.nutrition.macros && data.nutrition.macros.length > 0) ||
     (data.fitnessProgression && Object.values(data.fitnessProgression).some(progression => progression.length > 0)) ||
-    (data.mentalHealth && data.mentalHealth.length > 0)
+    (data.mentalHealth && (data.mentalHealth as any).length > 0)
   );
 
   if (!hasAnyData) {
@@ -185,7 +185,7 @@ export default function ProgressPage() {
         )}
 
         {/* 6. Mental Health Progression - Only show if we have minimum mental health data */}
-        {data.mentalHealth && data.mentalHealth.length >= 7 && (
+        {data.mentalHealth && (data.mentalHealth as any).length >= 7 && (
           <MentalHealthProgression mentalHealth={data.mentalHealth} dailyCheckins={data.dailyCheckins}/>
         )}
 

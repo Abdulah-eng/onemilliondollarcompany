@@ -324,8 +324,8 @@ export const useRealTimeClientData = (clientId?: string) => {
           id: checkin.id,
           date: checkin.created_at,
           message: checkin.message,
-          response: checkin.response,
-          rating: checkin.rating,
+          response: (checkin as any).response || null,
+          rating: (checkin as any).rating || null,
           status: checkin.status as 'pending' | 'responded',
         })),
       });

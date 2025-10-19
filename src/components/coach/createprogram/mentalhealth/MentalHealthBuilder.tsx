@@ -46,8 +46,22 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
   const [selectedSection, setSelectedSection] = useState<MentalHealthSection>('morning');
   const { items: libraryItems, loading: libraryLoading } = useCoachLibrary();
   
-  // Filter library items for mental health activities only
-  const mentalHealthItems = libraryItems.filter(item => item.category === 'mental health');
+  // Filter library items for mental health activities only and convert type
+  const mentalHealthItems: MentalHealthActivity[] = libraryItems
+    .filter(item => item.category === 'mental health')
+    .map(item => {
+      const details = (item.details as any) || {};
+      return {
+        id: item.id,
+        name: item.name,
+        description: item.introduction || '',
+        type: details.type || 'meditation',
+        focusAreas: details.focus_areas || [],
+        durationMinutes: details.duration_minutes || 10,
+        difficulty: details.difficulty,
+        content: (item as any).content
+      } as MentalHealthActivity;
+    });
   const [searchResults, setSearchResults] = useState<MentalHealthActivity[]>(mentalHealthItems);
 
   // ⭐ CALCULATE UNIQUE KEY
@@ -84,21 +98,21 @@ const MentalHealthBuilder: React.FC<MentalHealthBuilderProps> = ({ onBack, onSav
     setActiveDay(INITIAL_WEEK_DAY); // Reset to Monday when week changes
   }, []);
   
-  // Handlers for search (unchanged)
+  // Handlers for search
   const handleSearch = useCallback((query: string, activityTypeFilter?: ActivityType | 'all', focusArea?: FocusArea | 'all') => {
     let filtered = mentalHealthItems;
     if (activityTypeFilter && activityTypeFilter !== 'all') {
       filtered = filtered.filter(activity => activity.type === activityTypeFilter);
     }
     if (focusArea && focusArea !== 'all') {
-      filtered = filtered.filter(activity => activity.focusAreas.includes(focusArea as FocusArea));
+      filtered = filtered.filter(activity => activity.focusAreas?.includes(focusArea as FocusArea));
     }
     if (query.trim()) {
       const searchTerm = query.toLowerCase();
       filtered = filtered.filter(activity =>
         activity.name.toLowerCase().includes(searchTerm) ||
-        activity.description.toLowerCase().includes(searchTerm) ||
-        activity.focusAreas.some(area => area.toLowerCase().includes(searchTerm))
+        activity.description?.toLowerCase().includes(searchTerm) ||
+        activity.focusAreas?.some(area => area.toLowerCase().includes(searchTerm))
       );
     }
     setSearchResults(filtered);

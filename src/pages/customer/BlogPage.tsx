@@ -178,16 +178,16 @@ const BlogPage = () => {
                                     {latestPost && (
                                       <FeaturedPost post={{
                                         title: latestPost.title,
-                                        excerpt: latestPost.introduction,
-                                        imageUrl: latestPost.cover_url || 'https://placehold.co/1024x512',
+                                        excerpt: (latestPost as any).introduction || latestPost.excerpt,
+                                        imageUrl: (latestPost as any).cover_url || latestPost.imageUrl || 'https://placehold.co/1024x512',
                                         author: { 
-                                          name: latestPost.author_name, 
-                                          avatarUrl: latestPost.author_avatar || 'https://placehold.co/64x64',
-                                          id: latestPost.author_id
+                                          name: (latestPost as any).author_name || latestPost.author.name, 
+                                          avatarUrl: (latestPost as any).author_avatar || latestPost.author.avatarUrl || 'https://placehold.co/64x64',
+                                          id: (latestPost as any).author_id || latestPost.author.id
                                         },
-                                        date: new Date(latestPost.updated_at).toLocaleDateString(),
-                                        readTime: `${latestPost.read_time} min read`,
-                                        slug: latestPost.id,
+                                        date: (latestPost as any).updated_at ? new Date((latestPost as any).updated_at).toLocaleDateString() : latestPost.date,
+                                        readTime: (latestPost as any).read_time ? `${(latestPost as any).read_time} min read` : latestPost.readTime,
+                                        slug: latestPost.id || latestPost.slug,
                                         content: latestPost.content,
                                         category: latestPost.category || 'fitness',
                                       }} onReadMore={handleReadMore} />
@@ -197,16 +197,16 @@ const BlogPage = () => {
                                     <h2 className="text-2xl font-bold mb-4">{t('blog.thisJustIn')}</h2>
                                     <BlogTimeline posts={previousPosts.map(p => ({
                                       title: p.title,
-                                      excerpt: p.introduction,
-                                      imageUrl: p.cover_url || 'https://placehold.co/512x256',
+                                      excerpt: (p as any).introduction || p.excerpt,
+                                      imageUrl: (p as any).cover_url || p.imageUrl || 'https://placehold.co/512x256',
                                       author: { 
-                                        name: p.author_name, 
-                                        avatarUrl: p.author_avatar || 'https://placehold.co/32x32',
-                                        id: p.author_id
+                                        name: (p as any).author_name || p.author.name, 
+                                        avatarUrl: (p as any).author_avatar || p.author.avatarUrl || 'https://placehold.co/32x32',
+                                        id: (p as any).author_id || p.author.id
                                       },
-                                      date: new Date(p.updated_at).toLocaleDateString(),
-                                      readTime: `${p.read_time} min read`,
-                                      slug: p.id,
+                                      date: (p as any).updated_at ? new Date((p as any).updated_at).toLocaleDateString() : p.date,
+                                      readTime: (p as any).read_time ? `${(p as any).read_time} min read` : p.readTime,
+                                      slug: p.id || p.slug,
                                       content: p.content,
                                       category: p.category || 'fitness',
                                     }))} onReadMore={handleReadMore} />
@@ -218,16 +218,16 @@ const BlogPage = () => {
                                 {latestPost && (
                                   <FeaturedPost post={{
                                     title: latestPost.title,
-                                    excerpt: latestPost.introduction,
-                                    imageUrl: latestPost.cover_url || 'https://placehold.co/1024x512',
+                                    excerpt: (latestPost as any).introduction || latestPost.excerpt,
+                                    imageUrl: (latestPost as any).cover_url || latestPost.imageUrl || 'https://placehold.co/1024x512',
                                     author: { 
-                                      name: latestPost.author_name, 
-                                      avatarUrl: latestPost.author_avatar || 'https://placehold.co/64x64',
-                                      id: latestPost.author_id
+                                      name: (latestPost as any).author_name || latestPost.author.name, 
+                                      avatarUrl: (latestPost as any).author_avatar || latestPost.author.avatarUrl || 'https://placehold.co/64x64',
+                                      id: (latestPost as any).author_id || latestPost.author.id
                                     },
-                                    date: new Date(latestPost.updated_at).toLocaleDateString(),
-                                    readTime: `${latestPost.read_time} min read`,
-                                    slug: latestPost.id,
+                                    date: (latestPost as any).updated_at ? new Date((latestPost as any).updated_at).toLocaleDateString() : latestPost.date,
+                                    readTime: (latestPost as any).read_time ? `${(latestPost as any).read_time} min read` : latestPost.readTime,
+                                    slug: latestPost.id || latestPost.slug,
                                     content: latestPost.content,
                                     category: latestPost.category || 'fitness',
                                   }} onReadMore={handleReadMore} />
@@ -236,16 +236,16 @@ const BlogPage = () => {
                                     <h2 className="text-2xl font-bold mb-4">{t('blog.thisJustIn')}</h2>
                                     <BlogTimeline posts={previousPosts.map(p => ({
                                       title: p.title,
-                                      excerpt: p.introduction,
-                                      imageUrl: p.cover_url || 'https://placehold.co/512x256',
+                                      excerpt: (p as any).introduction || p.excerpt,
+                                      imageUrl: (p as any).cover_url || p.imageUrl || 'https://placehold.co/512x256',
                                       author: { 
-                                        name: p.author_name, 
-                                        avatarUrl: p.author_avatar || 'https://placehold.co/32x32',
-                                        id: p.author_id
+                                        name: (p as any).author_name || p.author.name, 
+                                        avatarUrl: (p as any).author_avatar || p.author.avatarUrl || 'https://placehold.co/32x32',
+                                        id: (p as any).author_id || p.author.id
                                       },
-                                      date: new Date(p.updated_at).toLocaleDateString(),
-                                      readTime: `${p.read_time} min read`,
-                                      slug: p.id,
+                                      date: (p as any).updated_at ? new Date((p as any).updated_at).toLocaleDateString() : p.date,
+                                      readTime: (p as any).read_time ? `${(p as any).read_time} min read` : p.readTime,
+                                      slug: p.id || p.slug,
                                       content: p.content,
                                       category: p.category || 'fitness',
                                     }))} onReadMore={handleReadMore} />
