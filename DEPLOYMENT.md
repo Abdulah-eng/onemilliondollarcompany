@@ -28,8 +28,9 @@ VITE_API_PROXY_TARGET=http://localhost:3000
 # Stripe Configuration
 VITE_STRIPE_PUBLISHABLE_KEY=pk_live_...
 
-# App Configuration
-VITE_APP_URL=https://your-app-domain.com
+# App Configuration (CRITICAL for magic links)
+# Note: trainwisestudio.com is hardcoded in production, but you can override with:
+VITE_APP_URL=https://trainwisestudio.com
 ```
 
 ### Backend (.env)
@@ -38,7 +39,8 @@ Create a `.env` file in the `backend/` directory:
 
 ```env
 PORT=3000
-PUBLIC_APP_URL=https://your-app-domain.com
+# trainwisestudio.com is hardcoded as fallback, but you can override with:
+PUBLIC_APP_URL=https://trainwisestudio.com
 
 # Stripe Configuration
 STRIPE_SECRET_KEY=sk_live_...
@@ -65,10 +67,10 @@ GEMINI_API_KEY=...
 
 In your Supabase dashboard:
 1. Go to Authentication > URL Configuration
-2. Set **Site URL** to your production domain: `https://your-app-domain.com`
+2. Set **Site URL** to: `https://trainwisestudio.com`
 3. Add **Redirect URLs**:
-   - `https://your-app-domain.com/onboarding/step-1`
-   - `https://your-app-domain.com/update-password`
+   - `https://trainwisestudio.com/onboarding/step-1`
+   - `https://trainwisestudio.com/update-password`
 
 ### 2. Email Templates
 
@@ -166,10 +168,28 @@ Update price IDs in your backend environment variables with your actual Stripe p
 
 ### Common Issues
 
-1. **Magic links not working**: Check Supabase redirect URLs
-2. **CORS errors**: Verify CORS configuration
-3. **Environment variables**: Ensure all required variables are set
-4. **Database errors**: Check Supabase connection and RLS policies
+1. **Magic links still pointing to localhost**: 
+   - Set `VITE_APP_URL` environment variable to your production domain
+   - Check browser console for URL debug information
+   - Verify Supabase redirect URLs match your domain
+
+2. **Magic links not working**: 
+   - Check Supabase redirect URLs in dashboard
+   - Ensure `VITE_APP_URL` is set correctly
+   - Verify email templates use correct domain
+
+3. **CORS errors**: Verify CORS configuration
+
+4. **Environment variables**: Ensure all required variables are set
+
+5. **Database errors**: Check Supabase connection and RLS policies
+
+### Debug Magic Link URLs
+
+Open browser console and look for:
+- `🔍 URL Debug Information` - Shows current URL configuration
+- `⚠️ Using localhost URL for magic links` - Warning about localhost usage
+- `❌ Production build is using localhost!` - Critical error in production
 
 ### Debug Mode
 

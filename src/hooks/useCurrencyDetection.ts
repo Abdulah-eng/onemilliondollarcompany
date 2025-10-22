@@ -27,7 +27,8 @@ export const useCurrencyDetection = () => {
         setLoading(true);
         
         // Try to get user's location via backend proxy
-        const response = await fetch('http://localhost:3000/api/geolocation');
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_PROXY_TARGET || 'http://localhost:3000';
+        const response = await fetch(`${apiBaseUrl}/api/geolocation`);
         const data = await response.json();
         
         const countryCode = data.country_code?.toLowerCase();

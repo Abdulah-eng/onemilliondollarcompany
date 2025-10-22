@@ -11,6 +11,7 @@ import StripeSyncHandler from "@/components/system/StripeSyncHandler";
 import AuthLinkHandler from "@/components/system/AuthLinkHandler";
 import { DiagnosticPanel } from "@/components/system/DiagnosticPanel";
 import { validateEnvironment } from "@/lib/env";
+import "@/lib/debug";
 import "@/lib/i18n";
 
 // --- LAYOUTS ---

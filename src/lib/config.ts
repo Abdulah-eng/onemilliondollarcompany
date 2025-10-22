@@ -2,18 +2,26 @@
 // Configuration management for deployment
 
 const getAppUrl = () => {
-  // In production, use environment variable
+  // Production domain - hardcoded for trainwisestudio.com
+  const PRODUCTION_DOMAIN = 'https://trainwisestudio.com';
+  
+  // Always prefer environment variable if set
   if (import.meta.env.VITE_APP_URL) {
     return import.meta.env.VITE_APP_URL;
   }
   
-  // In development, use current origin
+  // In development, use current origin but warn if it's localhost
   if (import.meta.env.DEV) {
-    return window.location.origin;
+    const origin = window.location.origin;
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      console.warn('⚠️ Using localhost URL for magic links. Set VITE_APP_URL for production deployment.');
+    }
+    return origin;
   }
   
-  // Fallback for production if VITE_APP_URL is not set
-  return window.location.origin;
+  // In production, use hardcoded domain
+  console.log('🚀 Using production domain:', PRODUCTION_DOMAIN);
+  return PRODUCTION_DOMAIN;
 };
 
 export const config = {

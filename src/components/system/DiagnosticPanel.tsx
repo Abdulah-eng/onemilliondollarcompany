@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { UrlDebugger } from './UrlDebugger';
 
 interface DiagnosticResult {
   name: string;
@@ -213,6 +214,13 @@ VITE_API_BASE_URL=http://localhost:3000`}
           )}
         </CardContent>
       </Card>
+      
+      {/* URL Debugger - Only in development */}
+      {import.meta.env.DEV && (
+        <div className="mt-6">
+          <UrlDebugger />
+        </div>
+      )}
     </div>
   );
 };

@@ -23,6 +23,8 @@ const formSchema = z.object({
 
 const GetStartedPage = () => {
   const [isSuccess, setIsSuccess] = useState(false);
+  const [userExists, setUserExists] = useState(false);
+  const [existingUserEmail, setExistingUserEmail] = useState('');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -35,7 +37,9 @@ const GetStartedPage = () => {
       const { exists, user } = await checkUserExists(values.email);
       
       if (exists) {
-        toast.error('An account with this email already exists. Please log in instead.');
+        // Show user exists UI instead of just toast
+        setUserExists(true);
+        setExistingUserEmail(values.email);
         return;
       }
 
@@ -62,6 +66,50 @@ const GetStartedPage = () => {
   };
 
   
+  if (userExists) {
+    return (
+      <AuthLayout>
+        <AuthCard>
+          <div className="text-center space-y-6">
+            <div className="h-16 w-16 mx-auto bg-orange-100 rounded-full flex items-center justify-center">
+              <span className="text-2xl">⚠️</span>
+            </div>
+            <h1 className="text-2xl font-bold">Account Already Exists</h1>
+            <p className="text-muted-foreground">
+              An account with <strong>{existingUserEmail}</strong> already exists.
+            </p>
+            <div className="space-y-3">
+              <Button 
+                onClick={() => window.location.href = '/login'} 
+                className="w-full"
+              >
+                Log In Instead
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => window.location.href = '/forgot-password'} 
+                className="w-full"
+              >
+                Reset Password
+              </Button>
+              <Button 
+                variant="ghost" 
+                onClick={() => { 
+                  setUserExists(false); 
+                  setExistingUserEmail(''); 
+                  form.reset(); 
+                }} 
+                className="w-full"
+              >
+                Use Different Email
+              </Button>
+            </div>
+          </div>
+        </AuthCard>
+      </AuthLayout>
+    );
+  }
+
   if (isSuccess) {
     return (
       <AuthLayout>

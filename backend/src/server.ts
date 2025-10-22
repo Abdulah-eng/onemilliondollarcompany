@@ -415,8 +415,8 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
       allow_promotion_codes: true,
       subscription_data: trialDays && trialDays > 0 ? { trial_period_days: trialDays } : undefined,
       client_reference_id: userId,
-      success_url: `${process.env.PUBLIC_APP_URL}/customer/settings?status=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.PUBLIC_APP_URL}/customer/settings?status=cancel`,
+      success_url: `${process.env.PUBLIC_APP_URL || 'https://trainwisestudio.com'}/customer/settings?status=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.PUBLIC_APP_URL || 'https://trainwisestudio.com'}/customer/settings?status=cancel`,
     });
     // eslint-disable-next-line no-console
     console.log('[API] Checkout session created', { sessionId: session.id, url: session.url });
@@ -435,7 +435,7 @@ app.post('/api/stripe/customer-portal', async (req, res) => {
     if (!stripeCustomerId) return res.status(400).json({ error: 'stripeCustomerId required' });
     const session = await stripe.billingPortal.sessions.create({
       customer: stripeCustomerId,
-      return_url: returnUrl || `${process.env.PUBLIC_APP_URL}/customer/settings`,
+      return_url: returnUrl || `${process.env.PUBLIC_APP_URL || 'https://trainwisestudio.com'}/customer/settings`,
     });
     return res.json({ url: session.url });
   } catch (e: any) {
@@ -628,8 +628,8 @@ app.post('/api/stripe/create-offer-checkout', async (req, res) => {
         },
       ],
       client_reference_id: `offer:${offer.id}`,
-      success_url: `${process.env.PUBLIC_APP_URL}/customer/messages?offer_status=paid&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.PUBLIC_APP_URL}/customer/messages?offer_status=cancel`,
+      success_url: `${process.env.PUBLIC_APP_URL || 'https://trainwisestudio.com'}/customer/messages?offer_status=paid&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.PUBLIC_APP_URL || 'https://trainwisestudio.com'}/customer/messages?offer_status=cancel`,
     });
     return res.json({ checkoutUrl: session.url });
   } catch (e: any) {
