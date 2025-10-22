@@ -156,7 +156,7 @@ const DailyCheckIn = () => {
             <SleepModule value={sleep} onChange={(val) => { setSleep(val); setTimeout(() => setActiveStep(2), 1000); }} />
           </div>
           <div ref={el => itemRefs.current[2] = el} className="min-w-full flex-shrink-0 snap-center lg:min-w-0 p-1">
-            <EnergyModule value={energy} onChange={(val) => { setEnergy(val); setTimeout(() => setActiveStep(3), 1000); }} />
+            <EnergyModule value={energy} onChange={(val) => { setEnergy(val); setTimeout(() => setActiveStep(3), 1000); }} trend={0} />
           </div>
           <div ref={el => itemRefs.current[3] = el} className="min-w-full flex-shrink-0 snap-center lg:min-w-0 p-1">
             <MoodModule value={mood} onChange={setMood} />

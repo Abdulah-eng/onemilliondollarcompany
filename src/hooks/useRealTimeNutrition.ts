@@ -105,8 +105,8 @@ export const useRealTimeNutrition = () => {
             fat: nutritionData.fat || 0,
             calories: nutritionData.calories || 0,
             source: 'recipe' as const,
-            sourceId: entry.program?.id || '',
-            sourceName: entry.program?.name || 'Recipe'
+            sourceId: (entry.program as any)?.id || '',
+            sourceName: (entry.program as any)?.name || 'Recipe'
           };
         }) || [];
 
@@ -133,8 +133,8 @@ export const useRealTimeNutrition = () => {
             fat: 0,
             calories: -caloriesBurned, // Negative because it's calories burned
             source: 'exercise' as const,
-            sourceId: entry.program?.id || '',
-            sourceName: entry.program?.name || 'Exercise'
+            sourceId: (entry.program as any)?.id || '',
+            sourceName: (entry.program as any)?.name || 'Exercise'
           };
         }) || [];
 

@@ -146,7 +146,8 @@ const ProfileHeader = forwardRef<ProfileHeaderRef, ProfileHeaderProps>(({ isGlob
     try {
       const result = await startTrial();
       if (result?.error) {
-        toast.error(result.error);
+        const errorMessage = typeof result.error === 'string' ? result.error : 'Failed to start trial';
+        toast.error(errorMessage);
       } else {
         toast.success('14-day trial started! Enjoy your premium features.');
       }

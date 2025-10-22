@@ -26,7 +26,6 @@ import MentalHealthProgramView from "@/components/customer/viewprogram/mentalhea
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProgramEntries } from "@/hooks/useProgramEntries";
-import { useAuth } from "@/contexts/AuthContext";
 
 // Helper components remain the same
 const LoadingSpinner = () => (

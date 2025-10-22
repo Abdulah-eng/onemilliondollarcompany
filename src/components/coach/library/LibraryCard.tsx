@@ -43,7 +43,7 @@ const LibraryCard: React.FC<LibraryCardProps> = ({ item, onEdit, onDelete, onVie
   const { icon, primaryDetail, secondaryTag } = getDetails();
 
   // Use hero image if available, otherwise fallback to category-based placeholder
-  const imageUrl = item.heroImageUrl || (item.category === 'exercise' 
+  const imageUrl = (item as any).hero_image_url || (item.category === 'exercise'
     ? "https://images.unsplash.com/photo-1549476483-e8893d56a337?q=80&w=2835&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     : item.category === 'recipe' 
       ? "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"

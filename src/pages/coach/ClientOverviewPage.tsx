@@ -48,7 +48,7 @@ const ClientOverviewPage = () => {
         />
 
         <div className="space-y-6">
-          <ClientFilters />
+          <ClientFilters onFilterChange={() => {}} />
           <ClientList refreshTrigger={refreshTrigger} />
         </div>
       </div>
