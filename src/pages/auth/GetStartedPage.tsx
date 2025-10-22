@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { sendMagicLink } from '@/lib/supabase/actions';
+import { sendMagicLink, checkUserExists } from '@/lib/supabase/actions';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { AuthCard } from '@/components/shared/AuthCard';
 
@@ -31,6 +31,14 @@ const GetStartedPage = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      // First check if user already exists
+      const { exists, user } = await checkUserExists(values.email);
+      
+      if (exists) {
+        toast.error('An account with this email already exists. Please log in instead.');
+        return;
+      }
+
       const { error } = await sendMagicLink(values.email);
       if (error) {
         // Handle specific error cases

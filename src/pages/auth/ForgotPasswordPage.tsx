@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { sendPasswordResetLink } from '@/lib/supabase/actions';
+import { sendPasswordResetLink, checkUserExists } from '@/lib/supabase/actions';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { AuthCard } from '@/components/shared/AuthCard';
 import { Loader2, MailCheck } from 'lucide-react';
@@ -28,12 +28,25 @@ const ForgotPasswordPage = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const { error } = await sendPasswordResetLink(values.email);
-    if (error) {
-      toast.error(error.message || 'Failed to send reset link.');
-    } else {
-      setIsSuccess(true);
-      toast.success('Password reset link sent! Please check your email.');
+    try {
+      // First check if user exists
+      const { exists } = await checkUserExists(values.email);
+      
+      if (!exists) {
+        toast.error('No account found with this email address.');
+        return;
+      }
+
+      const { error } = await sendPasswordResetLink(values.email);
+      if (error) {
+        toast.error(error.message || 'Failed to send reset link.');
+      } else {
+        setIsSuccess(true);
+        toast.success('Password reset link sent! Please check your email.');
+      }
+    } catch (error) {
+      console.error('Password reset error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
     }
   };
 

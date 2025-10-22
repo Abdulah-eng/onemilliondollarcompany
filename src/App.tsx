@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import StripeSyncHandler from "@/components/system/StripeSyncHandler";
 import AuthLinkHandler from "@/components/system/AuthLinkHandler";
 import { DiagnosticPanel } from "@/components/system/DiagnosticPanel";
+import { validateEnvironment } from "@/lib/env";
 import "@/lib/i18n";
 
 // --- LAYOUTS ---
@@ -432,14 +433,28 @@ const ThemedApp = () => {
 };
 
 // --- MAIN APP COMPONENT ---
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
-        <ThemedApp />
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Validate environment variables in development
+  if (import.meta.env.DEV && !validateEnvironment()) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-red-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Configuration Error</h1>
+          <p className="text-red-500">Missing required environment variables. Check the console for details.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
+          <ThemedApp />
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
