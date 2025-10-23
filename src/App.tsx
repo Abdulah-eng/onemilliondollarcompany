@@ -12,6 +12,7 @@ import AuthLinkHandler from "@/components/system/AuthLinkHandler";
 import { DiagnosticPanel } from "@/components/system/DiagnosticPanel";
 import { validateEnvironment } from "@/lib/env";
 import "@/lib/debug";
+import "@/lib/test-urls";
 import "@/lib/i18n";
 
 // --- LAYOUTS ---

@@ -7,6 +7,7 @@ import { CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { UrlDebugger } from './UrlDebugger';
+import { UrlTester } from './UrlTester';
 
 interface DiagnosticResult {
   name: string;
@@ -217,8 +218,9 @@ VITE_API_BASE_URL=http://localhost:3000`}
       
       {/* URL Debugger - Only in development */}
       {import.meta.env.DEV && (
-        <div className="mt-6">
+        <div className="mt-6 space-y-6">
           <UrlDebugger />
+          <UrlTester />
         </div>
       )}
     </div>

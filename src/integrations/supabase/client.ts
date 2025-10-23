@@ -5,10 +5,17 @@ import { config } from '@/lib/config';
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+// Force production URLs for auth redirects
+const authOptions = {
+  storage: localStorage,
+  persistSession: true,
+  autoRefreshToken: true,
+  // Override redirect URLs to force production domain
+  ...(import.meta.env.PROD && {
+    redirectTo: 'https://trainwisestudio.com'
+  })
+};
+
 export const supabase = createClient(config.supabase.url, config.supabase.anonKey, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
+  auth: authOptions
 });
