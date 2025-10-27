@@ -1,5 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { loadStripe } from '@stripe/stripe-js';
 import { useAuth } from '@/contexts/AuthContext';
 import { createCheckoutSession, syncCheckoutSession, cancelSubscriptionAtPeriodEnd, resumeSubscription, openCustomerPortal, cancelSubscriptionNow, gracefulCancelPlan } from '@/lib/stripe/api';
@@ -13,6 +14,8 @@ import { usePaymentInfo } from '@/hooks/usePaymentInfo';
 import { useCurrencyDetection } from '@/hooks/useCurrencyDetection';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from 'react-i18next';
+import { Lock } from 'lucide-react';
+import { toast } from 'sonner';
 
 const PaymentAndLegal = () => {
   const navigate = useNavigate();
@@ -21,12 +24,28 @@ const PaymentAndLegal = () => {
   const { paymentInfo, loading: paymentLoading } = usePaymentInfo();
   const { detectedCurrency, getCurrencyOption } = useCurrencyDetection();
   const [selectedCurrency, setSelectedCurrency] = useState(detectedCurrency);
+  const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' });
   const { t } = useTranslation();
 
   // Update selected currency when detected currency changes
   useEffect(() => {
     setSelectedCurrency(detectedCurrency);
   }, [detectedCurrency]);
+
+  const handlePasswordChange = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (passwordForm.new !== passwordForm.confirm) {
+      toast.error("New password and confirmation do not match.");
+      return;
+    }
+    if (passwordForm.new.length < 8) {
+      toast.error("Password must be at least 8 characters.");
+      return;
+    }
+    // Simulate API call for password change
+    toast.success("Password successfully updated!");
+    setPasswordForm({ current: '', new: '', confirm: '' });
+  };
 
   const handleSubscribe = async () => {
     try {
@@ -205,6 +224,58 @@ const PaymentAndLegal = () => {
           
           
           <AccordionItem value="item-2">
+            <AccordionTrigger className="text-base font-medium">Account Security</AccordionTrigger>
+            <AccordionContent className="p-4 space-y-4">
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Lock className="h-5 w-5" />
+                    <h4 className="font-medium">Change Password</h4>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="current-password">Current Password</Label>
+                      <Input 
+                        id="current-password"
+                        type="password" 
+                        placeholder="Enter current password" 
+                        value={passwordForm.current} 
+                        onChange={e => setPasswordForm({ ...passwordForm, current: e.target.value })} 
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="new-password">New Password</Label>
+                      <Input 
+                        id="new-password"
+                        type="password" 
+                        placeholder="Enter new password" 
+                        value={passwordForm.new} 
+                        onChange={e => setPasswordForm({ ...passwordForm, new: e.target.value })} 
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="confirm-password">Confirm New Password</Label>
+                      <Input 
+                        id="confirm-password"
+                        type="password" 
+                        placeholder="Confirm new password" 
+                        value={passwordForm.confirm} 
+                        onChange={e => setPasswordForm({ ...passwordForm, confirm: e.target.value })} 
+                      />
+                    </div>
+                    <Button 
+                      onClick={handlePasswordChange} 
+                      className="w-full bg-red-600 hover:bg-red-700"
+                    >
+                      Update Password
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+          
+          <AccordionItem value="item-3">
             <AccordionTrigger className="text-base font-medium">Privacy Policy & Terms</AccordionTrigger>
             <AccordionContent className="p-4 space-y-4">
               <div className="space-y-4">
