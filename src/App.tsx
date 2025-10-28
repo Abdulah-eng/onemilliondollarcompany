@@ -80,9 +80,21 @@ const PublicRoutesLayout = () => {
   
   if (loading) return <LoadingScreen />;
   
+  // If we're in a password recovery flow, never auto-redirect from public routes
+  try {
+    if (sessionStorage.getItem('recoveryFlow') === '1') {
+      return <Outlet />;
+    }
+  } catch {}
+  
+  // Allow staying on update-password even if authenticated (recovery flow)
+  if (location.pathname === '/update-password' || location.pathname.startsWith('/update-password')) {
+    return <Outlet />;
+  }
+  
   // Only redirect to dashboard if user is on a public route (not already on a protected route)
   if (profile) {
-    const publicRoutes = ['/', '/login', '/get-started', '/forgot-password', '/update-password', '/terms', '/privacy'];
+    const publicRoutes = ['/', '/login', '/get-started', '/forgot-password', '/terms', '/privacy'];
     const isOnPublicRoute = publicRoutes.includes(location.pathname);
     
     if (isOnPublicRoute) {
@@ -153,6 +165,13 @@ const ThemedApp = () => {
           </Suspense>
         } />
 
+        {/* Password recovery page - accessible without auth and outside AuthProvider to avoid redirects */}
+        <Route path="/update-password" element={
+          <Suspense fallback={<LoadingScreen />}>
+            <UpdatePasswordPage />
+          </Suspense>
+        } />
+
         {/* 2. All other routes inside AuthProvider */}
          <Route path="*" element={
            <AuthProvider>
@@ -173,11 +192,6 @@ const ThemedApp = () => {
                 <Route path="/forgot-password" element={
                   <Suspense fallback={<LoadingScreen />}>
                     <ForgotPasswordPage />
-                  </Suspense>
-                } />
-                <Route path="/update-password" element={
-                  <Suspense fallback={<LoadingScreen />}>
-                    <UpdatePasswordPage />
                   </Suspense>
                 } />
               </Route>

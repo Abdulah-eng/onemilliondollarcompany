@@ -1,16 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { updateUserPassword } from '@/lib/supabase/actions';
+import { supabase } from '@/integrations/supabase/client';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { AuthCard } from '@/components/shared/AuthCard';
 import { Loader2 } from 'lucide-react';
@@ -28,6 +30,15 @@ const formSchema = z
 const UpdatePasswordPage = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { profile } = useAuth();
+
+  // Hard block any auto-redirect while in recovery flow
+  useEffect(() => {
+    const inRecovery = (() => { try { return sessionStorage.getItem('recoveryFlow') === '1'; } catch { return false; } })();
+    if (!inRecovery) return;
+    // If any redirect tries to push, immediately stay here
+    // This component is outside AuthProvider now, so this is just a safety net
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,6 +63,9 @@ const UpdatePasswordPage = () => {
         }
       } else {
         toast.success('Password updated successfully. Please log in.');
+        // End any recovery session to avoid auto-login redirects
+        try { sessionStorage.removeItem('recoveryFlow'); } catch {}
+        await supabase.auth.signOut({ scope: 'local' });
         navigate('/login');
       }
     } catch (error) {

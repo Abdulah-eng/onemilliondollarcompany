@@ -10,9 +10,9 @@ const authOptions = {
   storage: localStorage,
   persistSession: true,
   autoRefreshToken: true,
-  // Override redirect URLs to force production domain
+  // Override redirect URLs to force production domain (match Supabase Site URL)
   ...(import.meta.env.PROD && {
-    redirectTo: 'https://trainwisestudio.com'
+    redirectTo: 'https://www.trainwisestudio.com'
   })
 };
 

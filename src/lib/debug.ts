@@ -18,8 +18,8 @@ export const debugUrls = () => {
       VITE_API_PROXY_TARGET: import.meta.env.VITE_API_PROXY_TARGET,
     },
     config: {
-      appUrl: import.meta.env.VITE_APP_URL || (import.meta.env.PROD ? 'https://trainwisestudio.com' : window.location.origin),
-      hardcodedDomain: 'https://trainwisestudio.com',
+      appUrl: import.meta.env.VITE_APP_URL || (import.meta.env.PROD ? 'https://www.trainwisestudio.com' : window.location.origin),
+      hardcodedDomain: 'https://www.trainwisestudio.com',
     }
   };
 
@@ -35,7 +35,7 @@ export const debugUrls = () => {
   }
   
   if (!import.meta.env.VITE_APP_URL && import.meta.env.PROD) {
-    console.log('✅ Using hardcoded production domain: trainwisestudio.com');
+    console.log('✅ Using hardcoded production domain: www.trainwisestudio.com');
   }
   
   console.groupEnd();

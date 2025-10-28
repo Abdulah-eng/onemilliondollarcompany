@@ -24,6 +24,13 @@ const RoleGate = ({ allowedRole, children }: RoleGateProps) => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const navigate = useNavigate();
 
+  // During password recovery, never redirect into dashboards; force staying on update-password
+  try {
+    if (sessionStorage.getItem('recoveryFlow') === '1') {
+      return <Navigate to="/update-password" replace />;
+    }
+  } catch {}
+
   // Check if modal was dismissed in this session
   useEffect(() => {
     if (allowedRole === 'customer' && profile?.onboarding_complete && planStatus.needsUpgrade) {
