@@ -27,7 +27,11 @@ const AuthLinkHandler = () => {
           
           if (error) {
             console.error('Error setting session:', error);
-            navigate('/login?error=auth_failed', { replace: true });
+            if (type === 'recovery') {
+              navigate('/recovery-expired', { replace: true });
+            } else {
+              navigate('/login?error=auth_failed', { replace: true });
+            }
             return;
           }
 

@@ -14,7 +14,7 @@ import { updateUserPassword } from '@/lib/supabase/actions';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { AuthCard } from '@/components/shared/AuthCard';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 
 const formSchema = z
   .object({
@@ -38,6 +38,9 @@ const UpdatePasswordPage = () => {
     // This component is outside AuthProvider now, so this is just a safety net
   }, []);
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: { password: '', confirmPassword: '' },
@@ -54,8 +57,7 @@ const UpdatePasswordPage = () => {
         } else if (error.message.includes('Invalid password')) {
           toast.error('Password does not meet security requirements.');
         } else if (error.message.includes('session_not_found')) {
-          toast.error('Session expired. Please request a new password reset link.');
-          navigate('/forgot-password');
+          navigate('/recovery-expired');
         } else {
           toast.error(error.message || 'Failed to update password.');
         }
@@ -90,7 +92,21 @@ const UpdatePasswordPage = () => {
                 <FormItem>
                   <FormLabel className="sr-only">New Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="New password" {...field} />
+                    <div className="relative">
+                      <Input 
+                        type={showPassword ? 'text' : 'password'} 
+                        placeholder="New password" 
+                        {...field} 
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-primary"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -103,7 +119,21 @@ const UpdatePasswordPage = () => {
                 <FormItem>
                   <FormLabel className="sr-only">Confirm Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Confirm password" {...field} />
+                    <div className="relative">
+                      <Input 
+                        type={showConfirm ? 'text' : 'password'} 
+                        placeholder="Confirm password" 
+                        {...field} 
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirm(!showConfirm)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-primary"
+                        aria-label={showConfirm ? 'Hide password' : 'Show password'}
+                      >
+                        {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

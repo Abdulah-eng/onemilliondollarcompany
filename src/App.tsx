@@ -35,6 +35,7 @@ const GetStartedPage = lazy(() => import("./pages/auth/GetStartedPage"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage"));
 const UpdatePasswordPage = lazy(() => import("./pages/auth/UpdatePasswordPage"));
+const RecoveryExpiredPage = lazy(() => import("./pages/auth/RecoveryExpiredPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const GoalSelectionStep = lazy(() => import("./pages/onboarding/GoalSelectionStep"));
 const PersonalInfoStep = lazy(() => import("./pages/onboarding/PersonalInfoStep"));
@@ -169,6 +170,11 @@ const ThemedApp = () => {
         <Route path="/update-password" element={
           <Suspense fallback={<LoadingScreen />}>
             <UpdatePasswordPage />
+          </Suspense>
+        } />
+        <Route path="/recovery-expired" element={
+          <Suspense fallback={<LoadingScreen />}>
+            <RecoveryExpiredPage />
           </Suspense>
         } />
 
