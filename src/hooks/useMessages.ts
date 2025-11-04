@@ -250,6 +250,51 @@ export const useMessages = (conversationId: string | null) => {
       }
     );
 
+    // Listen for coach_offers status updates (e.g., when webhook marks offer as accepted)
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'coach_offers',
+      },
+      (payload) => {
+        const updatedOffer = payload.new as any;
+        const offerId = updatedOffer.id;
+        const messageId = updatedOffer.message_id;
+        
+        // If this offer is linked to a message in this conversation, refresh that message
+        if (messageId) {
+          supabase
+            .from('messages')
+            .select(`
+              *,
+              sender:profiles!messages_sender_id_fkey(id, full_name, avatar_url),
+              coach_offer:coach_offers!coach_offers_message_id_fkey(
+                id,
+                price,
+                duration_months,
+                status,
+                expires_at
+              )
+            `)
+            .eq('id', messageId)
+            .single()
+            .then(({ data }) => {
+              if (!data) return;
+              // Update the message in state with the new offer status
+              setMessages(prev => prev.map(m => 
+                m.id === messageId ? data : m
+              ));
+              console.log('[Realtime] Coach offer status updated', { offerId, status: updatedOffer.status });
+            })
+            .catch(err => {
+              console.error('[Realtime] Error refreshing message after offer update', err);
+            });
+        }
+      }
+    );
+
     channel.subscribe();
 
     return () => {

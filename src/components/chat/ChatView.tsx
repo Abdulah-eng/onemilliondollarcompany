@@ -38,25 +38,95 @@ export const ChatView: React.FC<ChatViewProps> = ({
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const offerStatus = params.get('offer_status');
-    if (offerStatus === 'paid') {
-      toast.success('Payment successful! Finalizing...');
-      // Poll briefly to allow webhook to mark the offer as accepted
+    const sessionId = params.get('session_id');
+    
+    if (offerStatus === 'paid' && sessionId) {
+      console.log('[Frontend] Payment successful, processing offer acceptance', { sessionId });
+      toast.success('Payment successful! Processing your coaching offer...');
+      
+      // Poll to verify webhook processed the offer and updated status
       let attempts = 0;
-      const interval = setInterval(async () => {
+      const maxAttempts = 15; // 22.5 seconds total
+      let offerAccepted = false;
+      
+      const checkOfferStatus = async () => {
+        if (offerAccepted) return;
+        
         attempts += 1;
-        await refetch();
-        if (attempts >= 10) {
+        console.log(`[Frontend] Checking offer status (attempt ${attempts}/${maxAttempts})`);
+        
+        try {
+          // Refetch messages to get latest status
+          await refetch();
+          
+          // Check messages after a brief delay to allow state update
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          // Check if any offer in current messages has been accepted
+          // We'll check the messages state after refetch completes
+          // Since we can't directly access updated messages here, we'll rely on realtime updates
+          // or check via a different approach
+        } catch (error) {
+          console.error('[Frontend] Error checking offer status', error);
+        }
+        
+        if (attempts >= maxAttempts && !offerAccepted) {
+          console.warn('[Frontend] Offer status check timed out');
+          toast.info('Payment processed! Your offer status should update shortly. Please refresh if needed.');
+          
+          // Clean URL
+          const url = new URL(window.location.href);
+          url.searchParams.delete('offer_status');
+          url.searchParams.delete('session_id');
+          window.history.replaceState({}, '', url.toString());
+        }
+      };
+      
+      // Also listen for realtime updates to messages
+      const checkMessagesForAcceptedOffer = () => {
+        const hasAcceptedOffer = messages.some(msg => 
+          msg.coach_offer?.status === 'accepted'
+        );
+        
+        if (hasAcceptedOffer && !offerAccepted) {
+          offerAccepted = true;
+          console.log('[Frontend] ✅ Offer confirmed as accepted!');
+          toast.success('🎉 Your coaching offer has been accepted! Your coaching plan is now active.');
+          
+          // Clean URL
+          const url = new URL(window.location.href);
+          url.searchParams.delete('offer_status');
+          url.searchParams.delete('session_id');
+          window.history.replaceState({}, '', url.toString());
+        }
+      };
+      
+      // Check immediately
+      checkOfferStatus();
+      checkMessagesForAcceptedOffer();
+      
+      // Then check periodically
+      const interval = setInterval(() => {
+        if (!offerAccepted && attempts < maxAttempts) {
+          checkOfferStatus();
+        }
+        checkMessagesForAcceptedOffer();
+        
+        if (offerAccepted || attempts >= maxAttempts) {
           clearInterval(interval);
         }
       }, 1500);
-      // Clean URL immediately
+      
+      return () => clearInterval(interval);
+    } else if (offerStatus === 'cancel') {
+      toast.info('Payment was cancelled. You can try again when ready.');
+      // Clean URL
       const url = new URL(window.location.href);
       url.searchParams.delete('offer_status');
       url.searchParams.delete('session_id');
       window.history.replaceState({}, '', url.toString());
-      return () => clearInterval(interval);
     }
-  }, [refetch]);
+  }, [refetch, messages]); // Include messages to check when it updates
 
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;

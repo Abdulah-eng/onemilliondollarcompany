@@ -57,90 +57,185 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
             const clientRef = (session.client_reference_id as string) || '';
             if (clientRef.startsWith('offer:')) {
               const offerId = clientRef.replace('offer:', '');
+              // eslint-disable-next-line no-console
+              console.log('[WEBHOOK] Processing coach offer payment', { offerId, sessionId: session.id });
+              
               // Fetch offer to get coach/customer/duration/price
               const { data: offerRows, error: offerErr } = await supabase
                 .from('coach_offers')
                 .select('*')
                 .eq('id', offerId)
                 .limit(1);
-              const offer = offerRows?.[0];
-              if (!offerErr && offer) {
-                // Mark offer accepted
-                await supabase.from('coach_offers').update({ status: 'accepted' }).eq('id', offerId);
-                // Assign coach to customer and set plan expiry based on duration_months (now weeks)
-                const expiry = new Date(Date.now() + (offer.duration_months || 1) * 7 * 24 * 60 * 60 * 1000).toISOString();
-                await supabase
-                  .from('profiles')
-                  .update({ coach_id: offer.coach_id, plan: `${offer.duration_months}-week plan`, plan_expiry: expiry })
-                  .eq('id', offer.customer_id);
-                // Record payout intent with platform commission (15%)
-                const amountCents = Math.round(Number(offer.price) * 100);
-                const platformFee = Math.round(amountCents * 0.15);
-                const netAmount = amountCents - platformFee;
-                await supabase.from('payouts').insert({
-                  coach_id: offer.coach_id,
-                  amount_cents: amountCents,
-                  platform_fee_cents: platformFee,
-                  net_amount_cents: netAmount,
-                  status: 'pending',
-                  period_start: new Date().toISOString().slice(0,10),
-                  period_end: new Date().toISOString().slice(0,10),
-                });
-
-                // Create or update contract for this offer
-                try {
-                  const startDate = new Date();
-                  const endDate = new Date(startDate.getTime() + (offer.duration_months || 1) * 30 * 24 * 60 * 60 * 1000);
-                  await supabase
-                    .from('contracts')
-                    .insert({
-                      coach_id: offer.coach_id,
-                      customer_id: offer.customer_id,
-                      offer_id: offer.id,
-                      status: 'active',
-                      start_date: startDate.toISOString().slice(0,10),
-                      end_date: endDate.toISOString().slice(0,10),
-                      price_cents: amountCents,
-                    });
-                } catch (contractErr) {
-                  // eslint-disable-next-line no-console
-                  console.warn('[WEBHOOK] Could not create contract for offer', offerId, contractErr);
-                }
-
-                // Ensure a conversation exists and send system message about activation
-                try {
-                  const { data: convo } = await supabase
-                    .from('conversations')
-                    .select('id')
-                    .eq('coach_id', offer.coach_id)
-                    .eq('customer_id', offer.customer_id)
-                    .maybeSingle();
-                  let conversationId = convo?.id as string | undefined;
-                  if (!conversationId) {
-                    const { data: created } = await supabase
-                      .from('conversations')
-                      .insert({ coach_id: offer.coach_id, customer_id: offer.customer_id, title: 'Coaching Contract' })
-                      .select('id')
-                      .single();
-                    conversationId = created?.id;
-                  }
-                  if (conversationId) {
-                    await supabase.from('messages').insert({
-                      conversation_id: conversationId,
-                      sender_id: offer.coach_id,
-                      content: `Your coaching plan is now active for ${offer.duration_months} month(s). Let’s get started!`,
-                      type: 'system',
-                    });
-                  }
-                } catch (chatErr) {
-                  // eslint-disable-next-line no-console
-                  console.warn('[WEBHOOK] Conversation/message setup failed', chatErr);
-                }
+              
+              if (offerErr) {
+                // eslint-disable-next-line no-console
+                console.error('[WEBHOOK] Error fetching offer', { offerId, error: offerErr });
+                throw offerErr;
               }
+              
+              const offer = offerRows?.[0];
+              if (!offer) {
+                // eslint-disable-next-line no-console
+                console.error('[WEBHOOK] Offer not found', { offerId });
+                throw new Error(`Offer ${offerId} not found`);
+              }
+
+              // eslint-disable-next-line no-console
+              console.log('[WEBHOOK] Offer found', { offerId, coachId: offer.coach_id, customerId: offer.customer_id, price: offer.price, duration: offer.duration_months });
+
+              // Mark offer accepted
+              const { error: updateOfferError } = await supabase
+                .from('coach_offers')
+                .update({ status: 'accepted' })
+                .eq('id', offerId);
+              
+              if (updateOfferError) {
+                // eslint-disable-next-line no-console
+                console.error('[WEBHOOK] Error updating offer status', { offerId, error: updateOfferError });
+                throw updateOfferError;
+              }
+              
+              // eslint-disable-next-line no-console
+              console.log('[WEBHOOK] Offer marked as accepted', { offerId });
+
+              // Assign coach to customer and set plan expiry based on duration_months (now weeks)
+              const weeks = offer.duration_months || 1;
+              const expiry = new Date(Date.now() + weeks * 7 * 24 * 60 * 60 * 1000).toISOString();
+              const { error: profileError } = await supabase
+                .from('profiles')
+                .update({ 
+                  coach_id: offer.coach_id, 
+                  plan: `${weeks}-week plan`, 
+                  plan_expiry: expiry 
+                })
+                .eq('id', offer.customer_id);
+              
+              if (profileError) {
+                // eslint-disable-next-line no-console
+                console.error('[WEBHOOK] Error updating customer profile', { customerId: offer.customer_id, error: profileError });
+                throw profileError;
+              }
+              
+              // eslint-disable-next-line no-console
+              console.log('[WEBHOOK] Customer profile updated', { customerId: offer.customer_id, coachId: offer.coach_id, plan: `${weeks}-week plan` });
+
+              // Record payout intent with platform commission (15%)
+              const amountCents = Math.round(Number(offer.price) * 100);
+              const platformFee = Math.round(amountCents * 0.15);
+              const netAmount = amountCents - platformFee;
+              const { error: payoutError } = await supabase.from('payouts').insert({
+                coach_id: offer.coach_id,
+                amount_cents: amountCents,
+                platform_fee_cents: platformFee,
+                net_amount_cents: netAmount,
+                status: 'pending',
+                period_start: new Date().toISOString().slice(0,10),
+                period_end: new Date().toISOString().slice(0,10),
+              });
+
+              if (payoutError) {
+                // eslint-disable-next-line no-console
+                console.error('[WEBHOOK] Error creating payout', { coachId: offer.coach_id, error: payoutError });
+                throw payoutError;
+              }
+              
+              // eslint-disable-next-line no-console
+              console.log('[WEBHOOK] Payout created', { coachId: offer.coach_id, amountCents, platformFee, netAmount });
+
+              // Create or update contract for this offer (use weeks for duration, not days)
+              try {
+                const startDate = new Date();
+                const endDate = new Date(startDate.getTime() + weeks * 7 * 24 * 60 * 60 * 1000);
+                const { error: contractError } = await supabase
+                  .from('contracts')
+                  .insert({
+                    coach_id: offer.coach_id,
+                    customer_id: offer.customer_id,
+                    offer_id: offer.id,
+                    status: 'active',
+                    start_date: startDate.toISOString().slice(0,10),
+                    end_date: endDate.toISOString().slice(0,10),
+                    price_cents: amountCents,
+                  });
+                
+                if (contractError) {
+                  // eslint-disable-next-line no-console
+                  console.warn('[WEBHOOK] Could not create contract for offer', { offerId, error: contractError });
+                } else {
+                  // eslint-disable-next-line no-console
+                  console.log('[WEBHOOK] Contract created', { offerId, startDate: startDate.toISOString().slice(0,10), endDate: endDate.toISOString().slice(0,10) });
+                }
+              } catch (contractErr) {
+                // eslint-disable-next-line no-console
+                console.warn('[WEBHOOK] Could not create contract for offer', { offerId, error: contractErr });
+              }
+
+              // Ensure a conversation exists and send system message about activation
+              try {
+                const { data: convo, error: convoError } = await supabase
+                  .from('conversations')
+                  .select('id')
+                  .eq('coach_id', offer.coach_id)
+                  .eq('customer_id', offer.customer_id)
+                  .maybeSingle();
+                
+                if (convoError) {
+                  // eslint-disable-next-line no-console
+                  console.error('[WEBHOOK] Error fetching conversation', { error: convoError });
+                }
+                
+                let conversationId = convo?.id as string | undefined;
+                if (!conversationId) {
+                  const { data: created, error: createError } = await supabase
+                    .from('conversations')
+                    .insert({ coach_id: offer.coach_id, customer_id: offer.customer_id, title: 'Coaching Contract' })
+                    .select('id')
+                    .single();
+                  
+                  if (createError) {
+                    // eslint-disable-next-line no-console
+                    console.error('[WEBHOOK] Error creating conversation', { error: createError });
+                  } else {
+                    conversationId = created?.id;
+                    // eslint-disable-next-line no-console
+                    console.log('[WEBHOOK] Conversation created', { conversationId });
+                  }
+                }
+                
+                if (conversationId) {
+                  const { error: messageError } = await supabase.from('messages').insert({
+                    conversation_id: conversationId,
+                    sender_id: offer.coach_id,
+                    content: `✅ Your coaching plan is now active for ${weeks} week(s). Let's get started!`,
+                    message_type: 'system',
+                  });
+                  
+                  if (messageError) {
+                    // eslint-disable-next-line no-console
+                    console.error('[WEBHOOK] Error creating system message', { error: messageError });
+                  } else {
+                    // eslint-disable-next-line no-console
+                    console.log('[WEBHOOK] System message sent', { conversationId });
+                  }
+                }
+              } catch (chatErr) {
+                // eslint-disable-next-line no-console
+                console.warn('[WEBHOOK] Conversation/message setup failed', { error: chatErr });
+              }
+
+              // eslint-disable-next-line no-console
+              console.log('[WEBHOOK] ✅ Coach offer payment processed successfully', { 
+                offerId, 
+                coachId: offer.coach_id, 
+                customerId: offer.customer_id,
+                amount: offer.price,
+                duration: `${weeks} weeks`
+              });
             }
           } catch (e) {
             // eslint-disable-next-line no-console
-            console.error('[WEBHOOK] one-time payment processing error', e);
+            console.error('[WEBHOOK] ❌ One-time payment processing error', { error: e, sessionId: session.id });
+            // Don't throw - we still want to return 200 to Stripe
           }
         }
         if (session.customer && session.subscription) {
@@ -611,6 +706,7 @@ app.post('/api/stripe/create-offer-checkout', async (req, res) => {
     const amountCents = Math.round(Number(offer.price) * 100);
     if (!amountCents || amountCents <= 0) return res.status(400).json({ error: 'Invalid offer amount' });
 
+    const weeks = offer.duration_months || 1;
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
@@ -620,7 +716,7 @@ app.post('/api/stripe/create-offer-checkout', async (req, res) => {
             currency: 'usd',
             product_data: {
               name: 'Coach Offer',
-              description: `${offer.duration_months}-month coaching package`,
+              description: `${weeks}-week coaching package`,
             },
             unit_amount: amountCents,
           },
@@ -631,6 +727,8 @@ app.post('/api/stripe/create-offer-checkout', async (req, res) => {
       success_url: `${process.env.PUBLIC_APP_URL || 'https://trainwisestudio.com'}/customer/messages?offer_status=paid&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.PUBLIC_APP_URL || 'https://trainwisestudio.com'}/customer/messages?offer_status=cancel`,
     });
+    // eslint-disable-next-line no-console
+    console.log('[API] Created offer checkout session', { offerId, amountCents, weeks, sessionId: session.id });
     return res.json({ checkoutUrl: session.url });
   } catch (e: any) {
     // eslint-disable-next-line no-console
