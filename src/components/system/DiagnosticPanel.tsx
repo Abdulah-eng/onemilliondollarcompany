@@ -71,20 +71,28 @@ export const DiagnosticPanel = () => {
       details: profile ? `Role: ${profile.role}, Onboarding: ${profile.onboarding_complete}` : 'Profile not available'
     });
 
-    // Check API connectivity
+    // Check API connectivity (Supabase Edge Functions)
     try {
-      const response = await fetch(`${apiBaseUrl || 'http://localhost:3000'}/api/health`);
+      const { config } = await import('@/lib/config');
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch(`${config.api.baseUrl}/health`, {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token || ''}`,
+          'apikey': config.supabase.anonKey,
+        },
+      });
       results.push({
-        name: 'Backend API',
+        name: 'Supabase Edge Functions',
         status: response.ok ? 'success' : 'error',
-        message: response.ok ? 'Backend API accessible' : `API returned ${response.status}`,
+        message: response.ok ? 'Edge Functions accessible' : `API returned ${response.status}`,
         details: `Status: ${response.status}`
       });
     } catch (err) {
       results.push({
-        name: 'Backend API',
+        name: 'Supabase Edge Functions',
         status: 'error',
-        message: 'Backend API not accessible',
+        message: 'Edge Functions not accessible',
         details: err instanceof Error ? err.message : 'Connection failed'
       });
     }

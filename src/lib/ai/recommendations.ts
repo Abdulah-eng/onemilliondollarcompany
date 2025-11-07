@@ -24,14 +24,20 @@ export interface TrendRecommendationRequest {
 /**
  * Generate AI recommendations based on trend analysis
  */
+import { config } from '@/lib/config';
+import { supabase } from '@/integrations/supabase/client';
+
 export async function generateTrendRecommendations(
   request: TrendRecommendationRequest
 ): Promise<AIRecommendation[]> {
   try {
-    const response = await fetch('/api/ai/trend-recommendations', {
+    const { data: { session } } = await supabase.auth.getSession();
+    const response = await fetch(`${config.api.baseUrl}/ai-trend-recommendations`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token || ''}`,
+        'apikey': config.supabase.anonKey,
       },
       body: JSON.stringify(request),
     });

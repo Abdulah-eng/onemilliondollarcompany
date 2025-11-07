@@ -30,16 +30,29 @@ export const ContractExtension = ({ programId, coachId, customerId }: ExtensionR
   const [loading, setLoading] = useState(false);
   const [requesting, setRequesting] = useState(false);
 
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
-
   useEffect(() => {
     checkExtensionAvailability();
   }, [programId]);
 
+  const getAuthHeaders = async () => {
+    const { config } = await import('@/lib/config');
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data: { session } } = await supabase.auth.getSession();
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session?.access_token || ''}`,
+      'apikey': config.supabase.anonKey,
+    };
+  };
+
   const checkExtensionAvailability = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE}/api/contract/extension-check?programId=${programId}`);
+      const { config } = await import('@/lib/config');
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${config.api.baseUrl}/contract-extension?programId=${programId}`, {
+        headers,
+      });
       if (!response.ok) throw new Error('Failed to check extension availability');
       
       const data = await response.json();
@@ -60,11 +73,11 @@ export const ContractExtension = ({ programId, coachId, customerId }: ExtensionR
 
     try {
       setRequesting(true);
-      const response = await fetch(`${API_BASE}/api/contract/request-extension`, {
+      const { config } = await import('@/lib/config');
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${config.api.baseUrl}/contract-extension`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           programId,
           extensionWeeks,

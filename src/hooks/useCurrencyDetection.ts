@@ -26,9 +26,16 @@ export const useCurrencyDetection = () => {
       try {
         setLoading(true);
         
-        // Try to get user's location via backend proxy
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_PROXY_TARGET || 'http://localhost:3000';
-        const response = await fetch(`${apiBaseUrl}/api/geolocation`);
+        // Try to get user's location via Supabase Edge Function
+        const { config } = await import('@/lib/config');
+        const { supabase } = await import('@/integrations/supabase/client');
+        const { data: { session } } = await supabase.auth.getSession();
+        const response = await fetch(`${config.api.baseUrl}/geolocation`, {
+          headers: {
+            'Authorization': `Bearer ${session?.access_token || ''}`,
+            'apikey': config.supabase.anonKey,
+          },
+        });
         const data = await response.json();
         
         const countryCode = data.country_code?.toLowerCase();

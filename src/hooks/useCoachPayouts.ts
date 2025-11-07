@@ -43,8 +43,24 @@ export const useCoachPayouts = () => {
 
   const requestWithdrawal = async (amountCents: number) => {
     if (!user) throw new Error('Not authenticated');
-    // Call backend to create payout intent and schedule transfer
-    return await postJson('/api/payouts/request', { amountCents, coachId: user.id });
+    const { config } = await import('@/lib/config');
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data: { session } } = await supabase.auth.getSession();
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session?.access_token || ''}`,
+      'apikey': config.supabase.anonKey,
+    };
+    const response = await fetch(`${config.api.baseUrl}/coach-payouts`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ action: 'request', amountCents, coachId: user.id }),
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || `Request failed: ${response.status}`);
+    }
+    return await response.json();
   };
 
   return { payouts, loading, error, refetch: fetchPayouts, requestWithdrawal };

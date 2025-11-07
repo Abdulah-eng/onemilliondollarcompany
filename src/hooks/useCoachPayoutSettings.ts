@@ -31,8 +31,6 @@ export const useCoachPayoutSettings = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
-
   useEffect(() => {
     if (user) {
       fetchSettings();
@@ -40,14 +38,28 @@ export const useCoachPayoutSettings = () => {
     }
   }, [user]);
 
+  const getAuthHeaders = async () => {
+    const { config } = await import('@/lib/config');
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data: { session } } = await supabase.auth.getSession();
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session?.access_token || ''}`,
+      'apikey': config.supabase.anonKey,
+    };
+  };
+
   const fetchSettings = async () => {
     if (!user) return;
 
     try {
       setLoading(true);
       setError(null);
-
-      const response = await fetch(`${API_BASE}/api/coach/payout-settings?coachId=${user.id}`);
+      const { config } = await import('@/lib/config');
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${config.api.baseUrl}/coach-payouts?action=settings&coachId=${user.id}`, {
+        headers,
+      });
       if (!response.ok) throw new Error('Failed to fetch payout settings');
 
       const data = await response.json();
@@ -64,7 +76,11 @@ export const useCoachPayoutSettings = () => {
     if (!user) return;
 
     try {
-      const response = await fetch(`${API_BASE}/api/coach/balance?coachId=${user.id}`);
+      const { config } = await import('@/lib/config');
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${config.api.baseUrl}/coach-payouts?action=balance&coachId=${user.id}`, {
+        headers,
+      });
       if (!response.ok) throw new Error('Failed to fetch balance');
 
       const data = await response.json();
@@ -83,13 +99,13 @@ export const useCoachPayoutSettings = () => {
     try {
       setLoading(true);
       setError(null);
-
-      const response = await fetch(`${API_BASE}/api/coach/payout-settings`, {
+      const { config } = await import('@/lib/config');
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${config.api.baseUrl}/coach-payouts`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
+          action: 'update-settings',
           coachId: user.id,
           ...newSettings,
         }),
@@ -121,13 +137,13 @@ export const useCoachPayoutSettings = () => {
     try {
       setLoading(true);
       setError(null);
-
-      const response = await fetch(`${API_BASE}/api/coach/request-payout`, {
+      const { config } = await import('@/lib/config');
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${config.api.baseUrl}/coach-payouts`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
+          action: 'request-payout',
           coachId: user.id,
           amountCents,
         }),

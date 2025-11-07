@@ -24,14 +24,24 @@ const getAppUrl = () => {
   return PRODUCTION_DOMAIN;
 };
 
+// Get Supabase functions base URL
+const getSupabaseFunctionsUrl = () => {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
+  // Extract project ref from URL (e.g., https://xyz.supabase.co -> xyz)
+  const projectRef = supabaseUrl.replace('https://', '').replace('.supabase.co', '');
+  return `${supabaseUrl}/functions/v1`;
+};
+
 export const config = {
   appUrl: getAppUrl(),
   supabase: {
     url: import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co',
     anonKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'your-anon-key',
+    functionsUrl: getSupabaseFunctionsUrl(),
   },
   api: {
-    baseUrl: import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_PROXY_TARGET || 'http://localhost:3000',
+    // Use Supabase Edge Functions instead of separate backend
+    baseUrl: getSupabaseFunctionsUrl(),
   },
   stripe: {
     publishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '',

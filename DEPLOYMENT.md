@@ -21,10 +21,6 @@ Create a `.env` file in the project root:
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
 
-# API Configuration
-VITE_API_BASE_URL=https://your-api-domain.com
-VITE_API_PROXY_TARGET=http://localhost:3000
-
 # Stripe Configuration
 VITE_STRIPE_PUBLISHABLE_KEY=pk_live_...
 
@@ -33,15 +29,13 @@ VITE_STRIPE_PUBLISHABLE_KEY=pk_live_...
 VITE_APP_URL=https://trainwisestudio.com
 ```
 
-### Backend (.env)
+**Note:** The frontend automatically uses Supabase Edge Functions. No separate API configuration needed.
 
-Create a `.env` file in the `backend/` directory:
+### Supabase Edge Functions Secrets
+
+Set these in your Supabase project dashboard (Settings > Edge Functions > Secrets):
 
 ```env
-PORT=3000
-# trainwisestudio.com is hardcoded as fallback, but you can override with:
-PUBLIC_APP_URL=https://trainwisestudio.com
-
 # Stripe Configuration
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
@@ -52,9 +46,12 @@ STRIPE_PRICE_NOK=***REMOVED***
 STRIPE_PRICE_SEK=***REMOVED***
 STRIPE_PRICE_DKK=***REMOVED***
 
-# Supabase Configuration
+# Supabase Configuration (for service role access)
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
+
+# App Configuration
+PUBLIC_APP_URL=https://trainwisestudio.com
 
 # AI Configuration (Optional)
 OPENAI_KEY=sk-...
@@ -94,9 +91,42 @@ Update email templates in Supabase:
 
 3. **Set environment variables** in your hosting platform's dashboard
 
-### Backend Deployment (Railway/Render/Heroku)
+### Supabase Edge Functions Deployment
 
-1. **Prepare for deployment:**
+1. **Install Supabase CLI:**
+   ```bash
+   npm install -g supabase
+   ```
+
+2. **Login and link your project:**
+   ```bash
+   supabase login
+   supabase link --project-ref <your-project-ref>
+   ```
+
+3. **Deploy all functions:**
+   ```bash
+   supabase functions deploy
+   ```
+
+   Or deploy individually:
+   ```bash
+   supabase functions deploy stripe-webhook
+   supabase functions deploy stripe-checkout
+   # ... etc
+   ```
+
+4. **Configure Stripe Webhook:**
+   - In Stripe Dashboard, go to Developers > Webhooks
+   - Add endpoint: `https://<your-project-ref>.supabase.co/functions/v1/stripe-webhook`
+   - Select events: `checkout.session.completed`, `customer.subscription.deleted`
+   - Copy webhook secret and set as `STRIPE_WEBHOOK_SECRET` in Supabase secrets
+
+See `supabase/functions/README.md` for detailed deployment instructions.
+
+### Legacy Backend Deployment (No longer needed)
+
+The separate backend has been replaced with Supabase Edge Functions. If you need to deploy the old backend:
    ```bash
    cd backend
    npm install

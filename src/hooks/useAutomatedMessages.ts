@@ -38,18 +38,30 @@ export const useAutomatedMessages = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
-
   useEffect(() => {
     fetchTemplates();
   }, []);
+
+  const getAuthHeaders = async () => {
+    const { config } = await import('@/lib/config');
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data: { session } } = await supabase.auth.getSession();
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session?.access_token || ''}`,
+      'apikey': config.supabase.anonKey,
+    };
+  };
 
   const fetchTemplates = async () => {
     try {
       setLoading(true);
       setError(null);
-
-      const response = await fetch(`${API_BASE}/api/messages/templates`);
+      const { config } = await import('@/lib/config');
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${config.api.baseUrl}/automated-messages`, {
+        headers,
+      });
       if (!response.ok) throw new Error('Failed to fetch message templates');
 
       const data = await response.json();
@@ -76,12 +88,11 @@ export const useAutomatedMessages = () => {
     try {
       setLoading(true);
       setError(null);
-
-      const response = await fetch(`${API_BASE}/api/messages/automated`, {
+      const { config } = await import('@/lib/config');
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${config.api.baseUrl}/automated-messages`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           userId,
           messageType,
