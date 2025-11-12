@@ -80,6 +80,7 @@ serve(async (req) => {
 
                 console.log('[WEBHOOK] Offer found', { offerId, coachId: offer.coach_id, customerId: offer.customer_id, price: offer.price, duration: offer.duration_months });
 
+                console.log('[WEBHOOK] Updating coach_offers status to accepted', { offerId });
                 const { error: updateOfferError } = await supabase
                   .from('coach_offers')
                   .update({ status: 'accepted' })
@@ -90,10 +91,16 @@ serve(async (req) => {
                   throw updateOfferError;
                 }
                 
-                console.log('[WEBHOOK] Offer marked as accepted', { offerId });
+                console.log('[WEBHOOK] Offer marked as accepted', { offerId, status: 'accepted' });
 
                 const weeks = offer.duration_months || 1;
                 const expiry = new Date(Date.now() + weeks * 7 * 24 * 60 * 60 * 1000).toISOString();
+                console.log('[WEBHOOK] Updating customer profile after payment', {
+                  customerId: offer.customer_id,
+                  coachId: offer.coach_id,
+                  plan: `${weeks}-week plan`,
+                  plan_expiry: expiry,
+                });
                 const { error: profileError } = await supabase
                   .from('profiles')
                   .update({ 
@@ -108,11 +115,17 @@ serve(async (req) => {
                   throw profileError;
                 }
                 
-                console.log('[WEBHOOK] Customer profile updated', { customerId: offer.customer_id, coachId: offer.coach_id, plan: `${weeks}-week plan` });
+                console.log('[WEBHOOK] Customer profile updated', { customerId: offer.customer_id, coachId: offer.coach_id, plan: `${weeks}-week plan`, plan_expiry: expiry });
 
                 const amountCents = Math.round(Number(offer.price) * 100);
                 const platformFee = Math.round(amountCents * 0.15);
                 const netAmount = amountCents - platformFee;
+                console.log('[WEBHOOK] Creating payout record for offer', {
+                  coachId: offer.coach_id,
+                  amountCents,
+                  platformFee,
+                  netAmount,
+                });
                 const { error: payoutError } = await supabase.from('payouts').insert({
                   coach_id: offer.coach_id,
                   amount_cents: amountCents,

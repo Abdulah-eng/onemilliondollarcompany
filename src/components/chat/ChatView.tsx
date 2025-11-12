@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { DollarSign, Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { syncOfferCheckoutSession } from '@/lib/stripe/api';
 
 interface ChatViewProps {
   conversationId: string;
@@ -56,19 +57,26 @@ export const ChatView: React.FC<ChatViewProps> = ({
         console.log(`[Frontend] Checking offer status (attempt ${attempts}/${maxAttempts})`);
         
         try {
-          // Refetch messages to get latest status
-          await refetch();
-          
-          // Check messages after a brief delay to allow state update
-          await new Promise(resolve => setTimeout(resolve, 300));
-          
-          // Check if any offer in current messages has been accepted
-          // We'll check the messages state after refetch completes
-          // Since we can't directly access updated messages here, we'll rely on realtime updates
-          // or check via a different approach
+          const syncResult = await syncOfferCheckoutSession(sessionId);
+          if (syncResult?.status === 'accepted') {
+            console.log('[Frontend] Offer sync result', syncResult);
+            offerAccepted = true;
+            await refetch();
+            toast.success('🎉 Your coaching offer has been accepted! Your coaching plan is now active.');
+            
+            const url = new URL(window.location.href);
+            url.searchParams.delete('offer_status');
+            url.searchParams.delete('session_id');
+            window.history.replaceState({}, '', url.toString());
+            return;
+          }
         } catch (error) {
           console.error('[Frontend] Error checking offer status', error);
         }
+        
+        // If sync didn't confirm acceptance yet, try refetching messages for realtime updates
+        await refetch();
+        await new Promise(resolve => setTimeout(resolve, 300));
         
         if (attempts >= maxAttempts && !offerAccepted) {
           console.warn('[Frontend] Offer status check timed out');

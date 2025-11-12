@@ -75,6 +75,10 @@ export async function syncCheckoutSession(sessionId: string): Promise<{ ok?: boo
   return await getFromFunction('stripe-sync', { session_id: sessionId });
 }
 
+export async function syncOfferCheckoutSession(sessionId: string): Promise<{ offerId?: string; status?: string; statusChanged?: boolean; error?: string }> {
+  return await getFromFunction('stripe-offer-sync', { session_id: sessionId });
+}
+
 export async function createOfferCheckoutSession(offerId: string): Promise<CheckoutSessionResponse> {
   return await postToFunction<CheckoutSessionResponse>('stripe-offer-checkout', { offerId });
 }
