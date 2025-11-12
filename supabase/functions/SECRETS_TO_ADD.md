@@ -24,37 +24,37 @@ Copy and paste these into Supabase Dashboard > Settings > Edge Functions > Secre
 
 ## Secret 3: STRIPE_SECRET_KEY
 **Name:** `STRIPE_SECRET_KEY`  
-**Value:** `***REMOVED***`
+**Value:** `<your-stripe-secret-key>`
 
 ---
 
 ## Secret 4: STRIPE_WEBHOOK_SECRET
 **Name:** `STRIPE_WEBHOOK_SECRET`  
-**Value:** `***REMOVED***`
+**Value:** `<your-stripe-webhook-secret>`
 
 ---
 
 ## Secret 5: STRIPE_PRICE_USD
 **Name:** `STRIPE_PRICE_USD`  
-**Value:** `***REMOVED***`
+**Value:** `<your-stripe-price-usd-id>`
 
 ---
 
 ## Secret 6: STRIPE_PRICE_NOK
 **Name:** `STRIPE_PRICE_NOK`  
-**Value:** `***REMOVED***`
+**Value:** `<your-stripe-price-nok-id>`
 
 ---
 
 ## Secret 7: STRIPE_PRICE_SEK
 **Name:** `STRIPE_PRICE_SEK`  
-**Value:** `***REMOVED***`
+**Value:** `<your-stripe-price-sek-id>`
 
 ---
 
 ## Secret 8: STRIPE_PRICE_DKK
 **Name:** `STRIPE_PRICE_DKK`  
-**Value:** `***REMOVED***`
+**Value:** `<your-stripe-price-dkk-id>`
 
 ---
 
@@ -83,12 +83,12 @@ If Supabase allows bulk import, use this format:
 ```
 SUPABASE_URL=https://bhmdxxsdeekxmejnjwin.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
-STRIPE_SECRET_KEY=***REMOVED***
-STRIPE_WEBHOOK_SECRET=***REMOVED***
-STRIPE_PRICE_USD=***REMOVED***
-STRIPE_PRICE_NOK=***REMOVED***
-STRIPE_PRICE_SEK=***REMOVED***
-STRIPE_PRICE_DKK=***REMOVED***
+STRIPE_SECRET_KEY=<your-stripe-secret-key>
+STRIPE_WEBHOOK_SECRET=<your-stripe-webhook-secret>
+STRIPE_PRICE_USD=<your-stripe-price-usd-id>
+STRIPE_PRICE_NOK=<your-stripe-price-nok-id>
+STRIPE_PRICE_SEK=<your-stripe-price-sek-id>
+STRIPE_PRICE_DKK=<your-stripe-price-dkk-id>
 PUBLIC_APP_URL=https://trainwisestudio.com
 ```
 
