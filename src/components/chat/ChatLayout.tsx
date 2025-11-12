@@ -5,7 +5,7 @@ import { useConversations } from '@/hooks/useConversations';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
-
+//hello
 interface ChatLayoutProps {
   selectedConversationId: string | null;
   onSelectConversation: (id: string | null) => void;
