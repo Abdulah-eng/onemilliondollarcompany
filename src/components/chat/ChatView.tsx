@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { DollarSign, Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
-import { syncOfferCheckoutSession } from '@/lib/stripe/api';
+import { syncCheckoutSession } from '@/lib/stripe/api';
 
 interface ChatViewProps {
   conversationId: string;
@@ -35,11 +35,31 @@ export const ChatView: React.FC<ChatViewProps> = ({
     scrollToBottom();
   }, [messages]);
 
+  // Listen for offer status updates and refetch messages
+  useEffect(() => {
+    const handleOfferUpdate = () => {
+      console.log('[ChatView] Offer status updated event received, refetching messages');
+      refetch();
+    };
+    
+    window.addEventListener('offer-status-updated', handleOfferUpdate);
+    return () => {
+      window.removeEventListener('offer-status-updated', handleOfferUpdate);
+    };
+  }, [refetch]);
+
   // Handle Stripe redirect for one-time offer payments success
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const offerStatus = params.get('offer_status');
     const sessionId = params.get('session_id');
+    
+    console.log('[Frontend] ChatView useEffect - checking URL params', { 
+      offerStatus, 
+      sessionId, 
+      fullUrl: window.location.href,
+      search: window.location.search 
+    });
     
     if (offerStatus === 'paid' && sessionId) {
       console.log('[Frontend] Payment successful, processing offer acceptance', { sessionId });
@@ -57,9 +77,12 @@ export const ChatView: React.FC<ChatViewProps> = ({
         console.log(`[Frontend] Checking offer status (attempt ${attempts}/${maxAttempts})`);
         
         try {
-          const syncResult = await syncOfferCheckoutSession(sessionId);
-          if (syncResult?.status === 'accepted') {
-            console.log('[Frontend] Offer sync result', syncResult);
+          console.log('[Frontend] Calling syncCheckoutSession with sessionId:', sessionId);
+          const syncResult = await syncCheckoutSession(sessionId);
+          console.log('[Frontend] syncCheckoutSession response:', syncResult);
+          
+          if (syncResult?.status === 'accepted' || syncResult?.ok) {
+            console.log('[Frontend] Offer sync result - ACCEPTED', syncResult);
             offerAccepted = true;
             await refetch();
             toast.success('🎉 Your coaching offer has been accepted! Your coaching plan is now active.');
@@ -69,9 +92,15 @@ export const ChatView: React.FC<ChatViewProps> = ({
             url.searchParams.delete('session_id');
             window.history.replaceState({}, '', url.toString());
             return;
+          } else {
+            console.log('[Frontend] Offer sync result - not accepted yet', syncResult);
           }
         } catch (error) {
           console.error('[Frontend] Error checking offer status', error);
+          console.error('[Frontend] Error details:', {
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined
+          });
         }
         
         // If sync didn't confirm acceptance yet, try refetching messages for realtime updates

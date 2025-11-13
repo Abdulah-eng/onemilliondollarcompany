@@ -71,7 +71,10 @@ serve(async (req) => {
     });
     
     console.log('[API] Created offer checkout session', { offerId, amountCents, weeks, sessionId: session.id });
-    return new Response(JSON.stringify({ checkoutUrl: session.url }), {
+    return new Response(JSON.stringify({ 
+      checkoutUrl: session.url,
+      sessionId: session.id  // Include session ID in response for easy access
+    }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

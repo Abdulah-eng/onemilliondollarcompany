@@ -24,7 +24,24 @@ async function postToFunction<T>(functionName: string, body: unknown): Promise<T
     throw new Error(text || `Request failed: ${response.status}`);
   }
   
-  return await response.json() as T;
+  const data = await response.json() as T;
+  
+  // Log session ID to console if present (for offer checkout)
+  if (functionName === 'stripe-offer-checkout' && (data as any).sessionId) {
+    const sessionId = (data as any).sessionId;
+    console.log('\n');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('📋 STRIPE SESSION ID (Copy this for testing):');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log(sessionId);
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('Use this command to test:');
+    console.log(`  .\\test-curl.ps1 -SessionId "${sessionId}" -AnonKey "YOUR_KEY"`);
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('\n');
+  }
+  
+  return data;
 }
 
 async function getFromFunction<T>(functionName: string, params?: Record<string, string>): Promise<T> {
@@ -36,21 +53,46 @@ async function getFromFunction<T>(functionName: string, params?: Record<string, 
     });
   }
   
-  const response = await fetch(url.toString(), {
-    method: 'GET',
-    headers,
+  const fullUrl = url.toString();
+  console.log(`[API] Calling Edge Function: ${functionName}`, {
+    url: fullUrl,
+    params,
+    hasAuth: !!headers.Authorization
   });
   
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || `Request failed: ${response.status}`);
+  try {
+    const response = await fetch(fullUrl, {
+      method: 'GET',
+      headers,
+    });
+    
+    console.log(`[API] Edge Function ${functionName} response:`, {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok
+    });
+    
+    if (!response.ok) {
+      const text = await response.text();
+      console.error(`[API] Edge Function ${functionName} error:`, {
+        status: response.status,
+        error: text
+      });
+      throw new Error(text || `Request failed: ${response.status}`);
+    }
+    
+    const data = await response.json() as T;
+    console.log(`[API] Edge Function ${functionName} success:`, data);
+    return data;
+  } catch (error) {
+    console.error(`[API] Edge Function ${functionName} exception:`, error);
+    throw error;
   }
-  
-  return await response.json() as T;
 }
 
 export interface CheckoutSessionResponse {
   checkoutUrl: string;
+  sessionId?: string;
 }
 
 export async function createCheckoutSession(params: {
@@ -71,12 +113,8 @@ export async function resumeSubscription(subscriptionId: string): Promise<{ succ
   return await postToFunction('stripe-subscription', { action: 'resume', subscriptionId });
 }
 
-export async function syncCheckoutSession(sessionId: string): Promise<{ ok?: boolean; error?: string; plan_expiry?: number; user_id?: string }> {
+export async function syncCheckoutSession(sessionId: string): Promise<{ ok?: boolean; error?: string; plan_expiry?: number; user_id?: string; offerId?: string; status?: string; statusChanged?: boolean }> {
   return await getFromFunction('stripe-sync', { session_id: sessionId });
-}
-
-export async function syncOfferCheckoutSession(sessionId: string): Promise<{ offerId?: string; status?: string; statusChanged?: boolean; error?: string }> {
-  return await getFromFunction('stripe-offer-sync', { session_id: sessionId });
 }
 
 export async function createOfferCheckoutSession(offerId: string): Promise<CheckoutSessionResponse> {

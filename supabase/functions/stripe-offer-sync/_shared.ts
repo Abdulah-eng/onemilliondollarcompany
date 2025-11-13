@@ -36,4 +36,15 @@ export function createStripeClient(): Stripe {
   });
 }
 
+export const PRICE_IDS = {
+  usd: Deno.env.get('STRIPE_PRICE_USD') || '***REMOVED***',
+  nok: Deno.env.get('STRIPE_PRICE_NOK') || '***REMOVED***',
+  sek: Deno.env.get('STRIPE_PRICE_SEK') || '***REMOVED***',
+  dkk: Deno.env.get('STRIPE_PRICE_DKK') || '***REMOVED***',
+};
+
+export function getAppUrl(): string {
+  return Deno.env.get('PUBLIC_APP_URL') || 'https://trainwisestudio.com';
+}
+
 

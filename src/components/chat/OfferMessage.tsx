@@ -46,7 +46,19 @@ export const OfferMessage: React.FC<OfferMessageProps> = ({
         return;
       }
       // Redirect to Stripe Checkout for one-time payment
-      const { checkoutUrl } = await createOfferCheckoutSession(offerId);
+      const { checkoutUrl, sessionId } = await createOfferCheckoutSession(offerId);
+      
+      // Session ID is already logged in api.ts, but also log here for visibility
+      if (sessionId) {
+        // Browser console (styled)
+        console.log('%c📋 STRIPE SESSION ID (Copy this for testing):', 'background: #222; color: #0f0; font-size: 16px; font-weight: bold; padding: 10px;');
+        console.log('%c' + sessionId, 'background: #222; color: #0ff; font-size: 14px; padding: 5px; font-family: monospace;');
+        console.log('%cUse this in test script: .\\test-curl.ps1 -SessionId "' + sessionId + '" -AnonKey "YOUR_KEY"', 'background: #222; color: #ff0; font-size: 12px; padding: 5px;');
+        
+        // Also show in alert for maximum visibility
+        alert(`Stripe Session ID (check browser console for copy command):\n\n${sessionId}`);
+      }
+      
       window.location.href = checkoutUrl;
     } catch (error) {
       toast.error("Failed to accept offer. Please try again.");

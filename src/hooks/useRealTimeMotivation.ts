@@ -11,6 +11,20 @@ export interface MotivationMessage {
   created_at: string;
 }
 
+// Map category to emoji
+const getEmojiForCategory = (category: string): string => {
+  switch (category) {
+    case 'fitness':
+      return '💪';
+    case 'nutrition':
+      return '🥗';
+    case 'mental_health':
+      return '🧘';
+    default:
+      return '✨';
+  }
+};
+
 export const useRealTimeMotivation = () => {
   const { user } = useAuth();
   const [motivationMessage, setMotivationMessage] = useState<MotivationMessage | null>(null);
@@ -26,15 +40,15 @@ export const useRealTimeMotivation = () => {
       try {
         setLoading(true);
         
-        // Get a random motivation message from the database
+        // Get motivation messages from the database (same query as customer dashboard)
         const { data, error } = await supabase
           .from('motivation_messages')
-          .select('*')
+          .select('id, message, category, created_at')
           .order('created_at', { ascending: false })
-          .limit(10);
+          .limit(50);
 
-        if (error || !data || data.length === 0) {
-          console.error('Error fetching motivation message or no messages found:', error);
+        if (error) {
+          console.error('Error fetching motivation message:', error);
           // Fallback to default message
           setMotivationMessage({
             id: 'default',
@@ -44,10 +58,38 @@ export const useRealTimeMotivation = () => {
             type: 'positive',
             created_at: new Date().toISOString()
           });
-        } else {
+        } else if (data && data.length > 0) {
           // Select a random message from the results
           const randomIndex = Math.floor(Math.random() * data.length);
-          setMotivationMessage(data[randomIndex]);
+          const selected = data[randomIndex];
+          
+          // Map database fields to MotivationMessage interface
+          setMotivationMessage({
+            id: selected.id,
+            title: 'Daily Motivation',
+            content: selected.message, // Map 'message' field to 'content'
+            emoji: getEmojiForCategory(selected.category || 'general'),
+            type: 'positive',
+            created_at: selected.created_at
+          });
+        } else {
+          // Fallback if no messages in database
+          const defaultMessages = [
+            "The secret of getting ahead is getting started.",
+            "Your only limit is your mind.",
+            "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+            "The only way to do great work is to love what you do.",
+            "Don't watch the clock; do what it does. Keep going.",
+          ];
+          const randomMessage = defaultMessages[Math.floor(Math.random() * defaultMessages.length)];
+          setMotivationMessage({
+            id: 'default',
+            title: 'Daily Motivation',
+            content: randomMessage,
+            emoji: '✨',
+            type: 'positive',
+            created_at: new Date().toISOString()
+          });
         }
       } catch (error) {
         console.error('Error fetching motivation message:', error);
