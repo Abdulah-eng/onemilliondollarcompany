@@ -7,7 +7,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { DollarSign, Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
-import { syncCheckoutSession } from '@/lib/stripe/api';
 
 interface ChatViewProps {
   conversationId: string;
@@ -47,123 +46,6 @@ export const ChatView: React.FC<ChatViewProps> = ({
       window.removeEventListener('offer-status-updated', handleOfferUpdate);
     };
   }, [refetch]);
-
-  // Handle Stripe redirect for one-time offer payments success
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const offerStatus = params.get('offer_status');
-    const sessionId = params.get('session_id');
-    
-    console.log('[Frontend] ChatView useEffect - checking URL params', { 
-      offerStatus, 
-      sessionId, 
-      fullUrl: window.location.href,
-      search: window.location.search 
-    });
-    
-    if (offerStatus === 'paid' && sessionId) {
-      console.log('[Frontend] Payment successful, processing offer acceptance', { sessionId });
-      toast.success('Payment successful! Processing your coaching offer...');
-      
-      // Poll to verify webhook processed the offer and updated status
-      let attempts = 0;
-      const maxAttempts = 15; // 22.5 seconds total
-      let offerAccepted = false;
-      
-      const checkOfferStatus = async () => {
-        if (offerAccepted) return;
-        
-        attempts += 1;
-        console.log(`[Frontend] Checking offer status (attempt ${attempts}/${maxAttempts})`);
-        
-        try {
-          console.log('[Frontend] Calling syncCheckoutSession with sessionId:', sessionId);
-          const syncResult = await syncCheckoutSession(sessionId);
-          console.log('[Frontend] syncCheckoutSession response:', syncResult);
-          
-          if (syncResult?.status === 'accepted' || syncResult?.ok) {
-            console.log('[Frontend] Offer sync result - ACCEPTED', syncResult);
-            offerAccepted = true;
-            await refetch();
-            toast.success('🎉 Your coaching offer has been accepted! Your coaching plan is now active.');
-            
-            const url = new URL(window.location.href);
-            url.searchParams.delete('offer_status');
-            url.searchParams.delete('session_id');
-            window.history.replaceState({}, '', url.toString());
-            return;
-          } else {
-            console.log('[Frontend] Offer sync result - not accepted yet', syncResult);
-          }
-        } catch (error) {
-          console.error('[Frontend] Error checking offer status', error);
-          console.error('[Frontend] Error details:', {
-            message: error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error ? error.stack : undefined
-          });
-        }
-        
-        // If sync didn't confirm acceptance yet, try refetching messages for realtime updates
-        await refetch();
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        if (attempts >= maxAttempts && !offerAccepted) {
-          console.warn('[Frontend] Offer status check timed out');
-          toast.info('Payment processed! Your offer status should update shortly. Please refresh if needed.');
-          
-          // Clean URL
-          const url = new URL(window.location.href);
-          url.searchParams.delete('offer_status');
-          url.searchParams.delete('session_id');
-          window.history.replaceState({}, '', url.toString());
-        }
-      };
-      
-      // Also listen for realtime updates to messages
-      const checkMessagesForAcceptedOffer = () => {
-        const hasAcceptedOffer = messages.some(msg => 
-          msg.coach_offer?.status === 'accepted'
-        );
-        
-        if (hasAcceptedOffer && !offerAccepted) {
-          offerAccepted = true;
-          console.log('[Frontend] ✅ Offer confirmed as accepted!');
-          toast.success('🎉 Your coaching offer has been accepted! Your coaching plan is now active.');
-          
-          // Clean URL
-          const url = new URL(window.location.href);
-          url.searchParams.delete('offer_status');
-          url.searchParams.delete('session_id');
-          window.history.replaceState({}, '', url.toString());
-        }
-      };
-      
-      // Check immediately
-      checkOfferStatus();
-      checkMessagesForAcceptedOffer();
-      
-      // Then check periodically
-      const interval = setInterval(() => {
-        if (!offerAccepted && attempts < maxAttempts) {
-          checkOfferStatus();
-        }
-        checkMessagesForAcceptedOffer();
-        
-        if (offerAccepted || attempts >= maxAttempts) {
-          clearInterval(interval);
-        }
-      }, 1500);
-      
-      return () => clearInterval(interval);
-    } else if (offerStatus === 'cancel') {
-      toast.info('Payment was cancelled. You can try again when ready.');
-      // Clean URL
-      const url = new URL(window.location.href);
-      url.searchParams.delete('offer_status');
-      url.searchParams.delete('session_id');
-      window.history.replaceState({}, '', url.toString());
-    }
-  }, [refetch, messages]); // Include messages to check when it updates
 
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;

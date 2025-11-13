@@ -51,6 +51,20 @@ serve(async (req) => {
     const appUrl = (typeof customAppUrl === 'string' && customAppUrl.length > 0)
       ? customAppUrl
       : getAppUrl();
+    
+    const successUrl = `${appUrl}/customer/messages?offer_status=paid&session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${appUrl}/customer/messages?offer_status=cancel`;
+    
+    console.log('[API] Creating offer checkout session', { 
+      offerId, 
+      amountCents, 
+      weeks, 
+      appUrl,
+      successUrl,
+      cancelUrl,
+      client_reference_id: `offer:${offer.id}`
+    });
+    
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
@@ -68,11 +82,19 @@ serve(async (req) => {
         },
       ],
       client_reference_id: `offer:${offer.id}`,
-      success_url: `${appUrl}/customer/messages?offer_status=paid&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/customer/messages?offer_status=cancel`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
     });
     
-    console.log('[API] Created offer checkout session', { offerId, amountCents, weeks, sessionId: session.id });
+    console.log('[API] Created offer checkout session', { 
+      offerId, 
+      amountCents, 
+      weeks, 
+      sessionId: session.id,
+      checkoutUrl: session.url,
+      successUrl: session.success_url,
+      cancelUrl: session.cancel_url
+    });
     return new Response(JSON.stringify({ 
       checkoutUrl: session.url,
       sessionId: session.id  // Include session ID in response for easy access

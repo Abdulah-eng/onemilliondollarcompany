@@ -14,6 +14,7 @@ const MessagesPage = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(
     conversationId || null
   );
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const { conversations, loading, refetch: refetchConversations } = useConversations();
 
   // Handle Stripe redirect for offer payments - must run before auto-opening conversation
@@ -24,7 +25,8 @@ const MessagesPage = () => {
     console.log('[Frontend] MessagesPage - checking payment redirect', { 
       offerStatus, 
       sessionId,
-      search: window.location.search 
+      search: window.location.search,
+      pathname: window.location.pathname
     });
     
     // Log session ID prominently if present
@@ -36,6 +38,7 @@ const MessagesPage = () => {
     
     if (offerStatus === 'paid' && sessionId) {
       console.log('[Frontend] Payment successful, processing offer acceptance', { sessionId });
+      setIsProcessingPayment(true);
       toast.success('Payment successful! Processing your coaching offer...');
       
       let attempts = 0;
@@ -56,6 +59,7 @@ const MessagesPage = () => {
           if (syncResult?.status === 'accepted' || syncResult?.ok) {
             console.log('[Frontend] Offer sync result - ACCEPTED', syncResult);
             offerAccepted = true;
+            setIsProcessingPayment(false);
             await refetchConversations();
             
             // Dispatch custom event to trigger message refetch in ChatView
@@ -95,6 +99,7 @@ const MessagesPage = () => {
         
         if (attempts >= maxAttempts && !offerAccepted) {
           console.warn('[Frontend] Offer status check timed out');
+          setIsProcessingPayment(false);
           toast.info('Payment processed! Your offer status should update shortly. Please refresh if needed.');
           
           // Clean URL
@@ -118,8 +123,12 @@ const MessagesPage = () => {
         }
       }, 1500);
       
-      return () => clearInterval(interval);
+      return () => {
+        clearInterval(interval);
+        setIsProcessingPayment(false);
+      };
     } else if (offerStatus === 'cancel') {
+      setIsProcessingPayment(false);
       toast.info('Payment was cancelled. You can try again when ready.');
       // Clean URL
       const url = new URL(window.location.href);
@@ -127,12 +136,22 @@ const MessagesPage = () => {
       url.searchParams.delete('session_id');
       window.history.replaceState({}, '', url.toString());
       navigate(window.location.pathname, { replace: true });
+    } else {
+      setIsProcessingPayment(false);
     }
-  }, [searchParams, navigate, refetchConversations]);
+  }, [searchParams, navigate, refetchConversations, selectedConversationId]);
 
   // Auto-open most recent conversation if no specific conversation is selected (desktop only)
+  // BUT only if we're not processing a payment redirect
   useEffect(() => {
-    if (!conversationId && !loading && conversations.length > 0 && !selectedConversationId && !isMobile) {
+    if (
+      !isProcessingPayment &&
+      !conversationId && 
+      !loading && 
+      conversations.length > 0 && 
+      !selectedConversationId && 
+      !isMobile
+    ) {
       // Find the most recent conversation (conversations are already sorted by updated_at desc)
       const mostRecentConversation = conversations[0];
       if (mostRecentConversation) {
@@ -140,7 +159,7 @@ const MessagesPage = () => {
         navigate(`/customer/messages/${mostRecentConversation.id}`);
       }
     }
-  }, [conversationId, loading, conversations, selectedConversationId, navigate, isMobile]);
+  }, [conversationId, loading, conversations, selectedConversationId, navigate, isMobile, isProcessingPayment]);
 
   const handleSelectConversation = (id: string | null) => {
     setSelectedConversationId(id);

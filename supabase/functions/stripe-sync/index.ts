@@ -13,18 +13,28 @@ serve(async (req) => {
   }
 
   try {
+    console.log('[API] stripe-sync called', { 
+      method: req.method, 
+      url: req.url,
+      headers: Object.fromEntries(req.headers.entries())
+    });
+    
     const stripe = createStripeClient();
     const supabase = createSupabaseClient(req);
     const url = new URL(req.url);
     const sessionId = url.searchParams.get('session_id');
 
+    console.log('[API] stripe-sync extracted session_id from URL', { sessionId, url: url.toString() });
+
     if (!sessionId) {
+      console.error('[API] stripe-sync missing session_id');
       return new Response(JSON.stringify({ error: 'session_id required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    console.log('[API] stripe-sync retrieving Stripe session', { sessionId });
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     console.log('[API] /api/stripe/sync', {
       sessionId,
@@ -32,14 +42,17 @@ serve(async (req) => {
       subscription: session.subscription,
       client_reference_id: session.client_reference_id,
       mode: session.mode,
+      payment_status: session.payment_status,
+      status: session.status,
     });
 
     const clientRef = (session.client_reference_id as string) || '';
+    console.log('[API] stripe-sync client_reference_id', { clientRef, mode: session.mode });
     
     // Handle coach offer payments (one-time payments)
     if (session.mode === 'payment' && clientRef.startsWith('offer:')) {
       const offerId = clientRef.replace('offer:', '');
-      console.log('[API] stripe-sync processing offer payment', { offerId, sessionId });
+      console.log('[API] stripe-sync processing offer payment', { offerId, sessionId, payment_status: session.payment_status });
       
       const { data: offerRows, error: offerErr } = await supabase
         .from('coach_offers')
@@ -47,8 +60,16 @@ serve(async (req) => {
         .eq('id', offerId)
         .limit(1);
       
-      if (offerErr || !offerRows?.[0]) {
-        console.error('[API] stripe-sync offer not found', { offerId, error: offerErr });
+      if (offerErr) {
+        console.error('[API] stripe-sync error fetching offer', { offerId, error: offerErr });
+        return new Response(JSON.stringify({ error: 'Failed to fetch offer', offer_id: offerId, details: offerErr.message }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
+      if (!offerRows?.[0]) {
+        console.error('[API] stripe-sync offer not found', { offerId });
         return new Response(JSON.stringify({ error: 'Offer not found', offer_id: offerId }), {
           status: 404,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -56,6 +77,13 @@ serve(async (req) => {
       }
       
       const offer = offerRows[0];
+      console.log('[API] stripe-sync offer found', { 
+        offerId, 
+        currentStatus: offer.status, 
+        customerId: offer.customer_id, 
+        coachId: offer.coach_id 
+      });
+      
       let statusChanged = false;
       
       if (offer.status !== 'accepted') {
@@ -67,9 +95,17 @@ serve(async (req) => {
         
         if (updateOfferError) {
           console.error('[API] stripe-sync failed to update offer status', { offerId, error: updateOfferError });
-          throw updateOfferError;
+          return new Response(JSON.stringify({ 
+            error: 'Failed to update offer status', 
+            offer_id: offerId, 
+            details: updateOfferError.message 
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
         }
         
+        console.log('[API] stripe-sync offer status updated successfully', { offerId });
         statusChanged = true;
         
         const weeks = offer.duration_months || 1;
@@ -211,7 +247,23 @@ serve(async (req) => {
     }
     
     // Handle subscription payments (existing logic)
+    // If we get here, it's not an offer payment, so it should be a subscription
+    if (session.mode !== 'subscription') {
+      console.warn('[API] stripe-sync unexpected session mode', { 
+        mode: session.mode, 
+        client_reference_id: clientRef,
+        payment_status: session.payment_status,
+        status: session.status
+      });
+    }
+    
     if (!session.customer || !session.subscription) {
+      console.error('[API] stripe-sync session missing customer or subscription', {
+        hasCustomer: !!session.customer,
+        hasSubscription: !!session.subscription,
+        mode: session.mode,
+        client_reference_id: clientRef
+      });
       return new Response(JSON.stringify({ error: 'Session not completed or missing customer/subscription' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -256,8 +308,16 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e: any) {
-    console.error('[API] /api/stripe/sync error', e);
-    return new Response(JSON.stringify({ error: e?.message || 'Failed to sync subscription' }), {
+    console.error('[API] /api/stripe/sync error', {
+      error: e?.message || 'Unknown error',
+      stack: e?.stack,
+      name: e?.name,
+      cause: e?.cause
+    });
+    return new Response(JSON.stringify({ 
+      error: e?.message || 'Failed to sync checkout session',
+      details: e?.stack ? 'Check server logs for details' : undefined
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
