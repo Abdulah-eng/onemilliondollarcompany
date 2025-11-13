@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChatLayout } from '@/components/chat/ChatLayout';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { useConversations } from '@/hooks/useConversations';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { syncCheckoutSession } from '@/lib/stripe/api';
@@ -10,17 +10,21 @@ const MessagesPage = () => {
   const navigate = useNavigate();
   const { conversationId } = useParams();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const isMobile = useIsMobile();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(
     conversationId || null
   );
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const { conversations, loading, refetch: refetchConversations } = useConversations();
+  const hasProcessedPayment = useRef(false);
 
   // Handle Stripe redirect for offer payments - must run before auto-opening conversation
   useEffect(() => {
-    const offerStatus = searchParams.get('offer_status');
-    const sessionId = searchParams.get('session_id');
+    // Read from both searchParams and window.location.search to ensure we catch the redirect
+    const urlParams = new URLSearchParams(window.location.search);
+    const offerStatus = searchParams.get('offer_status') || urlParams.get('offer_status');
+    const sessionId = searchParams.get('session_id') || urlParams.get('session_id');
     
     console.log('[Frontend] MessagesPage - checking payment redirect', { 
       offerStatus, 
@@ -37,7 +41,14 @@ const MessagesPage = () => {
     }
     
     if (offerStatus === 'paid' && sessionId) {
+      // Prevent duplicate processing if this effect runs multiple times
+      if (hasProcessedPayment.current) {
+        console.log('[Frontend] Payment already processed, skipping duplicate');
+        return;
+      }
+      
       console.log('[Frontend] Payment successful, processing offer acceptance', { sessionId });
+      hasProcessedPayment.current = true;
       setIsProcessingPayment(true);
       toast.success('Payment successful! Processing your coaching offer...');
       
@@ -60,6 +71,7 @@ const MessagesPage = () => {
             console.log('[Frontend] Offer sync result - ACCEPTED', syncResult);
             offerAccepted = true;
             setIsProcessingPayment(false);
+            hasProcessedPayment.current = false; // Reset for future payments
             await refetchConversations();
             
             // Dispatch custom event to trigger message refetch in ChatView
@@ -70,7 +82,7 @@ const MessagesPage = () => {
             
             toast.success('🎉 Your coaching offer has been accepted! Your coaching plan is now active.');
             
-            // Clean URL
+            // Clean URL immediately
             const url = new URL(window.location.href);
             url.searchParams.delete('offer_status');
             url.searchParams.delete('session_id');
@@ -100,6 +112,7 @@ const MessagesPage = () => {
         if (attempts >= maxAttempts && !offerAccepted) {
           console.warn('[Frontend] Offer status check timed out');
           setIsProcessingPayment(false);
+          hasProcessedPayment.current = false; // Reset for retry
           toast.info('Payment processed! Your offer status should update shortly. Please refresh if needed.');
           
           // Clean URL
@@ -129,6 +142,7 @@ const MessagesPage = () => {
       };
     } else if (offerStatus === 'cancel') {
       setIsProcessingPayment(false);
+      hasProcessedPayment.current = false;
       toast.info('Payment was cancelled. You can try again when ready.');
       // Clean URL
       const url = new URL(window.location.href);
@@ -139,7 +153,7 @@ const MessagesPage = () => {
     } else {
       setIsProcessingPayment(false);
     }
-  }, [searchParams, navigate, refetchConversations, selectedConversationId]);
+  }, [location.search, navigate, refetchConversations, selectedConversationId]); // Use location.search instead of searchParams
 
   // Auto-open most recent conversation if no specific conversation is selected (desktop only)
   // BUT only if we're not processing a payment redirect
