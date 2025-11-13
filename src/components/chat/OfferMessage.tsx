@@ -46,7 +46,8 @@ export const OfferMessage: React.FC<OfferMessageProps> = ({
         return;
       }
       // Redirect to Stripe Checkout for one-time payment
-      const { checkoutUrl, sessionId } = await createOfferCheckoutSession(offerId);
+      const appUrl = typeof window !== 'undefined' ? window.location.origin : undefined;
+      const { checkoutUrl, sessionId } = await createOfferCheckoutSession(offerId, appUrl);
       
       // Session ID is already logged in api.ts, but also log here for visibility
       if (sessionId) {

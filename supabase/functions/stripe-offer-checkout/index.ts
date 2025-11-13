@@ -16,7 +16,7 @@ serve(async (req) => {
     const stripe = createStripeClient();
     const supabase = createSupabaseClient(req);
     const body = await req.json();
-    const { offerId } = body;
+    const { offerId, appUrl: customAppUrl } = body;
 
     if (!offerId) {
       return new Response(JSON.stringify({ error: 'offerId required' }), {
@@ -48,7 +48,9 @@ serve(async (req) => {
     }
 
     const weeks = offer.duration_months || 1;
-    const appUrl = getAppUrl();
+    const appUrl = (typeof customAppUrl === 'string' && customAppUrl.length > 0)
+      ? customAppUrl
+      : getAppUrl();
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],

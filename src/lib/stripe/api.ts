@@ -117,8 +117,8 @@ export async function syncCheckoutSession(sessionId: string): Promise<{ ok?: boo
   return await getFromFunction('stripe-sync', { session_id: sessionId });
 }
 
-export async function createOfferCheckoutSession(offerId: string): Promise<CheckoutSessionResponse> {
-  return await postToFunction<CheckoutSessionResponse>('stripe-offer-checkout', { offerId });
+export async function createOfferCheckoutSession(offerId: string, appUrl?: string): Promise<CheckoutSessionResponse> {
+  return await postToFunction<CheckoutSessionResponse>('stripe-offer-checkout', { offerId, appUrl });
 }
 
 export async function openCustomerPortal(stripeCustomerId: string, returnUrl?: string): Promise<{ url: string }> {
