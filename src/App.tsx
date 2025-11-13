@@ -44,7 +44,6 @@ const ContactStep = lazy(() => import("./pages/onboarding/ContactStep"));
 const OnboardingSuccess = lazy(() => import("./pages/onboarding/OnboardingSuccess"));
 const CustomerDashboardPage = lazy(() => import("./pages/customer/CustomerDashboard"));
 const TestOfferSyncPage = lazy(() => import("./pages/customer/TestOfferSync"));
-const TestOfferPaymentFlowPage = lazy(() => import("./pages/customer/TestOfferPaymentFlow"));
 const CoachDashboardPage = lazy(() => import("./pages/coach/CoachDashboard"));
 const ClientOverviewPage = lazy(() => import("./pages/coach/ClientOverviewPage"));
 const ClientCard = lazy(() => import("./pages/coach/ClientCard"));
@@ -399,12 +398,6 @@ const ThemedApp = () => {
                   <Route path="/customer/test-offer-sync" element={
                     <Suspense fallback={<LoadingScreen />}>
                       <TestOfferSyncPage />
-                    </Suspense>
-                  } />
-                  {/* Test page for complete offer payment flow (development/testing only) */}
-                  <Route path="/customer/test-offer-payment-flow" element={
-                    <Suspense fallback={<LoadingScreen />}>
-                      <TestOfferPaymentFlowPage />
                     </Suspense>
                   } />
                   <Route path="/program/:type/:id" element={
