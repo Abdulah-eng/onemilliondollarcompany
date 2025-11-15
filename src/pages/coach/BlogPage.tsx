@@ -98,6 +98,7 @@ const BlogPage: React.FC = () => {
         content: newPost.content,
         category: newPost.category,
         cover_url: (newPost as any).imageUrl || (newPost as any).coverUrl || null,
+        isPublished: newPost.isPublished ?? false,
       });
       setView('list');
       await refetch();

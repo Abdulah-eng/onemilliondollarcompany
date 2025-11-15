@@ -64,17 +64,31 @@ const ClientList = ({ refreshTrigger }: ClientListProps) => {
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-foreground">My Clients 🏋️</h2>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">My Clients 🏋️</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {filteredClients.length === allClients.length
+              ? `${allClients.length} ${allClients.length === 1 ? 'client' : 'clients'}`
+              : `Showing ${filteredClients.length} of ${allClients.length} ${allClients.length === 1 ? 'client' : 'clients'}`
+            }
+          </p>
+        </div>
+      </div>
       
-      <ClientFilters onFilterChange={handleFilterChange} />
+      <ClientFilters 
+        onFilterChange={handleFilterChange}
+        totalCount={allClients.length}
+        filteredCount={filteredClients.length}
+      />
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filteredClients.map((client, index) => (
           <ClientCard key={client.id} clientId={client.id} index={index} />
         ))}
         {filteredClients.length === 0 && (
-          <div className="col-span-full text-center py-8">
+          <div className="col-span-full text-center py-12">
             <div className="text-sm text-muted-foreground">
               {allClients.length === 0 
                 ? "No clients yet. Accept requests to see them here."

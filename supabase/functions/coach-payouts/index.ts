@@ -88,7 +88,7 @@ serve(async (req) => {
       const action = body.action;
 
       if (action === 'update-settings') {
-        const { coachId, payoutMethod, bankDetails, paypalEmail, stripeAccountId } = body;
+        const { coachId, payoutMethod, bankDetails, paypalEmail, paypalAccountId, stripeAccountId } = body;
         if (!coachId) {
           return new Response(JSON.stringify({ error: 'coachId required' }), {
             status: 400,
@@ -101,6 +101,7 @@ serve(async (req) => {
           payout_method: payoutMethod,
           bank_details: bankDetails || null,
           paypal_email: paypalEmail || null,
+          paypal_account_id: paypalAccountId || null,
           stripe_account_id: stripeAccountId || null,
           updated_at: new Date().toISOString()
         };

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ClientRequests from '@/components/coach/client-overview/ClientRequests';
-import ClientFilters from '@/components/coach/client-overview/ClientFilters';
 import ClientList from '@/components/coach/client-overview/ClientList';
 import ClientDetailModal from '@/components/coach/client-detail/ClientDetailModal';
 import { useCustomerDetail } from '@/hooks/useCustomerDetail';
@@ -13,13 +12,8 @@ const ClientOverviewPage = () => {
   const isMobile = useIsMobile();
   const { customer: selectedClient, loading: customerLoading } = useCustomerDetail(selectedClientId);
   const { t } = useTranslation();
-  
-  console.log('ClientOverviewPage: selectedClientId:', selectedClientId);
-  console.log('ClientOverviewPage: selectedClient:', selectedClient);
-  console.log('ClientOverviewPage: customerLoading:', customerLoading);
 
   const handleClientRequestClick = (clientId: string) => {
-    console.log('ClientOverviewPage: Client clicked, setting selectedClientId:', clientId);
     setSelectedClientId(clientId);
   };
 
@@ -47,10 +41,7 @@ const ClientOverviewPage = () => {
           onRequestAccepted={handleRequestAccepted}
         />
 
-        <div className="space-y-6">
-          <ClientFilters onFilterChange={() => {}} />
-          <ClientList refreshTrigger={refreshTrigger} />
-        </div>
+        <ClientList refreshTrigger={refreshTrigger} />
       </div>
 
       <ClientDetailModal

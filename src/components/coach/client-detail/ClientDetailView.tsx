@@ -1,4 +1,5 @@
 // src/components/coach/client-detail/ClientDetailView.tsx
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,10 +11,20 @@ import {
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { useClientStatus } from '@/hooks/useClientStatus';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { useCoachRequests } from '@/hooks/useCoachRequests';
+import { toast } from 'sonner';
 import ClientProgramsDisplay from './ClientProgramsDisplay';
 
 const ClientDetailView = ({ client, onClose, loading = false }) => {
   const { clientStatus, loading: statusLoading } = useClientStatus(client?.id);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { acceptRequest, rejectRequest } = useCoachRequests();
+  const [hasConversation, setHasConversation] = useState<boolean | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   
   if (loading || statusLoading) {
     return (
@@ -32,19 +43,109 @@ const ClientDetailView = ({ client, onClose, loading = false }) => {
     );
   }
 
-  const handleAccept = () => {
-    // TODO: Implement logic to accept the client request
-    // This should update the database (e.g., set request status to 'accepted')
-    // and trigger a welcome PDF and 3-day countdown for program assignment. [cite: 195, 198]
-    console.log(`Accepted client: ${client.name}`);
-    onClose();
+  // Check if conversation exists
+  useEffect(() => {
+    const checkConversation = async () => {
+      if (!user || !client?.id || !clientStatus) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('conversations')
+          .select('id')
+          .eq('coach_id', user.id)
+          .eq('customer_id', client.id)
+          .maybeSingle();
+        
+        if (error) throw error;
+        setHasConversation(!!data);
+      } catch (err) {
+        console.error('Error checking conversation:', err);
+        setHasConversation(false);
+      }
+    };
+
+    if (clientStatus?.status === 'waiting_offer') {
+      checkConversation();
+    }
+  }, [user, client?.id, clientStatus]);
+
+  const handleAccept = async () => {
+    if (!user || !client?.id || isProcessing) return;
+    
+    setIsProcessing(true);
+    try {
+      // Find the request for this client
+      const { data: requests, error: reqError } = await supabase
+        .from('coach_requests')
+        .select('id')
+        .eq('coach_id', user.id)
+        .eq('customer_id', client.id)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (reqError) throw reqError;
+
+      if (requests?.id) {
+        const success = await acceptRequest(requests.id);
+        if (success) {
+          toast.success(`Request accepted! ${client.name} is now your client.`);
+          onClose();
+          // Refresh will happen via real-time updates
+        } else {
+          toast.error('Failed to accept request. Please try again.');
+        }
+      } else {
+        toast.error('No pending request found for this client.');
+      }
+    } catch (error) {
+      console.error('Error accepting request:', error);
+      toast.error('Failed to accept request. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  const handleDecline = () => {
-    // TODO: Implement logic to decline the client request
-    // This might set the request status to 'declined' and notify the user.
-    console.log(`Declined client: ${client.name}`);
-    onClose();
+  const handleDecline = async () => {
+    if (!user || !client?.id || isProcessing) return;
+    
+    setIsProcessing(true);
+    try {
+      // Find the request for this client
+      const { data: requests, error: reqError } = await supabase
+        .from('coach_requests')
+        .select('id')
+        .eq('coach_id', user.id)
+        .eq('customer_id', client.id)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (reqError) throw reqError;
+
+      if (requests?.id) {
+        const success = await rejectRequest(requests.id);
+        if (success) {
+          toast.success('Request declined.');
+          onClose();
+        } else {
+          toast.error('Failed to decline request. Please try again.');
+        }
+      } else {
+        toast.error('No pending request found for this client.');
+      }
+    } catch (error) {
+      console.error('Error declining request:', error);
+      toast.error('Failed to decline request. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleSendOffer = () => {
+    // Navigate to messages with this client to send an offer
+    if (client?.id) {
+      navigate(`/coach/messages?client=${client.id}&name=${encodeURIComponent(client.name || 'Client')}`);
+      onClose();
+    }
   };
 
   const getStatusBadge = () => {
@@ -112,13 +213,15 @@ const ClientDetailView = ({ client, onClose, loading = false }) => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-yellow-800">
                 <Clock size={20} className="text-yellow-600" />
-                Waiting for Offer
+                {hasConversation ? 'Waiting for Offer' : 'Client Request'}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-yellow-700">
-                This client is waiting for you to send them a coaching offer. 
-                Click "Send Offer" to create a personalized coaching package.
+                {hasConversation 
+                  ? "This client is waiting for you to send them a coaching offer. Click 'Send Offer' to create a personalized coaching package."
+                  : "This client has sent you a coaching request. Accept to start working with them, or decline if you're unable to take them on."
+                }
               </p>
             </CardContent>
           </Card>
@@ -278,12 +381,41 @@ const ClientDetailView = ({ client, onClose, loading = false }) => {
 
       {clientStatus?.status === 'waiting_offer' && (
         <div className="flex gap-4 mt-8 pt-4 border-t border-border">
-          <Button onClick={handleAccept} className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold text-base">
-            <DollarSign className="h-5 w-5 mr-2" /> Send Offer
-          </Button>
-          <Button onClick={handleDecline} variant="outline" className="w-full text-red-600 border-red-600 font-bold text-base hover:bg-red-50">
-            <XCircle className="h-5 w-5 mr-2" /> Decline
-          </Button>
+          {hasConversation ? (
+            <Button 
+              onClick={handleSendOffer} 
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold text-base"
+              disabled={isProcessing}
+            >
+              <DollarSign className="h-5 w-5 mr-2" /> Send Offer
+            </Button>
+          ) : (
+            <>
+              <Button 
+                onClick={handleAccept} 
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-bold text-base"
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" /> Processing...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-5 w-5 mr-2" /> Accept
+                  </>
+                )}
+              </Button>
+              <Button 
+                onClick={handleDecline} 
+                variant="outline" 
+                className="w-full text-red-600 border-red-600 font-bold text-base hover:bg-red-50"
+                disabled={isProcessing}
+              >
+                <XCircle className="h-5 w-5 mr-2" /> Decline
+              </Button>
+            </>
+          )}
         </div>
       )}
     </div>

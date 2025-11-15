@@ -9,7 +9,9 @@ import {
   CheckCircle, 
   MessageCircle,
   X,
-  Filter
+  Filter,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -19,27 +21,30 @@ interface ClientFiltersProps {
     status: string[];
     badges: string[];
   }) => void;
+  totalCount?: number;
+  filteredCount?: number;
 }
 
-const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
+const ClientFilters = ({ onFilterChange, totalCount = 0, filteredCount = 0 }: ClientFiltersProps) => {
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
   const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { t } = useTranslation();
 
   const statusOptions = [
-    { value: 'no_status', label: 'No Status', icon: Clock, color: 'bg-gray-100 text-gray-800' },
-    { value: 'waiting_offer', label: 'Waiting Offer', icon: DollarSign, color: 'bg-yellow-100 text-yellow-800' },
-    { value: 'missing_program', label: 'Missing Program', icon: AlertCircle, color: 'bg-red-100 text-red-800' },
-    { value: 'program_active', label: 'Program Active', icon: CheckCircle, color: 'bg-blue-100 text-blue-800' },
-    { value: 'on_track', label: 'On Track', icon: CheckCircle, color: 'bg-green-100 text-green-800' },
-    { value: 'off_track', label: 'Off Track', icon: AlertCircle, color: 'bg-red-100 text-red-800' },
-    { value: 'soon_to_expire', label: 'Soon to Expire', icon: Clock, color: 'bg-orange-100 text-orange-800' }
+    { value: 'no_status', label: 'No Status', icon: Clock, color: 'bg-gray-500/10 text-gray-700 dark:text-gray-300' },
+    { value: 'waiting_offer', label: 'Waiting Offer', icon: DollarSign, color: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300' },
+    { value: 'missing_program', label: 'Missing Program', icon: AlertCircle, color: 'bg-red-500/10 text-red-700 dark:text-red-300' },
+    { value: 'program_active', label: 'Program Active', icon: CheckCircle, color: 'bg-blue-500/10 text-blue-700 dark:text-blue-300' },
+    { value: 'on_track', label: 'On Track', icon: CheckCircle, color: 'bg-green-500/10 text-green-700 dark:text-green-300' },
+    { value: 'off_track', label: 'Off Track', icon: AlertCircle, color: 'bg-red-500/10 text-red-700 dark:text-red-300' },
+    { value: 'soon_to_expire', label: 'Soon to Expire', icon: Clock, color: 'bg-orange-500/10 text-orange-700 dark:text-orange-300' }
   ];
 
   const badgeOptions = [
-    { value: 'new_message', label: 'New Message', icon: MessageCircle, color: 'bg-blue-100 text-blue-800' },
-    { value: 'awaiting_checkin', label: 'Awaiting Check-in', icon: Clock, color: 'bg-yellow-100 text-yellow-800' },
-    { value: 'new_feedback', label: 'New Feedback', icon: CheckCircle, color: 'bg-green-100 text-green-800' }
+    { value: 'new_message', label: 'New Message', icon: MessageCircle, color: 'bg-blue-500/10 text-blue-700 dark:text-blue-300' },
+    { value: 'awaiting_checkin', label: 'Awaiting Check-in', icon: Clock, color: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300' },
+    { value: 'new_feedback', label: 'New Feedback', icon: CheckCircle, color: 'bg-green-500/10 text-green-700 dark:text-green-300' }
   ];
 
   const handleStatusToggle = (status: string) => {
@@ -65,115 +70,163 @@ const ClientFilters = ({ onFilterChange }: ClientFiltersProps) => {
   };
 
   const hasActiveFilters = selectedStatus.length > 0 || selectedBadges.length > 0;
+  const activeFilterCount = selectedStatus.length + selectedBadges.length;
 
   return (
-    <Card className="shadow-lg rounded-xl border-0 bg-gradient-to-br from-background to-muted/20">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold text-lg">{t('clients.filterClients')}</h3>
+    <Card className="border shadow-sm">
+      <CardContent className="p-4">
+        {/* Header - Always Visible */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Filter className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-base">{t('clients.filterClients')}</h3>
+              <p className="text-xs text-muted-foreground">
+                {hasActiveFilters 
+                  ? `${filteredCount} of ${totalCount} clients`
+                  : `${totalCount} total clients`
+                }
+              </p>
+            </div>
           </div>
-          {hasActiveFilters && (
+          <div className="flex items-center gap-2">
+            {hasActiveFilters && (
+              <Badge variant="secondary" className="mr-2">
+                {activeFilterCount} active
+              </Badge>
+            )}
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="h-8 text-xs"
+              >
+                <X className="w-3 h-3 mr-1" />
+                Clear
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
-              onClick={clearFilters}
-              className="text-muted-foreground hover:text-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="h-8"
             >
-              <X className="w-4 h-4 mr-1" />
-{t('clients.clearAll')}
+              {isExpanded ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
             </Button>
-          )}
+          </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Status Filters */}
-          <div>
-            <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-primary"></div>
-{t('clients.status')}
-            </h4>
+        {/* Active Filters Pills - Always Visible */}
+        {hasActiveFilters && (
+          <div className="mb-4 pb-4 border-b">
             <div className="flex flex-wrap gap-2">
-              {statusOptions.map((option) => {
-                const Icon = option.icon;
-                const isSelected = selectedStatus.includes(option.value);
+              {selectedStatus.map((status) => {
+                const option = statusOptions.find(o => o.value === status);
                 return (
-                  <Button
-                    key={option.value}
-                    variant={isSelected ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleStatusToggle(option.value)}
-                    className={cn(
-                      "flex items-center gap-2 transition-all duration-200",
-                      isSelected ? option.color : "hover:bg-muted hover:border-primary/50"
-                    )}
+                  <Badge 
+                    key={status} 
+                    variant="secondary" 
+                    className="text-xs px-2 py-1 flex items-center gap-1"
                   >
-                    <Icon className="w-3 h-3" />
-                    {option.label}
-                  </Button>
+                    {option?.label}
+                    <X 
+                      className="w-3 h-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => handleStatusToggle(status)}
+                    />
+                  </Badge>
+                );
+              })}
+              {selectedBadges.map((badge) => {
+                const option = badgeOptions.find(o => o.value === badge);
+                return (
+                  <Badge 
+                    key={badge} 
+                    variant="secondary" 
+                    className="text-xs px-2 py-1 flex items-center gap-1"
+                  >
+                    {option?.label}
+                    <X 
+                      className="w-3 h-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => handleBadgeToggle(badge)}
+                    />
+                  </Badge>
                 );
               })}
             </div>
           </div>
+        )}
 
-          {/* Badge Filters */}
-          <div>
-            <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-secondary"></div>
-{t('clients.badges')}
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              {badgeOptions.map((option) => {
-                const Icon = option.icon;
-                const isSelected = selectedBadges.includes(option.value);
-                return (
-                  <Button
-                    key={option.value}
-                    variant={isSelected ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleBadgeToggle(option.value)}
-                    className={cn(
-                      "flex items-center gap-2 transition-all duration-200",
-                      isSelected ? option.color : "hover:bg-muted hover:border-primary/50"
-                    )}
-                  >
-                    <Icon className="w-3 h-3" />
-                    {option.label}
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Active Filters Summary */}
-          {hasActiveFilters && (
-            <div className="pt-4 border-t border-border/50">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full bg-accent"></div>
-                <span className="text-xs font-medium text-muted-foreground">{t('clients.activeFilters')}</span>
-              </div>
+        {/* Expandable Filter Options */}
+        {isExpanded && (
+          <div className="space-y-4 pt-2">
+            {/* Status Filters */}
+            <div>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                {t('clients.status')}
+              </h4>
               <div className="flex flex-wrap gap-2">
-                {selectedStatus.map((status) => {
-                  const option = statusOptions.find(o => o.value === status);
+                {statusOptions.map((option) => {
+                  const Icon = option.icon;
+                  const isSelected = selectedStatus.includes(option.value);
                   return (
-                    <Badge key={status} variant="secondary" className="text-xs px-2 py-1">
-                      {option?.label}
-                    </Badge>
-                  );
-                })}
-                {selectedBadges.map((badge) => {
-                  const option = badgeOptions.find(o => o.value === badge);
-                  return (
-                    <Badge key={badge} variant="secondary" className="text-xs px-2 py-1">
-                      {option?.label}
-                    </Badge>
+                    <Button
+                      key={option.value}
+                      variant={isSelected ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleStatusToggle(option.value)}
+                      className={cn(
+                        "h-8 text-xs transition-all",
+                        isSelected 
+                          ? option.color + " border-0" 
+                          : "hover:bg-muted"
+                      )}
+                    >
+                      <Icon className="w-3 h-3 mr-1.5" />
+                      {option.label}
+                    </Button>
                   );
                 })}
               </div>
             </div>
-          )}
-        </div>
+
+            {/* Badge Filters */}
+            <div>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                {t('clients.badges')}
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {badgeOptions.map((option) => {
+                  const Icon = option.icon;
+                  const isSelected = selectedBadges.includes(option.value);
+                  return (
+                    <Button
+                      key={option.value}
+                      variant={isSelected ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleBadgeToggle(option.value)}
+                      className={cn(
+                        "h-8 text-xs transition-all",
+                        isSelected 
+                          ? option.color + " border-0" 
+                          : "hover:bg-muted"
+                      )}
+                    >
+                      <Icon className="w-3 h-3 mr-1.5" />
+                      {option.label}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

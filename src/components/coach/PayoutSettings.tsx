@@ -193,6 +193,11 @@ const BankTransferForm = ({ settings, onUpdate, loading }: any) => {
     account_number: settings?.bank_details?.account_number || '',
     routing_number: settings?.bank_details?.routing_number || '',
     bank_name: settings?.bank_details?.bank_name || '',
+    bank_number: settings?.bank_details?.bank_number || '',
+    account_type: settings?.bank_details?.account_type || 'checking',
+    expire_date: settings?.bank_details?.expire_date || '',
+    swift_code: settings?.bank_details?.swift_code || '',
+    iban: settings?.bank_details?.iban || '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -228,6 +233,7 @@ const BankTransferForm = ({ settings, onUpdate, loading }: any) => {
           <Label htmlFor="account_number">Account Number</Label>
           <Input
             id="account_number"
+            type="password"
             value={formData.account_number}
             onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
             required
@@ -242,6 +248,57 @@ const BankTransferForm = ({ settings, onUpdate, loading }: any) => {
             required
           />
         </div>
+        <div>
+          <Label htmlFor="bank_number">Bank Number (Optional)</Label>
+          <Input
+            id="bank_number"
+            value={formData.bank_number}
+            onChange={(e) => setFormData({ ...formData, bank_number: e.target.value })}
+            placeholder="Bank identifier"
+          />
+        </div>
+        <div>
+          <Label htmlFor="account_type">Account Type</Label>
+          <Select
+            value={formData.account_type}
+            onValueChange={(value) => setFormData({ ...formData, account_type: value })}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="checking">Checking</SelectItem>
+              <SelectItem value="savings">Savings</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="expire_date">Expire Date (Optional)</Label>
+          <Input
+            id="expire_date"
+            type="date"
+            value={formData.expire_date}
+            onChange={(e) => setFormData({ ...formData, expire_date: e.target.value })}
+          />
+        </div>
+        <div>
+          <Label htmlFor="swift_code">SWIFT Code (Optional)</Label>
+          <Input
+            id="swift_code"
+            value={formData.swift_code}
+            onChange={(e) => setFormData({ ...formData, swift_code: e.target.value })}
+            placeholder="For international transfers"
+          />
+        </div>
+        <div className="md:col-span-2">
+          <Label htmlFor="iban">IBAN (Optional - International)</Label>
+          <Input
+            id="iban"
+            value={formData.iban}
+            onChange={(e) => setFormData({ ...formData, iban: e.target.value })}
+            placeholder="International Bank Account Number"
+          />
+        </div>
       </div>
       <Button type="submit" disabled={loading}>
         {loading ? 'Saving...' : 'Save Bank Details'}
@@ -252,12 +309,14 @@ const BankTransferForm = ({ settings, onUpdate, loading }: any) => {
 
 const PayPalForm = ({ settings, onUpdate, loading }: any) => {
   const [email, setEmail] = useState(settings?.paypal_email || '');
+  const [accountId, setAccountId] = useState(settings?.paypal_account_id || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onUpdate({
       payout_method: 'paypal',
       paypal_email: email,
+      paypal_account_id: accountId || null,
     });
   };
 
@@ -272,9 +331,24 @@ const PayPalForm = ({ settings, onUpdate, loading }: any) => {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
+        <p className="text-xs text-muted-foreground mt-1">
+          Make sure this email is verified in your PayPal account
+        </p>
+      </div>
+      <div>
+        <Label htmlFor="paypal_account_id">PayPal Account ID (Optional)</Label>
+        <Input
+          id="paypal_account_id"
+          value={accountId}
+          onChange={(e) => setAccountId(e.target.value)}
+          placeholder="PayPal Merchant ID or Account ID"
+        />
+        <p className="text-xs text-muted-foreground mt-1">
+          For business accounts, you can provide your PayPal Merchant ID
+        </p>
       </div>
       <Button type="submit" disabled={loading}>
-        {loading ? 'Saving...' : 'Save PayPal Email'}
+        {loading ? 'Saving...' : 'Save PayPal Settings'}
       </Button>
     </form>
   );

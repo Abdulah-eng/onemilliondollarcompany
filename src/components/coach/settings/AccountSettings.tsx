@@ -24,9 +24,16 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ account, onUpdate }) 
   const [payoutForm, setPayoutForm] = useState({
     method: 'bank' as 'bank' | 'paypal' | 'stripe',
     bankName: '',
+    accountHolder: '',
     accountNumber: '',
     routingNumber: '',
+    bankNumber: '',
+    accountType: 'checking' as 'checking' | 'savings',
+    expireDate: '',
+    swiftCode: '',
+    iban: '',
     paypalEmail: '',
+    paypalAccountId: '',
     stripeAccount: ''
   });
   const [isUpdatingPayout, setIsUpdatingPayout] = useState(false);
@@ -55,9 +62,48 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ account, onUpdate }) 
   const handlePayoutUpdate = async () => {
     setIsUpdatingPayout(true);
     try {
-      // Simulate API call for payout method update
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const { config } = await import('@/lib/config');
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
       
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token || ''}`,
+        'apikey': config.supabase.anonKey,
+      };
+
+      const bankDetails = payoutForm.method === 'bank' ? {
+        account_holder: payoutForm.accountHolder,
+        bank_name: payoutForm.bankName,
+        account_number: payoutForm.accountNumber,
+        routing_number: payoutForm.routingNumber,
+        bank_number: payoutForm.bankNumber || undefined,
+        account_type: payoutForm.accountType,
+        expire_date: payoutForm.expireDate || undefined,
+        swift_code: payoutForm.swiftCode || undefined,
+        iban: payoutForm.iban || undefined,
+      } : null;
+
+      const response = await fetch(`${config.api.baseUrl}/coach-payouts`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          action: 'update-settings',
+          coachId: formData.id,
+          payoutMethod: payoutForm.method,
+          bankDetails,
+          paypalEmail: payoutForm.method === 'paypal' ? payoutForm.paypalEmail : null,
+          paypalAccountId: payoutForm.method === 'paypal' ? payoutForm.paypalAccountId || null : null,
+          stripeAccountId: payoutForm.method === 'stripe' ? payoutForm.stripeAccount : null,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update payout method');
+      }
+
+      const data = await response.json();
       const updatedAccount = {
         ...formData,
         payoutMethod: payoutForm.method,
@@ -73,7 +119,8 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ account, onUpdate }) 
       setIsPayoutModalOpen(false);
       toast.success('Payout method updated successfully!');
     } catch (error) {
-      toast.error('Failed to update payout method. Please try again.');
+      console.error('Error updating payout method:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to update payout method. Please try again.');
     } finally {
       setIsUpdatingPayout(false);
     }
@@ -159,42 +206,126 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ account, onUpdate }) 
                 {payoutForm.method === 'bank' && (
                   <div className="space-y-3">
                     <div>
+                      <Label>Account Holder Name</Label>
+                      <Input 
+                        value={payoutForm.accountHolder}
+                        onChange={(e) => setPayoutForm({ ...payoutForm, accountHolder: e.target.value })}
+                        placeholder="John Doe"
+                        required
+                      />
+                    </div>
+                    <div>
                       <Label>Bank Name</Label>
                       <Input 
                         value={payoutForm.bankName}
                         onChange={(e) => setPayoutForm({ ...payoutForm, bankName: e.target.value })}
                         placeholder="e.g., Chase Bank"
+                        required
                       />
                     </div>
-                    <div>
-                      <Label>Account Number</Label>
-                      <Input 
-                        value={payoutForm.accountNumber}
-                        onChange={(e) => setPayoutForm({ ...payoutForm, accountNumber: e.target.value })}
-                        placeholder="1234567890"
-                        type="password"
-                      />
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Account Number</Label>
+                        <Input 
+                          value={payoutForm.accountNumber}
+                          onChange={(e) => setPayoutForm({ ...payoutForm, accountNumber: e.target.value })}
+                          placeholder="1234567890"
+                          type="password"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label>Routing Number</Label>
+                        <Input 
+                          value={payoutForm.routingNumber}
+                          onChange={(e) => setPayoutForm({ ...payoutForm, routingNumber: e.target.value })}
+                          placeholder="123456789"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Bank Number (Optional)</Label>
+                        <Input 
+                          value={payoutForm.bankNumber}
+                          onChange={(e) => setPayoutForm({ ...payoutForm, bankNumber: e.target.value })}
+                          placeholder="Bank identifier"
+                        />
+                      </div>
+                      <div>
+                        <Label>Account Type</Label>
+                        <Select 
+                          value={payoutForm.accountType}
+                          onValueChange={(value: 'checking' | 'savings') => 
+                            setPayoutForm({ ...payoutForm, accountType: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="checking">Checking</SelectItem>
+                            <SelectItem value="savings">Savings</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Expire Date (Optional)</Label>
+                        <Input 
+                          type="date"
+                          value={payoutForm.expireDate}
+                          onChange={(e) => setPayoutForm({ ...payoutForm, expireDate: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label>SWIFT Code (Optional)</Label>
+                        <Input 
+                          value={payoutForm.swiftCode}
+                          onChange={(e) => setPayoutForm({ ...payoutForm, swiftCode: e.target.value })}
+                          placeholder="SWIFT code for international"
+                        />
+                      </div>
                     </div>
                     <div>
-                      <Label>Routing Number</Label>
+                      <Label>IBAN (Optional - International)</Label>
                       <Input 
-                        value={payoutForm.routingNumber}
-                        onChange={(e) => setPayoutForm({ ...payoutForm, routingNumber: e.target.value })}
-                        placeholder="123456789"
+                        value={payoutForm.iban}
+                        onChange={(e) => setPayoutForm({ ...payoutForm, iban: e.target.value })}
+                        placeholder="International Bank Account Number"
                       />
                     </div>
                   </div>
                 )}
 
                 {payoutForm.method === 'paypal' && (
-                  <div>
-                    <Label>PayPal Email</Label>
-                    <Input 
-                      value={payoutForm.paypalEmail}
-                      onChange={(e) => setPayoutForm({ ...payoutForm, paypalEmail: e.target.value })}
-                      placeholder="your-email@example.com"
-                      type="email"
-                    />
+                  <div className="space-y-3">
+                    <div>
+                      <Label>PayPal Email</Label>
+                      <Input 
+                        value={payoutForm.paypalEmail}
+                        onChange={(e) => setPayoutForm({ ...payoutForm, paypalEmail: e.target.value })}
+                        placeholder="your-email@example.com"
+                        type="email"
+                        required
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Make sure this email is verified in your PayPal account
+                      </p>
+                    </div>
+                    <div>
+                      <Label>PayPal Account ID (Optional)</Label>
+                      <Input 
+                        value={payoutForm.paypalAccountId}
+                        onChange={(e) => setPayoutForm({ ...payoutForm, paypalAccountId: e.target.value })}
+                        placeholder="PayPal Merchant ID or Account ID"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        For business accounts, you can provide your PayPal Merchant ID
+                      </p>
+                    </div>
                   </div>
                 )}
 

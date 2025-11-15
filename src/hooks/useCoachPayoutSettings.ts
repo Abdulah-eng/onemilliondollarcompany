@@ -10,8 +10,14 @@ export interface PayoutSettings {
     account_number: string;
     routing_number: string;
     bank_name: string;
+    bank_number?: string;
+    account_type?: 'checking' | 'savings';
+    expire_date?: string;
+    swift_code?: string;
+    iban?: string;
   };
   paypal_email?: string;
+  paypal_account_id?: string;
   stripe_account_id?: string;
   created_at?: string;
   updated_at?: string;
