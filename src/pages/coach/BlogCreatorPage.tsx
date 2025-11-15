@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import BlogContentBuilder, { BlogContentItem } from '@/components/coach/blog/BlogContentBuilder';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'; 
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface BlogCreatorPageProps {
   onBack: () => void;
@@ -72,9 +73,7 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
 
       if (uploadError) {
         console.error('[BlogCreator] upload error', uploadError);
-        // Fallback to local preview so user sees something, but not used on customer side
-        const localUrl = URL.createObjectURL(file);
-        handleFormChange('imageUrl', localUrl);
+        toast.error('Failed to upload image. Please try again or check if the storage bucket exists.');
         event.target.value = '';
         return;
       }
@@ -87,14 +86,15 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
       const publicUrl = publicUrlData?.publicUrl;
       if (publicUrl) {
         handleFormChange('imageUrl', publicUrl);
+        toast.success('Image uploaded successfully!');
       } else {
-        const localUrl = URL.createObjectURL(file);
-        handleFormChange('imageUrl', localUrl);
+        toast.error('Failed to get image URL. Please try again.');
+        event.target.value = '';
       }
     } catch (e) {
       console.error('[BlogCreator] unexpected upload error', e);
-      const localUrl = URL.createObjectURL(file);
-      handleFormChange('imageUrl', localUrl);
+      toast.error('An unexpected error occurred while uploading the image.');
+      event.target.value = '';
     } finally {
       event.target.value = '';
     }
@@ -112,6 +112,12 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
       return;
     }
     
+    // Validate image URL - reject blob URLs
+    if (formData.imageUrl && formData.imageUrl.startsWith('blob:')) {
+      toast.error('Please upload the image again. Blob URLs cannot be saved.');
+      return;
+    }
+    
     const combinedContent = JSON.stringify(contentItems);
 
     // Do NOT generate a fake id here; let DB generate UUID on insert
@@ -121,7 +127,7 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
       title: formData.title,
       introduction: formData.introduction,
       content: combinedContent,
-      imageUrl: formData.imageUrl || '',
+      imageUrl: formData.imageUrl && !formData.imageUrl.startsWith('blob:') ? formData.imageUrl : null,
       createdAt: formData.createdAt || new Date().toISOString(),
       isPublished: formData.isPublished ?? false,
     };

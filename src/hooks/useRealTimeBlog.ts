@@ -119,13 +119,19 @@ export const useRealTimeBlog = () => {
         const transformedPosts: BlogPost[] = rows.map((post: any) => {
           const author = profilesById[post.coach_id] || {};
           const readTime = Math.ceil((post.content?.length || 0) / 500);
+          
+          // Filter out blob URLs - they don't work in production
+          let coverUrl = post.cover_url;
+          if (coverUrl && coverUrl.startsWith('blob:')) {
+            coverUrl = undefined;
+          }
 
           return {
             id: post.id,
             title: post.title,
             introduction: post.introduction,
             content: post.content,
-            cover_url: post.cover_url,
+            cover_url: coverUrl,
             category: post.category,
             author_id: post.coach_id,
             author_name: author.full_name || 'Unknown Author',

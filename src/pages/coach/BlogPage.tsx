@@ -91,13 +91,20 @@ const BlogPage: React.FC = () => {
 
   const handlePostSubmit = async (newPost: BlogPost) => {
     try {
+      // Filter out blob URLs - they won't work in production
+      let coverUrl = (newPost as any).imageUrl || (newPost as any).coverUrl || null;
+      if (coverUrl && coverUrl.startsWith('blob:')) {
+        coverUrl = null;
+        console.warn('Blob URL detected and removed from blog post');
+      }
+      
       await createOrUpdate({
         id: newPost.id?.startsWith('mock') ? undefined : newPost.id,
         title: newPost.title,
         introduction: newPost.introduction,
         content: newPost.content,
         category: newPost.category,
-        cover_url: (newPost as any).imageUrl || (newPost as any).coverUrl || null,
+        cover_url: coverUrl,
         isPublished: newPost.isPublished ?? false,
       });
       setView('list');
