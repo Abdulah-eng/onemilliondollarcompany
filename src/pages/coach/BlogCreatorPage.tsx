@@ -118,7 +118,16 @@ const BlogCreatorPage: React.FC<BlogCreatorPageProps> = ({ onBack, onSubmit, ini
       return;
     }
     
-    const combinedContent = JSON.stringify(contentItems);
+    // Filter out blob URLs from content items
+    const sanitizedContent = contentItems.map(item => {
+      if (item.type === 'file' && item.value && item.value.startsWith('blob:')) {
+        toast.error('Please re-upload any files. Blob URLs cannot be saved.');
+        return { ...item, value: '' };
+      }
+      return item;
+    });
+    
+    const combinedContent = JSON.stringify(sanitizedContent);
 
     // Do NOT generate a fake id here; let DB generate UUID on insert
     const finalPost: any = {

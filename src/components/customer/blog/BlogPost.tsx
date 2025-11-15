@@ -109,16 +109,22 @@ const BlogPost = ({ post, onBack }) => {
                     <div className="space-y-2">
                       {item.mediaType === 'image' && (
                         <img
-                          src={item.value}
+                          src={item.value && !item.value.startsWith('blob:') ? item.value : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop'}
                           alt="Blog content"
                           className="max-w-full h-auto rounded-lg shadow-md"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';
+                          }}
                         />
                       )}
                       {item.mediaType === 'video' && (
                         <video
-                          src={item.value}
+                          src={item.value && !item.value.startsWith('blob:') ? item.value : undefined}
                           controls
                           className="max-w-full h-auto rounded-lg shadow-md"
+                          onError={(e) => {
+                            (e.target as HTMLVideoElement).style.display = 'none';
+                          }}
                         />
                       )}
                     </div>

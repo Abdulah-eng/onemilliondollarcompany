@@ -48,22 +48,71 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
   }, [content, onContentChange]);
 
 
-  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    const id = currentBlockId.current;
+  const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    const id = currentBlockId.current;
 
-    if (file && id) {
-      const localUrl = URL.createObjectURL(file);
-      const mediaType: 'image' | 'video' = file.type.startsWith('video') ? 'video' : 'image';
+    if (file && id) {
+      try {
+        // Upload to Supabase storage instead of using blob URLs
+        const { supabase } = await import('@/integrations/supabase/client');
+        const { data: userRes } = await supabase.auth.getUser();
+        const userId = userRes.user?.id || 'anonymous';
+        const safeName = file.name.replace(/[^a-zA-Z0-9_.-]/g, '_');
+        const path = `blog_content/${userId}/${Date.now()}-${safeName}`;
+        // Use blog-covers bucket for both images and videos (or create blog-videos if needed)
+        const bucket = 'blog-covers';
 
-      onContentChange(content.map(item =>
-        item.id === id ? { ...item, value: localUrl, mediaType } : item
-      ));
-    }
+        const { error: uploadError } = await supabase
+          .storage
+          .from(bucket)
+          .upload(path, file, { contentType: file.type, upsert: false });
 
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    currentBlockId.current = null;
-  }, [content, onContentChange]);
+        if (uploadError) {
+          console.error('[BlogContentBuilder] upload error', uploadError);
+          // Fallback: use data URL for preview only (won't be saved)
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const dataUrl = e.target?.result as string;
+            const mediaType: 'image' | 'video' = file.type.startsWith('video') ? 'video' : 'image';
+            onContentChange(content.map(item =>
+              item.id === id ? { ...item, value: dataUrl, mediaType } : item
+            ));
+          };
+          reader.readAsDataURL(file);
+          return;
+        }
+
+        const { data: publicUrlData } = supabase
+          .storage
+          .from(bucket)
+          .getPublicUrl(path);
+
+        const publicUrl = publicUrlData?.publicUrl;
+        if (publicUrl) {
+          const mediaType: 'image' | 'video' = file.type.startsWith('video') ? 'video' : 'image';
+          onContentChange(content.map(item =>
+            item.id === id ? { ...item, value: publicUrl, mediaType } : item
+          ));
+        }
+      } catch (e) {
+        console.error('[BlogContentBuilder] unexpected upload error', e);
+        // Fallback: use data URL for preview only
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const dataUrl = e.target?.result as string;
+          const mediaType: 'image' | 'video' = file.type.startsWith('video') ? 'video' : 'image';
+          onContentChange(content.map(item =>
+            item.id === id ? { ...item, value: dataUrl, mediaType } : item
+          ));
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    currentBlockId.current = null;
+  }, [content, onContentChange]);
 
   const triggerFileExplorer = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
@@ -137,23 +186,44 @@ const BlogContentBuilder: React.FC<BlogContentBuilderProps> = ({ content, onCont
                     Click to Upload Image or Video
                   </span>
                 </div>
-              ) : (
-                <div className="relative border rounded-lg overflow-hidden">
-                  {item.mediaType === 'image' && (
-                    <img src={item.value} alt="Preview" className="max-h-64 w-full object-contain" />
-                  )}
-                  {item.mediaType === 'video' && (
-                    <video src={item.value} controls className="max-h-64 w-full object-contain bg-black" />
-                  )}
-                  <Button
-                    variant="ghost"
-                    className="absolute top-2 right-2 bg-black/50 text-white hover:bg-black/70"
-                    onClick={(e) => triggerFileExplorer(e, item.id)}
-                  >
-                    Replace
-                  </Button>
-                </div>
-              )}
+              ) : (
+                <div className="relative border rounded-lg overflow-hidden">
+                  {item.mediaType === 'image' && (
+                    <img 
+                      src={item.value && !item.value.startsWith('blob:') ? item.value : undefined} 
+                      alt="Preview" 
+                      className="max-h-64 w-full object-contain"
+                      onError={(e) => {
+                        if (item.value.startsWith('data:')) {
+                          // Data URL is fine for preview
+                          return;
+                        }
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  )}
+                  {item.mediaType === 'video' && (
+                    <video 
+                      src={item.value && !item.value.startsWith('blob:') ? item.value : undefined} 
+                      controls 
+                      className="max-h-64 w-full object-contain bg-black"
+                      onError={(e) => {
+                        if (item.value.startsWith('data:')) {
+                          return;
+                        }
+                        (e.target as HTMLVideoElement).style.display = 'none';
+                      }}
+                    />
+                  )}
+                  <Button
+                    variant="ghost"
+                    className="absolute top-2 right-2 bg-black/50 text-white hover:bg-black/70"
+                    onClick={(e) => triggerFileExplorer(e, item.id)}
+                  >
+                    Replace
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>

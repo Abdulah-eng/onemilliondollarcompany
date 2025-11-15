@@ -94,13 +94,16 @@ const BlogViewer: React.FC<BlogViewerProps> = ({ post, onBack, onEdit, onDelete 
       {/* Content */}
       <div className="grid gap-6">
         {/* Hero Image */}
-        {post.imageUrl && (
+        {post.imageUrl && !post.imageUrl.startsWith('blob:') && (
           <Card>
             <div className="relative h-64 md:h-80 w-full bg-muted">
               <img 
                 src={post.imageUrl} 
                 alt={post.title} 
                 className="w-full h-full object-cover rounded-t-lg" 
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1200&auto=format&fit=crop';
+                }}
               />
             </div>
           </Card>
@@ -159,16 +162,22 @@ const BlogViewer: React.FC<BlogViewerProps> = ({ post, onBack, onEdit, onDelete 
                         <div className="space-y-2">
                           {item.mediaType === 'image' && (
                             <img 
-                              src={item.value} 
+                              src={item.value && !item.value.startsWith('blob:') ? item.value : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop'} 
                               alt="Blog content" 
                               className="max-w-full h-auto rounded-lg shadow-md"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';
+                              }}
                             />
                           )}
                           {item.mediaType === 'video' && (
                             <video 
-                              src={item.value} 
+                              src={item.value && !item.value.startsWith('blob:') ? item.value : undefined} 
                               controls 
                               className="max-w-full h-auto rounded-lg shadow-md"
+                              onError={(e) => {
+                                (e.target as HTMLVideoElement).style.display = 'none';
+                              }}
                             />
                           )}
                         </div>

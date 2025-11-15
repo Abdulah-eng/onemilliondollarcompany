@@ -16,53 +16,65 @@ values (
 on conflict (id) do nothing;
 
 -- Create RLS policies for blog-covers bucket
--- Policy 1: Coaches can upload their own blog covers
+-- Policy 1: Authenticated users can upload blog covers to their own folder
 do $$
 begin
   if not exists (
     select 1 from pg_policies 
     where schemaname = 'storage' 
     and tablename = 'objects' 
-    and policyname = 'Coaches can upload blog covers'
+    and policyname = 'Users can upload blog covers'
   ) then
-    create policy "Coaches can upload blog covers" on storage.objects
+    create policy "Users can upload blog covers" on storage.objects
     for insert with check (
       bucket_id = 'blog-covers' 
-      and auth.uid()::text = (storage.foldername(name))[1]
+      and auth.uid() is not null
+      and (
+        name like 'blog_covers/' || auth.uid()::text || '/%'
+        or name like 'blog_content/' || auth.uid()::text || '/%'
+      )
     );
   end if;
 end $$;
 
--- Policy 2: Coaches can update their own blog covers
+-- Policy 2: Users can update their own blog covers
 do $$
 begin
   if not exists (
     select 1 from pg_policies 
     where schemaname = 'storage' 
     and tablename = 'objects' 
-    and policyname = 'Coaches can update blog covers'
+    and policyname = 'Users can update blog covers'
   ) then
-    create policy "Coaches can update blog covers" on storage.objects
+    create policy "Users can update blog covers" on storage.objects
     for update using (
       bucket_id = 'blog-covers' 
-      and auth.uid()::text = (storage.foldername(name))[1]
+      and auth.uid() is not null
+      and (
+        name like 'blog_covers/' || auth.uid()::text || '/%'
+        or name like 'blog_content/' || auth.uid()::text || '/%'
+      )
     );
   end if;
 end $$;
 
--- Policy 3: Coaches can delete their own blog covers
+-- Policy 3: Users can delete their own blog covers
 do $$
 begin
   if not exists (
     select 1 from pg_policies 
     where schemaname = 'storage' 
     and tablename = 'objects' 
-    and policyname = 'Coaches can delete blog covers'
+    and policyname = 'Users can delete blog covers'
   ) then
-    create policy "Coaches can delete blog covers" on storage.objects
+    create policy "Users can delete blog covers" on storage.objects
     for delete using (
       bucket_id = 'blog-covers' 
-      and auth.uid()::text = (storage.foldername(name))[1]
+      and auth.uid() is not null
+      and (
+        name like 'blog_covers/' || auth.uid()::text || '/%'
+        or name like 'blog_content/' || auth.uid()::text || '/%'
+      )
     );
   end if;
 end $$;

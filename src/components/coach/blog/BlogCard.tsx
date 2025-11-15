@@ -31,12 +31,19 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, onEdit, onDelete, onView }) =
       <Card className="rounded-xl overflow-hidden shadow-xl transition-all duration-300 hover:scale-[1.01] hover:shadow-primary/20 cursor-pointer flex flex-col h-full">
         
         <div className="relative h-40 w-full bg-muted flex-shrink-0">
-          {post.imageUrl && (
+          {post.imageUrl && !post.imageUrl.startsWith('blob:') ? (
             <img 
               src={post.imageUrl} 
               alt={post.title} 
               className="w-full h-full object-cover" 
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop';
+              }}
             />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <span className="text-muted-foreground text-sm">No image</span>
+            </div>
           )}
 
           <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-white flex items-center gap-1">
