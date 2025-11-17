@@ -1,6 +1,6 @@
 # Welcome to your Lovable project
 
-## Project info projectes actinn
+## Project info projectes actiio
 
 **URL**:klf nnhttps://lovable.dev/projects/d1a60329-addb-4dbc-a0cc-73041cdc47ca
 
