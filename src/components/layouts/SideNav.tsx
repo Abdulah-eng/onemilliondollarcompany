@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import { LogOut } from 'lucide-react';
+import { LogOut, Crown, Users } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -13,8 +13,10 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAccessLevel } from '@/contexts/AccessLevelContext';
 import { NavItem } from '@/lib/navItems';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface SideNavProps {
   navItems: NavItem[];
@@ -23,7 +25,8 @@ interface SideNavProps {
 
 const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
   const location = useLocation();
-  const { signOut } = useAuth();
+  const { signOut, profile } = useAuth();
+  const { hasCoach, hasPaymentPlan } = useAccessLevel();
   const { state, isMobile, setOpen, setOpenMobile } = useSidebar();
   const collapsed = state === 'collapsed';
 
@@ -49,6 +52,27 @@ const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
 
   const showText = isMobile || !collapsed;
   const btnClass = collapsed && !isMobile ? 'justify-center px-0' : 'justify-start';
+
+  const hasAccess = (item: NavItem): boolean => {
+    if (!item.requiresAccess || item.requiresAccess === 'free') return true;
+    if (item.requiresAccess === 'coach') return hasCoach || hasPaymentPlan;
+    if (item.requiresAccess === 'payment') return hasPaymentPlan;
+    return true;
+  };
+
+  const getAccessTooltip = (item: NavItem): string => {
+    if (!item.requiresAccess || item.requiresAccess === 'free') return '';
+    if (item.requiresAccess === 'coach') return 'Requires coach or subscription';
+    if (item.requiresAccess === 'payment') return 'Requires subscription';
+    return '';
+  };
+
+  const getAccessIcon = (item: NavItem) => {
+    if (!item.requiresAccess || item.requiresAccess === 'free') return null;
+    if (item.requiresAccess === 'payment') return <Crown className="h-3 w-3 text-orange-500" />;
+    if (item.requiresAccess === 'coach') return <Users className="h-3 w-3 text-blue-500" />;
+    return null;
+  };
 
   return (
     <Sidebar
@@ -77,22 +101,42 @@ const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className={collapsed && !isMobile ? 'items-center' : ''}>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.href)}
-                    className={btnClass}
-                  >
-                    <Link to={item.href} className="flex items-center gap-3" onClick={closeSidebar}>
-                      <item.icon className="h-5 w-5 shrink-0" />
-                      {showText && (
-                        <span className="text-sm font-medium">{item.name}</span>
-                      )}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              <TooltipProvider>
+                {navItems.map((item) => {
+                  const itemHasAccess = hasAccess(item);
+                  const accessIcon = getAccessIcon(item);
+                  const tooltipText = getAccessTooltip(item);
+                  
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive(item.href)}
+                            className={cn(btnClass, !itemHasAccess && 'opacity-60')}
+                          >
+                            <Link to={item.href} className="flex items-center gap-3 w-full" onClick={closeSidebar}>
+                              <item.icon className="h-5 w-5 shrink-0" />
+                              {showText && (
+                                <span className="text-sm font-medium flex-1">{item.name}</span>
+                              )}
+                              {showText && accessIcon && !itemHasAccess && (
+                                <span className="shrink-0">{accessIcon}</span>
+                              )}
+                            </Link>
+                          </SidebarMenuButton>
+                        </TooltipTrigger>
+                        {tooltipText && !itemHasAccess && (
+                          <TooltipContent side="right">
+                            <p className="text-xs">{tooltipText}</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </TooltipProvider>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -102,22 +146,42 @@ const SideNav = ({ navItems, bottomNavItems = [] }: SideNavProps) => {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className={collapsed && !isMobile ? 'items-center' : ''}>
-              {bottomNavItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.href)}
-                    className={btnClass}
-                  >
-                    <Link to={item.href} className="flex items-center gap-3" onClick={closeSidebar}>
-                      <item.icon className="h-5 w-5 shrink-0" />
-                      {showText && (
-                        <span className="text-sm font-medium">{item.name}</span>
-                      )}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              <TooltipProvider>
+                {bottomNavItems.map((item) => {
+                  const itemHasAccess = hasAccess(item);
+                  const accessIcon = getAccessIcon(item);
+                  const tooltipText = getAccessTooltip(item);
+                  
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive(item.href)}
+                            className={cn(btnClass, !itemHasAccess && 'opacity-60')}
+                          >
+                            <Link to={item.href} className="flex items-center gap-3 w-full" onClick={closeSidebar}>
+                              <item.icon className="h-5 w-5 shrink-0" />
+                              {showText && (
+                                <span className="text-sm font-medium flex-1">{item.name}</span>
+                              )}
+                              {showText && accessIcon && !itemHasAccess && (
+                                <span className="shrink-0">{accessIcon}</span>
+                              )}
+                            </Link>
+                          </SidebarMenuButton>
+                        </TooltipTrigger>
+                        {tooltipText && !itemHasAccess && (
+                          <TooltipContent side="right">
+                            <p className="text-xs">{tooltipText}</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </TooltipProvider>
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={handleSignOut} className={btnClass}>
                   <LogOut className="h-5 w-5 shrink-0" />

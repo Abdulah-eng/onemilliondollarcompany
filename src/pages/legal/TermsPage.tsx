@@ -10,10 +10,10 @@ const TermsPage = () => {
   const handleBack = () => {
     // Simple approach: use browser history or go to home
     if (window.history.length > 1) {
-      window.history.back();
+      navigate(-1);
     } else {
       // Fallback to home page
-      window.location.href = '/';
+      navigate('/');
     }
   };
 

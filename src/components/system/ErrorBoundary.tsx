@@ -3,6 +3,7 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Navigate } from 'react-router-dom';
 
 interface Props {
   children: ReactNode;
@@ -11,11 +12,13 @@ interface Props {
 interface State {
   hasError: boolean;
   error?: Error;
+  navigateHome?: boolean;
 }
 
 class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
+    navigateHome: false,
   };
 
   public static getDerivedStateFromError(error: Error): State {
@@ -30,7 +33,15 @@ class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: undefined });
   };
 
+  private handleGoHome = () => {
+    this.setState({ navigateHome: true });
+  };
+
   public render() {
+    if (this.state.navigateHome) {
+      return <Navigate to="/" replace />;
+    }
+
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex items-center justify-center p-4">
@@ -58,7 +69,7 @@ class ErrorBoundary extends Component<Props, State> {
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Try Again
                 </Button>
-                <Button onClick={() => window.location.href = '/'} size="sm">
+                <Button onClick={this.handleGoHome} size="sm">
                   Go Home
                 </Button>
               </div>

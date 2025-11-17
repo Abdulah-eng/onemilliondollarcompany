@@ -48,20 +48,26 @@ const ContactStep = () => {
     }
   };
 
-  const isPasswordValid = !contactInfo.password || (contactInfo.password.length >= 6 && contactInfo.password === confirmPass);
-  const isFormValid = isPasswordValid && !errors.phone;
-  
-  // Show password validation error
-  const passwordError = contactInfo.password && contactInfo.password.length < 6 
+  // Password is required - validate it
+  const passwordError = !contactInfo.password
+    ? 'Password is required'
+    : contactInfo.password.length < 6 
     ? 'Password must be at least 6 characters' 
-    : contactInfo.password && contactInfo.password !== confirmPass 
+    : '';
+  
+  const confirmPasswordError = !confirmPass && contactInfo.password
+    ? 'Please confirm your password'
+    : confirmPass && contactInfo.password && contactInfo.password !== confirmPass 
     ? 'Passwords do not match' 
     : '';
+  
+  const isPasswordValid = contactInfo.password && contactInfo.password.length >= 6 && contactInfo.password === confirmPass;
+  const isFormValid = isPasswordValid && !errors.phone;
 
   return (
     <OnboardingContainer
       title="Secure Your Account"
-      subtitle="Add a photo and set a strong password to protect your account."
+      subtitle="Add a photo and set a strong password to secure your account."
       currentStep={4} totalSteps={5}
       onBack={() => navigate('/onboarding/step-3')}
       onNext={handleNext}
@@ -84,7 +90,7 @@ const ContactStep = () => {
               <Input id="phone" type="tel" placeholder="+1 555 123 4567" value={contactInfo.phone} onChange={(e) => handleInputChange('phone', e.target.value)} />
             </FormField>
 
-            <FormField label="New Password (min. 6 characters)" htmlFor="password" error={passwordError}>
+            <FormField label={<span>New Password <span className="text-red-500">*</span> (min. 6 characters)</span>} htmlFor="password" error={passwordError}>
               <div className="relative">
                 <Input id="password" type={showPass ? 'text' : 'password'} placeholder="••••••••" value={contactInfo.password || ''} onChange={(e) => handleInputChange('password', e.target.value)} />
                 <button type="button" onClick={() => setShowPass(!showPass)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-800">
@@ -93,7 +99,7 @@ const ContactStep = () => {
               </div>
             </FormField>
 
-            <FormField label="Confirm Password" htmlFor="confirm-password" error="">
+            <FormField label={<span>Confirm Password <span className="text-red-500">*</span></span>} htmlFor="confirm-password" error={confirmPasswordError}>
               <Input id="confirm-password" type={showPass ? 'text' : 'password'} placeholder="••••••••" value={confirmPass} onChange={(e) => setConfirmPass(e.target.value)} />
             </FormField>
           </CardContent>

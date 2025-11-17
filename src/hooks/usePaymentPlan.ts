@@ -11,7 +11,7 @@ export interface PaymentPlanStatus {
 }
 
 export const usePaymentPlan = () => {
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
   const [planStatus, setPlanStatus] = useState<PaymentPlanStatus>({
     hasActivePlan: false,
     planExpired: false,
@@ -64,7 +64,7 @@ export const usePaymentPlan = () => {
     if (!profile?.id) return { error: 'No user found' };
 
     const trialExpiry = new Date();
-    trialExpiry.setDate(trialExpiry.getDate() + 14); // 14 days from now
+    trialExpiry.setDate(trialExpiry.getDate() + 7); // 7 days from now
 
     const { error } = await supabase
       .from('profiles')
@@ -77,7 +77,7 @@ export const usePaymentPlan = () => {
 
     if (!error) {
       // Refresh auth context to get updated profile
-      window.location.reload();
+      await refreshProfile();
     }
 
     return { error };

@@ -7,6 +7,7 @@ import { Check, Droplets, Battery, Smile, Moon, TrendingUp, Lock } from 'lucide-
 import { useAuth } from '@/contexts/AuthContext';
 import { usePaymentPlan } from '@/hooks/usePaymentPlan';
 import { useDailyCheckins } from '@/hooks/useDailyCheckins';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const sleepOptions = [
@@ -34,6 +35,7 @@ const DailyCheckIn = () => {
   const { profile } = useAuth();
   const { planStatus } = usePaymentPlan();
   const { checkins, upsertToday, loading: checkinsLoading } = useDailyCheckins();
+  const navigate = useNavigate();
   
   const [water, setWater] = useState(0);
   const [sleep, setSleep] = useState(0);
@@ -98,6 +100,14 @@ const DailyCheckIn = () => {
 
   const isComplete = water > 0 && sleep > 0 && energy > 0 && mood > 0;
 
+  const handleUpgrade = () => {
+    navigate('/customer/payment/update-plan');
+  };
+
+  const handleFindCoach = () => {
+    navigate('/customer/my-coach');
+  };
+
   // Show access denied message if user doesn't have coach or plan
   if (!canAccessCheckIn) {
     return (
@@ -113,10 +123,18 @@ const DailyCheckIn = () => {
               Get a coach or subscribe to access daily wellness tracking and personalized insights.
             </p>
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleFindCoach}
+              >
                 Find a Coach
               </Button>
-              <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+              <Button 
+                size="sm" 
+                className="bg-orange-500 hover:bg-orange-600"
+                onClick={handleUpgrade}
+              >
                 Subscribe Now
               </Button>
             </div>

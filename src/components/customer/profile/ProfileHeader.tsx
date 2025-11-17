@@ -149,7 +149,7 @@ const ProfileHeader = forwardRef<ProfileHeaderRef, ProfileHeaderProps>(({ isGlob
         const errorMessage = typeof result.error === 'string' ? result.error : 'Failed to start trial';
         toast.error(errorMessage);
       } else {
-        toast.success('14-day trial started! Enjoy your premium features.');
+        toast.success('7-day free trial started! Enjoy your premium features.');
       }
     } catch (error) {
       console.error('Trial start error:', error);

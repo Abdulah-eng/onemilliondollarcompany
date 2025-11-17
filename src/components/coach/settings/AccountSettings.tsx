@@ -224,22 +224,22 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ account, onUpdate }) 
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>Account Number</Label>
-                        <Input 
-                          value={payoutForm.accountNumber}
-                          onChange={(e) => setPayoutForm({ ...payoutForm, accountNumber: e.target.value })}
-                          placeholder="1234567890"
-                          type="password"
+                    <div>
+                      <Label>Account Number</Label>
+                      <Input 
+                        value={payoutForm.accountNumber}
+                        onChange={(e) => setPayoutForm({ ...payoutForm, accountNumber: e.target.value })}
+                        placeholder="1234567890"
+                        type="password"
                           required
-                        />
-                      </div>
-                      <div>
-                        <Label>Routing Number</Label>
-                        <Input 
-                          value={payoutForm.routingNumber}
-                          onChange={(e) => setPayoutForm({ ...payoutForm, routingNumber: e.target.value })}
-                          placeholder="123456789"
+                      />
+                    </div>
+                    <div>
+                      <Label>Routing Number</Label>
+                      <Input 
+                        value={payoutForm.routingNumber}
+                        onChange={(e) => setPayoutForm({ ...payoutForm, routingNumber: e.target.value })}
+                        placeholder="123456789"
                           required
                         />
                       </div>
@@ -302,13 +302,13 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ account, onUpdate }) 
 
                 {payoutForm.method === 'paypal' && (
                   <div className="space-y-3">
-                    <div>
-                      <Label>PayPal Email</Label>
-                      <Input 
-                        value={payoutForm.paypalEmail}
-                        onChange={(e) => setPayoutForm({ ...payoutForm, paypalEmail: e.target.value })}
-                        placeholder="your-email@example.com"
-                        type="email"
+                  <div>
+                    <Label>PayPal Email</Label>
+                    <Input 
+                      value={payoutForm.paypalEmail}
+                      onChange={(e) => setPayoutForm({ ...payoutForm, paypalEmail: e.target.value })}
+                      placeholder="your-email@example.com"
+                      type="email"
                         required
                       />
                       <p className="text-xs text-muted-foreground mt-1">

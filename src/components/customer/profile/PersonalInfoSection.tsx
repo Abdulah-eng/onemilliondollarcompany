@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Edit, Save, X, Plus, Trash2, Calendar, MapPin, Ruler, Weight, User, Flag, Heart, Activity, Brain, Mail, Phone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { countries } from '@/data/countries';
 
 interface OnboardingDetails {
   id: string;
@@ -438,15 +439,24 @@ const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSecti
               <div>
                 <Label htmlFor="country">Country</Label>
                 {isGlobalEditing ? (
-                  <Input
-                    id="country"
+                  <Select
                     value={formData.country || ''}
-                    onChange={(e) => {
-                      setFormData({ ...formData, country: e.target.value });
+                    onValueChange={(value) => {
+                      setFormData({ ...formData, country: value });
                       setHasUnsavedChanges(true);
                     }}
-                    placeholder="e.g. Norway"
-                  />
+                  >
+                    <SelectTrigger id="country">
+                      <SelectValue placeholder="Select country" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[300px]">
+                      {countries.map((country) => (
+                        <SelectItem key={country.code} value={country.name}>
+                          {country.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 ) : (
                   <p className="text-sm text-muted-foreground py-2">
                     {onboardingData?.country || 'Not provided'}

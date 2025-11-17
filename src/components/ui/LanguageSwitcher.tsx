@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,14 +14,39 @@ const languages = [
   { code: 'es', name: 'Español', flag: '🇪🇸' },
   { code: 'fr', name: 'Français', flag: '🇫🇷' },
   { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'no', name: 'Norsk', flag: '🇳🇴' },
+  { code: 'sv', name: 'Svenska', flag: '🇸🇪' },
+  { code: 'da', name: 'Dansk', flag: '🇩🇰' },
 ];
 
 export const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
-  const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
+  const [currentLang, setCurrentLang] = useState(i18n.language);
+  
+  // Normalize language code (e.g., 'en-US' -> 'en')
+  const currentLangCode = currentLang?.split('-')[0] || 'en';
+  const currentLanguage = languages.find(lang => lang.code === currentLangCode) || languages[0];
 
-  const changeLanguage = (languageCode: string) => {
-    i18n.changeLanguage(languageCode);
+  // Listen for language changes
+  useEffect(() => {
+    const handleLanguageChange = (lng: string) => {
+      setCurrentLang(lng);
+    };
+    
+    i18n.on('languageChanged', handleLanguageChange);
+    
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, [i18n]);
+
+  const changeLanguage = async (languageCode: string) => {
+    try {
+      await i18n.changeLanguage(languageCode);
+      setCurrentLang(languageCode);
+    } catch (error) {
+      console.error('Error changing language:', error);
+    }
   };
 
   return (
@@ -41,7 +67,7 @@ export const LanguageSwitcher = () => {
           >
             <span>{language.flag}</span>
             <span>{language.name}</span>
-            {i18n.language === language.code && (
+            {currentLangCode === language.code && (
               <span className="ml-auto text-primary">✓</span>
             )}
           </DropdownMenuItem>

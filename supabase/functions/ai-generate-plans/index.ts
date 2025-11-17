@@ -40,9 +40,13 @@ serve(async (req) => {
     }
 
     const now = new Date();
-    const active = profile?.plan && profile.plan !== 'trial' && (!profile?.plan_expiry || new Date(profile.plan_expiry) > now);
+    // Allow trial users and active subscriptions
+    const hasActiveTrial = profile?.plan === 'trial' && profile?.plan_expiry && new Date(profile.plan_expiry) > now;
+    const hasActivePlan = profile?.plan && profile.plan !== 'trial' && (!profile?.plan_expiry || new Date(profile.plan_expiry) > now);
+    const active = hasActiveTrial || hasActivePlan;
+    
     if (!active) {
-      return new Response(JSON.stringify({ error: 'AI Coach requires an active subscription' }), {
+      return new Response(JSON.stringify({ error: 'AI Coach requires an active subscription or trial' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

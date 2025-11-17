@@ -18,25 +18,26 @@ export interface NavItem {
   icon: React.ElementType;
   badge?: string | number;
   conditional?: boolean; // For items that should be conditionally shown
+  requiresAccess?: 'coach' | 'payment' | 'free'; // Access requirement indicator
 }
 
 export const getCustomerNavItems = (showLibrary: boolean = true, showProgress: boolean = true): NavItem[] => {
   const baseItems: NavItem[] = [
-    { name: 'Home', href: '/customer/dashboard', icon: Home },
-    { name: 'My Programs', href: '/customer/programs', icon: BookOpen },
-    { name: 'Messages', href: '/customer/messages', icon: MessageSquare },
-    { name: 'My Coach', href: '/customer/my-coach', icon: Users },
-    { name: 'Blog', href: '/customer/blog', icon: FileText },
+    { name: 'Home', href: '/customer/dashboard', icon: Home, requiresAccess: 'free' },
+    { name: 'My Programs', href: '/customer/programs', icon: BookOpen, requiresAccess: 'coach' },
+    { name: 'Messages', href: '/customer/messages', icon: MessageSquare, requiresAccess: 'coach' },
+    { name: 'My Coach', href: '/customer/my-coach', icon: Users, requiresAccess: 'free' },
+    { name: 'Blog', href: '/customer/blog', icon: FileText, requiresAccess: 'coach' },
   ];
 
   // Add Library if user has access
   if (showLibrary) {
-    baseItems.splice(2, 0, { name: 'Library', href: '/customer/library', icon: Library, conditional: true });
+    baseItems.splice(2, 0, { name: 'Library', href: '/customer/library', icon: Library, conditional: true, requiresAccess: 'coach' });
   }
 
   // Always show Progress page - let AccessControl handle access restrictions
   const insertIndex = showLibrary ? 3 : 2; // Insert after Library or after My Programs
-  baseItems.splice(insertIndex, 0, { name: 'Progress', href: '/customer/progress', icon: TrendingUp, conditional: true });
+  baseItems.splice(insertIndex, 0, { name: 'Progress', href: '/customer/progress', icon: TrendingUp, conditional: true, requiresAccess: 'payment' });
 
   return baseItems;
 };

@@ -104,7 +104,7 @@ export default function HeroSection() {
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             <p className="mt-4 text-sm text-white/80" style={textGlow}>
-              14-day free trial · No credit card required
+              7-day free trial · No credit card required
             </p>
           </div>
 

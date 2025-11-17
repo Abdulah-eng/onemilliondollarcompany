@@ -38,7 +38,7 @@ const UpdatePaymentPlanPage = () => {
       const planKeyMap: Record<string, { priceKey: string; trialDays?: number }> = {
         'all-access': { priceKey: 'platform_monthly' },
         premium: { priceKey: 'platform_monthly' },
-        standard: { priceKey: 'platform_monthly', trialDays: 14 },
+        standard: { priceKey: 'platform_monthly', trialDays: 7 },
         basic: { priceKey: 'platform_monthly' },
       };
       const mapped = planKeyMap[selectedPlan] || { priceKey: selectedPlan };

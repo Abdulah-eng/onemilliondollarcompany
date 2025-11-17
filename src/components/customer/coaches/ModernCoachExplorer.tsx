@@ -18,6 +18,7 @@ import { CoachDetailModal } from './CoachDetailModal';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePaymentPlan } from '@/hooks/usePaymentPlan';
+import { useNavigate } from 'react-router-dom';
 
 // Define the available filter options
 type FilterOption = 'All' | 'Fitness' | 'Nutrition' | 'Mental Health';
@@ -166,6 +167,7 @@ interface ModernCoachExplorerProps {
 }
 
 const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachRequestSent }) => {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const { planStatus } = usePaymentPlan();
     const { coaches: realTimeCoaches, loading: realTimeLoading } = useRealTimeCoachData();
@@ -250,7 +252,7 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
             await generateThreePlans();
             toast.success('Your AI plans have been generated and saved!');
             // Navigate to programs page to see the generated plans
-            window.location.href = '/customer/programs';
+            navigate('/customer/programs');
         } catch (error) {
             console.error('AI plan generation error:', error);
             toast.error('Failed to generate AI plan. Please try again.');

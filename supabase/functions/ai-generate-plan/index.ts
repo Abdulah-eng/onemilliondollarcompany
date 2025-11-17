@@ -17,7 +17,7 @@ serve(async (req) => {
   try {
     const supabase = createSupabaseClient(req);
     const body = await req.json();
-    const { userId } = body;
+    const { userId, category } = body; // category: 'fitness' | 'nutrition' | 'mental_health'
 
     if (!userId) {
       return new Response(JSON.stringify({ error: 'userId required' }), {
@@ -40,9 +40,13 @@ serve(async (req) => {
     }
 
     const now = new Date();
-    const active = profile?.plan && profile.plan !== 'trial' && (!profile?.plan_expiry || new Date(profile.plan_expiry) > now);
+    // Allow trial users and active subscriptions
+    const hasActiveTrial = profile?.plan === 'trial' && profile?.plan_expiry && new Date(profile.plan_expiry) > now;
+    const hasActivePlan = profile?.plan && profile.plan !== 'trial' && (!profile?.plan_expiry || new Date(profile.plan_expiry) > now);
+    const active = hasActiveTrial || hasActivePlan;
+    
     if (!active) {
-      return new Response(JSON.stringify({ error: 'AI Coach requires an active subscription' }), {
+      return new Response(JSON.stringify({ error: 'AI Coach requires an active subscription or trial' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -90,12 +94,38 @@ serve(async (req) => {
     }
 
     try {
-      const systemPrompt = `You are a world-class health coach. Create a 4-week plan with fitness, nutrition, and mindfulness.
-Respond in JSON with fields: generatedAt (ISO), summary (string), goals (array), weeks (number), schedule (array of 7 objects with day, workout, nutrition, mindfulness), personalization (object).`;
-      const userPrompt = `User goals: ${JSON.stringify(details?.goals || [])}
-Allergies: ${JSON.stringify(details?.allergies || [])}
+      // Category-specific prompts
+      const categoryPrompts: Record<string, { system: string; user: string }> = {
+        fitness: {
+          system: `You are a world-class fitness coach. Create a personalized 4-week fitness program focusing on strength, cardio, and mobility.
+Respond in JSON with fields: generatedAt (ISO), summary (string), goals (array), weeks (number), schedule (array of 7 objects with day, workout, sets, reps, rest, notes), personalization (object with injuries, fitnessLevel).`,
+          user: `User goals: ${JSON.stringify(details?.goals || [])}
 Injuries: ${JSON.stringify(details?.injuries || [])}
-Meditation experience: ${JSON.stringify(details?.meditation_experience || 'beginner')}`;
+Training preferences: ${JSON.stringify(details?.training_likes || [])}
+Training dislikes: ${JSON.stringify(details?.training_dislikes || [])}`
+        },
+        nutrition: {
+          system: `You are a world-class nutritionist. Create a personalized 4-week nutrition plan focusing on balanced meals, macros, and meal timing.
+Respond in JSON with fields: generatedAt (ISO), summary (string), goals (array), weeks (number), schedule (array of 7 objects with day, breakfast, lunch, dinner, snacks, macros, notes), personalization (object with allergies, dietaryPreferences).`,
+          user: `User goals: ${JSON.stringify(details?.goals || [])}
+Allergies: ${JSON.stringify(details?.allergies || [])}
+Weight: ${details?.weight || 'not specified'} kg
+Height: ${details?.height || 'not specified'} cm`
+        },
+        mental_health: {
+          system: `You are a world-class mental health coach. Create a personalized 4-week mindfulness and mental wellness program.
+Respond in JSON with fields: generatedAt (ISO), summary (string), goals (array), weeks (number), schedule (array of 7 objects with day, meditation, breathing, journaling, selfCare, notes), personalization (object with meditationExperience, stressLevel).`,
+          user: `User goals: ${JSON.stringify(details?.goals || [])}
+Meditation experience: ${JSON.stringify(details?.meditation_experience || 'beginner')}
+Training preferences: ${JSON.stringify(details?.training_likes || [])}`
+        }
+      };
+
+      const selectedCategory = category || 'fitness';
+      const prompts = categoryPrompts[selectedCategory] || categoryPrompts.fitness;
+      
+      const systemPrompt = prompts.system;
+      const userPrompt = prompts.user;
 
       if (geminiKey) {
         const genAI = new GoogleGenerativeAI(geminiKey);

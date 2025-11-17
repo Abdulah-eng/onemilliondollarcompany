@@ -10,6 +10,8 @@ import ExplorerTab from '@/components/customer/coaches/ExplorerTab';
 import CoachBioDrawer from '@/components/customer/mycoach/CoachBioDrawer';
 import { SharedFilesDrawerContent } from '@/components/customer/mycoach/UnifiedSharedFiles';
 import SmartFeedbackSystem from '@/components/customer/mycoach/SmartFeedbackSystem';
+import AICoachProgramSelector from '@/components/customer/mycoach/AICoachProgramSelector';
+import TrialCountdown from '@/components/customer/TrialCountdown';
 
 // UI Components
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
@@ -115,6 +117,9 @@ const MyCoach = () => {
                 <p className="mt-1 text-lg text-muted-foreground">{t('mycoach.description')}</p>
             </div>
 
+            {/* Trial Countdown */}
+            <TrialCountdown />
+
             <Tabs
                 defaultValue="myCoach"
                 value={activeTab}
@@ -140,7 +145,15 @@ const MyCoach = () => {
                 {/* 2. TAB CONTENT */}
 
                 {/* --- CONTENT 1: MY COACH --- */}
-                <TabsContent value="myCoach" className="mt-6">
+                <TabsContent value="myCoach" className="mt-6 space-y-6">
+                    {/* AI Coach Program Selector - Show when no coach or always available */}
+                    <AICoachProgramSelector 
+                        onProgramGenerated={(programId, category) => {
+                            console.log('Program generated:', programId, category);
+                            // Optionally refresh or navigate to program
+                        }}
+                    />
+                    
                     {hasCurrentCoach ? (
                         <CurrentCoachTab
                             isMobile={isMobile}

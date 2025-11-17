@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { loadStripe } from '@stripe/stripe-js';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRefresh } from '@/contexts/RefreshContext';
 import { createCheckoutSession, syncCheckoutSession, cancelSubscriptionAtPeriodEnd, resumeSubscription, openCustomerPortal, cancelSubscriptionNow, gracefulCancelPlan } from '@/lib/stripe/api';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -20,7 +21,8 @@ import { toast } from 'sonner';
 const PaymentAndLegal = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
+  const { refreshAll } = useRefresh();
   const { paymentInfo, loading: paymentLoading } = usePaymentInfo();
   const { detectedCurrency, getCurrencyOption } = useCurrencyDetection();
   const [selectedCurrency, setSelectedCurrency] = useState(detectedCurrency);
@@ -51,7 +53,7 @@ const PaymentAndLegal = () => {
     try {
       const { checkoutUrl } = await createCheckoutSession({
         priceKey: 'platform_monthly',
-        trialDays: 14,
+        trialDays: 7,
         stripeCustomerId: profile?.stripe_customer_id ?? null,
         currency: selectedCurrency,
         userId: profile?.id,
@@ -71,10 +73,10 @@ const PaymentAndLegal = () => {
     try {
       if (!profile?.id) return;
       await gracefulCancelPlan(profile.id);
-      alert('Subscription marked as canceled.');
-      window.location.reload();
+      toast.success('Subscription marked as canceled.');
+      await refreshAll();
     } catch (e: any) {
-      alert(e?.message || 'Failed to cancel');
+      toast.error(e?.message || 'Failed to cancel');
     }
   };
 
@@ -82,28 +84,28 @@ const PaymentAndLegal = () => {
     try {
       if (!profile?.id) return;
       await gracefulCancelPlan(profile.id);
-      alert('Subscription canceled.');
-      window.location.reload();
+      toast.success('Subscription canceled.');
+      await refreshAll();
     } catch (e: any) {
-      alert(e?.message || 'Failed to cancel');
+      toast.error(e?.message || 'Failed to cancel');
     }
   };
 
   const handleResume = async () => {
     try {
       if (!profile?.stripe_subscription_id) {
-        alert('No active subscription found.');
+        toast.error('No active subscription found.');
         return;
       }
       const res = await resumeSubscription(profile.stripe_subscription_id);
       if (res?.success) {
-        alert('Your subscription has been resumed.');
-        window.location.reload();
+        toast.success('Your subscription has been resumed.');
+        await refreshAll();
       } else {
-        alert(res?.error || 'Failed to resume subscription');
+        toast.error(res?.error || 'Failed to resume subscription');
       }
     } catch (e: any) {
-      alert(e?.message || 'Failed to resume subscription');
+      toast.error(e?.message || 'Failed to resume subscription');
     }
   };
 
@@ -214,7 +216,7 @@ const PaymentAndLegal = () => {
                       size="sm" 
                       onClick={handleSubscribe}
                     >
-                      Subscribe {getCurrencyOption(selectedCurrency).price}/mo (14-day trial)
+                      Subscribe {getCurrencyOption(selectedCurrency).price}/mo (7-day trial)
                     </Button>
                   )}
                 </div>

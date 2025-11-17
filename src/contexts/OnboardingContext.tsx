@@ -152,18 +152,22 @@ export const OnboardingProvider = ({ children }: { children: React.ReactNode }) 
         }
       }
 
-      // Update password if provided
-      if (state.contactInfo.password) {
-        try {
-          const { error: passwordError } = await supabase.auth.updateUser({ password: state.contactInfo.password });
-          if (passwordError) {
-            console.error('Password update error:', passwordError);
-            toast.error('Failed to update password. You can set it later in settings.');
-          }
-        } catch (passwordError) {
+      // Password is required - validate it
+      if (!state.contactInfo.password || state.contactInfo.password.length < 6) {
+        throw new Error('Password is required and must be at least 6 characters long.');
+      }
+
+      // Update password (required)
+      try {
+        const { error: passwordError } = await supabase.auth.updateUser({ password: state.contactInfo.password });
+        if (passwordError) {
           console.error('Password update error:', passwordError);
-          toast.error('Failed to update password. You can set it later in settings.');
+          throw new Error('Failed to update password. Please try again.');
         }
+      } catch (passwordError) {
+        console.error('Password update error:', passwordError);
+        const errorMessage = passwordError instanceof Error ? passwordError.message : 'Failed to update password. Please try again.';
+        throw new Error(errorMessage);
       }
 
       // Update profile

@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,7 @@ const formSchema = z.object({
 });
 
 const GetStartedPage = () => {
+  const navigate = useNavigate();
   const [isSuccess, setIsSuccess] = useState(false);
   const [userExists, setUserExists] = useState(false);
   const [existingUserEmail, setExistingUserEmail] = useState('');
@@ -80,14 +81,14 @@ const GetStartedPage = () => {
             </p>
             <div className="space-y-3">
               <Button 
-                onClick={() => window.location.href = '/login'} 
+                onClick={() => navigate('/login')} 
                 className="w-full"
               >
                 Log In Instead
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => window.location.href = '/forgot-password'} 
+                onClick={() => navigate('/forgot-password')} 
                 className="w-full"
               >
                 Reset Password

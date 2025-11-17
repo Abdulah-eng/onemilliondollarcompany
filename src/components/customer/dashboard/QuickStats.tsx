@@ -175,8 +175,8 @@ const QuickStats = () => {
         
         {/* Upgrade Prompts */}
         {needsUpgrade && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg">
-            <div className="text-center p-6 max-w-md">
+          <div className="absolute inset-0 flex items-center justify-center bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg z-10">
+            <div className="text-center p-6 max-w-md mx-auto">
               <div className="flex justify-center mb-4">
                 <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full">
                   <Crown className="w-8 h-8 text-orange-600 dark:text-orange-400" />
@@ -186,9 +186,9 @@ const QuickStats = () => {
                 Unlock Your Weekly Stats
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Get personalized insights and track your progress with detailed weekly statistics.
+                Subscribe or get a coach to access detailed weekly statistics and personalized insights.
               </p>
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
                 <Button 
                   onClick={handleUpgrade}
                   className="bg-orange-500 hover:bg-orange-600 text-white"
@@ -199,7 +199,7 @@ const QuickStats = () => {
                 <Button 
                   onClick={handleFindCoach}
                   variant="outline"
-                  className="border-orange-200 text-orange-600 hover:bg-orange-50"
+                  className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-400"
                 >
                   <Users className="w-4 h-4 mr-2" />
                   Find a Coach
@@ -210,13 +210,13 @@ const QuickStats = () => {
         )}
         
         {hasPartialAccess && (
-          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
+            <div className="flex items-center justify-center gap-2 text-blue-700 dark:text-blue-300 mb-1">
               <Users className="w-4 h-4" />
               <span className="text-sm font-medium">Coach Access</span>
             </div>
-            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-              You have limited access through your coach. Upgrade for full statistics and insights.
+            <p className="text-xs text-blue-600 dark:text-blue-400">
+              You have limited access through your coach. Subscribe for full statistics and insights.
             </p>
           </div>
         )}
@@ -249,45 +249,43 @@ interface StatCardProps {
 const StatCard: React.FC<StatCardProps> = ({ emoji, label, value, isLocked, trend, color, needsUpgrade, hasPartialAccess }) => {
   const theme = statCardThemes[color];
 
+  // Show locked state with grayscale but no individual upgrade button
   if (isLocked) {
     return (
-      <Card className="min-w-[160px] flex-1 shadow-sm bg-card border">
+      <Card className="min-w-[160px] flex-1 shadow-sm bg-card border opacity-50">
         <CardContent className="p-4 flex flex-col justify-center items-center h-full text-center gap-2">
           <div className="flex items-center gap-2 text-muted-foreground">
             <span className="text-lg filter grayscale">{emoji}</span>
             <p className="text-xs font-semibold">{label}</p>
           </div>
-          <div className="flex flex-col items-center gap-2 mt-1">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
-              <Lock size={12} />
-              <span>Premium Feature</span>
-            </div>
-            <Button size="sm" className="h-7 px-3 text-xs bg-orange-500 hover:bg-orange-600 rounded-full">Upgrade</Button>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
+            <Lock size={12} />
+            <span>Locked</span>
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  return (
-    <Card className={cn("min-w-[160px] flex-1 shadow-sm hover:shadow-lg transition-all duration-300 border bg-gradient-to-br dark:bg-none", theme)}>
-        <CardContent className="p-4 flex flex-col justify-between h-full">
-            <div className="flex items-center gap-2 mb-1">
-                <span className="text-lg">{emoji}</span>
-                <p className="text-xs font-semibold">{label}</p>
-            </div>
-            
-            <div className="flex items-baseline gap-1.5 mt-2">
-                <p className="text-2xl font-bold dark:text-white">{value}</p>
-                {trend && (
-                    <div className={cn("flex items-center font-bold text-xs", trend === 'up' ? 'text-emerald-500' : 'text-rose-500')}>
-                        {trend === 'up' ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-                    </div>
-                )}
-            </div>
-        </CardContent>
-    </Card>
-  );
+  return (
+    <Card className={cn("min-w-[160px] flex-1 shadow-sm hover:shadow-lg transition-all duration-300 border bg-gradient-to-br dark:bg-none", theme)}>
+        <CardContent className="p-4 flex flex-col justify-between h-full">
+            <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">{emoji}</span>
+                <p className="text-xs font-semibold">{label}</p>
+            </div>
+            
+            <div className="flex items-baseline gap-1.5 mt-2">
+                <p className="text-2xl font-bold dark:text-white">{value}</p>
+                {trend && (
+                    <div className={cn("flex items-center font-bold text-xs", trend === 'up' ? 'text-emerald-500' : 'text-rose-500')}>
+                        {trend === 'up' ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                    </div>
+                )}
+            </div>
+        </CardContent>
+    </Card>
+  );
 };
 
 export default QuickStats;

@@ -9,12 +9,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { countries } from '@/data/countries';
 
 const validateField = (name: string, value: any, allValues: any = {}) => {
   switch (name) {
     case 'name':
-    case 'country':
       return /^[a-zA-Z\s-]*$/.test(value) ? '' : 'Only letters and spaces are allowed.';
+    case 'country':
+      return value ? '' : 'Please select a country.';
     case 'weight_kg':
       return value >= 30 && value <= 300 ? '' : 'Enter a valid weight (30-300 kg).';
     case 'weight_lbs':
@@ -196,7 +198,18 @@ const PersonalInfoStep = () => {
                  </Select>
               </FormField>
               <FormField label="Country" htmlFor="country" error={errors.country || ''}>
-                <Input id="country" type="text" placeholder="e.g. Norway" value={personalInfo.country || ''} onChange={(e) => handleInputChange('country', e.target.value)} />
+                <Select value={personalInfo.country || ''} onValueChange={(value) => handleInputChange('country', value)}>
+                  <SelectTrigger id="country">
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {countries.map((country) => (
+                      <SelectItem key={country.code} value={country.name}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormField>
             </div>
           </CardContent>
