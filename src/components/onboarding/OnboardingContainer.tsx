@@ -1,6 +1,7 @@
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
+import { theme } from '@/lib/theme';
 
 interface OnboardingContainerProps {
   children: ReactNode;
@@ -29,14 +30,34 @@ export const OnboardingContainer = ({
   nextDisabled = false,
   isLoading = false,
 }: OnboardingContainerProps) => {
+  const backgroundStyle = useMemo(() => ({
+    background: `linear-gradient(135deg, ${theme.colors.surfaces.light.background}, rgba(16, 185, 129, 0.12))`,
+  }), []);
+
+  const footerStyle = useMemo(() => ({
+    background: `linear-gradient(180deg, rgba(254, 249, 241, 0), rgba(254, 249, 241, 0.95))`,
+    backdropFilter: 'blur(8px)',
+  }), []);
+
+  const nextButtonStyle = useMemo(() => ({
+    backgroundImage: `linear-gradient(90deg, ${theme.colors.buttons.primary}, ${theme.colors.categories.nutrition})`,
+    boxShadow: '0 12px 30px rgba(13, 148, 136, 0.35)',
+  }), []);
+
   return (
-    <div className="min-h-[100svh] bg-gradient-to-br from-emerald-50 to-teal-100 flex flex-col">
+    <div className="min-h-[100svh] flex flex-col" style={backgroundStyle}>
       {/* Progress Bar */}
       {currentStep && (
-        <div className="w-full bg-gray-200 h-1.5">
+        <div
+          className="w-full h-1.5"
+          style={{ backgroundColor: theme.colors.surfaces.light.border }}
+        >
           <div 
-            className="bg-gradient-to-r from-emerald-400 to-teal-500 h-full transition-all duration-500 ease-out"
-            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+            className="h-full transition-all duration-500 ease-out rounded-r-full"
+            style={{
+              backgroundImage: `linear-gradient(90deg, ${theme.colors.buttons.secondary}, ${theme.colors.buttons.primary})`,
+              width: `${(currentStep / totalSteps) * 100}%`,
+            }}
           />
         </div>
       )}
@@ -54,12 +75,13 @@ export const OnboardingContainer = ({
           </div>
 
           {/* Navigation Footer */}
-          <footer className="sticky bottom-0 bg-gradient-to-t from-emerald-50 via-emerald-50/80 to-transparent pt-8 pb-4">
+          <footer className="sticky bottom-0 pt-8 pb-4" style={footerStyle}>
             <div className="max-w-md mx-auto flex flex-col gap-3">
               <Button
                 onClick={onNext}
                 disabled={nextDisabled || isLoading}
-                className="w-full text-base py-6 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all disabled:opacity-50 disabled:scale-100"
+                className="w-full text-base py-6 text-white font-bold hover:scale-[1.02] transition-all disabled:opacity-50 disabled:scale-100 shadow-none border-0"
+                style={nextButtonStyle}
               >
                 {isLoading ? <Loader2 className="animate-spin" /> : nextLabel}
               </Button>

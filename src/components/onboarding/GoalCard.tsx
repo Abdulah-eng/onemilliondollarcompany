@@ -22,7 +22,9 @@ export const GoalCard = ({ emoji, title, subtitle, selected = false, onClick }: 
       )}
     >
       <div className="flex items-center gap-4">
-        <div className="text-3xl bg-gray-100 p-2 rounded-lg">{emoji}</div>
+        <div className="w-14 h-14 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-3xl shadow-sm">
+          {emoji}
+        </div>
         <div className="flex-1">
           <h3 className="font-bold text-gray-800">{title}</h3>
           {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
