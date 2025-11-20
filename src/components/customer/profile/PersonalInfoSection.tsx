@@ -101,9 +101,6 @@ export interface PersonalInfoSectionRef {
 
 const PHONE_MIN_DIGITS = 7;
 const PHONE_MAX_DIGITS = 15;
-
-const PHONE_MIN_DIGITS = 7;
-const PHONE_MAX_DIGITS = 15;
 const MIN_WEIGHT = 20; // kg
 const MAX_WEIGHT = 400;
 const MIN_HEIGHT = 50; // cm
@@ -122,6 +119,7 @@ const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSecti
   const [newItem, setNewItem] = useState({ type: '', value: '' });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [formErrors, setFormErrors] = useState<{ phone?: string; weight?: string; height?: string; dob?: string }>({});
+  const [phoneError, setPhoneError] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
