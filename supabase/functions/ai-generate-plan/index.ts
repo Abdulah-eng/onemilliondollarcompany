@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createSupabaseClient, corsHeaders, handleCors } from './_shared.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import OpenAI from 'https://esm.sh/openai@6.1.0';
 import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.24.1';
 
@@ -26,6 +27,34 @@ serve(async (req) => {
       });
     }
 
+    // Optional: Verify auth token if ANON_KEY is available
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    if (anonKey) {
+      const authHeader = req.headers.get('authorization');
+      if (authHeader) {
+        try {
+          const userSupabase = createClient(
+            Deno.env.get('SUPABASE_URL')!,
+            anonKey,
+            {
+              global: {
+                headers: { Authorization: authHeader },
+              },
+            }
+          );
+          const { data: { user }, error: authError } = await userSupabase.auth.getUser();
+          if (authError || !user || user.id !== userId) {
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+              status: 401,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+        } catch (authErr) {
+          console.warn('[AI] Auth verification failed, continuing with service role:', authErr);
+        }
+      }
+    }
+
     const { data: profile, error: profileErr } = await supabase
       .from('profiles')
       .select('plan, plan_expiry')
@@ -33,19 +62,49 @@ serve(async (req) => {
       .single();
 
     if (profileErr) {
-      return new Response(JSON.stringify({ error: 'Profile not found' }), {
+      console.error('[AI] Profile fetch error:', profileErr);
+      return new Response(JSON.stringify({ error: 'Profile not found', details: profileErr.message }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     const now = new Date();
-    const hasActiveTrial = profile?.plan === 'trial' && profile?.plan_expiry && new Date(profile.plan_expiry) > now;
-    const hasActiveSubscription = profile?.plan && profile.plan !== 'trial' && (!profile?.plan_expiry || new Date(profile.plan_expiry) > now);
+    const planExpiry = profile?.plan_expiry ? new Date(profile.plan_expiry) : null;
+    
+    // Match frontend logic exactly
+    const hasActiveTrial = Boolean(
+      profile?.plan === 'trial' &&
+      planExpiry &&
+      planExpiry > now
+    );
+
+    const hasActiveSubscription = Boolean(
+      profile?.plan &&
+      profile.plan !== 'trial' &&
+      (planExpiry ? planExpiry > now : true)
+    );
+
     const hasAccess = hasActiveTrial || hasActiveSubscription;
     
     if (!hasAccess) {
-      return new Response(JSON.stringify({ error: 'AI Coach requires an active subscription or trial' }), {
+      console.log('[AI] Access denied:', { 
+        userId, 
+        plan: profile?.plan, 
+        planExpiry: profile?.plan_expiry,
+        hasActiveTrial,
+        hasActiveSubscription,
+        now: now.toISOString()
+      });
+      return new Response(JSON.stringify({ 
+        error: 'AI Coach requires an active subscription or trial',
+        details: {
+          plan: profile?.plan,
+          planExpiry: profile?.plan_expiry,
+          hasActiveTrial,
+          hasActiveSubscription
+        }
+      }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

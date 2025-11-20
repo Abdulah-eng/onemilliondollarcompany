@@ -50,6 +50,7 @@ const GoalSelectionStep = () => {
       onNext={() => navigate('/onboarding/step-2')}
       nextDisabled={state.goals.length === 0 || loading}
       isLoading={loading}
+      forceLightMode={true}
     >
       <div className="space-y-8 max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-4">

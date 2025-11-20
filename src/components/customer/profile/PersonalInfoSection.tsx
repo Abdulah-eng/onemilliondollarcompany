@@ -430,28 +430,30 @@ const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSecti
               <div>
                 <Label htmlFor="weight">Weight (kg)</Label>
                 {isGlobalEditing ? (
-                  <Input
-                    id="weight"
-                    type="number"
-                    step="0.1"
-                    value={formData.weight || ''}
-                    onChange={(e) => {
-                      const value = e.target.value ? parseFloat(e.target.value) : null;
-                      setFormData({ ...formData, weight: value });
-                      setHasUnsavedChanges(true);
-                      if (value === null) {
-                        setFormErrors(prev => ({ ...prev, weight: undefined }));
-                      } else if (value < MIN_WEIGHT || value > MAX_WEIGHT) {
-                        setFormErrors(prev => ({ ...prev, weight: `Weight must be between ${MIN_WEIGHT}kg and ${MAX_WEIGHT}kg.` }));
-                      } else {
-                        setFormErrors(prev => ({ ...prev, weight: undefined }));
-                      }
-                    }}
-                    placeholder="70.0"
-                  />
-                  {formErrors.weight && (
-                    <p className="text-xs text-red-600 mt-1">{formErrors.weight}</p>
-                  )}
+                  <>
+                    <Input
+                      id="weight"
+                      type="number"
+                      step="0.1"
+                      value={formData.weight || ''}
+                      onChange={(e) => {
+                        const value = e.target.value ? parseFloat(e.target.value) : null;
+                        setFormData({ ...formData, weight: value });
+                        setHasUnsavedChanges(true);
+                        if (value === null) {
+                          setFormErrors(prev => ({ ...prev, weight: undefined }));
+                        } else if (value < MIN_WEIGHT || value > MAX_WEIGHT) {
+                          setFormErrors(prev => ({ ...prev, weight: `Weight must be between ${MIN_WEIGHT}kg and ${MAX_WEIGHT}kg.` }));
+                        } else {
+                          setFormErrors(prev => ({ ...prev, weight: undefined }));
+                        }
+                      }}
+                      placeholder="70.0"
+                    />
+                    {formErrors.weight && (
+                      <p className="text-xs text-red-600 mt-1">{formErrors.weight}</p>
+                    )}
+                  </>
                 ) : (
                   <p className="text-sm text-muted-foreground py-2">
                     {onboardingData?.weight ? `${onboardingData.weight} kg` : 'Not provided'}
@@ -462,28 +464,30 @@ const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSecti
               <div>
                 <Label htmlFor="height">Height (cm)</Label>
                 {isGlobalEditing ? (
-                  <Input
-                    id="height"
-                    type="number"
-                    step="0.1"
-                    value={formData.height || ''}
-                    onChange={(e) => {
-                      const value = e.target.value ? parseFloat(e.target.value) : null;
-                      setFormData({ ...formData, height: value });
-                      setHasUnsavedChanges(true);
-                      if (value === null) {
-                        setFormErrors(prev => ({ ...prev, height: undefined }));
-                      } else if (value < MIN_HEIGHT || value > MAX_HEIGHT) {
-                        setFormErrors(prev => ({ ...prev, height: `Height must be between ${MIN_HEIGHT}cm and ${MAX_HEIGHT}cm.` }));
-                      } else {
-                        setFormErrors(prev => ({ ...prev, height: undefined }));
-                      }
-                    }}
-                    placeholder="175.0"
-                  />
-                  {formErrors.height && (
-                    <p className="text-xs text-red-600 mt-1">{formErrors.height}</p>
-                  )}
+                  <>
+                    <Input
+                      id="height"
+                      type="number"
+                      step="0.1"
+                      value={formData.height || ''}
+                      onChange={(e) => {
+                        const value = e.target.value ? parseFloat(e.target.value) : null;
+                        setFormData({ ...formData, height: value });
+                        setHasUnsavedChanges(true);
+                        if (value === null) {
+                          setFormErrors(prev => ({ ...prev, height: undefined }));
+                        } else if (value < MIN_HEIGHT || value > MAX_HEIGHT) {
+                          setFormErrors(prev => ({ ...prev, height: `Height must be between ${MIN_HEIGHT}cm and ${MAX_HEIGHT}cm.` }));
+                        } else {
+                          setFormErrors(prev => ({ ...prev, height: undefined }));
+                        }
+                      }}
+                      placeholder="175.0"
+                    />
+                    {formErrors.height && (
+                      <p className="text-xs text-red-600 mt-1">{formErrors.height}</p>
+                    )}
+                  </>
                 ) : (
                   <p className="text-sm text-muted-foreground py-2">
                     {onboardingData?.height ? `${onboardingData.height} cm` : 'Not provided'}
@@ -528,28 +532,30 @@ const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSecti
               <div>
                 <Label htmlFor="dob">Date of Birth</Label>
                 {isGlobalEditing ? (
-                  <Input
-                    id="dob"
-                    type="date"
-                    value={formData.dob || ''}
-                    onChange={(e) => {
-                      setFormData({ ...formData, dob: e.target.value });
-                      setHasUnsavedChanges(true);
-                      if (e.target.value) {
-                        const age = calculateAge(e.target.value);
-                        if (age && (age < 10 || age > 120)) {
-                          setFormErrors(prev => ({ ...prev, dob: 'Please enter a realistic date of birth.' }));
+                  <>
+                    <Input
+                      id="dob"
+                      type="date"
+                      value={formData.dob || ''}
+                      onChange={(e) => {
+                        setFormData({ ...formData, dob: e.target.value });
+                        setHasUnsavedChanges(true);
+                        if (e.target.value) {
+                          const age = calculateAge(e.target.value);
+                          if (age && (age < 10 || age > 120)) {
+                            setFormErrors(prev => ({ ...prev, dob: 'Please enter a realistic date of birth.' }));
+                          } else {
+                            setFormErrors(prev => ({ ...prev, dob: undefined }));
+                          }
                         } else {
                           setFormErrors(prev => ({ ...prev, dob: undefined }));
                         }
-                      } else {
-                        setFormErrors(prev => ({ ...prev, dob: undefined }));
-                      }
-                    }}
-                  />
-                  {formErrors.dob && (
-                    <p className="text-xs text-red-600 mt-1">{formErrors.dob}</p>
-                  )}
+                      }}
+                    />
+                    {formErrors.dob && (
+                      <p className="text-xs text-red-600 mt-1">{formErrors.dob}</p>
+                    )}
+                  </>
                 ) : (
                   <p className="text-sm text-muted-foreground py-2">
                     {onboardingData?.dob ? new Date(onboardingData.dob).toLocaleDateString() : 'Not provided'}

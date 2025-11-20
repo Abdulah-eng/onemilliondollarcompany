@@ -52,13 +52,18 @@ const MyCoach = () => {
                 // Check if user has coach_id in profile
                 const hasCoachId = !!profile?.coach_id;
                 
-                // Also check for accepted requests
-                const { data: acceptedRequest } = await supabase
+                // Also check for accepted requests (use maybeSingle to handle no results gracefully)
+                const { data: acceptedRequest, error: requestError } = await supabase
                     .from('coach_requests')
-                    .select('*')
+                    .select('id')
                     .eq('customer_id', user.id)
                     .eq('status', 'accepted')
-                    .single();
+                    .maybeSingle();
+
+                // Only log if it's a real error, not just "no results"
+                if (requestError && requestError.code !== 'PGRST116') {
+                    console.error('Error checking coach requests:', requestError);
+                }
 
                 const hasCoach = hasCoachId || !!acceptedRequest;
                 setHasCurrentCoach(hasCoach);

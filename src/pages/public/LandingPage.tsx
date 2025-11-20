@@ -75,11 +75,12 @@ export default function LandingPage() {
             <CTASection />
           </Suspense>
         </section>
-      </main>
+        
+      </main>
       {/* Added "light" class to footer */}
-      <footer className="light bg-card text-card-foreground border-t">
-        <Footer />
-      </footer>
+      <footer className="light bg-card text-card-foreground border-t">
+        <Footer />
+      </footer>
     </div>
   );
 }

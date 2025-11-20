@@ -105,13 +105,22 @@ const AICoachProgramSelector: React.FC<AICoachProgramSelectorProps> = ({ onProgr
 
       // Save the generated program to the database
       if (data?.plan) {
+        // Map internal category names to database enum values
+        const categoryMap: Record<ProgramType, 'fitness' | 'nutrition' | 'mental health'> = {
+          fitness: 'fitness',
+          nutrition: 'nutrition',
+          mental_health: 'mental health', // Database uses 'mental health' with space
+        };
+        
+        const dbCategory = categoryMap[selectedType];
+        
         const { data: programData, error: insertError } = await supabase
           .from('programs')
           .insert({
             name: data.plan.summary || `${selectedType} Program`,
             description: `AI-generated ${selectedType} program`,
             status: 'active',
-            category: selectedType,
+            category: dbCategory,
             coach_id: user.id, // AI coach
             assigned_to: user.id,
             scheduled_date: new Date().toISOString(),

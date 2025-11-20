@@ -1,7 +1,8 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
+import { queryClient } from "@/lib/query-config";
 import { useAuth, AuthProvider } from "./contexts/AuthContext";
 import { OnboardingProvider } from "./contexts/OnboardingContext";
 import { RefreshProvider } from "./contexts/RefreshContext";
@@ -74,7 +75,7 @@ const LoadingScreen = () => (
   </div>
 );
 
-const queryClient = new QueryClient();
+// QueryClient is now imported from query-config.ts for better scalability
 
 const PublicRoutesLayout = () => {
   const { profile, loading } = useAuth();

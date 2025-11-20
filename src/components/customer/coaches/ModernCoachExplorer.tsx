@@ -262,16 +262,16 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
     return (
         <div className="space-y-8">
             {/* AI Coach Highlight */}
-            <Card className={`border-2 ${planStatus.hasActivePlan ? 'border-emerald-300/40 bg-emerald-50/40' : 'border-amber-300/40 bg-amber-50/40'}`}>
+            <Card className="border-2 border-emerald-300/40 bg-emerald-50/40 dark:border-emerald-500/30 dark:bg-emerald-950/20">
                 <CardContent className="p-6 flex items-center justify-between gap-4">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <Bot className={`w-6 h-6 ${planStatus.hasActivePlan ? 'text-emerald-600' : 'text-amber-600'}`} />
-                            <span className={`text-2xl font-extrabold tracking-tight ${planStatus.hasActivePlan ? 'text-emerald-700' : 'text-amber-700'}`}>
+                            <Bot className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                            <span className="text-2xl font-extrabold tracking-tight text-emerald-700 dark:text-emerald-300">
                                 AI Coach
                             </span>
                         </div>
-                        <p className={`mt-1 ${planStatus.hasActivePlan ? 'text-emerald-700' : 'text-amber-700'} text-lg font-semibold`}>
+                        <p className="mt-1 text-emerald-700 dark:text-emerald-300 text-lg font-semibold">
                             {planStatus.hasActivePlan 
                                 ? 'Get a personalized plan powered by AI.' 
                                 : 'Get a personalized plan powered by AI. Requires active subscription.'
@@ -281,10 +281,10 @@ const ModernCoachExplorer: React.FC<ModernCoachExplorerProps> = ({ onNewCoachReq
                     <Button 
                         onClick={handleAICoach} 
                         disabled={aiLoading || !planStatus.hasActivePlan}
-                        className={`${planStatus.hasActivePlan 
-                            ? 'bg-emerald-600 hover:bg-emerald-700' 
-                            : 'bg-amber-600 hover:bg-amber-700'
-                        }`}
+                        className={planStatus.hasActivePlan 
+                            ? 'bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600' 
+                            : 'bg-emerald-600/60 hover:bg-emerald-700/70 dark:bg-emerald-500/50 dark:hover:bg-emerald-600/60 cursor-not-allowed'
+                        }
                     >
                         {aiLoading ? (
                             <>

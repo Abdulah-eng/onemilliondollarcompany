@@ -22,12 +22,38 @@ export function createStripeClient(): Stripe {
   });
 }
 
-export const PRICE_IDS = {
-  usd: Deno.env.get('STRIPE_PRICE_USD') || '***REMOVED***',
-  nok: Deno.env.get('STRIPE_PRICE_NOK') || '***REMOVED***',
-  sek: Deno.env.get('STRIPE_PRICE_SEK') || '***REMOVED***',
-  dkk: Deno.env.get('STRIPE_PRICE_DKK') || '***REMOVED***',
+// Helper to get price ID with logging (returns empty string if not set, allowing fallback to defaults)
+function getPriceId(key: string): string {
+  const envKey = `STRIPE_PRICE_${key.toUpperCase()}`;
+  const value = Deno.env.get(envKey) || '';
+  
+  if (value) {
+    console.log(`[Config] ${envKey}: ${value.substring(0, 20)}... (from environment variable)`);
+  } else {
+    console.log(`[Config] ${envKey}: Using hardcoded default`);
+  }
+  return value;
+}
+
+// Default price IDs (can be overridden by environment variables)
+const DEFAULT_PRICE_IDS = {
+  usd: 'price_1RuGa5ASxfWk5jq3tVdquNfV',
+  nok: 'price_1RuGbJASxfWk5jq3jHf2UWtW',
+  sek: 'price_1RuGboASxfWk5jq387nsCumM',
+  dkk: 'price_1RuGcJASxfWk5jq3tY106Hk9',
 };
+
+export const PRICE_IDS = {
+  usd: getPriceId('USD') || DEFAULT_PRICE_IDS.usd,
+  nok: getPriceId('NOK') || DEFAULT_PRICE_IDS.nok,
+  sek: getPriceId('SEK') || DEFAULT_PRICE_IDS.sek,
+  dkk: getPriceId('DKK') || DEFAULT_PRICE_IDS.dkk,
+};
+
+// Helper to check if price IDs are configured
+export function arePriceIdsConfigured(): boolean {
+  return Object.values(PRICE_IDS).every(price => price && price.length > 0 && !price.includes('REMOVED'));
+}
 
 export function getAppUrl(): string {
   return Deno.env.get('PUBLIC_APP_URL') || 'https://trainwisestudio.com';

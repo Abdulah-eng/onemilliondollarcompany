@@ -74,6 +74,7 @@ const ContactStep = () => {
       nextDisabled={!isFormValid || loading}
       isLoading={loading}
       nextLabel="Finish Setup"
+      forceLightMode={true}
     >
       <div className="max-w-md mx-auto">
         <Card className="bg-white/80 backdrop-blur-sm border-gray-200 shadow-lg">

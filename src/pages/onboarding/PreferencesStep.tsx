@@ -66,6 +66,7 @@ const PreferencesStep = () => {
       onBack={() => navigate('/onboarding/step-2')}
       onNext={() => navigate('/onboarding/step-4')}
       isLoading={loading}
+      forceLightMode={true}
     >
       <div className="max-w-3xl mx-auto space-y-8">
         <PreferenceSection title="Do you have any food allergies?">

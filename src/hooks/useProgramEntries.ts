@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRefresh } from '@/contexts/RefreshContext';
+import { useTableMutations } from './useMutationQueue';
+import { queryKeys } from '@/lib/query-config';
 
 export interface ProgramEntry {
   id: string;
@@ -16,6 +18,7 @@ export interface ProgramEntry {
 export const useProgramEntries = (programId?: string) => {
   const { user } = useAuth();
   const { refreshAll } = useRefresh();
+  const { upsert: queueUpsert, isOnline } = useTableMutations('program_entries');
   const [entries, setEntries] = useState<ProgramEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,24 +44,61 @@ export const useProgramEntries = (programId?: string) => {
   const completeToday = async (payload: { program_id: string | null; type: ProgramEntry['type']; notes?: string; data?: any; }) => {
     if (!user) throw new Error('Not authenticated');
     const today = new Date().toISOString().slice(0, 10);
-    const { data, error } = await supabase
-      .from('program_entries')
-      .upsert({
+    
+    // Use mutation queue for offline support and scalability
+    try {
+      await queueUpsert(
+        {
+          user_id: user.id,
+          program_id: payload.program_id,
+          date: today,
+          type: payload.type,
+          notes: payload.notes || null,
+          data: payload.data || null,
+        },
+        'user_id,program_id,date',
+        {
+          invalidateQueries: [
+            queryKeys.programEntries(programId, user.id),
+            queryKeys.programEntries(undefined, user.id),
+          ],
+        }
+      );
+      
+      // If online, fetch immediately; otherwise queue will handle it
+      if (isOnline) {
+        await fetchEntries();
+        await refreshAll();
+      }
+      
+      // Return optimistic data
+      return [{
+        id: `temp_${Date.now()}`,
         user_id: user.id,
         program_id: payload.program_id,
         date: today,
         type: payload.type,
         notes: payload.notes || null,
         data: payload.data || null,
-      }, { onConflict: 'user_id,program_id,date' })
-      .select('*');
-    if (error) throw error;
-    await fetchEntries();
-    
-    // Use smart refresh to update all related data
-    await refreshAll();
-    
-    return data as ProgramEntry[];
+      }] as ProgramEntry[];
+    } catch (error) {
+      // Fallback to direct Supabase call if queue fails
+      const { data, error: supabaseError } = await supabase
+        .from('program_entries')
+        .upsert({
+          user_id: user.id,
+          program_id: payload.program_id,
+          date: today,
+          type: payload.type,
+          notes: payload.notes || null,
+          data: payload.data || null,
+        }, { onConflict: 'user_id,program_id,date' })
+        .select('*');
+      if (supabaseError) throw supabaseError;
+      await fetchEntries();
+      await refreshAll();
+      return data as ProgramEntry[];
+    }
   };
 
   return { entries, loading, error, refetch: fetchEntries, completeToday };

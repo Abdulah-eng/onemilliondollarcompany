@@ -16,6 +16,7 @@ interface OnboardingContainerProps {
   nextLabel?: string;
   nextDisabled?: boolean;
   isLoading?: boolean;
+  forceLightMode?: boolean;
 }
 
 export const OnboardingContainer = ({
@@ -30,8 +31,10 @@ export const OnboardingContainer = ({
   nextLabel = "Next",
   nextDisabled = false,
   isLoading = false,
+  forceLightMode = false,
 }: OnboardingContainerProps) => {
-  const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
+  const systemPrefersDark = useMediaQuery('(prefers-color-scheme: dark)');
+  const prefersDark = forceLightMode ? false : systemPrefersDark;
   const surfaces = prefersDark ? theme.colors.surfaces.dark : theme.colors.surfaces.light;
   const typography = prefersDark ? theme.colors.typography.dark : theme.colors.typography.light;
 

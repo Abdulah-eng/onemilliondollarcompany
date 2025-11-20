@@ -138,6 +138,7 @@ const PersonalInfoStep = () => {
       onBack={() => navigate('/onboarding/step-1')}
       onNext={() => navigate('/onboarding/step-3')}
       nextDisabled={!isFormValid || loading} isLoading={loading}
+      forceLightMode={true}
     >
       <div className="max-w-md mx-auto">
         <Card className="bg-white/80 backdrop-blur-sm border-gray-200 shadow-lg">
