@@ -3,11 +3,10 @@ import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Check, Droplets, Battery, Smile, Moon, TrendingUp, Lock } from 'lucide-react';
+import { Check, Droplets, Battery, Smile, Moon, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePaymentPlan } from '@/hooks/usePaymentPlan';
 import { useDailyCheckins } from '@/hooks/useDailyCheckins';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const sleepOptions = [
@@ -34,8 +33,7 @@ const moodOptions = [
 const DailyCheckIn = () => {
   const { profile } = useAuth();
   const { planStatus } = usePaymentPlan();
-  const { checkins, upsertToday, loading: checkinsLoading } = useDailyCheckins();
-  const navigate = useNavigate();
+  const { checkins, upsertToday } = useDailyCheckins();
   
   const [water, setWater] = useState(0);
   const [sleep, setSleep] = useState(0);
@@ -100,50 +98,6 @@ const DailyCheckIn = () => {
 
   const isComplete = water > 0 && sleep > 0 && energy > 0 && mood > 0;
 
-  const handleUpgrade = () => {
-    navigate('/customer/payment/update-plan');
-  };
-
-  const handleFindCoach = () => {
-    navigate('/customer/my-coach');
-  };
-
-  // Show access denied message if user doesn't have coach or plan
-  if (!canAccessCheckIn) {
-    return (
-      <div>
-        <h2 className="text-xl font-bold text-foreground mb-4">Daily Check-in</h2>
-        <Card className="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600">
-          <CardContent className="p-8 text-center">
-            <Lock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Daily Check-ins Available
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Get a coach or subscribe to access daily wellness tracking and personalized insights.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleFindCoach}
-              >
-                Find a Coach
-              </Button>
-              <Button 
-                size="sm" 
-                className="bg-orange-500 hover:bg-orange-600"
-                onClick={handleUpgrade}
-              >
-                Subscribe Now
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   if (checkedIn) {
     return (
       <div>
@@ -190,7 +144,7 @@ const DailyCheckIn = () => {
         <div className="pt-2 flex justify-center">
             <Button 
               onClick={handleLogCheckIn} 
-              disabled={!isComplete || isSubmitting} 
+              disabled={!isComplete || isSubmitting || !canAccessCheckIn} 
               size="lg" 
               className="w-full max-w-sm bg-orange-500 hover:bg-orange-600 font-bold disabled:bg-muted"
             >

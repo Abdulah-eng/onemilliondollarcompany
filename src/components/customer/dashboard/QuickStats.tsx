@@ -1,23 +1,18 @@
 // src/components/customer/dashboard/QuickStats.tsx
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Lock, ArrowUp, ArrowDown, Loader2, Crown, Users } from 'lucide-react';
+import { Lock, ArrowUp, ArrowDown, Loader2, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDailyCheckins } from '@/hooks/useDailyCheckins';
-import { usePaymentPlan } from '@/hooks/usePaymentPlan';
 import { useWeightTracking } from '@/hooks/useWeightTracking';
 import { useAccessLevel } from '@/contexts/AccessLevelContext';
-import { useNavigate } from 'react-router-dom';
 
 const QuickStats = () => {
   const { profile } = useAuth();
-  const { planStatus } = usePaymentPlan();
   const { checkins } = useDailyCheckins();
-  const { getWeightTrend, getWeightHistory, entries: weightEntries, addWeightEntry } = useWeightTracking();
+  const { getWeightTrend, entries: weightEntries, addWeightEntry } = useWeightTracking();
   const { accessLevel, hasCoach, hasPaymentPlan } = useAccessLevel();
-  const navigate = useNavigate();
   const [stats, setStats] = useState({
     avgWater: '0.0 L',
     avgEnergy: 'N/A',
@@ -131,17 +126,7 @@ const QuickStats = () => {
     );
   }
 
-  // Determine if user needs upgrade prompts
-  const needsUpgrade = !hasCoach && !hasPaymentPlan;
   const hasPartialAccess = hasCoach && !hasPaymentPlan;
-
-  const handleUpgrade = () => {
-    navigate('/customer/payment/update-plan');
-  };
-
-  const handleFindCoach = () => {
-    navigate('/customer/my-coach');
-  };
 
   return (
     <div className="relative">
@@ -159,55 +144,16 @@ const QuickStats = () => {
       
       <div className="p-1 -m-1">
         <div className={cn(
-          "flex gap-3 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]",
-          needsUpgrade && "blur-sm pointer-events-none"
+          "flex gap-3 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         )}>
           {statItems.map((stat) => (
             <StatCard
               key={stat.label}
               {...stat}
               isLocked={stat.requiredPlan > userPlanLevel}
-              needsUpgrade={needsUpgrade}
-              hasPartialAccess={hasPartialAccess}
             />
           ))}
         </div>
-        
-        {/* Upgrade Prompts */}
-        {needsUpgrade && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg z-10">
-            <div className="text-center p-6 max-w-md mx-auto">
-              <div className="flex justify-center mb-4">
-                <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full">
-                  <Crown className="w-8 h-8 text-orange-600 dark:text-orange-400" />
-                </div>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Unlock Your Weekly Stats
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Subscribe or get a coach to access detailed weekly statistics and personalized insights.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                <Button 
-                  onClick={handleUpgrade}
-                  className="bg-orange-500 hover:bg-orange-600 text-white"
-                >
-                  <Crown className="w-4 h-4 mr-2" />
-                  Subscribe Now
-                </Button>
-                <Button 
-                  onClick={handleFindCoach}
-                  variant="outline"
-                  className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-400"
-                >
-                  <Users className="w-4 h-4 mr-2" />
-                  Find a Coach
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
         
         {hasPartialAccess && (
           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
@@ -242,11 +188,10 @@ interface StatCardProps {
   isLocked: boolean;
   trend?: string;
   color: string;
-  needsUpgrade?: boolean;
   hasPartialAccess?: boolean;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ emoji, label, value, isLocked, trend, color, needsUpgrade, hasPartialAccess }) => {
+const StatCard: React.FC<StatCardProps> = ({ emoji, label, value, isLocked, trend, color }) => {
   const theme = statCardThemes[color];
 
   // Show locked state with grayscale but no individual upgrade button

@@ -33,7 +33,12 @@ const RoleGate = ({ allowedRole, children }: RoleGateProps) => {
 
   // Check if modal was dismissed in this session
   useEffect(() => {
-    if (allowedRole === 'customer' && profile?.onboarding_complete && planStatus.needsUpgrade) {
+    if (
+      allowedRole === 'customer' &&
+      profile?.onboarding_complete &&
+      planStatus.needsUpgrade &&
+      !planStatus.hasActiveTrial
+    ) {
       const modalDismissed = sessionStorage.getItem('paymentModalDismissed');
       const modalShown = sessionStorage.getItem('paymentModalShown');
       

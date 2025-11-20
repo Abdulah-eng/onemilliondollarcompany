@@ -27,7 +27,7 @@ export const getCustomerNavItems = (showLibrary: boolean = true, showProgress: b
     { name: 'My Programs', href: '/customer/programs', icon: BookOpen, requiresAccess: 'coach' },
     { name: 'Messages', href: '/customer/messages', icon: MessageSquare, requiresAccess: 'coach' },
     { name: 'My Coach', href: '/customer/my-coach', icon: Users, requiresAccess: 'free' },
-    { name: 'Blog', href: '/customer/blog', icon: FileText, requiresAccess: 'coach' },
+    { name: 'Blog', href: '/customer/blog', icon: FileText, requiresAccess: 'payment' },
   ];
 
   // Add Library if user has access

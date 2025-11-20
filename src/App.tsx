@@ -340,9 +340,9 @@ const ThemedApp = () => {
                     </AccessControl>
                   } />
                   
-                  {/* Blog - Coach OR Payment plan access */}
+                  {/* Blog - Subscription access only */}
                   <Route path="/customer/blog" element={
-                    <AccessControl requiredAccess="coach">
+                    <AccessControl requiredAccess="payment">
                       <Suspense fallback={<LoadingScreen />}>
                         <BlogPage />
                       </Suspense>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
@@ -6,26 +6,36 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 
-const languages = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-  { code: 'no', name: 'Norsk', flag: '🇳🇴' },
-  { code: 'sv', name: 'Svenska', flag: '🇸🇪' },
-  { code: 'da', name: 'Dansk', flag: '🇩🇰' },
-];
+const LANGUAGE_OPTIONS = [
+  { code: 'en', flag: '🇺🇸', labelKey: 'language.english' },
+  { code: 'es', flag: '🇪🇸', labelKey: 'language.spanish' },
+  { code: 'fr', flag: '🇫🇷', labelKey: 'language.french' },
+  { code: 'de', flag: '🇩🇪', labelKey: 'language.german' },
+  { code: 'no', flag: '🇳🇴', labelKey: 'language.norwegian' },
+  { code: 'sv', flag: '🇸🇪', labelKey: 'language.swedish' },
+  { code: 'da', flag: '🇩🇰', labelKey: 'language.danish' },
+] as const;
 
 export const LanguageSwitcher = () => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [currentLang, setCurrentLang] = useState(i18n.language);
+  const languageOptions = useMemo(
+    () =>
+      LANGUAGE_OPTIONS.map((option) => ({
+        ...option,
+        name: t(option.labelKey),
+      })),
+    [t]
+  );
   
   // Normalize language code (e.g., 'en-US' -> 'en')
   const currentLangCode = currentLang?.split('-')[0] || 'en';
-  const currentLanguage = languages.find(lang => lang.code === currentLangCode) || languages[0];
+  const currentLanguage = languageOptions.find(lang => lang.code === currentLangCode) || languageOptions[0];
 
   // Listen for language changes
   useEffect(() => {
@@ -44,6 +54,7 @@ export const LanguageSwitcher = () => {
     try {
       await i18n.changeLanguage(languageCode);
       setCurrentLang(languageCode);
+      window.localStorage.setItem('i18nextLng', languageCode);
     } catch (error) {
       console.error('Error changing language:', error);
     }
@@ -52,14 +63,18 @@ export const LanguageSwitcher = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-2" aria-label={t('language.select')}>
           <Globe className="h-4 w-4" />
           <span className="hidden sm:inline">{currentLanguage.flag} {currentLanguage.name}</span>
           <span className="sm:hidden">{currentLanguage.flag}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {languages.map((language) => (
+      <DropdownMenuContent align="end" className="min-w-[220px]">
+        <DropdownMenuLabel className="text-xs text-muted-foreground">
+          {t('language.select')}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {languageOptions.map((language) => (
           <DropdownMenuItem
             key={language.code}
             onClick={() => changeLanguage(language.code)}

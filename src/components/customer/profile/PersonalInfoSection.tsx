@@ -99,6 +99,18 @@ export interface PersonalInfoSectionRef {
   cancel: () => void;
 }
 
+const PHONE_MIN_DIGITS = 7;
+const PHONE_MAX_DIGITS = 15;
+
+const PHONE_MIN_DIGITS = 7;
+const PHONE_MAX_DIGITS = 15;
+const MIN_WEIGHT = 20; // kg
+const MAX_WEIGHT = 400;
+const MIN_HEIGHT = 50; // cm
+const MAX_HEIGHT = 250;
+const MIN_AGE = 10;
+const MAX_AGE = 120;
+
 const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSectionProps>(({ isGlobalEditing = false }, ref) => {
   const { user, profile } = useAuth();
   const { updateOnboarding, updateProfile, loading } = useProfileUpdates();
@@ -109,6 +121,7 @@ const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSecti
   const [profileFormData, setProfileFormData] = useState({ phone: '', email: '' });
   const [newItem, setNewItem] = useState({ type: '', value: '' });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [formErrors, setFormErrors] = useState<{ phone?: string; weight?: string; height?: string; dob?: string }>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -171,8 +184,79 @@ const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSecti
     }
   }, [isGlobalEditing, onboardingData, profileData]);
 
+  const digitsOnly = (value: string) => value.replace(/\D/g, '');
+
+  const sanitizePhoneInput = (value: string) => {
+    if (!value) return '';
+    const hasPlus = value.trim().startsWith('+');
+    const digits = digitsOnly(value);
+    const limitedDigits = digits.slice(0, PHONE_MAX_DIGITS);
+    return hasPlus ? `+${limitedDigits}` : limitedDigits;
+  };
+
+  const validatePhone = (value: string) => {
+    const digits = digitsOnly(value);
+    if (!digits) {
+      setPhoneError('');
+      return true;
+    }
+    if (digits.length < PHONE_MIN_DIGITS) {
+      setPhoneError(`Phone number must include at least ${PHONE_MIN_DIGITS} digits.`);
+      return false;
+    }
+    setPhoneError('');
+    return true;
+  };
+
+  const handlePhoneChange = (value: string) => {
+    const sanitized = sanitizePhoneInput(value);
+    setProfileFormData({ ...profileFormData, phone: sanitized });
+    const digits = digitsOnly(sanitized);
+    if (digits.length > PHONE_MAX_DIGITS) {
+      setPhoneError(`Phone number cannot exceed ${PHONE_MAX_DIGITS} digits.`);
+    } else {
+      setPhoneError('');
+    }
+    setHasUnsavedChanges(true);
+  };
+
+  const validateProfileFields = () => {
+    const errors: typeof formErrors = {};
+    if (!validatePhone(profileFormData.phone)) {
+      errors.phone = `Phone number must be between ${PHONE_MIN_DIGITS} and ${PHONE_MAX_DIGITS} digits when provided.`;
+    }
+    if (formData.weight) {
+      if (formData.weight < MIN_WEIGHT || formData.weight > MAX_WEIGHT) {
+        errors.weight = `Weight must be between ${MIN_WEIGHT}kg and ${MAX_WEIGHT}kg.`;
+      }
+    }
+    if (formData.height) {
+      if (formData.height < MIN_HEIGHT || formData.height > MAX_HEIGHT) {
+        errors.height = `Height must be between ${MIN_HEIGHT}cm and ${MAX_HEIGHT}cm.`;
+      }
+    }
+    if (formData.dob) {
+      const dobDate = new Date(formData.dob);
+      const today = new Date();
+      if (dobDate > today) {
+        errors.dob = 'Date of birth cannot be in the future.';
+      } else {
+        const age = calculateAge(formData.dob);
+        if (age && (age < MIN_AGE || age > MAX_AGE)) {
+          errors.dob = 'Please enter a realistic date of birth.';
+        }
+      }
+    }
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
     try {
+      if (!validateProfileFields()) {
+        toast.error('Please fix the highlighted fields before saving.');
+        return;
+      }
       // Update profile data (phone)
       await updateProfile({ phone: profileFormData.phone });
 
@@ -316,15 +400,19 @@ const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSecti
               <div>
                 <Label htmlFor="phone">Phone</Label>
                 {isGlobalEditing ? (
-                  <Input
-                    id="phone"
-                    value={profileFormData.phone}
-                    onChange={(e) => {
-                      setProfileFormData({ ...profileFormData, phone: e.target.value });
-                      setHasUnsavedChanges(true);
-                    }}
-                    placeholder="+1 (555) 123-4567"
-                  />
+                  <>
+                    <Input
+                      id="phone"
+                      value={profileFormData.phone}
+                      onChange={(e) => handlePhoneChange(e.target.value)}
+                      onBlur={(e) => validatePhone(e.target.value)}
+                      placeholder="+1 (555) 123-4567"
+                      maxLength={PHONE_MAX_DIGITS + 2}
+                    />
+                    {phoneError && (
+                      <p className="text-xs text-red-600 mt-1">{phoneError}</p>
+                    )}
+                  </>
                 ) : (
                   <p className="text-sm text-muted-foreground py-2">
                     {profileData?.phone || 'Not provided'}
@@ -350,11 +438,22 @@ const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSecti
                     step="0.1"
                     value={formData.weight || ''}
                     onChange={(e) => {
-                      setFormData({ ...formData, weight: parseFloat(e.target.value) || null });
+                      const value = e.target.value ? parseFloat(e.target.value) : null;
+                      setFormData({ ...formData, weight: value });
                       setHasUnsavedChanges(true);
+                      if (value === null) {
+                        setFormErrors(prev => ({ ...prev, weight: undefined }));
+                      } else if (value < MIN_WEIGHT || value > MAX_WEIGHT) {
+                        setFormErrors(prev => ({ ...prev, weight: `Weight must be between ${MIN_WEIGHT}kg and ${MAX_WEIGHT}kg.` }));
+                      } else {
+                        setFormErrors(prev => ({ ...prev, weight: undefined }));
+                      }
                     }}
                     placeholder="70.0"
                   />
+                  {formErrors.weight && (
+                    <p className="text-xs text-red-600 mt-1">{formErrors.weight}</p>
+                  )}
                 ) : (
                   <p className="text-sm text-muted-foreground py-2">
                     {onboardingData?.weight ? `${onboardingData.weight} kg` : 'Not provided'}
@@ -371,11 +470,22 @@ const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSecti
                     step="0.1"
                     value={formData.height || ''}
                     onChange={(e) => {
-                      setFormData({ ...formData, height: parseFloat(e.target.value) || null });
+                      const value = e.target.value ? parseFloat(e.target.value) : null;
+                      setFormData({ ...formData, height: value });
                       setHasUnsavedChanges(true);
+                      if (value === null) {
+                        setFormErrors(prev => ({ ...prev, height: undefined }));
+                      } else if (value < MIN_HEIGHT || value > MAX_HEIGHT) {
+                        setFormErrors(prev => ({ ...prev, height: `Height must be between ${MIN_HEIGHT}cm and ${MAX_HEIGHT}cm.` }));
+                      } else {
+                        setFormErrors(prev => ({ ...prev, height: undefined }));
+                      }
                     }}
                     placeholder="175.0"
                   />
+                  {formErrors.height && (
+                    <p className="text-xs text-red-600 mt-1">{formErrors.height}</p>
+                  )}
                 ) : (
                   <p className="text-sm text-muted-foreground py-2">
                     {onboardingData?.height ? `${onboardingData.height} cm` : 'Not provided'}
@@ -427,8 +537,21 @@ const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSecti
                     onChange={(e) => {
                       setFormData({ ...formData, dob: e.target.value });
                       setHasUnsavedChanges(true);
+                      if (e.target.value) {
+                        const age = calculateAge(e.target.value);
+                        if (age && (age < 10 || age > 120)) {
+                          setFormErrors(prev => ({ ...prev, dob: 'Please enter a realistic date of birth.' }));
+                        } else {
+                          setFormErrors(prev => ({ ...prev, dob: undefined }));
+                        }
+                      } else {
+                        setFormErrors(prev => ({ ...prev, dob: undefined }));
+                      }
                     }}
                   />
+                  {formErrors.dob && (
+                    <p className="text-xs text-red-600 mt-1">{formErrors.dob}</p>
+                  )}
                 ) : (
                   <p className="text-sm text-muted-foreground py-2">
                     {onboardingData?.dob ? new Date(onboardingData.dob).toLocaleDateString() : 'Not provided'}
@@ -460,25 +583,6 @@ const PersonalInfoSection = forwardRef<PersonalInfoSectionRef, PersonalInfoSecti
                 ) : (
                   <p className="text-sm text-muted-foreground py-2">
                     {onboardingData?.country || 'Not provided'}
-                  </p>
-                )}
-              </div>
-
-              <div className="md:col-span-2">
-                <Label htmlFor="location">Location</Label>
-                {isGlobalEditing ? (
-                  <Input
-                    id="location"
-                    value={formData.location || ''}
-                    onChange={(e) => {
-                      setFormData({ ...formData, location: e.target.value });
-                      setHasUnsavedChanges(true);
-                    }}
-                    placeholder="City, State/Province"
-                  />
-                ) : (
-                  <p className="text-sm text-muted-foreground py-2">
-                    {onboardingData?.location || 'Not provided'}
                   </p>
                 )}
               </div>

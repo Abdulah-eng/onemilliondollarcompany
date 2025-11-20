@@ -183,6 +183,9 @@ const resources = {
       'language.spanish': 'Español',
       'language.french': 'Français',
       'language.german': 'Deutsch',
+      'language.norwegian': 'Norwegian',
+      'language.swedish': 'Swedish',
+      'language.danish': 'Danish',
       'language.select': 'Select Language',
       
       // Dashboard
@@ -489,6 +492,9 @@ const resources = {
       'language.spanish': 'Español',
       'language.french': 'Français',
       'language.german': 'Deutsch',
+      'language.norwegian': 'Noruego',
+      'language.swedish': 'Sueco',
+      'language.danish': 'Danés',
       'language.select': 'Seleccionar Idioma',
       
       // Dashboard
@@ -795,6 +801,9 @@ const resources = {
       'language.spanish': 'Español',
       'language.french': 'Français',
       'language.german': 'Deutsch',
+      'language.norwegian': 'Norvégien',
+      'language.swedish': 'Suédois',
+      'language.danish': 'Danois',
       'language.select': 'Sélectionner la langue',
       
       // Dashboard
@@ -1101,6 +1110,9 @@ const resources = {
       'language.spanish': 'Español',
       'language.french': 'Français',
       'language.german': 'Deutsch',
+      'language.norwegian': 'Norwegisch',
+      'language.swedish': 'Schwedisch',
+      'language.danish': 'Dänisch',
       'language.select': 'Sprache auswählen',
       
       // Dashboard
@@ -1407,6 +1419,9 @@ const resources = {
       'language.spanish': 'Spansk',
       'language.french': 'Fransk',
       'language.german': 'Tysk',
+      'language.norwegian': 'Norsk',
+      'language.swedish': 'Svensk',
+      'language.danish': 'Dansk',
       'language.select': 'Velg Språk',
       
       // Dashboard
@@ -1713,6 +1728,9 @@ const resources = {
       'language.spanish': 'Spanska',
       'language.french': 'Franska',
       'language.german': 'Tyska',
+      'language.norwegian': 'Norska',
+      'language.swedish': 'Svenska',
+      'language.danish': 'Danska',
       'language.select': 'Välj Språk',
       
       // Dashboard
@@ -2019,6 +2037,9 @@ const resources = {
       'language.spanish': 'Spansk',
       'language.french': 'Fransk',
       'language.german': 'Tysk',
+      'language.norwegian': 'Norsk',
+      'language.swedish': 'Svensk',
+      'language.danish': 'Dansk',
       'language.select': 'Vælg Sprog',
       
       // Dashboard

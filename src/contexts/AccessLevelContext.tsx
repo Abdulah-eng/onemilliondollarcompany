@@ -40,7 +40,7 @@ export const AccessLevelProvider: React.FC<AccessLevelProviderProps> = ({ childr
   const canAccessProgress = hasPaymentPlan; // Only payment plan users
   const canAccessPrograms = hasCoach || hasPaymentPlan;
   const canAccessMessages = hasCoach || hasPaymentPlan;
-  const canAccessBlog = hasCoach || hasPaymentPlan;
+  const canAccessBlog = hasPaymentPlan;
 
   const value: AccessLevelContextType = {
     accessLevel,

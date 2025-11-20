@@ -1,13 +1,16 @@
 // src/components/customer/mycoach/AICoachProgramSelector.tsx
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Sparkles, Dumbbell, Apple, Brain, ArrowRight } from 'lucide-react';
+import { Loader2, Sparkles, Dumbbell, Apple, Brain, ArrowRight, ShieldCheck } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePaymentPlan } from '@/hooks/usePaymentPlan';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 type ProgramType = 'fitness' | 'nutrition' | 'mental_health';
 
@@ -15,9 +18,10 @@ interface ProgramTypeOption {
   id: ProgramType;
   label: string;
   description: string;
-  icon: React.ReactNode;
-  color: string;
-  bgColor: string;
+  icon: LucideIcon;
+  accent: string;
+  accentBg: string;
+  gradient: string;
 }
 
 const programTypes: ProgramTypeOption[] = [
@@ -25,25 +29,28 @@ const programTypes: ProgramTypeOption[] = [
     id: 'fitness',
     label: 'Fitness',
     description: 'Personalized workout plans and exercise routines',
-    icon: <Dumbbell className="w-6 h-6" />,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50 dark:bg-blue-950/20',
+    icon: Dumbbell,
+    accent: 'text-[#F97316]',
+    accentBg: 'bg-[#F97316]/15',
+    gradient: 'from-white via-white to-[#F97316]/10 dark:from-slate-950 dark:via-slate-950 dark:to-[#F97316]/20',
   },
   {
     id: 'nutrition',
     label: 'Nutrition',
     description: 'Custom meal plans and dietary guidance',
-    icon: <Apple className="w-6 h-6" />,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50 dark:bg-green-950/20',
+    icon: Apple,
+    accent: 'text-[#10B981]',
+    accentBg: 'bg-[#10B981]/15',
+    gradient: 'from-white via-white to-[#10B981]/10 dark:from-slate-950 dark:via-slate-950 dark:to-[#10B981]/20',
   },
   {
     id: 'mental_health',
     label: 'Mental Health',
     description: 'Mindfulness, meditation, and stress management',
-    icon: <Brain className="w-6 h-6" />,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50 dark:bg-purple-950/20',
+    icon: Brain,
+    accent: 'text-[#6366F1]',
+    accentBg: 'bg-[#6366F1]/15',
+    gradient: 'from-white via-white to-[#6366F1]/10 dark:from-slate-950 dark:via-slate-950 dark:to-[#6366F1]/20',
   },
 ];
 
@@ -52,9 +59,19 @@ interface AICoachProgramSelectorProps {
 }
 
 const AICoachProgramSelector: React.FC<AICoachProgramSelectorProps> = ({ onProgramGenerated }) => {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
+  const { planStatus } = usePaymentPlan();
   const [selectedType, setSelectedType] = useState<ProgramType | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const hasPlanAccess = planStatus.hasActivePlan;
+  const isTrialPlan = planStatus.hasActiveTrial && !planStatus.hasActiveSubscription;
+  const statusBadge = useMemo(() => {
+    if (!planStatus.hasActivePlan) return null;
+    if (isTrialPlan) {
+      return { label: '7-day trial access', tone: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200' };
+    }
+    return { label: 'Premium unlocked', tone: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200' };
+  }, [planStatus.hasActivePlan, isTrialPlan]);
 
   const handleGenerateProgram = async () => {
     if (!selectedType || !user?.id) {
@@ -62,14 +79,7 @@ const AICoachProgramSelector: React.FC<AICoachProgramSelectorProps> = ({ onProgr
       return;
     }
 
-    // Check if user has active plan or trial
-    const hasActivePlan = profile?.plan && (
-      profile.plan === 'trial' 
-        ? (profile.plan_expiry ? new Date(profile.plan_expiry) > new Date() : false)
-        : (profile.plan_expiry ? new Date(profile.plan_expiry) > new Date() : true)
-    );
-
-    if (!hasActivePlan) {
+    if (!hasPlanAccess) {
       toast.error('You need an active subscription or trial to generate AI programs');
       return;
     }
@@ -133,59 +143,70 @@ const AICoachProgramSelector: React.FC<AICoachProgramSelectorProps> = ({ onProgr
   };
 
   return (
-    <Card className="border-2 border-dashed border-primary/30">
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-primary" />
+    <Card className="border border-border/60 bg-white/95 dark:bg-slate-950/60 backdrop-blur-lg shadow-sm">
+      <CardHeader className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-primary/15 text-primary flex items-center justify-center shadow-inner">
+            <Sparkles className="w-6 h-6" />
           </div>
-          <div>
-            <CardTitle>AI Coach Program Generator</CardTitle>
-            <CardDescription>
-              Select a program type and get a personalized AI-generated plan
+          <div className="flex-1">
+            <CardTitle className="text-xl text-foreground">AI Coach Program Generator</CardTitle>
+            <CardDescription className="text-base text-muted-foreground leading-relaxed">
+              Pick a focus, tap generate, and we’ll build a tailored plan that matches your current journey.
             </CardDescription>
           </div>
         </div>
+        {statusBadge && (
+          <div className={cn('inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium shadow-sm', statusBadge.tone)}>
+            <ShieldCheck className="w-3.5 h-3.5" />
+            {statusBadge.label}
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Program Type Selection */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {programTypes.map((type) => (
-            <motion.div
-              key={type.id}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Card
-                className={`cursor-pointer transition-all ${
-                  selectedType === type.id
-                    ? 'border-primary border-2 shadow-lg'
-                    : 'border hover:border-primary/50'
-                } ${type.bgColor}`}
-                onClick={() => setSelectedType(type.id)}
+          {programTypes.map((type) => {
+            const Icon = type.icon;
+            return (
+              <motion.div
+                key={type.id}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <CardContent className="p-6 text-center space-y-3">
-                  <div className={`mx-auto w-16 h-16 rounded-full ${type.bgColor} flex items-center justify-center ${type.color}`}>
-                    {type.icon}
-                  </div>
-                  <h3 className="font-semibold text-lg">{type.label}</h3>
-                  <p className="text-sm text-muted-foreground">{type.description}</p>
-                  {selectedType === type.id && (
-                    <Badge className="bg-primary text-primary-foreground">
-                      Selected
-                    </Badge>
+                <Card
+                  className={cn(
+                    'cursor-pointer rounded-2xl border border-border/60 bg-white/95 dark:bg-slate-950/60 bg-gradient-to-br shadow-sm transition-all',
+                    type.gradient,
+                    selectedType === type.id
+                      ? 'ring-2 ring-primary shadow-lg'
+                      : 'hover:border-primary/40 hover:shadow-md'
                   )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                  onClick={() => setSelectedType(type.id)}
+                >
+                  <CardContent className="p-6 text-center space-y-4">
+                    <div className={cn('mx-auto w-16 h-16 rounded-full flex items-center justify-center shadow-inner', type.accentBg)}>
+                      <Icon className={cn('w-6 h-6', type.accent)} />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="font-semibold text-lg text-foreground">{type.label}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{type.description}</p>
+                    </div>
+                    {selectedType === type.id && (
+                      <Badge className="bg-primary text-primary-foreground border-0">Selected</Badge>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Generate Button */}
         <Button
           onClick={handleGenerateProgram}
-          disabled={!selectedType || isGenerating}
-          className="w-full"
+          disabled={!selectedType || isGenerating || !hasPlanAccess}
+          className="w-full h-12 text-base font-semibold"
           size="lg"
         >
           {isGenerating ? (
@@ -202,9 +223,15 @@ const AICoachProgramSelector: React.FC<AICoachProgramSelectorProps> = ({ onProgr
           )}
         </Button>
 
-        {selectedType && (
-          <p className="text-sm text-center text-muted-foreground">
-            Your personalized {programTypes.find(t => t.id === selectedType)?.label.toLowerCase()} program will be created based on your goals and preferences.
+        <div className="text-center text-sm text-muted-foreground">
+          {selectedType
+            ? `Your personalized ${programTypes.find(t => t.id === selectedType)?.label.toLowerCase()} plan will reflect your onboarding goals and preferences.`
+            : 'Select a focus to preview what your AI coach will build for you.'}
+        </div>
+
+        {!hasPlanAccess && (
+          <p className="text-xs text-center text-amber-600 dark:text-amber-300">
+            Start your 7-day free trial or subscribe to unlock AI-generated programs.
           </p>
         )}
       </CardContent>

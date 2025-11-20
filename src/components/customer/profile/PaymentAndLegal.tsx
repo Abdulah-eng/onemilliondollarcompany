@@ -1,7 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { loadStripe } from '@stripe/stripe-js';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRefresh } from '@/contexts/RefreshContext';
 import { createCheckoutSession, syncCheckoutSession, cancelSubscriptionAtPeriodEnd, resumeSubscription, openCustomerPortal, cancelSubscriptionNow, gracefulCancelPlan } from '@/lib/stripe/api';
@@ -15,7 +14,7 @@ import { usePaymentInfo } from '@/hooks/usePaymentInfo';
 import { useCurrencyDetection } from '@/hooks/useCurrencyDetection';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from 'react-i18next';
-import { Lock } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
 const PaymentAndLegal = () => {
@@ -27,6 +26,8 @@ const PaymentAndLegal = () => {
   const { detectedCurrency, getCurrencyOption } = useCurrencyDetection();
   const [selectedCurrency, setSelectedCurrency] = useState(detectedCurrency);
   const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' });
+  const [passwordVisibility, setPasswordVisibility] = useState({ current: false, new: false, confirm: false });
+  const [portalLoading, setPortalLoading] = useState(false);
   const { t } = useTranslation();
 
   // Update selected currency when detected currency changes
@@ -34,7 +35,7 @@ const PaymentAndLegal = () => {
     setSelectedCurrency(detectedCurrency);
   }, [detectedCurrency]);
 
-  const handlePasswordChange = (e: React.MouseEvent) => {
+  const handlePasswordChange = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (passwordForm.new !== passwordForm.confirm) {
       toast.error("New password and confirmation do not match.");
@@ -44,9 +45,20 @@ const PaymentAndLegal = () => {
       toast.error("Password must be at least 8 characters.");
       return;
     }
-    // Simulate API call for password change
-    toast.success("Password successfully updated!");
-    setPasswordForm({ current: '', new: '', confirm: '' });
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordForm.new,
+      });
+      if (error) {
+        throw error;
+      }
+      toast.success("Password successfully updated!");
+      setPasswordForm({ current: '', new: '', confirm: '' });
+    } catch (err: any) {
+      console.error('Password update error:', err);
+      toast.error(err?.message || 'Failed to update password.');
+    }
   };
 
   const handleSubscribe = async () => {
@@ -110,17 +122,22 @@ const PaymentAndLegal = () => {
   };
 
   const handleOpenCustomerPortal = async () => {
+    if (portalLoading) return;
     try {
       if (!profile?.stripe_customer_id) {
-        alert('No Stripe customer found on your profile.');
+        toast.error('No billing profile found. Please contact support.');
         return;
       }
+      setPortalLoading(true);
       const { url } = await openCustomerPortal(profile.stripe_customer_id, `${window.location.origin}/customer/settings`);
       if (url) {
         window.location.href = url;
       }
     } catch (e: any) {
-      alert(e?.message || 'Failed to open billing portal');
+      console.error('Billing portal error:', e);
+      toast.error(e?.message || 'Failed to open billing portal. Please try again later.');
+    } finally {
+      setPortalLoading(false);
     }
   };
 
@@ -160,20 +177,38 @@ const PaymentAndLegal = () => {
                 <>
                   <div className="space-y-2 text-sm">
                     <p><strong>Current Plan:</strong> {paymentInfo.currentPlan.name}</p>
-                    <p><strong>Price:</strong> {paymentInfo.currentPlan.price} / {paymentInfo.currentPlan.billingCycle}</p>
-                    <p><strong>Next Billing:</strong> {paymentInfo.currentPlan.nextBillingDate}</p>
-                    <p><strong>Status:</strong> <span className={`capitalize ${paymentInfo.currentPlan.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>{paymentInfo.currentPlan.status}</span></p>
+                    <p><strong>Price:</strong> {paymentInfo.currentPlan.price}</p>
+                    {paymentInfo.currentPlan.billingCycle && (
+                      <p><strong>Billing Cycle:</strong> {paymentInfo.currentPlan.billingCycle}</p>
+                    )}
+                    {paymentInfo.currentPlan.showNextBilling && paymentInfo.currentPlan.nextBillingDate && (
+                      <p><strong>Next Billing:</strong> {paymentInfo.currentPlan.nextBillingDate}</p>
+                    )}
+                    <p>
+                      <strong>Status:</strong>{' '}
+                      <span
+                        className={`capitalize ${
+                          paymentInfo.currentPlan.status === 'active'
+                            ? 'text-green-600'
+                            : paymentInfo.currentPlan.status === 'trialing'
+                            ? 'text-amber-600'
+                            : 'text-red-600'
+                        }`}
+                      >
+                        {paymentInfo.currentPlan.status.replace('_', ' ')}
+                      </span>
+                    </p>
                   </div>
-                  {paymentInfo.paymentMethod ? (
+                  {paymentInfo.paymentMethod && paymentInfo.currentPlan.type === 'subscription' ? (
                     <div className="space-y-2 text-sm">
                       <p><strong>Card:</strong> {paymentInfo.paymentMethod.brand} ending in {paymentInfo.paymentMethod.last4}</p>
                       <p><strong>Expires:</strong> {paymentInfo.paymentMethod.expiry}</p>
                     </div>
-                  ) : (
+                  ) : paymentInfo.currentPlan.type === 'subscription' ? (
                     <div className="space-y-2 text-sm text-muted-foreground">
                       <p>No payment method on file</p>
                     </div>
-                  )}
+                  ) : null}
                 </>
               ) : (
                 <div className="text-center py-4 text-muted-foreground">No payment information available</div>
@@ -182,15 +217,22 @@ const PaymentAndLegal = () => {
               <div className="space-y-4">
                 {/* Currency is auto-detected; selector hidden */}
                 <div className="space-y-2 text-sm">
-                  {paymentInfo?.currentPlan?.status === 'active' ? (
-                    // User has an active plan - show manage billing and cancel options
+                  {paymentInfo?.currentPlan?.type === 'subscription' ? (
                     <>
                       <Button 
                         variant="outline" 
                         size="sm"
                         onClick={handleOpenCustomerPortal}
+                        disabled={portalLoading}
                       >
-                        Manage Billing
+                        {portalLoading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            Opening Portal...
+                          </>
+                        ) : (
+                          'Manage Billing'
+                        )}
                       </Button>
                       <Button 
                         variant="destructive" 
@@ -209,8 +251,11 @@ const PaymentAndLegal = () => {
                         Cancel Now
                       </Button>
                     </>
+                  ) : paymentInfo?.currentPlan?.type === 'coach' ? (
+                    <div className="rounded-lg border p-4 text-sm text-muted-foreground">
+                      Billing is handled directly with your coach. Reach out to them to make changes.
+                    </div>
                   ) : (
-                    // User doesn't have an active plan - show subscribe option
                     <Button 
                       variant="secondary" 
                       size="sm" 
@@ -237,33 +282,60 @@ const PaymentAndLegal = () => {
                   <div className="space-y-3">
                     <div>
                       <Label htmlFor="current-password">Current Password</Label>
-                      <Input 
-                        id="current-password"
-                        type="password" 
-                        placeholder="Enter current password" 
-                        value={passwordForm.current} 
-                        onChange={e => setPasswordForm({ ...passwordForm, current: e.target.value })} 
-                      />
+                      <div className="relative">
+                        <Input 
+                          id="current-password"
+                          type={passwordVisibility.current ? 'text' : 'password'} 
+                          placeholder="Enter current password" 
+                          value={passwordForm.current} 
+                          onChange={e => setPasswordForm({ ...passwordForm, current: e.target.value })} 
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setPasswordVisibility(prev => ({ ...prev, current: !prev.current }))}
+                          className="absolute inset-y-0 right-3 flex items-center text-muted-foreground"
+                        >
+                          {passwordVisibility.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor="new-password">New Password</Label>
-                      <Input 
-                        id="new-password"
-                        type="password" 
-                        placeholder="Enter new password" 
-                        value={passwordForm.new} 
-                        onChange={e => setPasswordForm({ ...passwordForm, new: e.target.value })} 
-                      />
+                      <div className="relative">
+                        <Input 
+                          id="new-password"
+                          type={passwordVisibility.new ? 'text' : 'password'} 
+                          placeholder="Enter new password" 
+                          value={passwordForm.new} 
+                          onChange={e => setPasswordForm({ ...passwordForm, new: e.target.value })} 
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setPasswordVisibility(prev => ({ ...prev, new: !prev.new }))}
+                          className="absolute inset-y-0 right-3 flex items-center text-muted-foreground"
+                        >
+                          {passwordVisibility.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor="confirm-password">Confirm New Password</Label>
-                      <Input 
-                        id="confirm-password"
-                        type="password" 
-                        placeholder="Confirm new password" 
-                        value={passwordForm.confirm} 
-                        onChange={e => setPasswordForm({ ...passwordForm, confirm: e.target.value })} 
-                      />
+                      <div className="relative">
+                        <Input 
+                          id="confirm-password"
+                          type={passwordVisibility.confirm ? 'text' : 'password'} 
+                          placeholder="Confirm new password" 
+                          value={passwordForm.confirm} 
+                          onChange={e => setPasswordForm({ ...passwordForm, confirm: e.target.value })} 
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setPasswordVisibility(prev => ({ ...prev, confirm: !prev.confirm }))}
+                          className="absolute inset-y-0 right-3 flex items-center text-muted-foreground"
+                        >
+                          {passwordVisibility.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
                     </div>
                     <Button 
                       onClick={handlePasswordChange} 

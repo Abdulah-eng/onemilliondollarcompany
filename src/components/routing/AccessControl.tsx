@@ -47,12 +47,12 @@ const AccessControl = ({ children, requiredAccess }: AccessControlProps) => {
   if (requiredAccess === 'payment') {
     if (!hasPaymentPlan) {
       return (
-        <div className="relative">
-          <div className="blur-sm pointer-events-none">
+        <div className="relative isolate min-h-[60vh]">
+          <div className="blur-sm pointer-events-none select-none min-h-[60vh]">
             {children}
           </div>
-          <div className="absolute inset-0 flex items-center justify-center bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg z-10">
-            <div className="text-center p-6 max-w-md mx-auto">
+          <div className="absolute inset-0 flex items-center justify-center px-4 py-10 bg-background/95 dark:bg-gray-900/95 backdrop-blur-xl z-20">
+            <div className="text-center p-6 max-w-md mx-auto rounded-2xl border border-orange-200/70 dark:border-orange-900/50 bg-white/95 dark:bg-gray-950/95 shadow-2xl">
               <div className="flex justify-center mb-4">
                 <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full">
                   <Crown className="w-8 h-8 text-orange-600 dark:text-orange-400" />
@@ -93,12 +93,12 @@ const AccessControl = ({ children, requiredAccess }: AccessControlProps) => {
   if (requiredAccess === 'coach') {
     if (!hasCoachAccess && !hasPaymentPlan) {
       return (
-        <div className="relative">
-          <div className="blur-sm pointer-events-none">
+        <div className="relative isolate min-h-[60vh]">
+          <div className="blur-sm pointer-events-none select-none min-h-[60vh]">
             {children}
           </div>
-          <div className="absolute inset-0 flex items-center justify-center bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg z-10">
-            <div className="text-center p-6 max-w-md mx-auto">
+          <div className="absolute inset-0 flex items-center justify-center px-4 py-10 bg-background/95 dark:bg-gray-900/95 backdrop-blur-xl z-20">
+            <div className="text-center p-6 max-w-md mx-auto rounded-2xl border border-blue-200/70 dark:border-blue-900/50 bg-white/95 dark:bg-gray-950/95 shadow-2xl">
               <div className="flex justify-center mb-4">
                 <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
                   <Users className="w-8 h-8 text-blue-600 dark:text-blue-400" />
