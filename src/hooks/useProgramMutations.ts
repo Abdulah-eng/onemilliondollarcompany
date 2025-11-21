@@ -5,6 +5,8 @@ import { useRefresh } from '@/contexts/RefreshContext';
 import { Program, ProgramStatus, ProgramCategory } from '@/types/program';
 import { toast } from 'sonner';
 import { supabase as sb } from '@/integrations/supabase/client';
+import { useTableMutations } from './useMutationQueue';
+import { queryKeys } from '@/lib/query-config';
 
 interface CreateProgramData {
   name: string;
@@ -24,6 +26,9 @@ export const useProgramMutations = () => {
   const [loading, setLoading] = useState(false);
   const { profile } = useAuth();
   const { refreshAll } = useRefresh();
+  const { insert: queueInsert, update: queueUpdate, remove: queueDelete } = useTableMutations('programs');
+  const { insert: queueMessageInsert } = useTableMutations('messages');
+  const { insert: queueConversationInsert } = useTableMutations('conversations');
 
   const createProgram = async (data: CreateProgramData): Promise<Program | null> => {
     if (!profile?.id) {
@@ -53,9 +58,30 @@ export const useProgramMutations = () => {
           return null;
         }
       }
-      const { data: result, error } = await supabase
-        .from('programs')
-        .insert({
+      // Use mutation queue for offline support and scalability
+      try {
+        await queueInsert(
+          {
+            name: data.name,
+            description: data.description,
+            category: data.category,
+            status: data.status || 'draft',
+            coach_id: profile.id,
+            assigned_to: data.assignedTo || null,
+            scheduled_date: data.scheduledDate || null,
+            plan: data.plan || null,
+          },
+          {
+            invalidateQueries: [
+              queryKeys.programs(),
+              queryKeys.coachPrograms(profile.id),
+            ],
+          }
+        );
+        
+        // Return optimistic data
+        const optimisticResult = {
+          id: `temp_${Date.now()}`,
           name: data.name,
           description: data.description,
           category: data.category,
@@ -64,60 +90,136 @@ export const useProgramMutations = () => {
           assigned_to: data.assignedTo || null,
           scheduled_date: data.scheduledDate || null,
           plan: data.plan || null,
-        })
-        .select()
-        .single();
-      // If assigned to a client, send a system message notifying assignment
-      if (result?.assigned_to) {
-        try {
-          // Find or create conversation
-          const { data: convo } = await sb
-            .from('conversations')
-            .select('id')
-            .eq('coach_id', profile.id)
-            .eq('customer_id', result.assigned_to)
-            .single();
-          let conversationId = convo?.id;
-          if (!conversationId) {
-            const { data: newConvo } = await sb
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        
+        // If assigned to a client, queue system message notifying assignment
+        if (optimisticResult.assigned_to) {
+          try {
+            // Find or create conversation (still need to check if exists)
+            const { data: convo } = await sb
               .from('conversations')
-              .insert({ coach_id: profile.id, customer_id: result.assigned_to })
               .select('id')
-              .single();
-            conversationId = newConvo?.id;
+              .eq('coach_id', profile.id)
+              .eq('customer_id', optimisticResult.assigned_to)
+              .maybeSingle();
+            
+            let conversationId = convo?.id;
+            if (!conversationId) {
+              // Queue conversation creation
+              await queueConversationInsert(
+                { coach_id: profile.id, customer_id: optimisticResult.assigned_to },
+                {
+                  invalidateQueries: [queryKeys.conversations(optimisticResult.assigned_to)],
+                }
+              );
+              // For optimistic return, generate temp ID
+              conversationId = `temp_convo_${Date.now()}`;
+            }
+            
+            if (conversationId) {
+              // Queue message creation
+              await queueMessageInsert(
+                {
+                  conversation_id: conversationId,
+                  sender_id: profile.id,
+                  content: `A new program "${data.name}" has been assigned to you.`,
+                  type: 'system',
+                },
+                {
+                  invalidateQueries: [queryKeys.messages(conversationId)],
+                }
+              );
+            }
+          } catch (msgError) {
+            console.warn('Failed to queue message for program assignment:', msgError);
           }
-          if (conversationId) {
-            await sb.from('messages').insert({
-              conversation_id: conversationId,
-              sender_id: profile.id,
-              content: `A new program "${result.name}" has been assigned to you.`,
-              type: 'system',
-            });
-          }
-        } catch {}
+        }
+
+        toast.success('Program created successfully!');
+        await refreshAll();
+        
+        // Transform the optimistic result to match our Program interface
+        return {
+          id: optimisticResult.id,
+          name: optimisticResult.name,
+          description: optimisticResult.description,
+          status: optimisticResult.status as ProgramStatus,
+          category: optimisticResult.category as ProgramCategory,
+          createdAt: optimisticResult.created_at,
+          updatedAt: optimisticResult.updated_at,
+          assignedTo: optimisticResult.assigned_to,
+          scheduledDate: optimisticResult.scheduled_date || undefined,
+          plan: optimisticResult.plan || undefined,
+        };
+      } catch (queueError) {
+        // Fallback to direct Supabase call if queue fails
+        console.warn('Queue failed, falling back to direct insert:', queueError);
+        const { data: result, error } = await supabase
+          .from('programs')
+          .insert({
+            name: data.name,
+            description: data.description,
+            category: data.category,
+            status: data.status || 'draft',
+            coach_id: profile.id,
+            assigned_to: data.assignedTo || null,
+            scheduled_date: data.scheduledDate || null,
+            plan: data.plan || null,
+          })
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        // If assigned to a client, send a system message notifying assignment
+        if (result?.assigned_to) {
+          try {
+            // Find or create conversation
+            const { data: convo } = await sb
+              .from('conversations')
+              .select('id')
+              .eq('coach_id', profile.id)
+              .eq('customer_id', result.assigned_to)
+              .maybeSingle();
+            let conversationId = convo?.id;
+            if (!conversationId) {
+              const { data: newConvo } = await sb
+                .from('conversations')
+                .insert({ coach_id: profile.id, customer_id: result.assigned_to })
+                .select('id')
+                .single();
+              conversationId = newConvo?.id;
+            }
+            if (conversationId) {
+              await sb.from('messages').insert({
+                conversation_id: conversationId,
+                sender_id: profile.id,
+                content: `A new program "${result.name}" has been assigned to you.`,
+                type: 'system',
+              });
+            }
+          } catch {}
+        }
+
+        toast.success('Program created successfully!');
+        await refreshAll();
+        
+        // Transform the result to match our Program interface
+        return {
+          id: result.id,
+          name: result.name,
+          description: result.description,
+          status: result.status as ProgramStatus,
+          category: result.category as ProgramCategory,
+          createdAt: result.created_at,
+          updatedAt: result.updated_at,
+          assignedTo: result.assigned_to,
+          scheduledDate: result.scheduled_date || undefined,
+          plan: result.plan || undefined,
+        };
       }
-
-
-      if (error) throw error;
-
-      toast.success('Program created successfully!');
-      
-      // Use smart refresh to update all related data
-      await refreshAll();
-      
-      // Transform the result to match our Program interface
-      return {
-        id: result.id,
-        name: result.name,
-        description: result.description,
-        status: result.status as ProgramStatus,
-        category: result.category as ProgramCategory,
-        createdAt: result.created_at,
-        updatedAt: result.updated_at,
-        assignedTo: result.assigned_to,
-        scheduledDate: result.scheduled_date || undefined,
-        plan: result.plan || undefined,
-      };
     } catch (err) {
       console.error('Error creating program:', err);
       toast.error('Failed to create program');
@@ -155,41 +257,81 @@ export const useProgramMutations = () => {
           return null;
         }
       }
-      const { data: result, error } = await supabase
-        .from('programs')
-        .update({
+      // Use mutation queue for offline support and scalability
+      try {
+        await queueUpdate(
+          {
+            name: data.name,
+            description: data.description,
+            category: data.category,
+            status: data.status || 'draft',
+            assigned_to: data.assignedTo || null,
+            scheduled_date: data.scheduledDate || null,
+            plan: data.plan || null,
+          },
+          { id: data.id, coach_id: profile.id },
+          {
+            invalidateQueries: [
+              queryKeys.program(data.id),
+              queryKeys.programs(),
+              queryKeys.coachPrograms(profile.id),
+            ],
+          }
+        );
+        
+        toast.success('Program updated successfully!');
+        await refreshAll();
+        
+        // Return optimistic data
+        return {
+          id: data.id,
           name: data.name,
           description: data.description,
-          category: data.category,
           status: data.status || 'draft',
-          assigned_to: data.assignedTo || null,
-          scheduled_date: data.scheduledDate || null,
-          plan: data.plan || null,
-        })
-        .eq('id', data.id)
-        .eq('coach_id', profile.id)
-        .select()
-        .single();
+          category: data.category,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          assignedTo: data.assignedTo || undefined,
+          scheduledDate: data.scheduledDate || undefined,
+          plan: data.plan || undefined,
+        };
+      } catch (queueError) {
+        // Fallback to direct Supabase call if queue fails
+        console.warn('Queue failed, falling back to direct update:', queueError);
+        const { data: result, error } = await supabase
+          .from('programs')
+          .update({
+            name: data.name,
+            description: data.description,
+            category: data.category,
+            status: data.status || 'draft',
+            assigned_to: data.assignedTo || null,
+            scheduled_date: data.scheduledDate || null,
+            plan: data.plan || null,
+          })
+          .eq('id', data.id)
+          .eq('coach_id', profile.id)
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast.success('Program updated successfully!');
-      
-      // Use smart refresh to update all related data
-      await refreshAll();
-      
-      return {
-        id: result.id,
-        name: result.name,
-        description: result.description,
-        status: result.status as ProgramStatus,
-        category: result.category as ProgramCategory,
-        createdAt: result.created_at,
-        updatedAt: result.updated_at,
-        assignedTo: result.assigned_to,
-        scheduledDate: result.scheduled_date || undefined,
-        plan: result.plan || undefined,
-      };
+        toast.success('Program updated successfully!');
+        await refreshAll();
+        
+        return {
+          id: result.id,
+          name: result.name,
+          description: result.description,
+          status: result.status as ProgramStatus,
+          category: result.category as ProgramCategory,
+          createdAt: result.created_at,
+          updatedAt: result.updated_at,
+          assignedTo: result.assigned_to,
+          scheduledDate: result.scheduled_date || undefined,
+          plan: result.plan || undefined,
+        };
+      }
     } catch (err) {
       console.error('Error updating program:', err);
       toast.error('Failed to update program');
@@ -207,16 +349,36 @@ export const useProgramMutations = () => {
 
     try {
       setLoading(true);
-      const { error } = await supabase
-        .from('programs')
-        .delete()
-        .eq('id', id)
-        .eq('coach_id', profile.id);
+      
+      // Use mutation queue for offline support and scalability
+      try {
+        await queueDelete(
+          { id, coach_id: profile.id },
+          {
+            invalidateQueries: [
+              queryKeys.program(id),
+              queryKeys.programs(),
+              queryKeys.coachPrograms(profile.id),
+            ],
+          }
+        );
+        
+        toast.success('Program deleted successfully!');
+        return true;
+      } catch (queueError) {
+        // Fallback to direct Supabase call if queue fails
+        console.warn('Queue failed, falling back to direct delete:', queueError);
+        const { error } = await supabase
+          .from('programs')
+          .delete()
+          .eq('id', id)
+          .eq('coach_id', profile.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast.success('Program deleted successfully!');
-      return true;
+        toast.success('Program deleted successfully!');
+        return true;
+      }
     } catch (err) {
       console.error('Error deleting program:', err);
       toast.error('Failed to delete program');

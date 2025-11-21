@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRefresh } from '@/contexts/RefreshContext';
+import { useTableMutations } from './useMutationQueue';
+import { queryKeys } from '@/lib/query-config';
 
 export interface ProgressPhoto {
   id: string;
@@ -14,6 +16,7 @@ export interface ProgressPhoto {
 export const useProgressPhotos = () => {
   const { user } = useAuth();
   const { refreshAll } = useRefresh();
+  const { insert: queueInsert } = useTableMutations('progress_photos');
   const [photos, setPhotos] = useState<ProgressPhoto[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,26 +45,55 @@ export const useProgressPhotos = () => {
     if (!user) throw new Error('User not authenticated');
 
     try {
-      const { data, error } = await supabase
-        .from('progress_photos')
-        .insert({
+      // Use mutation queue for offline support and scalability
+      try {
+        await queueInsert(
+          {
+            user_id: user.id,
+            image_url: imageUrl,
+            date: new Date().toISOString().split('T')[0],
+            notes: notes || null,
+          },
+          {
+            invalidateQueries: [queryKeys.profile(user.id)],
+          }
+        );
+        
+        // Return optimistic data
+        const optimisticData = {
+          id: `temp_${Date.now()}`,
           user_id: user.id,
           image_url: imageUrl,
-          date: new Date().toISOString().split('T')[0], // Today's date
-          notes
-        })
-        .select()
-        .single();
+          date: new Date().toISOString().split('T')[0],
+          notes: notes || null,
+          created_at: new Date().toISOString(),
+        } as ProgressPhoto;
+        
+        // Update local state
+        setPhotos(prev => [optimisticData, ...prev]);
+        await refreshAll();
+        
+        return optimisticData;
+      } catch (queueError) {
+        // Fallback to direct Supabase call if queue fails
+        console.warn('Queue failed, falling back to direct insert:', queueError);
+        const { data, error } = await supabase
+          .from('progress_photos')
+          .insert({
+            user_id: user.id,
+            image_url: imageUrl,
+            date: new Date().toISOString().split('T')[0],
+            notes
+          })
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      // Update local state
-      setPhotos(prev => [data, ...prev]);
-      
-      // Use smart refresh to update all related data
-      await refreshAll();
-      
-      return data;
+        setPhotos(prev => [data, ...prev]);
+        await refreshAll();
+        return data;
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add progress photo');
       throw err;

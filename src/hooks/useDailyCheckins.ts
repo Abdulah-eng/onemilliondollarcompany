@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRefresh } from '@/contexts/RefreshContext';
+import { useTableMutations } from './useMutationQueue';
+import { queryKeys } from '@/lib/query-config';
 
 export interface DailyCheckinRecord {
   id: string;
@@ -16,6 +18,7 @@ export interface DailyCheckinRecord {
 export const useDailyCheckins = () => {
   const { user } = useAuth();
   const { refreshAll } = useRefresh();
+  const { upsert: queueUpsert, isOnline } = useTableMutations('daily_checkins');
   const [checkins, setCheckins] = useState<DailyCheckinRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,21 +53,55 @@ export const useDailyCheckins = () => {
   }) => {
     if (!user) throw new Error('Not authenticated');
     const today = new Date().toISOString().slice(0, 10);
-    const { data, error } = await supabase
-      .from('daily_checkins')
-      .upsert({
+    
+    // Use mutation queue for offline support and scalability
+    try {
+      await queueUpsert(
+        {
+          user_id: user.id,
+          date: today,
+          ...payload,
+        },
+        'user_id,date',
+        {
+          invalidateQueries: [
+            queryKeys.dailyCheckins(user.id, today),
+            queryKeys.dailyCheckins(user.id),
+          ],
+        }
+      );
+      
+      // If online, fetch immediately; otherwise queue will handle it
+      if (isOnline) {
+        await fetchCheckins();
+        await refreshAll();
+      }
+      
+      // Return optimistic data
+      return [{
+        id: `temp_${Date.now()}`,
         user_id: user.id,
         date: today,
-        ...payload,
-      }, { onConflict: 'user_id,date' })
-      .select('*');
-    if (error) throw error;
-    await fetchCheckins();
-    
-    // Use smart refresh to update all related data
-    await refreshAll();
-    
-    return data as DailyCheckinRecord[];
+        water_liters: payload.water_liters ?? null,
+        mood: payload.mood ?? null,
+        energy: payload.energy ?? null,
+        sleep_hours: payload.sleep_hours ?? null,
+      }] as DailyCheckinRecord[];
+    } catch (error) {
+      // Fallback to direct Supabase call if queue fails
+      const { data, error: supabaseError } = await supabase
+        .from('daily_checkins')
+        .upsert({
+          user_id: user.id,
+          date: today,
+          ...payload,
+        }, { onConflict: 'user_id,date' })
+        .select('*');
+      if (supabaseError) throw supabaseError;
+      await fetchCheckins();
+      await refreshAll();
+      return data as DailyCheckinRecord[];
+    }
   };
 
   const last7Days = useMemo(() => checkins.slice(-7), [checkins]);

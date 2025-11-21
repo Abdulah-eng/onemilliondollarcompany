@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTableMutations } from './useMutationQueue';
+import { queryKeys } from '@/lib/query-config';
 
 export interface MessageWithSender {
   id: string;
@@ -27,6 +29,8 @@ export interface MessageWithSender {
 
 export const useMessages = (conversationId: string | null) => {
   const { user } = useAuth();
+  const { insert: queueMessageInsert } = useTableMutations('messages');
+  const { insert: queueOfferInsert } = useTableMutations('coach_offers');
   const [messages, setMessages] = useState<MessageWithSender[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,25 +79,63 @@ export const useMessages = (conversationId: string | null) => {
     if (!conversationId || !user) throw new Error('Missing conversation or user');
 
     try {
-      const { data, error } = await supabase
-        .from('messages')
-        .insert({
+      // Use mutation queue for offline support and scalability
+      try {
+        await queueMessageInsert(
+          {
+            conversation_id: conversationId,
+            sender_id: user.id,
+            content,
+            message_type: messageType,
+            metadata,
+          },
+          {
+            invalidateQueries: conversationId ? [queryKeys.messages(conversationId)] : [],
+          }
+        );
+        
+        // Return optimistic data
+        const optimisticData = {
+          id: `temp_${Date.now()}`,
           conversation_id: conversationId,
           sender_id: user.id,
           content,
           message_type: messageType,
-          metadata
-        })
-        .select(`
-          *,
-          sender:profiles!messages_sender_id_fkey(id, full_name, avatar_url)
-        `)
-        .single();
+          metadata,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          sender: {
+            id: user.id,
+            full_name: user.user_metadata?.full_name || '',
+            avatar_url: user.user_metadata?.avatar_url || '',
+          },
+        } as MessageWithSender;
+        
+        setMessages(prev => [...prev, optimisticData]);
+        return optimisticData;
+      } catch (queueError) {
+        // Fallback to direct Supabase call if queue fails
+        console.warn('Queue failed, falling back to direct insert:', queueError);
+        const { data, error } = await supabase
+          .from('messages')
+          .insert({
+            conversation_id: conversationId,
+            sender_id: user.id,
+            content,
+            message_type: messageType,
+            metadata
+          })
+          .select(`
+            *,
+            sender:profiles!messages_sender_id_fkey(id, full_name, avatar_url)
+          `)
+          .single();
 
-      if (error) throw error;
-      
-      setMessages(prev => [...prev, data]);
-      return data;
+        if (error) throw error;
+        
+        setMessages(prev => [...prev, data]);
+        return data;
+      }
     } catch (err) {
       console.error('Error sending message:', err);
       throw err;
@@ -119,29 +161,67 @@ export const useMessages = (conversationId: string | null) => {
 
       if (convError) throw convError;
 
-      // Then create the offer
-      const { data: offerData, error: offerError } = await supabase
-        .from('coach_offers')
-        .insert({
+      // Then create the offer using queue
+      try {
+        await queueOfferInsert(
+          {
+            message_id: messageData.id,
+            coach_id: user.id,
+            customer_id: conversation.customer_id,
+            price,
+            duration_months: durationMonths,
+          },
+          {
+            invalidateQueries: conversationId ? [queryKeys.messages(conversationId)] : [],
+          }
+        );
+        
+        // Return optimistic offer data
+        const offerData = {
+          id: `temp_offer_${Date.now()}`,
           message_id: messageData.id,
           coach_id: user.id,
           customer_id: conversation.customer_id,
           price,
-          duration_months: durationMonths
-        })
-        .select()
-        .single();
+          duration_months: durationMonths,
+          status: 'pending' as const,
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        };
+        
+        // Update the message in state to include offer data
+        setMessages(prev => prev.map(msg => 
+          msg.id === messageData.id 
+            ? { ...msg, coach_offer: offerData }
+            : msg
+        ));
+        
+        return { message: messageData, offer: offerData };
+      } catch (queueError) {
+        // Fallback to direct Supabase call if queue fails
+        console.warn('Queue failed for offer, falling back to direct insert:', queueError);
+        const { data: offerData, error: offerError } = await supabase
+          .from('coach_offers')
+          .insert({
+            message_id: messageData.id,
+            coach_id: user.id,
+            customer_id: conversation.customer_id,
+            price,
+            duration_months: durationMonths
+          })
+          .select()
+          .single();
 
-      if (offerError) throw offerError;
+        if (offerError) throw offerError;
 
-      // Update the message in state to include offer data
-      setMessages(prev => prev.map(msg => 
-        msg.id === messageData.id 
-          ? { ...msg, coach_offer: offerData }
-          : msg
-      ));
+        // Update the message in state to include offer data
+        setMessages(prev => prev.map(msg => 
+          msg.id === messageData.id 
+            ? { ...msg, coach_offer: offerData }
+            : msg
+        ));
 
-      return { message: messageData, offer: offerData };
+        return { message: messageData, offer: offerData };
+      }
     } catch (err) {
       console.error('Error sending offer:', err);
       throw err;

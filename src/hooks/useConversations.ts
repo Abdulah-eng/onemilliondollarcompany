@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTableMutations } from './useMutationQueue';
+import { queryKeys } from '@/lib/query-config';
 
 export interface ConversationWithProfiles {
   id: string;
@@ -31,6 +33,7 @@ export interface ConversationWithProfiles {
 
 export const useConversations = () => {
   const { user, profile } = useAuth();
+  const { insert: queueInsert } = useTableMutations('conversations');
   const [conversations, setConversations] = useState<ConversationWithProfiles[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -188,23 +191,53 @@ export const useConversations = () => {
 
   const createConversation = async (coachId: string, customerId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('conversations')
-        .insert({
+      // Use mutation queue for offline support and scalability
+      try {
+        await queueInsert(
+          {
+            coach_id: coachId,
+            customer_id: customerId,
+          },
+          {
+            invalidateQueries: [
+              queryKeys.conversations(coachId),
+              queryKeys.conversations(customerId),
+            ],
+          }
+        );
+        
+        // Return optimistic data
+        const optimisticData = {
+          id: `temp_${Date.now()}`,
           coach_id: coachId,
-          customer_id: customerId
-        })
-        .select(`
-          *,
-          coach:profiles!conversations_coach_id_fkey(id, full_name, avatar_url, email),
-          customer:profiles!conversations_customer_id_fkey(id, full_name, avatar_url, email)
-        `)
-        .single();
+          customer_id: customerId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        } as any;
+        
+        setConversations(prev => [optimisticData, ...prev]);
+        return optimisticData;
+      } catch (queueError) {
+        // Fallback to direct Supabase call if queue fails
+        console.warn('Queue failed, falling back to direct insert:', queueError);
+        const { data, error } = await supabase
+          .from('conversations')
+          .insert({
+            coach_id: coachId,
+            customer_id: customerId
+          })
+          .select(`
+            *,
+            coach:profiles!conversations_coach_id_fkey(id, full_name, avatar_url, email),
+            customer:profiles!conversations_customer_id_fkey(id, full_name, avatar_url, email)
+          `)
+          .single();
 
-      if (error) throw error;
-      
-      setConversations(prev => [data, ...prev]);
-      return data;
+        if (error) throw error;
+        
+        setConversations(prev => [data, ...prev]);
+        return data;
+      }
     } catch (err) {
       console.error('Error creating conversation:', err);
       throw err;

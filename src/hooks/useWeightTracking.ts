@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRefresh } from '@/contexts/RefreshContext';
+import { useTableMutations } from './useMutationQueue';
+import { queryKeys } from '@/lib/query-config';
 
 export interface WeightEntry {
   id: string;
@@ -14,6 +16,7 @@ export interface WeightEntry {
 export const useWeightTracking = () => {
   const { user } = useAuth();
   const { refreshAll } = useRefresh();
+  const { insert: queueInsert, update: queueUpdate, upsert: queueUpsert, isOnline } = useTableMutations('weight_entries');
   const [entries, setEntries] = useState<WeightEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,56 +47,96 @@ export const useWeightTracking = () => {
     try {
       const today = new Date().toISOString().split('T')[0];
       
-      // First, check if there's already an entry for today
-      const { data: existingEntry } = await supabase
-        .from('weight_entries')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('date', today)
-        .single();
-
-      let data;
-      if (existingEntry) {
-        // Update existing entry
-        const { data: updatedData, error } = await supabase
-          .from('weight_entries')
-          .update({
-            weight_kg: weight,
-            notes
-          })
-          .eq('id', existingEntry.id)
-          .select()
-          .single();
-        
-        if (error) throw error;
-        data = updatedData;
-      } else {
-        // Create new entry
-        const { data: newData, error } = await supabase
-          .from('weight_entries')
-          .insert({
+      // Use mutation queue for offline support and scalability
+      try {
+        await queueUpsert(
+          {
             user_id: user.id,
             weight_kg: weight,
             date: today,
-            notes
-          })
-          .select()
-          .single();
+            notes: notes || null,
+          },
+          'user_id,date',
+          {
+            invalidateQueries: [queryKeys.profile(user.id)],
+          }
+        );
         
-        if (error) throw error;
-        data = newData;
-      }
+        // Return optimistic data
+        const optimisticData = {
+          id: `temp_${Date.now()}`,
+          user_id: user.id,
+          weight_kg: weight,
+          date: today,
+          notes: notes || null,
+          created_at: new Date().toISOString(),
+        } as WeightEntry;
+        
+        // Update local state optimistically
+        setEntries(prev => {
+          const filtered = prev.filter(e => e.date !== today);
+          return [optimisticData, ...filtered];
+        });
+        
+        // If online, refresh; otherwise queue will handle it
+        if (isOnline) {
+          await refreshAll();
+        }
+        
+        return optimisticData;
+      } catch (queueError) {
+        // Fallback to direct Supabase call if queue fails
+        console.warn('Queue failed, falling back to direct operation:', queueError);
+        
+        // First, check if there's already an entry for today
+        const { data: existingEntry } = await supabase
+          .from('weight_entries')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('date', today)
+          .maybeSingle();
 
-      // Update local state - replace existing entry for today or add new one
-      setEntries(prev => {
-        const filtered = prev.filter(e => e.date !== today);
-        return [data, ...filtered];
-      });
-      
-      // Use smart refresh to update all related data
-      await refreshAll();
-      
-      return data;
+        let data;
+        if (existingEntry) {
+          // Update existing entry
+          const { data: updatedData, error } = await supabase
+            .from('weight_entries')
+            .update({
+              weight_kg: weight,
+              notes
+            })
+            .eq('id', existingEntry.id)
+            .select()
+            .single();
+          
+          if (error) throw error;
+          data = updatedData;
+        } else {
+          // Create new entry
+          const { data: newData, error } = await supabase
+            .from('weight_entries')
+            .insert({
+              user_id: user.id,
+              weight_kg: weight,
+              date: today,
+              notes
+            })
+            .select()
+            .single();
+          
+          if (error) throw error;
+          data = newData;
+        }
+
+        // Update local state
+        setEntries(prev => {
+          const filtered = prev.filter(e => e.date !== today);
+          return [data, ...filtered];
+        });
+        
+        await refreshAll();
+        return data;
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add weight entry');
       throw err;
